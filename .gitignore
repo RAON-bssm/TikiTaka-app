@@ -41,3 +41,12 @@ example
 # generated native folders
 /ios
 /android
+
+# pnpm debug logs
+pnpm-debug.log*
+
+# env files (보안/환경변수 설정 파일)
+.env
+.env.local
+.env.*
+!.env.example
