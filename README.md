@@ -1,56 +1,40 @@
-# Welcome to your Expo app 👋
+## 커밋 컨벤션
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+| 태그 이름 | 설명                                                                      |
+| --------- | ------------------------------------------------------------------------- |
+| Feat      | 새로운 기능을 추가할 경우                                                 |
+| Fix       | 버그를 고친 경우                                                          |
+| Style     | 코드 포맷 변경, 세미 콜론 누락, 코드 수정이 없는 경우                     |
+| Design    | UI/UX 디자인 변경                                                         |
+| Refactor  | 프로덕션 코드 리팩토링                                                    |
+| Docs      | 문서를 수정한 경우                                                        |
+| Chore     | 빌드 태스트 업데이트, 패키지 매니저를 설정하는 경우(프로덕션 코드 변경 X) |
 
-## Get started
+---
 
-1. Install dependencies
+## 시작하기 (Getting Started)
 
-   ```bash
-   npm install
-   ```
+프로젝트를 처음 클론한 후 아래 순서대로 실행해 주세요.
 
-2. Start the app
+### 1. 패키지 설치
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+Husky 설정이 포함되어 있어 설치 후 자동으로 git hook이 활성화됩니다.
 
 ```bash
-npm run reset-project
+pnpm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### 2. 개발 서버 실행
 
-### Other setup steps
+```bash
+pnpm dev
+```
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+---
 
-## Learn more
+## 주요 명령어 (Scripts)
 
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- `pnpm dev` 또는 `pnpm start`: 로컬 개발 서버 실행
+- `pnpm lint`: ESLint 검사
+- `pnpm lint:fix`: ESLint 검사 및 자동 교정
+- `pnpm format`: Prettier 코드 포맷팅

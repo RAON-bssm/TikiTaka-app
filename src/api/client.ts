@@ -18,7 +18,7 @@ client.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 // 응답 인터셉터 추가 (공통 에러 핸들링 등)
@@ -27,7 +27,7 @@ client.interceptors.response.use(
   (error) => {
     // 예: 401 Unauthorized 에러 시 로그아웃 처리 등
     return Promise.reject(error);
-  }
+  },
 );
 
 export default client;
