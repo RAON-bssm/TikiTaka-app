@@ -63,6 +63,7 @@ module.exports = {
         full: '9999px',
       },
       fontFamily: {
+        sans: ['Pretendard-Medium'],
         regular: ['Pretendard-Regular'],
         medium: ['Pretendard-Medium'],
         bold: ['Pretendard-Bold'],
@@ -75,7 +76,7 @@ module.exports = {
         xl: ['20px', { lineHeight: '28px' }],
         '2xl': ['24px', { lineHeight: '32px' }],
         '3xl': ['28px', { lineHeight: '36px' }],
-        '4xl': ['40px', { lineHeight: '40px' }],
+        '4xl': ['40px', { lineHeight: '48px' }],
       },
     },
   },
