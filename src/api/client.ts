@@ -1,6 +1,8 @@
 import axios from 'axios';
 
 // 기본 Axios 클라이언트 인스턴스 생성
+// axios 타입 선언상 `create`가 named export로도 잡혀서 발생하는 false positive이므로 비활성화합니다.
+// eslint-disable-next-line import/no-named-as-default-member
 const client = axios.create({
   baseURL: process.env.EXPO_PUBLIC_API_URL || 'https://api.example.com',
   timeout: 10000,
