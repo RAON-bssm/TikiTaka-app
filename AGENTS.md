@@ -20,7 +20,7 @@
 - **프레임워크:** Expo (SDK 56) 및 Expo Router
 - **런타임:** React Native / TypeScript
 - **패키지 매니저:** **pnpm** (절대 `npm`, `yarn`, `bun`을 사용하지 마세요)
-- **스타일링:** **NativeWind** (React Native용 Tailwind CSS v4 또는 호환 버전)
+- **스타일링:** **NativeWind v4** (React Native용 Tailwind CSS v3 호환 버전)
 - **데이터 페칭 및 상태 관리:** **TanStack Query** (React Query) & **Axios**
 
 ---
@@ -50,6 +50,7 @@
 ## 5. 코딩 및 스타일 가이드라인 (Coding & Styling Style)
 - 함수형 컴포넌트, 훅, 그리고 명확한 TypeScript 타입/인터페이스를 사용하세요.
 - 가능한 한 인라인 스타일(`style={{...}}`)이나 `StyleSheet.create` 대신 **NativeWind** 클래스명(`className="..."`)을 사용하여 스타일을 정의해 주세요.
+- NativeWind v4(Tailwind CSS v3)를 사용하므로, 테마 설정이나 커스텀 스타일은 `tailwind.config.js` 파일에서 관리해 주세요. 또한 `babel.config.js` 및 `metro.config.js`에 NativeWind v4 관련 설정이 유지되어야 합니다.
 - API 호출은 **Axios**로 래핑하여 작성하고, 비동기 상태(로딩, 에러, 캐싱 등)는 **TanStack Query**의 훅(`useQuery`, `useMutation`)을 사용해 관리해 주세요.
 - 코드 내 기존 주석이나 문서(Docstring)는 훼손하지 않고 온전히 보존해야 합니다.
 
