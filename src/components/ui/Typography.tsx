@@ -1,9 +1,9 @@
 import { Text, TextProps } from 'react-native';
 
-type Variant = 'Display' | 'h1' | 'h2' | 'h3' | 'h4' | 'body1' | 'body2' | 'body3' | 'caption';
+type Variant = 'display' | 'h1' | 'h2' | 'h3' | 'h4' | 'body1' | 'body2' | 'body3' | 'caption';
 
 const variantClass: Record<Variant, string> = {
-  Display: 'text-2xl font-bold',
+  display: 'text-2xl font-bold',
   h1: 'text-xl font-bold',
   h2: 'text-lg font-bold',
   h3: 'text-md font-bold',
