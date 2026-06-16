@@ -1,4 +1,5 @@
 import BackButton from '@/components/ui/BackButton';
+import Dropdown from '@/components/ui/input/Dropdown';
 import TextInput from '@/components/ui/input/TextInput';
 import Typography from '@/components/ui/Typography';
 import { View } from 'react-native';
@@ -11,6 +12,7 @@ const SignUp = () => {
         회원 정보 등록
       </Typography>
       <TextInput label="닉네임" placeholder="닉네임을 입력해주세요" />
+      <Dropdown label="동네" placeholder="시/도" options={['']} />
     </View>
   );
 };
