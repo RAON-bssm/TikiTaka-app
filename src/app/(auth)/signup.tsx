@@ -12,7 +12,11 @@ const SignUp = () => {
         회원 정보 등록
       </Typography>
       <TextInput label="닉네임" placeholder="닉네임을 입력해주세요" />
-      <Dropdown label="동네" placeholder="시/도" options={['']} />
+      <Dropdown
+        label="동네"
+        placeholder="시/도"
+        options={['부산시', '서울시', '대구시', '인천시', '광주시', '대전시', '울산시']}
+      />
     </View>
   );
 };
