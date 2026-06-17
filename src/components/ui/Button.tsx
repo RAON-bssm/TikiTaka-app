@@ -10,7 +10,7 @@ const Button = ({ content, onclick }: Props) => {
   return (
     <Pressable
       onPress={onclick}
-      className="flex items-center justify-center w-full p-md rounded-sm bg-primary-600"
+      className="flex items-center justify-center p-md rounded-sm bg-primary-600"
     >
       <Typography variant="body2" className="text-gray-50">
         {content}
