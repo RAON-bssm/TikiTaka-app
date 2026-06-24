@@ -1,6 +1,6 @@
 import type { BottomTabBarProps } from 'expo-router/build/react-navigation/bottom-tabs';
 import type { FC } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { SvgProps } from 'react-native-svg';
 
@@ -9,6 +9,7 @@ import FeedIcon from '@/assets/icons/app-var/feed.svg';
 import HomeIcon from '@/assets/icons/app-var/home.svg';
 import MarketIcon from '@/assets/icons/app-var/market.svg';
 import RankingIcon from '@/assets/icons/app-var/ranking.svg';
+import Typography from './Typography';
 
 type TabConfig = {
   label: string;
@@ -61,11 +62,12 @@ const AppBar = ({ state, navigation }: BottomTabBarProps) => {
             className="flex-1 items-center justify-center gap-xs py-sm active:opacity-70"
           >
             <Icon width={24} height={24} color={focused ? COLOR_FOCUSED : COLOR_DEFAULT} />
-            <Text
-              className={`font-medium text-[10px] leading-[15px] ${focused ? 'text-primary-600' : 'text-gray-500'}`}
+            <Typography
+              variant="caption"
+              className={`${focused ? 'text-primary-600' : 'text-gray-500'}`}
             >
               {config.label}
-            </Text>
+            </Typography>
           </Pressable>
         );
       })}
