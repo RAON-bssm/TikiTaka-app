@@ -1,20 +1,30 @@
 import type { BottomTabBarProps } from 'expo-router/build/react-navigation/bottom-tabs';
-import { Image, Pressable, View, type ImageSourcePropType } from 'react-native';
+import type { FC } from 'react';
+import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import type { SvgProps } from 'react-native-svg';
 
+import HomeIcon from '@/assets/icons/app-var/home.svg';
+import FeedIcon from '@/assets/icons/app-var/feed.svg';
+import RankingIcon from '@/assets/icons/app-var/ranking.svg';
+import CameraIcon from '@/assets/icons/app-var/camera.svg';
 import Typography from './Typography';
 
 type TabConfig = {
   label: string;
-  icon: ImageSourcePropType;
+  Icon: FC<SvgProps>;
 };
 
-// 라우트 이름(파일명) -> 바텀바 표시 정보. require는 정적 경로여야 하므로 맵으로 관리합니다.
+// SVG fill은 currentColor라서 color prop으로 제어합니다. (tailwind.config.js 값과 일치)
+const COLOR_FOCUSED = '#FC8253'; // primary-600
+const COLOR_DEFAULT = '#9DAABB'; // gray-500
+
+// 라우트 이름(파일명) -> 바텀바 표시 정보. SVG는 컴포넌트로 import 합니다.
 const TAB_CONFIG: Record<string, TabConfig> = {
-  index: { label: '홈', icon: require('@/assets/icons/app-var/home.svg') },
-  feed: { label: '피드', icon: require('@/assets/icons/app-var/feed.svg') },
-  ranking: { label: '랭킹', icon: require('@/assets/icons/app-var/ranking.svg') },
-  camera: { label: '카메라', icon: require('@/assets/icons/app-var/camera.svg') },
+  index: { label: '홈', Icon: HomeIcon },
+  feed: { label: '피드', Icon: FeedIcon },
+  ranking: { label: '랭킹', Icon: RankingIcon },
+  camera: { label: '카메라', Icon: CameraIcon },
 };
 
 const AppBar = ({ state, navigation }: BottomTabBarProps) => {
@@ -31,6 +41,7 @@ const AppBar = ({ state, navigation }: BottomTabBarProps) => {
         if (!config) return null;
 
         const focused = state.index === index;
+        const { Icon } = config;
 
         const onPress = () => {
           const event = navigation.emit({
@@ -50,11 +61,7 @@ const AppBar = ({ state, navigation }: BottomTabBarProps) => {
             onPress={onPress}
             className="flex-1 items-center justify-center gap-xs py-sm active:opacity-70"
           >
-            <Image
-              source={config.icon}
-              className="object-contain"
-              style={{ width: 24, height: 24, opacity: focused ? 1 : 0.4 }}
-            />
+            <Icon width={24} height={24} color={focused ? COLOR_FOCUSED : COLOR_DEFAULT} />
             <Typography
               variant="caption"
               className={focused ? 'text-primary-600' : 'text-gray-500'}
