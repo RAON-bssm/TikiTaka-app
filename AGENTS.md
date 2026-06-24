@@ -58,17 +58,22 @@
   ```
   이 명령어는 현재 Expo SDK 버전과 호환되는 버전을 자동으로 설치하도록 보장합니다.
 
-## 4. 디렉토리 구조 (Expo Router & Feature-based Structure)
+## 4. 디렉토리 구조 (Expo Router & Type-based Structure)
 
 - 앱은 Expo Router를 사용하며, 진입점 및 라우트는 `src/app/` 디렉토리 내에 위치합니다.
-- 폴더 구조는 **기능 중심(Feature-based) 구조**를 따릅니다:
-  - 기능별 모듈은 `src/features/<feature-name>/` 디렉토리 하위에 위치합니다.
-    - 예: `src/features/auth/`, `src/features/competition/`
-    - 각 기능 폴더 내부에 해당 기능 전용 `components/`, `hooks/`, `api/`(또는 `queries/`/`services/`) 등을 그룹화하여 관리합니다.
-  - 여러 기능에서 공통으로 재사용하는 전역(Shared) 자원은 아래에 위치합니다:
-    - 공통 UI 컴포넌트: `src/components/`
-    - 공통 커스텀 훅: `src/hooks/`
-    - 공통 API 설정 및 Axios 클라이언트: `src/api/` 또는 `src/services/`
+- 폴더 구조는 **타입 중심(Type-based) 구조**를 따릅니다. (별도의 `src/features/` 디렉토리는 사용하지 않습니다.)
+- 컴포넌트는 `src/components/` 하위에서 다음 기준으로 분류합니다:
+  - **도메인 무관 공용 UI(디자인 시스템)**: `src/components/ui/`
+    - 예: `Button.tsx`, `Typography.tsx`, `input/TextInput.tsx`
+    - 이 폴더 내부는 도메인이 아니라 **UI 종류/성격** 기준으로만 하위 폴더를 나눕니다. (예: `input/`, `feedback/`, `layout/`)
+  - **특정 도메인 전용 컴포넌트**: `src/components/<도메인>/`
+    - 예: `src/components/auth/`, `src/components/market/`, `src/components/feed/`
+    - 도메인명으로 `src/components/ui/` **하위에** 폴더를 만들지 마세요. (`ui/`는 도메인 무관 UI 전용)
+  - 판단 기준: 다른 도메인에서도 그대로 재사용 가능하면 `ui/`, 특정 도메인 전용이면 `components/<도메인>/`.
+- 그 외 공통(Shared) 자원의 위치:
+  - 공통 커스텀 훅: `src/hooks/`
+  - 공통 API 설정 및 Axios 클라이언트: `src/api/` 또는 `src/services/`
+  - 상수/테마: `src/constants/`
 
 ---
 
