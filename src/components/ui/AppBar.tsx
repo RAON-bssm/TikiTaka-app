@@ -1,18 +1,19 @@
 import type { BottomTabBarProps } from 'expo-router/build/react-navigation/bottom-tabs';
 import type { FC } from 'react';
-import { Pressable, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { SvgProps } from 'react-native-svg';
 
 import HomeIcon from '@/assets/icons/app-var/home.svg';
-import FeedIcon from '@/assets/icons/app-var/feed.svg';
 import RankingIcon from '@/assets/icons/app-var/ranking.svg';
 import CameraIcon from '@/assets/icons/app-var/camera.svg';
-import Typography from './Typography';
+import FeedIcon from '@/assets/icons/app-var/feed.svg';
+import MarketIcon from '@/assets/icons/app-var/market.svg';
 
 type TabConfig = {
   label: string;
   Icon: FC<SvgProps>;
+  size: number;
 };
 
 // SVG fill은 currentColor라서 color prop으로 제어합니다. (tailwind.config.js 값과 일치)
@@ -20,28 +21,27 @@ const COLOR_FOCUSED = '#FC8253'; // primary-600
 const COLOR_DEFAULT = '#9DAABB'; // gray-500
 
 // 라우트 이름(파일명) -> 바텀바 표시 정보. SVG는 컴포넌트로 import 합니다.
+// 노출 순서는 (tabs)/_layout.tsx의 Tabs.Screen 선언 순서를 따릅니다.
 const TAB_CONFIG: Record<string, TabConfig> = {
-  index: { label: '홈', Icon: HomeIcon },
-  feed: { label: '피드', Icon: FeedIcon },
-  ranking: { label: '랭킹', Icon: RankingIcon },
-  camera: { label: '카메라', Icon: CameraIcon },
+  index: { label: '홈', Icon: HomeIcon, size: 24 },
+  ranking: { label: '랭킹', Icon: RankingIcon, size: 26 },
+  camera: { label: '카메라', Icon: CameraIcon, size: 24 },
+  feed: { label: '피드', Icon: FeedIcon, size: 24 },
+  market: { label: '상점', Icon: MarketIcon, size: 24 },
 };
 
 const AppBar = ({ state, navigation }: BottomTabBarProps) => {
   const insets = useSafeAreaInsets();
 
   return (
-    <View
-      className="flex-row border-t border-gray-200 bg-white"
-      style={{ paddingBottom: insets.bottom }}
-    >
+    <View className="flex-row bg-white" style={{ paddingBottom: insets.bottom }}>
       {state.routes.map((route, index) => {
         const config = TAB_CONFIG[route.name];
         // TAB_CONFIG에 없는 라우트(상세 페이지 등)는 바텀바에 노출하지 않습니다.
         if (!config) return null;
 
         const focused = state.index === index;
-        const { Icon } = config;
+        const { Icon, size } = config;
 
         const onPress = () => {
           const event = navigation.emit({
@@ -61,13 +61,12 @@ const AppBar = ({ state, navigation }: BottomTabBarProps) => {
             onPress={onPress}
             className="flex-1 items-center justify-center gap-xs py-sm active:opacity-70"
           >
-            <Icon width={24} height={24} color={focused ? COLOR_FOCUSED : COLOR_DEFAULT} />
-            <Typography
-              variant="caption"
-              className={focused ? 'text-primary-600' : 'text-gray-500'}
+            <Icon width={size} height={size} color={focused ? COLOR_FOCUSED : COLOR_DEFAULT} />
+            <Text
+              className={`font-medium text-[10px] leading-[15px] ${focused ? 'text-primary-600' : 'text-gray-500'}`}
             >
               {config.label}
-            </Typography>
+            </Text>
           </Pressable>
         );
       })}
