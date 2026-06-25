@@ -4,7 +4,15 @@ const prettierPlugin = require('eslint-plugin-prettier');
 
 module.exports = [
   {
-    ignores: ['node_modules/**', '.expo/**', 'dist/**', 'web-build/**', 'ios/**', 'android/**'],
+    ignores: [
+      'node_modules/**',
+      '.expo/**',
+      'dist/**',
+      'web-build/**',
+      'ios/**',
+      'android/**',
+      'expo-env.d.ts',
+    ],
   },
   ...expoConfig,
   {
