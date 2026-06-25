@@ -8,7 +8,8 @@
     "scheme": "tikitakaapp",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.anonymous.TikiTaka-app"
     },
     "android": {
       "adaptiveIcon": {
@@ -17,7 +18,8 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": ["android.permission.CAMERA", "android.permission.RECORD_AUDIO"]
     },
     "web": {
       "output": "static",
@@ -41,8 +43,15 @@
           "fonts": [
             "./assets/fonts/Pretendard-Regular.ttf",
             "./assets/fonts/Pretendard-Medium.ttf",
-            "./assets/fonts/Pretendard-Bold.ttf"
+            "./assets/fonts/Pretendard-Bold.ttf",
+            "./assets/fonts/OkDanDan-Bold.ttf"
           ]
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "동네 사진을 촬영하기 위해 카메라 접근 권한이 필요합니다."
         }
       ]
     ],
