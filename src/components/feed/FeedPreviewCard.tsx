@@ -11,7 +11,7 @@ interface Props {
   place: string;
 }
 
-const FeedPreviewCard = ({ imgUrl, user, place }: Props) => {
+export default function FeedPreviewCard({ imgUrl, user, place }: Props) {
   return (
     <ImageBackground
       source={{ uri: imgUrl }}
@@ -34,6 +34,4 @@ const FeedPreviewCard = ({ imgUrl, user, place }: Props) => {
       </View>
     </ImageBackground>
   );
-};
-
-export default FeedPreviewCard;
+}

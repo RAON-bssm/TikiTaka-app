@@ -21,7 +21,7 @@ const SLIDES = [
   },
 ];
 
-const Onboarding = () => {
+export default function Onboarding() {
   const [index, setIndex] = useState(0);
   const slide = SLIDES[index];
   const isLast = index === SLIDES.length - 1;
@@ -59,6 +59,4 @@ const Onboarding = () => {
       </View>
     </View>
   );
-};
-
-export default Onboarding;
+}

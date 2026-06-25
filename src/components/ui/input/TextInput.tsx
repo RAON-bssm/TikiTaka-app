@@ -6,7 +6,7 @@ interface Props {
   placeholder?: string;
 }
 
-const TextInput = ({ label, placeholder }: Props) => {
+export default function TextInput({ label, placeholder }: Props) {
   return (
     <View className="flex flex-col gap-xs w-full">
       <Typography variant="h3" className="text-gray-700">
@@ -20,5 +20,4 @@ const TextInput = ({ label, placeholder }: Props) => {
       />
     </View>
   );
-};
-export default TextInput;
+}

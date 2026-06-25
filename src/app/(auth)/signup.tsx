@@ -5,7 +5,7 @@ import TextInput from '@/components/ui/input/TextInput';
 import Typography from '@/components/ui/Typography';
 import { View } from 'react-native';
 
-const SignUp = () => {
+export default function SignUp() {
   return (
     <View className="flex flex-col flex-1 items-start justify-between p-lg gap-4xl bg-white">
       <View className="flex flex-col items-start gap-4xl w-full">
@@ -42,5 +42,4 @@ const SignUp = () => {
       </View>
     </View>
   );
-};
-export default SignUp;
+}
