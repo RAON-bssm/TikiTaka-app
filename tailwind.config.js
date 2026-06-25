@@ -67,6 +67,7 @@ module.exports = {
         regular: ['Pretendard-Regular'],
         medium: ['Pretendard-Medium'],
         bold: ['Pretendard-Bold'],
+        title: ['OkDanDan-Bold'],
       },
       fontSize: {
         xs: ['12px', { lineHeight: '14px' }],

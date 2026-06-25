@@ -7,7 +7,7 @@ interface Props {
   title: string;
 }
 
-const BackButton = ({ link, title }: Props) => {
+export default function BackButton({ link, title }: Props) {
   const onPress = () => {
     if (link) {
       router.push(link);
@@ -28,5 +28,4 @@ const BackButton = ({ link, title }: Props) => {
       </Typography>
     </View>
   );
-};
-export default BackButton;
+}

@@ -6,7 +6,7 @@ interface Props {
   onclick?: () => void;
 }
 
-const Button = ({ content, onclick }: Props) => {
+export default function Button({ content, onclick }: Props) {
   return (
     <Pressable
       onPress={onclick}
@@ -17,5 +17,4 @@ const Button = ({ content, onclick }: Props) => {
       </Typography>
     </Pressable>
   );
-};
-export default Button;
+}

@@ -30,7 +30,7 @@ const TAB_CONFIG: Record<string, TabConfig> = {
   market: { label: '상점', Icon: MarketIcon },
 };
 
-const AppBar = ({ state, navigation }: BottomTabBarProps) => {
+export default function AppBar({ state, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
 
   return (
@@ -73,6 +73,4 @@ const AppBar = ({ state, navigation }: BottomTabBarProps) => {
       })}
     </View>
   );
-};
-
-export default AppBar;
+}

@@ -21,13 +21,17 @@ const SLIDES = [
   },
 ];
 
-const Onboarding = () => {
+export default function Onboarding() {
   const [index, setIndex] = useState(0);
   const slide = SLIDES[index];
   const isLast = index === SLIDES.length - 1;
 
   const handleNext = () => {
-    isLast ? console.log('온보딩 완료') : setIndex(index + 1);
+    if (isLast) {
+      console.log('온보딩 완료');
+    } else {
+      setIndex(index + 1);
+    }
   };
 
   return (
@@ -59,6 +63,4 @@ const Onboarding = () => {
       </View>
     </View>
   );
-};
-
-export default Onboarding;
+}

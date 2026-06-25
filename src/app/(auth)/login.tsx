@@ -20,7 +20,7 @@ const KakaoIcon = ({ size = 23 }: { size?: number }) => (
   />
 );
 
-const Login = () => {
+export default function Login() {
   const handleSocialLogin = () => {
     router.push('/(auth)/signup');
   };
@@ -70,5 +70,4 @@ const Login = () => {
       </View>
     </SafeAreaView>
   );
-};
-export default Login;
+}

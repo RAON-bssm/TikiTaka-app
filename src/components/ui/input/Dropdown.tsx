@@ -10,7 +10,7 @@ interface Props {
   onChange?: (value: string) => void;
 }
 
-const Dropdown = ({ label, placeholder, options, value, onChange }: Props) => {
+export default function Dropdown({ label, placeholder, options, value, onChange }: Props) {
   const [selectedValue, setSelectedValue] = useState<string>(value || '');
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [triggerLayout, setTriggerLayout] = useState({ x: 0, y: 0, width: 0, height: 0 });
@@ -89,5 +89,4 @@ const Dropdown = ({ label, placeholder, options, value, onChange }: Props) => {
       </Modal>
     </View>
   );
-};
-export default Dropdown;
+}
