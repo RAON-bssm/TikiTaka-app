@@ -44,7 +44,7 @@ export default function Upload() {
         />
       </View>
       <View className="px-lg py-md">
-        <Button content="게시물 업로드" />
+        <Button content="게시물 업로드" onclick={handleUpload} />
       </View>
     </View>
   );
