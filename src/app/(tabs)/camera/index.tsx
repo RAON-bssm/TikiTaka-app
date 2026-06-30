@@ -4,7 +4,7 @@ import MissionTitle from '@/components/camera/MissionTitle';
 import ShutterButton from '@/components/camera/ShutterButton';
 import ZoomControl, { ZOOM_LEVELS, type ZoomLevel } from '@/components/camera/ZoomControl';
 import Typography from '@/components/ui/Typography';
-import { useIsFocused } from 'expo-router';
+import { router, useIsFocused } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -111,8 +111,11 @@ export default function CameraScreen() {
   const handleCapture = async () => {
     const photo = await photoOutput.capturePhotoToFile({}, {});
     if (photo) {
-      // TODO: 촬영 결과 미리보기/업로드 화면으로 연결
-      console.log('captured:', `file://${photo.filePath}`);
+      // 촬영한 사진 경로를 업로드 화면으로 넘깁니다. (filePath는 file:// URL로 변환)
+      router.push({
+        pathname: '/camera/upload',
+        params: { uri: `file://${photo.filePath}` },
+      });
     }
   };
 
