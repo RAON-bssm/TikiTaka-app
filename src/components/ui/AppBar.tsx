@@ -33,12 +33,6 @@ const TAB_CONFIG: Record<string, TabConfig> = {
 export default function AppBar({ state, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
 
-  // [임시 디버그] 실제 등록된 탭 라우트 이름 확인용
-  console.log(
-    'APPBAR ROUTES =',
-    state.routes.map((r) => r.name),
-  );
-
   return (
     <View className="flex-row bg-white" style={{ paddingBottom: insets.bottom }}>
       {state.routes.map((route, index) => {
