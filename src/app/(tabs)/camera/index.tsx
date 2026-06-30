@@ -1,3 +1,4 @@
+import CameraBackButton from '@/components/camera/CameraBackButton';
 import FlipButton from '@/components/camera/FlipButton';
 import MissionTitle from '@/components/camera/MissionTitle';
 import ShutterButton from '@/components/camera/ShutterButton';
@@ -155,6 +156,7 @@ export default function CameraScreen() {
       </GestureDetector>
 
       <MissionTitle title="예쁜 돌멩이 찾기" />
+      <CameraBackButton />
 
       <View
         className="absolute left-0 right-0 bottom-0 items-center gap-lg"
