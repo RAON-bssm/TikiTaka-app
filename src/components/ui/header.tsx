@@ -13,24 +13,22 @@ const Header = () => {
 
   return (
     <View
-      className="flex-row items-center justify-between bg-white px-md"
+      className="flex-row items-center justify-between px-md"
       style={{ paddingTop: insets.top }}
     >
-      {/* 로고 */}
-      <Logo style={{ width: 120, height: 32 }} />
+      <Logo height={32} />
 
-      {/* 우측 아이콘 그룹 */}
       <View className="flex-row items-center gap-md">
         <Pressable className="active:opacity-70">
-          <NotificationsIcon style={{ width: 24, height: 24 }} color={COLOR_ICON} />
+          <NotificationsIcon width={24} height={24} color={COLOR_ICON} />
         </Pressable>
 
         <Pressable className="active:opacity-70">
-          <VectorIcon style={{ width: 24, height: 24 }} color={COLOR_ICON} />
+          <VectorIcon width={24} height={24} color={COLOR_ICON} />
         </Pressable>
 
         <Pressable className="active:opacity-70">
-          <ProfileImageIcon style={{ width: 32, height: 32 }} />
+          <ProfileImageIcon width={32} height={32} />
         </Pressable>
       </View>
     </View>
