@@ -18,8 +18,14 @@ export default function Topic({ title }: Props) {
       source={TOPIC_BG}
       resizeMode="cover"
     >
-      {/* 배너 상단 탭 모양 때문에 텍스트를 중앙보다 살짝 아래로 내립니다. (디자인: center +8px) */}
-      <Text className="mt-sm font-title text-xl text-primary-600">{title}</Text>
+      {/* 배너 상단 탭 모양 때문에 텍스트를 중앙보다 아래로 내립니다.
+          justify-center의 재정렬 영향을 피하려고 margin 대신 transform으로 이동합니다. */}
+      <Text
+        className="font-title text-xl text-primary-600"
+        style={{ transform: [{ translateY: 10 }] }}
+      >
+        {title}
+      </Text>
     </ImageBackground>
   );
 }
