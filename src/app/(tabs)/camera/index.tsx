@@ -5,7 +5,7 @@ import FlipButton from '@/components/camera/FlipButton';
 import MissionTitle from '@/components/camera/MissionTitle';
 import ShutterButton from '@/components/camera/ShutterButton';
 import ZoomControl from '@/components/camera/ZoomControl';
-import useCameraZoom from '@/hooks/useCameraZoom';
+import useCameraZoom from '@/hooks/camera/useCameraZoom';
 import { router, useIsFocused } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
