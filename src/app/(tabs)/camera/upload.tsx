@@ -23,9 +23,9 @@ export default function Upload() {
         <Topic title="예쁜 돌멩이 찾기" />
 
         {/* 촬영한 사진 미리보기 */}
-        <View className="h-[232px] w-full overflow-hidden rounded-md bg-gray-50">
+        <View className="h-[232px] w-full overflow-hidden rounded-md bg-gray-200">
           {uri ? (
-            <Image source={{ uri }} resizeMode="cover" className="flex-1" />
+            <Image source={{ uri }} resizeMode="cover" className="h-full w-full" />
           ) : (
             <View className="flex-1 items-center justify-center">
               <Typography variant="body1" className="text-gray-600">

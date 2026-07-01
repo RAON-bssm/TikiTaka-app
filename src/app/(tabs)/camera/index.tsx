@@ -6,7 +6,7 @@ import ZoomControl, { ZOOM_LEVELS, type ZoomLevel } from '@/components/camera/Zo
 import Typography from '@/components/ui/Typography';
 import { router, useIsFocused } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { runOnJS, useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -26,6 +26,11 @@ const LENS_FILTER: DeviceFilter = {
 
 // 줌 버튼이 활성으로 보일 허용 오차 (핀치로 근처에 오면 해당 버튼 하이라이트)
 const ZOOM_MATCH_TOLERANCE = 0.08;
+
+// DEV ONLY: 카메라가 없는 환경(시뮬레이터)에서 쓸 목 사진 URI.
+// 원격 URL은 시뮬레이터에서 로드가 불안정해, 로컬 번들 이미지를 URI로 변환해 사용합니다.
+// 실제 배포 시 handleMockCapture / device==null 목 버튼과 mock-photo.jpg를 함께 삭제하세요.
+const MOCK_PHOTO_URI = Image.resolveAssetSource(require('@/assets/images/mock-photo.jpg')).uri;
 
 export default function CameraScreen() {
   const insets = useSafeAreaInsets();
@@ -122,9 +127,9 @@ export default function CameraScreen() {
   // ──────────────────────────────────────────────────────────────
   // DEV ONLY: iOS 시뮬레이터 등 사용 가능한 카메라가 없는 환경에서
   // 업로드 화면 흐름을 확인하기 위한 목(mock) 데이터입니다.
+  // 네트워크 없이도 뜨도록 로컬 번들 이미지를 URI로 변환해 사용합니다.
   // 실제 배포 시 이 블록과 아래 device==null 화면의 목 버튼을 함께 삭제하세요.
   // (추후 카메라 없음 처리는 토스트 알럿 후 뒤로가기로 대체 예정)
-  const MOCK_PHOTO_URI = 'https://picsum.photos/seed/tikitaka/1080/1920';
   const handleMockCapture = () => {
     router.push({ pathname: '/camera/upload', params: { uri: MOCK_PHOTO_URI } });
   };
