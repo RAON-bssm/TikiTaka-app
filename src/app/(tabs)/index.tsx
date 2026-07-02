@@ -1,5 +1,5 @@
 import FeedPreviewCard from '@/components/feed/FeedPreviewCard';
-import Header from '@/components/ui/header';
+import Header from '@/components/ui/Header';
 import { Text, View } from 'react-native';
 
 export default function HomeScreen() {
