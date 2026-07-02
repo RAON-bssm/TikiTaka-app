@@ -1,10 +1,10 @@
-import { Pressable, View } from 'react-native';
+import { Image, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import NotificationsIcon from '@/assets/icons/header/notifications.svg';
 import ProfileImageIcon from '@/assets/icons/header/ProfileImage.svg';
 import VectorIcon from '@/assets/icons/header/Vector.svg';
-import Logo from '@/assets/icons/logo.svg';
+import LogoImage from '@/assets/icons/logo.webp';
 
 const COLOR_ICON = '#9DAABB'; // gray-500
 
@@ -16,7 +16,7 @@ const Header = () => {
       className="flex-row items-center justify-between px-md"
       style={{ paddingTop: insets.top }}
     >
-      <Logo height={32} />
+      <Image source={LogoImage} className="h-8 w-[124px]" resizeMode="contain" />
 
       <View className="flex-row items-center gap-md">
         <Pressable className="active:opacity-70">
