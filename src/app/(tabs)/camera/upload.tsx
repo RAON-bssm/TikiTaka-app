@@ -3,15 +3,16 @@ import Button from '@/components/ui/Button';
 import Dropdown from '@/components/ui/input/Dropdown';
 import TextInput from '@/components/ui/input/TextInput';
 import Typography from '@/components/ui/Typography';
+import useImageRatio from '@/hooks/useImageRatio';
 import { useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
 import { Image, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function Upload() {
   const insets = useSafeAreaInsets();
   const { uri } = useLocalSearchParams<{ uri?: string }>();
-  const [photoRatio, setPhotoRatio] = useState<number>();
+  // 가로는 부모 폭으로 고정, 세로는 원본 비율(가로/세로)에 맞춰 유동
+  const photoRatio = useImageRatio(uri);
 
   const handleUpload = () => {
     // TODO: 서버 업로드 API 연동 (TanStack Query useMutation)
@@ -24,17 +25,15 @@ export default function Upload() {
         <Topic title="예쁜 돌멩이 찾기" />
 
         {/* 촬영한 사진 미리보기: 폭은 부모를 채우고, 높이는 사진 원본 비율에 맞춰 반응형 */}
-        {uri ? (
+        {uri && photoRatio ? (
           <Image
             source={{ uri }}
             resizeMode="cover"
-            onLoad={(e) => {
-              const { width, height } = e.nativeEvent.source;
-              if (width && height) setPhotoRatio(width / height);
-            }}
             className="w-full overflow-hidden rounded-md bg-gray-200"
             style={{ aspectRatio: photoRatio }}
           />
+        ) : uri ? (
+          <View className="h-[232px] w-full overflow-hidden rounded-md bg-gray-200" />
         ) : (
           <View className="h-[232px] w-full items-center justify-center overflow-hidden rounded-md bg-gray-200">
             <Typography variant="body1" className="text-gray-600">

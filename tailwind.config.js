@@ -6,6 +6,7 @@ module.exports = {
     './src/features/**/*.{js,jsx,ts,tsx}',
   ],
   presets: [require('nativewind/preset')],
+  corePlugins: { borderOpacity: true },
   theme: {
     extend: {
       colors: {
