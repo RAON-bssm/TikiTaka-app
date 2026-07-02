@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { Image, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -13,7 +14,9 @@ const Header = () => {
 
   return (
     <View className="flex-row items-center justify-between">
-      <Image source={LogoImage} className="h-8 w-[124px]" resizeMode="contain" />
+      <Pressable onPress={() => router.push('/(tabs)')} className="active:opacity-70">
+        <Image source={LogoImage} className="h-8 w-[124px]" resizeMode="contain" />
+      </Pressable>
 
       <View className="flex-row items-center gap-md">
         <Pressable className="active:opacity-70">

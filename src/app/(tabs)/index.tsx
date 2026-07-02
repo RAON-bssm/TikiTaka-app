@@ -42,7 +42,11 @@ export default function HomeScreen() {
   ];
   return (
     <SafeAreaView className="flex-1 bg-gray-100" edges={['top']}>
-      <View className="flex-1 gap-2xl px-xl pt-lg">
+      <ScrollView
+        className="flex-1"
+        contentContainerClassName="gap-2xl px-xl pt-lg"
+        showsVerticalScrollIndicator={false}
+      >
         <Header />
 
         <Banner />
@@ -81,7 +85,7 @@ export default function HomeScreen() {
             ))}
           </ScrollView>
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
