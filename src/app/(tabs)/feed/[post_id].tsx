@@ -1,9 +1,9 @@
-import FavoriteIcon from '@/assets/icons/favorite.svg';
-import InfoIcon from '@/assets/icons/info.svg';
-import PlaceIcon from '@/assets/icons/place.svg';
+import AiScoreCard from '@/components/feed/AiScoreCard';
+import PostAuthor from '@/components/feed/PostAuthor';
+import PostImage from '@/components/feed/PostImage';
+import PostTitleRow from '@/components/feed/PostTitleRow';
 import Header from '@/components/ui/header';
-import Typography from '@/components/ui/Typography';
-import { Image, View } from 'react-native';
+import { View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -33,84 +33,18 @@ export default function PostDetailScreen() {
         <Header />
 
         <View className="flex flex-col gap-lg">
-          {/* 작성자 정보 */}
-          <View className="flex flex-row items-center gap-md">
-            <Image
-              source={{ uri: post.user.profile }}
-              style={{ width: 40, height: 40 }}
-              className="rounded-full bg-gray-50"
-            />
-            <View className="flex flex-col gap-xs">
-              <Typography variant="body2" className="text-gray-900">
-                {post.user.name}
-              </Typography>
-              <View className="flex flex-row items-center gap-sm">
-                <View className="flex flex-row items-center gap-xs">
-                  <PlaceIcon width={12} height={12} color="#9DAABB" />
-                  <Typography variant="body3" className="text-gray-500 text-[10px]">
-                    {post.place}
-                  </Typography>
-                </View>
-                <Typography variant="body3" className="text-gray-500 text-[10px]">
-                  ·
-                </Typography>
-                <Typography variant="body3" className="text-gray-500 text-[10px]">
-                  {post.createdAt}
-                </Typography>
-              </View>
-            </View>
-          </View>
-
-          {/* 피드 이미지 */}
-          <Image
-            source={{ uri: post.imgUrl }}
-            style={{ width: '100%', height: 320 }}
-            className="rounded-lg bg-gray-200"
+          <PostAuthor
+            name={post.user.name}
+            profile={post.user.profile}
+            place={post.place}
+            createdAt={post.createdAt}
           />
+          <PostImage uri={post.imgUrl} />
         </View>
 
-        {/* 제목 · 장소 / 좋아요 */}
-        <View className="flex flex-row items-center justify-between">
-          <View className="flex flex-row items-center gap-xs">
-            <Typography variant="h3" className="text-gray-900">
-              {post.user.name}
-            </Typography>
-            <Typography variant="h3" className="text-gray700">
-              ·
-            </Typography>
-            <Typography variant="body2" className="text-gray-700">
-              {post.title}
-            </Typography>
-          </View>
-          <View className="flex flex-row items-center gap-xs">
-            <FavoriteIcon width={20} height={20} color="#FC8253" />
-            <Typography variant="body3" className="text-gray-700">
-              {post.likeCount}
-            </Typography>
-          </View>
-        </View>
+        <PostTitleRow authorName={post.user.name} title={post.title} likeCount={post.likeCount} />
 
-        {/* AI 평가 카드 */}
-        <View className="relative flex flex-row items-center gap-xl rounded-md bg-white p-lg border border-gray-200">
-          <View className="absolute right-sm top-sm">
-            <InfoIcon width={24} height={24} color="#C4CCDA" />
-          </View>
-          <View className="flex flex-col items-center gap-xs">
-            <Typography variant="h3" className="text-gray-900">
-              AI 평가 점수
-            </Typography>
-            <Typography
-              variant="display"
-              className="text-primary-600 text-[64px] leading-[72px] font-bold"
-            >
-              {post.aiScore}
-            </Typography>
-          </View>
-          <View className="h-[81px] w-[2px] rounded-xs bg-gray-300" />
-          <Typography variant="body3" className="flex-1 pr-xl pt-md text-gray-800 leading-5">
-            {post.aiComment}
-          </Typography>
-        </View>
+        <AiScoreCard score={post.aiScore} comment={post.aiComment} />
       </ScrollView>
     </SafeAreaView>
   );
