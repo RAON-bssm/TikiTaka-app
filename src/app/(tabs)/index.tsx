@@ -20,24 +20,28 @@ export default function HomeScreen() {
       imgUrl: 'https://i.pinimg.com/736x/f8/95/1a/f8951a0f7b8523223d87d0ab42498056.jpg',
       user,
       place: '영도구',
+      postId: '1',
     },
     {
       id: 2,
       imgUrl: 'https://i.pinimg.com/736x/db/4b/95/db4b954a0e9191b2d38e69b2568f7013.jpg',
       user,
       place: '강서구',
+      postId: '2',
     },
     {
       id: 3,
       imgUrl: 'https://i.pinimg.com/736x/f8/95/1a/f8951a0f7b8523223d87d0ab42498056.jpg',
       user,
       place: '해운대구',
+      postId: '3',
     },
     {
       id: 4,
       imgUrl: 'https://i.pinimg.com/736x/db/4b/95/db4b954a0e9191b2d38e69b2568f7013.jpg',
       user,
       place: '수영구',
+      postId: '4',
     },
   ];
   return (
@@ -81,6 +85,7 @@ export default function HomeScreen() {
                 imgUrl={feed.imgUrl}
                 user={feed.user}
                 place={feed.place}
+                postId={feed.postId}
               />
             ))}
           </ScrollView>
