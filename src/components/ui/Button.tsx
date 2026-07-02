@@ -12,7 +12,7 @@ export default function Button({ content, onclick }: Props) {
       onPress={onclick}
       className="flex items-center justify-center p-md rounded-sm bg-primary-600"
     >
-      <Typography variant="body2" className="text-gray-50">
+      <Typography variant="h3" className="text-gray-50">
         {content}
       </Typography>
     </Pressable>
