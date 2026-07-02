@@ -91,7 +91,7 @@ export default function PostDetailScreen() {
         </View>
 
         {/* AI 평가 카드 */}
-        <View className="relative flex flex-row items-center gap-xl rounded-md bg-gray-50 p-lg">
+        <View className="relative flex flex-row items-center gap-xl rounded-md bg-white p-lg border border-gray-200">
           <View className="absolute right-sm top-sm">
             <InfoIcon width={24} height={24} color="#C4CCDA" />
           </View>
