@@ -1,3 +1,4 @@
+import DistrictBattleStatus from '@/components/feed/DistrictBattleStatus';
 import FeedPreviewCard from '@/components/feed/FeedPreviewCard';
 import Banner from '@/components/ui/banner/Banner';
 import { View } from 'react-native';
@@ -12,6 +13,10 @@ export default function HomeScreen() {
     <SafeAreaView className="flex-1 bg-gray-100" edges={['top']}>
       <View className="flex-1 gap-2xl px-xl pt-lg">
         <Banner />
+        <DistrictBattleStatus
+          myTeam={{ name: '강서구', score: 99 }}
+          opponentTeam={{ name: '영도구', score: 67 }}
+        />
         <FeedPreviewCard
           imgUrl="https://i.pinimg.com/736x/f8/95/1a/f8951a0f7b8523223d87d0ab42498056.jpg"
           user={user}
