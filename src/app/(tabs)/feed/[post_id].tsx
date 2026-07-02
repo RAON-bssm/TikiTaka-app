@@ -1,4 +1,5 @@
 import AiScoreCard from '@/components/feed/AiScoreCard';
+import AiScoreCheckCard from '@/components/feed/AiScoreCheckCard';
 import PostAuthor from '@/components/feed/PostAuthor';
 import PostImage from '@/components/feed/PostImage';
 import PostTitleRow from '@/components/feed/PostTitleRow';
@@ -45,6 +46,7 @@ export default function PostDetailScreen() {
         <PostTitleRow authorName={post.user.name} title={post.title} likeCount={post.likeCount} />
 
         <AiScoreCard score={post.aiScore} comment={post.aiComment} />
+        <AiScoreCheckCard score={post.aiScore} />
       </ScrollView>
     </SafeAreaView>
   );
