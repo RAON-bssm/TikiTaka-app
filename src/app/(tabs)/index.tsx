@@ -2,6 +2,7 @@ import DistrictBattleStatus from '@/components/feed/DistrictBattleStatus';
 import FeedPreviewCard from '@/components/feed/FeedPreviewCard';
 import Banner from '@/components/ui/banner/Banner';
 import Button from '@/components/ui/Button';
+import Header from '@/components/ui/header';
 import Typography from '@/components/ui/Typography';
 import { Pressable, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -42,6 +43,8 @@ export default function HomeScreen() {
   return (
     <SafeAreaView className="flex-1 bg-gray-100" edges={['top']}>
       <View className="flex-1 gap-2xl px-xl pt-lg">
+        <Header />
+
         <Banner />
 
         <View className="flex flex-col gap-sm">
