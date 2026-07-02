@@ -107,7 +107,7 @@ export default function PostDetailScreen() {
             </Typography>
           </View>
           <View className="h-[81px] w-[2px] rounded-xs bg-gray-300" />
-          <Typography variant="body3" className="flex-1 text-gray-700 leading-5">
+          <Typography variant="body3" className="flex-1 pr-xl pt-md text-gray-700 leading-5">
             {post.aiComment}
           </Typography>
         </View>
