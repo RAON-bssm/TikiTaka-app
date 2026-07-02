@@ -4,6 +4,7 @@ import Banner from '@/components/ui/banner/Banner';
 import Button from '@/components/ui/Button';
 import Header from '@/components/ui/header';
 import Typography from '@/components/ui/Typography';
+import { useRouter } from 'expo-router';
 import { Pressable, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -44,6 +45,7 @@ export default function HomeScreen() {
       postId: '4',
     },
   ];
+  const router = useRouter();
   return (
     <SafeAreaView className="flex-1 bg-gray-100" edges={['top']}>
       <ScrollView
@@ -68,7 +70,7 @@ export default function HomeScreen() {
             <Typography variant="h3" className="text-gray-900">
               동네 훔쳐보기
             </Typography>
-            <Pressable>
+            <Pressable onPress={() => router.push('/feed')}>
               <Typography variant="body2" className="text-gray-600">
                 더보기
               </Typography>
