@@ -75,10 +75,10 @@ export default function PostDetailScreen() {
             <Typography variant="h3" className="text-gray-900">
               {post.user.name}
             </Typography>
-            <Typography variant="h3" className="text-gray-900">
+            <Typography variant="h3" className="text-gray700">
               ·
             </Typography>
-            <Typography variant="body2" className="text-gray-900">
+            <Typography variant="body2" className="text-gray-700">
               {post.title}
             </Typography>
           </View>
@@ -93,7 +93,7 @@ export default function PostDetailScreen() {
         {/* AI 평가 카드 */}
         <View className="relative flex flex-row items-center gap-xl rounded-md bg-gray-50 p-lg">
           <View className="absolute right-sm top-sm">
-            <InfoIcon width={24} height={24} color="#9DAABB" />
+            <InfoIcon width={24} height={24} color="#C4CCDA" />
           </View>
           <View className="flex flex-col items-center gap-xs">
             <Typography variant="h3" className="text-gray-900">
@@ -107,7 +107,7 @@ export default function PostDetailScreen() {
             </Typography>
           </View>
           <View className="h-[81px] w-[2px] rounded-xs bg-gray-300" />
-          <Typography variant="body3" className="flex-1 pr-xl pt-md text-gray-700 leading-5">
+          <Typography variant="body3" className="flex-1 pr-xl pt-md text-gray-800 leading-5">
             {post.aiComment}
           </Typography>
         </View>
