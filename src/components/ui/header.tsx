@@ -27,7 +27,7 @@ const Header = () => {
           <VectorIcon width={24} height={24} color={COLOR_ICON} />
         </Pressable>
 
-        <Pressable className="active:opacity-70">
+        <Pressable onPress={() => router.push('/(tabs)/profile')} className="active:opacity-70">
           <ProfileImageIcon width={32} height={32} />
         </Pressable>
       </View>

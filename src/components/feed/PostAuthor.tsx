@@ -18,20 +18,20 @@ export default function PostAuthor({ name, profile, place, createdAt }: Props) {
         className="rounded-full bg-gray-50"
       />
       <View className="flex flex-col gap-xs">
-        <Typography variant="body2" className="text-gray-900">
+        <Typography variant="h3" className="text-gray-900">
           {name}
         </Typography>
         <View className="flex flex-row items-center gap-sm">
           <View className="flex flex-row items-center gap-xs">
-            <PlaceIcon width={12} height={12} color="#9DAABB" />
-            <Typography variant="body3" className="text-gray-500 text-[10px]">
+            <PlaceIcon width={24} height={24} color="#9DAABB" />
+            <Typography variant="body2" className="text-gray-500 text-[10px]">
               {place}
             </Typography>
           </View>
-          <Typography variant="body3" className="text-gray-500 text-[10px]">
+          <Typography variant="body2" className="text-gray-500 text-[10px]">
             ·
           </Typography>
-          <Typography variant="body3" className="text-gray-500 text-[10px]">
+          <Typography variant="body2" className="text-gray-500 text-[10px]">
             {createdAt}
           </Typography>
         </View>
