@@ -1,8 +1,6 @@
-import PlaceIcon from '@/assets/icons/place.svg';
-import Character from '@/components/character/Character';
+import UserProfile from '@/components/profile/UserProfile';
 import Header from '@/components/ui/header';
-import PointBadge from '@/components/ui/PointBadge';
-import Typography from '@/components/ui/Typography';
+import NavRow from '@/components/ui/NavRow';
 import { View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -27,23 +25,13 @@ export default function ProfileScreen() {
       >
         <View className="flex flex-col gap-2xl">
           <Header />
-          <View className="flex flex-row justify-between items-center">
-            <View className="flex flex-row justify-content items-center gap-sm">
-              <Character config={character} size={72} />
-              <View className="flex flex-col ">
-                <Typography variant="h2" className="text-gray-800">
-                  그만말해인제
-                </Typography>
-                <View className="flex flex-row items-center gap-xs">
-                  <PlaceIcon width={24} height={24} color="#9DAABB" />
-                  <Typography variant="body2" className="text-gray-500 text-[10px]">
-                    부산시 영도구
-                  </Typography>
-                </View>
-              </View>
-            </View>
-            <PointBadge point={9999} />
-          </View>
+          <UserProfile
+            character={character}
+            point={9999}
+            userName="그만말해인제"
+            userPlace="부산시 영도구"
+          />
+          <NavRow title="동네 확인하기" description="부산시 사상구" onPress={() => {}} />
         </View>
       </ScrollView>
     </SafeAreaView>
