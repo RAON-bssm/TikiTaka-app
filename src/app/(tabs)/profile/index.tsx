@@ -25,7 +25,7 @@ export default function ProfileScreen() {
         contentContainerClassName="gap-2xl grow"
         showsVerticalScrollIndicator={false}
       >
-        <View className="flex flex-col gap-2xl bg-white p-xl border border-gray-200">
+        <View className="flex flex-col gap-2xl bg-white p-xl border-b border-gray-200">
           <Header />
           <UserProfile
             character={character}
@@ -40,7 +40,7 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        <View className="flex flex-1 flex-col gap-lg bg-white rounded-t-md p-xl border border-gray-200">
+        <View className="flex flex-1 flex-col gap-lg bg-white rounded-t-md p-xl border-t border-gray-200">
           <Typography variant="h2" className="text-gray-800">
             게시물 보관함
           </Typography>
