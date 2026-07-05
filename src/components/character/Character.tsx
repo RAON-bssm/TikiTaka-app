@@ -31,7 +31,7 @@ export default function Character({ config, size, className }: CharacterProps) {
 
         return (
           <Image
-            key={layer.group}
+            key={'tint' in layer ? layer.tint : layer.group}
             source={source}
             contentFit="contain"
             style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}

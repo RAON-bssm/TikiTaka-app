@@ -13,6 +13,8 @@
 export type SimpleGroup = 'body' | 'mouth' | 'clothing' | 'accessory';
 /** 모양 × 색상 파츠 그룹 (모양 → 색상 → 이미지) */
 export type ColorGroup = 'eyes' | 'hairBack' | 'hairFront';
+/** 색상만으로 이미지를 고르는 파츠 그룹 (모양 없음, 예: 눈 색에 맞춘 머리 하이라이트) */
+export type TintGroup = 'hairHighlights';
 /** 실제로 화면에 그려지는 레이어(에셋 그룹). 모양을 고르는 config 키와 동일한 이름이다. */
 export type AssetGroup = SimpleGroup | ColorGroup;
 
@@ -38,11 +40,20 @@ export interface CharacterConfig {
   accessory?: string; // 선택 파츠
 }
 
-/** 한 레이어를 그리는 정보. group에서 모양 id를, color가 있으면 색상 id를 읽는다. */
-export interface LayerDef {
+/** 모양 파츠 레이어. group에서 모양 id를, color가 있으면 색상 id를 읽는다. */
+export interface ShapeLayerDef {
   group: AssetGroup; // 모양 id를 읽어올 config 키이자 에셋 그룹
   color?: ColorConfigKey; // 색상 id를 읽어올 config 키 (ColorGroup만 해당)
 }
+
+/** 색상만으로 이미지를 고르는 레이어. color가 가리키는 색상 id로 tint 그룹 이미지를 고른다. */
+export interface TintLayerDef {
+  tint: TintGroup; // 색상만으로 이미지를 고르는 에셋 그룹
+  color: ColorConfigKey; // 색상 id를 읽어올 config 키
+}
+
+/** 한 레이어를 그리는 정보. (모양 파츠 또는 색상 tint 파츠) */
+export type LayerDef = ShapeLayerDef | TintLayerDef;
 
 /**
  * 그리는 순서(아래 → 위, z-index 오름차순).
@@ -55,7 +66,8 @@ export const LAYERS: LayerDef[] = [
   { group: 'eyes', color: 'eyesColor' },
   { group: 'mouth' },
   { group: 'hairFront', color: 'hairColor' }, // 앞머리 — body·eyes 앞
-  { group: 'accessory' }, // 모자·안경 등 최상단
+  { group: 'accessory' }, // 모자·안경 등
+  { tint: 'hairHighlights', color: 'eyesColor' }, // 눈 색에 맞춘 머리 하이라이트 — 최상단
 ];
 
 /**
