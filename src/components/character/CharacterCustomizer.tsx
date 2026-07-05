@@ -19,8 +19,14 @@ type SelectHandler = (config: CharacterConfig) => void;
 /** 캐릭터 미리보기 (실제 캐릭터 컴포넌트로 합성) */
 const CharacterPreview = ({ config }: { config: CharacterConfig }) => (
   <View className="relative w-full items-center">
-    <Character config={config} size={160} />
-    <View className="-mt-md h-[24px] w-[180px] rounded-full bg-secondary-100" />
+    <View className="relative items-center pb-md">
+      <Image
+        source={require('@/assets/character/footrest.webp')}
+        contentFit="contain"
+        style={{ position: 'absolute', bottom: 0, width: 100, aspectRatio: 400 / 74 }}
+      />
+      <Character config={config} size={160} className="-translate-x-[4px] translate-y-[4px]" />
+    </View>
     <Pressable className="absolute bottom-0 right-0 items-center justify-center rounded-sm bg-primary-600/80 p-md">
       <Typography variant="h4" className="text-gray-100">
         수정하기
