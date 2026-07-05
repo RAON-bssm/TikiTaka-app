@@ -2,6 +2,7 @@ import UserProfile from '@/components/profile/UserProfile';
 import Button from '@/components/ui/Button';
 import Header from '@/components/ui/header';
 import NavRow from '@/components/ui/NavRow';
+import Typography from '@/components/ui/Typography';
 import { View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -18,13 +19,13 @@ export default function ProfileScreen() {
     clothing: 'clothing01',
   };
   return (
-    <SafeAreaView className="flex-1 bg-gray-100" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-white" edges={['top']}>
       <ScrollView
-        className="flex-1"
-        contentContainerClassName="gap-2xl px-xl pt-lg"
+        className="flex-1 bg-gray-100"
+        contentContainerClassName="gap-2xl grow"
         showsVerticalScrollIndicator={false}
       >
-        <View className="flex flex-col gap-2xl">
+        <View className="flex flex-col gap-2xl bg-white p-xl border border-gray-200">
           <Header />
           <UserProfile
             character={character}
@@ -37,6 +38,12 @@ export default function ProfileScreen() {
             <Button content="프로필 수정" variant="light" className="flex-1" />
             <Button content="캐릭터 꾸미기" variant="light" className="flex-1" />
           </View>
+        </View>
+
+        <View className="flex flex-1 flex-col gap-lg bg-white rounded-t-md p-xl border border-gray-200">
+          <Typography variant="h2" className="text-gray-800">
+            게시물 보관함
+          </Typography>
         </View>
       </ScrollView>
     </SafeAreaView>

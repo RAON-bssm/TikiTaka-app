@@ -19,7 +19,7 @@ export default function NavRow({ title, description, onPress }: Props) {
           {title}
         </Typography>
         {description && (
-          <Typography variant="body3" className="text-gray-500">
+          <Typography variant="body3" className="text-gray-600">
             {description}
           </Typography>
         )}
