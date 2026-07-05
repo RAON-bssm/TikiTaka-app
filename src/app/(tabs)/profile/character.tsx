@@ -15,7 +15,18 @@ import { Pressable, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-/** 그리드에 표시할 파츠 옵션 하나 (썸네일 이미지 + 선택 시 반영될 config) */
+/** 색상 스와치 미리보기용 색상 id → 표시 색(hex). 없으면 회색으로 대체한다. */
+const COLOR_HEX: Record<string, string> = {
+  black: '#2D3748',
+  brown: '#9a8d7f',
+  blond: '#eee9c6',
+  green: '#8aed8c',
+  orange: '#FC8253',
+  pink: '#ef89c6',
+  sky: '#e2e9f7',
+};
+
+/** 그리드/스와치에 표시할 파츠 옵션 하나 (썸네일 이미지 + 선택 시 반영될 config) */
 interface PartOption {
   id: string;
   source: number | undefined;
@@ -23,22 +34,25 @@ interface PartOption {
   next: CharacterConfig;
 }
 
-/** 카테고리 탭 정의. 현재 config를 받아 해당 파츠의 선택지들을 만든다. */
-interface CategoryDef {
-  label: string;
-  build: (config: CharacterConfig) => PartOption[];
-}
-
 /**
- * 캐릭터 커스터마이징 카테고리.
+ * 카테고리 탭 정의.
+ *
+ * - buildShapes: 모양 선택지 (그리드)
+ * - buildColors: 색상 선택지 (스와치). 색상 축이 있는 파츠(머리·눈)에만 정의한다.
  *
  * 각 옵션 썸네일은 실제 파츠 에셋(resolveLayerSource)을 그대로 렌더하고,
  * 선택하면 해당 파츠만 교체한 config로 상단 캐릭터가 다시 합성된다.
  */
+interface CategoryDef {
+  label: string;
+  buildShapes: (config: CharacterConfig) => PartOption[];
+  buildColors?: (config: CharacterConfig) => PartOption[];
+}
+
 const CATEGORY_DEFS: CategoryDef[] = [
   {
     label: '머리',
-    build: (config) =>
+    buildShapes: (config) =>
       getShapeOptions('hairBack').map((shape) => ({
         id: shape,
         source: resolveLayerSource(
@@ -48,10 +62,30 @@ const CATEGORY_DEFS: CategoryDef[] = [
         active: config.hairBack === shape,
         next: { ...config, hairBack: shape },
       })),
+    buildColors: (config) =>
+      getColorOptions('hairBack', config.hairBack).map((color) => ({
+        id: color,
+        source: resolveLayerSource(
+          { ...config, hairColor: color },
+          { group: 'hairBack', color: 'hairColor' },
+        ),
+        active: config.hairColor === color,
+        next: { ...config, hairColor: color },
+      })),
   },
   {
     label: '눈',
-    build: (config) =>
+    buildShapes: (config) =>
+      getShapeOptions('eyes').map((shape) => ({
+        id: shape,
+        source: resolveLayerSource(
+          { ...config, eyes: shape },
+          { group: 'eyes', color: 'eyesColor' },
+        ),
+        active: config.eyes === shape,
+        next: { ...config, eyes: shape },
+      })),
+    buildColors: (config) =>
       getColorOptions('eyes', config.eyes).map((color) => ({
         id: color,
         source: resolveLayerSource(
@@ -64,7 +98,7 @@ const CATEGORY_DEFS: CategoryDef[] = [
   },
   {
     label: '입',
-    build: (config) =>
+    buildShapes: (config) =>
       getShapeOptions('mouth').map((shape) => ({
         id: shape,
         source: resolveLayerSource({ ...config, mouth: shape }, { group: 'mouth' }),
@@ -74,7 +108,7 @@ const CATEGORY_DEFS: CategoryDef[] = [
   },
   {
     label: '코스튬',
-    build: (config) =>
+    buildShapes: (config) =>
       getShapeOptions('clothing').map((shape) => ({
         id: shape,
         source: resolveLayerSource({ ...config, clothing: shape }, { group: 'clothing' }),
@@ -84,7 +118,7 @@ const CATEGORY_DEFS: CategoryDef[] = [
   },
   {
     label: '몸',
-    build: (config) =>
+    buildShapes: (config) =>
       getShapeOptions('body').map((shape) => ({
         id: shape,
         source: resolveLayerSource({ ...config, body: shape }, { group: 'body' }),
@@ -94,7 +128,7 @@ const CATEGORY_DEFS: CategoryDef[] = [
   },
   {
     label: '악세서리',
-    build: (config) =>
+    buildShapes: (config) =>
       getShapeOptions('accessory').map((shape) => ({
         id: shape,
         source: resolveLayerSource({ ...config, accessory: shape }, { group: 'accessory' }),
@@ -107,7 +141,9 @@ const CATEGORY_DEFS: CategoryDef[] = [
 export default function CharacterScreen() {
   const [config, setConfig] = useState<CharacterConfig>(DEFAULT_CHARACTER_CONFIG);
   const [selected, setSelected] = useState(0);
-  const options = CATEGORY_DEFS[selected].build(config);
+  const category = CATEGORY_DEFS[selected];
+  const shapes = category.buildShapes(config);
+  const colors = category.buildColors?.(config);
 
   return (
     <SafeAreaView className="flex-1 bg-gray-100" edges={['top']}>
@@ -158,11 +194,34 @@ export default function CharacterScreen() {
           </View>
 
           <View className="flex-1 rounded-md border-2 border-primary-600 bg-gray-50 p-lg">
+            {/* 색상 스와치 (머리·눈처럼 색상 축이 있는 파츠만) */}
+            {colors && (
+              <View className="mb-md shrink-0 gap-sm">
+                <Typography variant="body3" className="text-gray-500">
+                  색상
+                </Typography>
+                <View className="flex-row gap-sm">
+                  {colors.map((color) => (
+                    <Pressable
+                      key={color.id}
+                      onPress={() => setConfig(color.next)}
+                      style={{ backgroundColor: COLOR_HEX[color.id] ?? '#DDE2EC' }}
+                      className={`h-[44px] w-[44px] rounded-full ${
+                        color.active ? 'border-2 border-primary-600' : ''
+                      }`}
+                    />
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {/* 모양 그리드 */}
             <ScrollView
+              className="flex-1"
               showsVerticalScrollIndicator={false}
               contentContainerClassName="flex-row flex-wrap gap-sm"
             >
-              {options.map((option) => (
+              {shapes.map((option) => (
                 <Pressable
                   key={option.id}
                   onPress={() => setConfig(option.next)}
