@@ -128,31 +128,34 @@ export default function CharacterScreen() {
 
         {/* 카테고리 탭 + 파츠 그리드 */}
         <View className="flex-1">
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerClassName="gap-sm"
-          >
-            {CATEGORY_DEFS.map((category, index) => {
-              const active = index === selected;
-              return (
-                <Pressable
-                  key={category.label}
-                  onPress={() => setSelected(index)}
-                  className={`w-[60px] items-center rounded-t-lg py-sm ${
-                    active ? 'bg-primary-600' : 'bg-secondary-100'
-                  }`}
-                >
-                  <Typography
-                    variant={active ? 'h4' : 'body3'}
-                    className={active ? 'text-gray-50' : 'text-primary-600'}
+          {/* 탭 줄은 내용 높이만 차지하고, 남는 높이는 아래 카드가 모두 채운다 */}
+          <View className="shrink-0">
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerClassName="gap-sm"
+            >
+              {CATEGORY_DEFS.map((category, index) => {
+                const active = index === selected;
+                return (
+                  <Pressable
+                    key={category.label}
+                    onPress={() => setSelected(index)}
+                    className={`w-[60px] items-center rounded-t-lg py-sm ${
+                      active ? 'bg-primary-600' : 'bg-secondary-100'
+                    }`}
                   >
-                    {category.label}
-                  </Typography>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
+                    <Typography
+                      variant={active ? 'h4' : 'body3'}
+                      className={active ? 'text-gray-50' : 'text-primary-600'}
+                    >
+                      {category.label}
+                    </Typography>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+          </View>
 
           <View className="flex-1 rounded-md border-2 border-primary-600 bg-gray-50 p-lg">
             <ScrollView
