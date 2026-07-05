@@ -130,7 +130,6 @@ const ShapeGrid = ({ shapes, onSelect }: { shapes: ShapeOption[]; onSelect: Sele
 export default function CharacterCustomizer({
   initialConfig = DEFAULT_CHARACTER_CONFIG,
 }: {
-  /** 편집 시작 시점의 config. 취소하면 이 상태로 되돌린다. */
   initialConfig?: CharacterConfig;
 }) {
   const [config, setConfig] = useState<CharacterConfig>(initialConfig);
@@ -143,11 +142,10 @@ export default function CharacterCustomizer({
     <View className="flex-1 gap-2xl">
       <CharacterPreview config={config} />
 
-      {/* 카테고리 탭 + 파츠 그리드 */}
       <View className="flex-1">
         <CategoryTabs selectedIndex={selected} onSelect={setSelected} />
 
-        <View className="flex-1 rounded-md border-2 border-primary-600 bg-gray-50 p-lg">
+        <View className="-mx-lg flex-1 rounded-t-md border-2 border-b-0 border-primary-600 bg-gray-50 p-lg">
           {colors && <ColorSwatches colors={colors} onSelect={setConfig} />}
           <ShapeGrid shapes={shapes} onSelect={setConfig} />
         </View>
