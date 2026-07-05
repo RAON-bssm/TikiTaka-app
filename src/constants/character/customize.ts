@@ -38,16 +38,21 @@ export type ColorOption = Option;
 /**
  * 모양 선택지 목록을 만든다.
  * apply(id)로 해당 파츠만 교체한 config를 만들고, 그 config로 썸네일을 합성한다.
+ *
+ * deselect가 주어지면(악세서리처럼 선택 해제 가능한 파츠) 이미 선택된 항목을
+ * 다시 눌렀을 때 해당 파츠를 벗도록 next를 해제 config로 바꾼다.
  */
 function shapeOptions(
   group: PartConfigKey,
   layer: LayerDef,
   currentId: string,
   apply: (id: string) => CharacterConfig,
+  deselect?: () => CharacterConfig,
 ): ShapeOption[] {
   return getShapeOptions(group).map((id) => {
-    const next = apply(id);
-    return { id, source: resolveLayerSource(next, layer), active: currentId === id, next };
+    const active = currentId === id;
+    const next = active && deselect ? deselect() : apply(id);
+    return { id, source: resolveLayerSource(apply(id), layer), active, next };
   });
 }
 
@@ -119,9 +124,12 @@ export const CATEGORY_DEFS: CategoryDef[] = [
   {
     label: '악세서리',
     buildShapes: (c) =>
-      shapeOptions('accessory', { group: 'accessory' }, c.accessory ?? '', (id) => ({
-        ...c,
-        accessory: id,
-      })),
+      shapeOptions(
+        'accessory',
+        { group: 'accessory' },
+        c.accessory ?? '',
+        (id) => ({ ...c, accessory: id }),
+        () => ({ ...c, accessory: undefined }), // 선택된 악세서리를 다시 누르면 벗는다
+      ),
   },
 ];

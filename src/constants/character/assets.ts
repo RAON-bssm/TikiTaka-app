@@ -132,4 +132,5 @@ export const DEFAULT_CHARACTER_CONFIG: CharacterConfig = {
   hairBack: firstShape('hairBack'),
   hairFront: firstShape('hairFront'),
   hairColor: firstColor('hairFront'),
+  clothing: firstShape('clothing'), // 코스튬은 항상 착용 상태(기본 clothing01) — 벗을 수 없다
 };

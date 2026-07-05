@@ -127,8 +127,13 @@ const ShapeGrid = ({ shapes, onSelect }: { shapes: ShapeOption[]; onSelect: Sele
  * config 상태를 소유하며 미리보기(상단)와 파츠 선택(하단)이 이를 공유한다.
  * 라우트 화면은 헤더 등 껍데기만 두고 이 컴포넌트를 배치하면 된다.
  */
-export default function CharacterCustomizer() {
-  const [config, setConfig] = useState<CharacterConfig>(DEFAULT_CHARACTER_CONFIG);
+export default function CharacterCustomizer({
+  initialConfig = DEFAULT_CHARACTER_CONFIG,
+}: {
+  /** 편집 시작 시점의 config. 취소하면 이 상태로 되돌린다. */
+  initialConfig?: CharacterConfig;
+}) {
+  const [config, setConfig] = useState<CharacterConfig>(initialConfig);
   const [selected, setSelected] = useState(0);
   const category = CATEGORY_DEFS[selected];
   const shapes = category.buildShapes(config);
