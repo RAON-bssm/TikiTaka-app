@@ -6,6 +6,7 @@ import {
   type LayerDef,
   type PartConfigKey,
   type SimpleGroup,
+  type TintGroup,
 } from './types';
 
 /**
@@ -89,10 +90,27 @@ const COLOR_ASSETS: Record<ColorGroup, Record<string, Record<string, number>>> =
   },
 };
 
+/** 색상만으로 고르는 파츠: 그룹 → 색상 → 이미지 (모양 없음) */
+const TINT_ASSETS: Record<TintGroup, Record<string, number>> = {
+  hairHighlights: {
+    green: require('@/assets/character/hair-highlights/green.webp'),
+    orange: require('@/assets/character/hair-highlights/orange.webp'),
+    pink: require('@/assets/character/hair-highlights/pink.webp'),
+    sky: require('@/assets/character/hair-highlights/sky.webp'),
+  },
+};
+
 const COLOR_GROUPS = new Set<ColorGroup>(['eyes', 'hairBack', 'hairFront']);
 
 /** 한 레이어의 이미지 소스를 config로부터 해석한다. 없으면 undefined (해당 레이어 skip). */
 export function resolveLayerSource(config: CharacterConfig, layer: LayerDef): number | undefined {
+  // 색상만으로 고르는 레이어 (모양 없음, 예: 눈 색 → 머리 하이라이트)
+  if ('tint' in layer) {
+    const colorId = config[layer.color];
+    if (!colorId) return undefined;
+    return TINT_ASSETS[layer.tint]?.[colorId];
+  }
+
   const shapeId = config[layer.group];
   if (!shapeId) return undefined;
 
