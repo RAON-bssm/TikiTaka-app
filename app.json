@@ -9,7 +9,10 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/images/tikitaka-bg-white.png",
-      "bundleIdentifier": "com.anonymous.TikiTaka"
+      "bundleIdentifier": "com.tikitaka.raon",
+      "infoPlist": {
+        "NSCameraUsageDescription": "동네 사진을 촬영하기 위해 카메라 접근 권한이 필요합니다."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -18,7 +21,7 @@
         "backgroundImage": "./assets/images/android-icon-background.png"
       },
       "predictiveBackGestureEnabled": false,
-      "permissions": ["android.permission.CAMERA", "android.permission.RECORD_AUDIO"],
+      "permissions": ["android.permission.CAMERA"],
       "package": "com.anonymous.TikiTaka"
     },
     "web": {
@@ -46,12 +49,6 @@
             "./assets/fonts/Pretendard-Bold.ttf",
             "./assets/fonts/OkDanDan-Bold.ttf"
           ]
-        }
-      ],
-      [
-        "expo-camera",
-        {
-          "cameraPermission": "동네 사진을 촬영하기 위해 카메라 접근 권한이 필요합니다."
         }
       ]
     ],

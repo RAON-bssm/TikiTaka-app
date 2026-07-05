@@ -1,5 +1,6 @@
+import ChevronDownIcon from '@/assets/icons/chevron-down.svg';
 import { useRef, useState } from 'react';
-import { Image, Modal, Pressable, View } from 'react-native';
+import { Modal, Pressable, View } from 'react-native';
 import Typography from '../Typography';
 
 interface Props {
@@ -48,10 +49,7 @@ export default function Dropdown({ label, placeholder, options, value, onChange 
             {placeholder}
           </Typography>
         )}
-        <Image
-          source={require('@/assets/icons/chevron-down.svg')}
-          style={{ width: 16, height: 16, resizeMode: 'contain' }}
-        />
+        <ChevronDownIcon width={16} height={16} />
       </Pressable>
 
       <Modal

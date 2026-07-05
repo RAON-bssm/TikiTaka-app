@@ -1,4 +1,5 @@
 import type { BottomTabBarProps } from 'expo-router/build/react-navigation/bottom-tabs';
+import { getFocusedRouteNameFromRoute } from 'expo-router/build/react-navigation/core';
 import type { FC } from 'react';
 import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -32,6 +33,17 @@ const TAB_CONFIG: Record<string, TabConfig> = {
 
 export default function AppBar({ state, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
+
+  // 카메라 스택의 기본 화면(index)에서만 바텀바를 숨깁니다.
+  // 하위 화면(예: camera/preview)에서는 nested 라우트 이름이 잡혀 바텀바가 다시 노출됩니다.
+  const focusedRoute = state.routes[state.index];
+  const nestedRouteName = getFocusedRouteNameFromRoute(focusedRoute);
+  if (
+    focusedRoute?.name === 'camera' &&
+    (nestedRouteName === undefined || nestedRouteName === 'index')
+  ) {
+    return null;
+  }
 
   return (
     <View className="flex-row bg-white" style={{ paddingBottom: insets.bottom }}>

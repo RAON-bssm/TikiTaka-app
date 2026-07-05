@@ -3,26 +3,28 @@ import { Pressable, Text, View } from 'react-native';
 
 export interface ZoomLevel {
   label: string;
-  /** expo-camera의 zoom prop 값 (0~1). 광학 배율이 아닌 정규화 값이라 근사치입니다. */
-  value: number;
+  /** neutralZoom(1x) 기준 배율. 0.5는 초광각(minZoom) 렌즈로 매핑됩니다. */
+  factor: number;
 }
 
 export const ZOOM_LEVELS: ZoomLevel[] = [
-  { label: '.5', value: 0 },
-  { label: '1', value: 0 },
-  { label: '2', value: 0.2 },
-  { label: '3', value: 0.4 },
+  { label: '.5', factor: 0.5 },
+  { label: '1', factor: 1 },
+  { label: '2', factor: 2 },
+  { label: '3', factor: 3 },
 ];
 
 interface Props {
   selected: string;
   onSelect: (level: ZoomLevel) => void;
+  /** 노출할 배율 목록. 기기에 초광각이 없으면 부모가 .5를 빼고 넘겨줍니다. */
+  levels?: ZoomLevel[];
 }
 
-export default function ZoomControl({ selected, onSelect }: Props) {
+export default function ZoomControl({ selected, onSelect, levels = ZOOM_LEVELS }: Props) {
   return (
     <View className="flex flex-row items-center justify-center gap-2xl">
-      {ZOOM_LEVELS.map((level) => {
+      {levels.map((level) => {
         const isActive = level.label === selected;
         return (
           <Pressable key={level.label} onPress={() => onSelect(level)} hitSlop={8}>

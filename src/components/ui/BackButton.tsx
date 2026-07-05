@@ -1,5 +1,6 @@
+import ChevronLeftIcon from '@/assets/icons/chevron-left.svg';
 import { router, type Href } from 'expo-router';
-import { Image, Pressable, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import Typography from './Typography';
 
 interface Props {
@@ -18,10 +19,7 @@ export default function BackButton({ link, title }: Props) {
   return (
     <View className="flex flex-row items-center gap-sm">
       <Pressable onPress={onPress}>
-        <Image
-          source={require('@/assets/icons/chevron-left.svg')}
-          style={{ width: 24, height: 24, resizeMode: 'contain' }}
-        />
+        <ChevronLeftIcon width={24} height={24} color="#6E7D94" />
       </Pressable>
       <Typography variant="h3" className="text-gray-600">
         {title}

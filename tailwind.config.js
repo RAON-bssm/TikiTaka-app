@@ -24,6 +24,7 @@ module.exports = {
     'text-secondary-500',
   ],
   presets: [require('nativewind/preset')],
+  corePlugins: { borderOpacity: true },
   theme: {
     extend: {
       colors: {
