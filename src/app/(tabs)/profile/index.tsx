@@ -4,6 +4,7 @@ import Button from '@/components/ui/Button';
 import Header from '@/components/ui/header';
 import NavRow from '@/components/ui/NavRow';
 import Typography from '@/components/ui/Typography';
+import { router } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -42,8 +43,18 @@ export default function ProfileScreen() {
             onPress={() => setIsNeighborhoodSheetOpen(true)}
           />
           <View className="flex flex-row gap-md w-full">
-            <Button content="프로필 수정" variant="light" className="flex-1" />
-            <Button content="캐릭터 꾸미기" variant="light" className="flex-1" />
+            <Button
+              content="프로필 수정"
+              variant="light"
+              className="flex-1"
+              onclick={() => router.push('/profile/edit-region')}
+            />
+            <Button
+              content="캐릭터 꾸미기"
+              variant="light"
+              className="flex-1"
+              onclick={() => router.push('/profile/character')}
+            />
           </View>
         </View>
 
