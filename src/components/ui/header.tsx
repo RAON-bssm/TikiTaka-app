@@ -1,6 +1,5 @@
 import { router } from 'expo-router';
 import { Image, Pressable, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import NotificationsIcon from '@/assets/icons/header/notifications.svg';
 import ProfileImageIcon from '@/assets/icons/header/ProfileImage.svg';
@@ -10,10 +9,8 @@ import LogoImage from '@/assets/icons/logo.webp';
 const COLOR_ICON = '#9DAABB'; // gray-500
 
 const Header = () => {
-  const insets = useSafeAreaInsets();
-
   return (
-    <View className="flex-row items-center justify-between">
+    <View className="w-full flex-row items-center justify-between">
       <Pressable onPress={() => router.push('/(tabs)')} className="active:opacity-70">
         <Image source={LogoImage} className="h-8 w-[124px]" resizeMode="contain" />
       </Pressable>

@@ -1,6 +1,7 @@
 import CloseIcon from '@/assets/icons/close.svg';
 import RadioOffIcon from '@/assets/icons/radio-selected.svg';
 import RadioOnIcon from '@/assets/icons/radio.svg';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import BottomSheet from '../ui/BottomSheet';
@@ -26,6 +27,7 @@ const INITIAL_NEIGHBORHOODS: Neighborhood[] = [
 export default function NeighborhoodSheet({ visible, onClose }: Props) {
   const [neighborhoods, setNeighborhoods] = useState(INITIAL_NEIGHBORHOODS);
   const [selectedId, setSelectedId] = useState('2');
+  const router = useRouter();
 
   const removeNeighborhood = (id: string) => {
     setNeighborhoods((prev) => prev.filter((n) => n.id !== id));
@@ -72,7 +74,11 @@ export default function NeighborhoodSheet({ visible, onClose }: Props) {
           })}
         </View>
 
-        <Button content="동네 추가" onclick={() => {}} className="w-full" />
+        <Button
+          content="동네 추가"
+          onclick={() => router.push('/profile/edit-region')}
+          className="w-full"
+        />
       </View>
     </BottomSheet>
   );
