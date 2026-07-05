@@ -1,13 +1,16 @@
+import NeighborhoodSheet from '@/components/profile/NeighborhoodSheet';
 import UserProfile from '@/components/profile/UserProfile';
 import Button from '@/components/ui/Button';
 import Header from '@/components/ui/header';
 import NavRow from '@/components/ui/NavRow';
 import Typography from '@/components/ui/Typography';
+import { useState } from 'react';
 import { View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ProfileScreen() {
+  const [isNeighborhoodSheetOpen, setIsNeighborhoodSheetOpen] = useState(false);
   const character = {
     body: 'body02',
     eyes: 'eyes01',
@@ -33,7 +36,11 @@ export default function ProfileScreen() {
             userName="그만말해인제"
             userPlace="부산시 영도구"
           />
-          <NavRow title="동네 확인하기" description="부산시 사상구" onPress={() => {}} />
+          <NavRow
+            title="동네 확인하기"
+            description="부산시 사상구"
+            onPress={() => setIsNeighborhoodSheetOpen(true)}
+          />
           <View className="flex flex-row gap-md w-full">
             <Button content="프로필 수정" variant="light" className="flex-1" />
             <Button content="캐릭터 꾸미기" variant="light" className="flex-1" />
@@ -46,6 +53,11 @@ export default function ProfileScreen() {
           </Typography>
         </View>
       </ScrollView>
+
+      <NeighborhoodSheet
+        visible={isNeighborhoodSheetOpen}
+        onClose={() => setIsNeighborhoodSheetOpen(false)}
+      />
     </SafeAreaView>
   );
 }
