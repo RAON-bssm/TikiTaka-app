@@ -1,4 +1,5 @@
 import UserProfile from '@/components/profile/UserProfile';
+import Button from '@/components/ui/Button';
 import Header from '@/components/ui/header';
 import NavRow from '@/components/ui/NavRow';
 import { View } from 'react-native';
@@ -32,6 +33,10 @@ export default function ProfileScreen() {
             userPlace="부산시 영도구"
           />
           <NavRow title="동네 확인하기" description="부산시 사상구" onPress={() => {}} />
+          <View className="flex flex-row gap-md w-full">
+            <Button content="프로필 수정" variant="light" className="flex-1" />
+            <Button content="캐릭터 꾸미기" variant="light" className="flex-1" />
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
