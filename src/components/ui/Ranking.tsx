@@ -1,32 +1,45 @@
-import type { FC } from 'react';
+import type { FC, ReactNode } from 'react';
 import { View } from 'react-native';
+
+import PlaceIcon from '@/assets/icons/place.svg';
 import Typography from './Typography';
 
-type RankingRowProps = {
-  /** 순위 (1부터). 1~3위는 강조색으로 표시한다. */
+const COLOR_GRAY = '#6E7D94'; // gray-600
+
+type RankingProps = {
   number: number;
-  /** 동네(구) 이름. */
   location: string;
-  /** 점수. */
   count: number;
+  avatar?: ReactNode;
+  address?: string;
 };
 
-const Ranking: FC<RankingRowProps> = ({ number, location, count }) => {
+const Ranking: FC<RankingProps> = ({ number, location, count, avatar, address }) => {
   return (
-    <View className="w-full flex-row items-center gap-md px-md py-lg">
-      {/* 순위 (왼쪽) — 1~3위 강조 */}
-      <Typography
-        variant="body1"
-        className={`w-8 ${number <= 3 ? 'text-primary-600' : 'text-gray-600'}`}
-      >
+    <View
+      className={`w-full flex-row items-center justify-between px-md ${avatar ? 'py-md' : 'py-lg'}`}
+    >
+      <Typography variant="body1" className={number <= 3 ? 'text-primary-600' : 'text-gray-600'}>
         {number}
       </Typography>
-      {/* 동네명 (중앙) */}
-      <Typography variant="body1" className="flex-1 text-center text-gray-900">
-        {location}
-      </Typography>
-      {/* 점수 (오른쪽) */}
-      <Typography variant="body1" className="w-16 text-right font-semibold text-primary-600">
+
+      {avatar}
+
+      <View className="items-start gap-xs">
+        <Typography variant="body1" className="text-gray-900">
+          {location}
+        </Typography>
+        {address && (
+          <View className="flex-row items-center gap-xs">
+            <PlaceIcon width={12} height={12} color={COLOR_GRAY} />
+            <Typography variant="body3" className="text-[10px] text-gray-600">
+              {address}
+            </Typography>
+          </View>
+        )}
+      </View>
+
+      <Typography variant="body1" className="text-primary-600">
         {count}점
       </Typography>
     </View>

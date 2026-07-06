@@ -4,10 +4,12 @@ import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import FilterIcon from '@/assets/icons/filter.svg';
+import Character from '@/components/character/Character';
 import Header from '@/components/ui/header';
 import MatchCard, { type MatchTeam } from '@/components/ui/MatchCard';
 import Ranking from '@/components/ui/Ranking';
 import Typography from '@/components/ui/Typography';
+import { DEFAULT_CHARACTER_CONFIG } from '@/constants/character/assets';
 
 const TABS = ['동네랭킹', '개인랭킹'] as const;
 type Tab = (typeof TABS)[number];
@@ -25,10 +27,19 @@ const MATCHES: Match[] = [
 ];
 
 // TODO: 서버 연동 시 TanStack Query로 대체
-const RANKINGS = Array.from({ length: 9 }, (_, i) => ({
+const DISTRICT_RANKINGS = Array.from({ length: 9 }, (_, i) => ({
   rank: i + 1,
   location: '부산시 사상구',
   score: 580,
+}));
+
+// TODO: 서버 연동 시 TanStack Query로 대체 (character는 각 유저의 CharacterConfig)
+const PERSONAL_RANKINGS = Array.from({ length: 9 }, (_, i) => ({
+  rank: i + 1,
+  name: '니코꼬리찜',
+  address: '부산시 사상구',
+  score: 580,
+  character: DEFAULT_CHARACTER_CONFIG,
 }));
 
 export default function RankingScreen() {
@@ -107,15 +118,27 @@ export default function RankingScreen() {
             })}
           </View>
 
+          {/* 랭킹 리스트 — 탭에 따라 동네/개인 전환 */}
           <View>
-            {RANKINGS.map((item) => (
-              <Ranking
-                key={item.rank}
-                number={item.rank}
-                location={item.location}
-                count={item.score}
-              />
-            ))}
+            {tab === '동네랭킹'
+              ? DISTRICT_RANKINGS.map((item) => (
+                  <Ranking
+                    key={item.rank}
+                    number={item.rank}
+                    location={item.location}
+                    count={item.score}
+                  />
+                ))
+              : PERSONAL_RANKINGS.map((item) => (
+                  <Ranking
+                    key={item.rank}
+                    number={item.rank}
+                    location={item.name}
+                    address={item.address}
+                    count={item.score}
+                    avatar={<Character config={item.character} size={50} />}
+                  />
+                ))}
           </View>
         </View>
       </ScrollView>
