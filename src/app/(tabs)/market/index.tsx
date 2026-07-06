@@ -9,12 +9,11 @@ import ShopTabs from '@/components/market/ShopTabs';
 import CategoryTabs from '@/components/ui/CategoryTabs';
 import Header from '@/components/ui/header';
 import PointBadge from '@/components/ui/PointBadge';
-import { SHOP_CATEGORIES, SHOP_SECTIONS, USER_POINT, type ShopSection } from '@/constants/market';
+import { SHOP_CATEGORIES, USER_POINT } from '@/constants/market';
 import { useShop } from '@/hooks/market/useShop';
 
 export default function MarketScreen() {
   const { category, items, selectedId, selectedItem, selectCategory, selectItem } = useShop();
-  const [section, setSection] = useState<ShopSection>('상점');
   const [purchaseOpen, setPurchaseOpen] = useState(false);
 
   const handleConfirmPurchase = () => {
@@ -28,7 +27,7 @@ export default function MarketScreen() {
         <Header />
 
         <View className="w-full flex-row items-center justify-between">
-          <ShopTabs tabs={SHOP_SECTIONS} selected={section} onSelect={setSection} />
+          <ShopTabs />
           <PointBadge point={USER_POINT} />
         </View>
 

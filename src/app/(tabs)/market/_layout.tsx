@@ -1,5 +1,5 @@
 import { Stack } from 'expo-router';
 
-export default function FeedLayout() {
-  return <Stack screenOptions={{ headerShown: false }} />;
+export default function MarketLayout() {
+  return <Stack screenOptions={{ headerShown: false, animation: 'none' }} />;
 }
