@@ -2,32 +2,35 @@ import type { FC } from 'react';
 import { View } from 'react-native';
 import Typography from './Typography';
 
-type LocationHeaderProps = {
+type RankingRowProps = {
+  /** 순위 (1부터). 1~3위는 강조색으로 표시한다. */
   number: number;
+  /** 동네(구) 이름. */
   location: string;
+  /** 점수. */
   count: number;
 };
 
-const LocationHeader: FC<LocationHeaderProps> = ({ number, location, count }) => {
+const Ranking: FC<RankingRowProps> = ({ number, location, count }) => {
   return (
-    <View className="flex-row items-center gap-md px-3 py-4 w-full">
-      {/* 번호 (왼쪽) */}
+    <View className="w-full flex-row items-center gap-md px-md py-lg">
+      {/* 순위 (왼쪽) — 1~3위 강조 */}
       <Typography
         variant="body1"
-        className={number === 1 ? 'w-8 text-primary-500' : 'w-8 text-gray-800'}
+        className={`w-8 ${number <= 3 ? 'text-primary-600' : 'text-gray-600'}`}
       >
         {number}
       </Typography>
-      {/* 위치명 (중앙) */}
-      <Typography variant="body1" className="flex-1 text-gray-800 items-center">
+      {/* 동네명 (중앙) */}
+      <Typography variant="body1" className="flex-1 text-center text-gray-900">
         {location}
       </Typography>
       {/* 점수 (오른쪽) */}
-      <Typography variant="body1" className="text-primary-500 font-semibold w-16 text-right">
+      <Typography variant="body1" className="w-16 text-right font-semibold text-primary-600">
         {count}점
       </Typography>
     </View>
   );
 };
 
-export default LocationHeader;
+export default Ranking;
