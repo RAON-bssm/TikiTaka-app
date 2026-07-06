@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -9,7 +9,6 @@ import CategoryTabs from '@/components/ui/CategoryTabs';
 import Header from '@/components/ui/header';
 import PointBadge from '@/components/ui/PointBadge';
 import {
-  FEATURED_ITEM,
   getShopItems,
   SHOP_CATEGORIES,
   SHOP_SECTIONS,
@@ -21,7 +20,17 @@ import {
 export default function MarketScreen() {
   const [section, setSection] = useState<ShopSection>('상점');
   const [category, setCategory] = useState<ShopCategory>('머리');
-  const items = getShopItems(category);
+  const items = useMemo(() => getShopItems(category), [category]);
+
+  // 선택된 아이템 하나만 기본 캐릭터 위에 얹어 미리본다 (커스터마이저처럼 수정사항을 누적하지 않음)
+  const [selectedId, setSelectedId] = useState(items[0]?.id ?? '');
+  const selectedItem = items.find((item) => item.id === selectedId) ?? items[0];
+
+  // 카테고리를 바꾸면 해당 카테고리의 첫 아이템으로 선택을 초기화한다
+  const handleSelectCategory = (next: ShopCategory) => {
+    setCategory(next);
+    setSelectedId(getShopItems(next)[0]?.id ?? '');
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-gray-100" edges={['top']}>
@@ -34,19 +43,22 @@ export default function MarketScreen() {
         </View>
 
         <FeaturedItem
-          character={FEATURED_ITEM.character}
-          name={FEATURED_ITEM.name}
-          description={FEATURED_ITEM.description}
-          price={FEATURED_ITEM.price}
+          character={selectedItem.character}
+          name={selectedItem.name}
+          description={selectedItem.description}
+          price={selectedItem.price}
         />
 
         <View className="flex-1">
-          <CategoryTabs tabs={SHOP_CATEGORIES} selected={category} onSelect={setCategory} />
+          <CategoryTabs
+            tabs={SHOP_CATEGORIES}
+            selected={category}
+            onSelect={handleSelectCategory}
+          />
 
           {/* 알약형 탭과 이어지는 전체 폭 테두리 카드 (캐릭터 꾸미기와 동일한 형태) */}
           <View className="-mx-lg flex-1 rounded-t-md border-2 border-b-0 border-primary-600 bg-gray-50 p-lg">
-            {/* 카테고리 전환 시 선택 상태를 초기화하기 위해 key로 리마운트 */}
-            <ItemGrid key={category} items={items} />
+            <ItemGrid items={items} selectedId={selectedId} onSelect={setSelectedId} />
           </View>
         </View>
       </View>
