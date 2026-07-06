@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import FeaturedItem from '@/components/market/FeaturedItem';
 import ItemGrid from '@/components/market/ItemGrid';
+import PurchaseModal from '@/components/market/PurchaseModal';
 import ShopTabs from '@/components/market/ShopTabs';
 import CategoryTabs from '@/components/ui/CategoryTabs';
 import Header from '@/components/ui/header';
@@ -32,6 +33,13 @@ export default function MarketScreen() {
     setSelectedId(getShopItems(next)[0]?.id ?? '');
   };
 
+  // 구매 확인 모달
+  const [purchaseOpen, setPurchaseOpen] = useState(false);
+  const handleConfirmPurchase = () => {
+    // TODO: 서버 연동 시 구매 요청(useMutation) 후 포인트/보유 목록 갱신
+    setPurchaseOpen(false);
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-gray-100" edges={['top']}>
       <View className="flex flex-1 flex-col gap-2xl px-lg pt-lg">
@@ -47,6 +55,7 @@ export default function MarketScreen() {
           name={selectedItem.name}
           description={selectedItem.description}
           price={selectedItem.price}
+          onBuy={() => setPurchaseOpen(true)}
         />
 
         <View className="flex-1">
@@ -62,6 +71,13 @@ export default function MarketScreen() {
           </View>
         </View>
       </View>
+
+      <PurchaseModal
+        visible={purchaseOpen}
+        item={selectedItem}
+        onClose={() => setPurchaseOpen(false)}
+        onConfirm={handleConfirmPurchase}
+      />
     </SafeAreaView>
   );
 }
