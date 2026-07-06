@@ -1,33 +1,49 @@
-import type { FC } from 'react';
+import type { FC, ReactNode } from 'react';
 import { View } from 'react-native';
+
+import PlaceIcon from '@/assets/icons/place.svg';
 import Typography from './Typography';
 
-type LocationHeaderProps = {
+const COLOR_GRAY = '#6E7D94'; // gray-600
+
+type RankingProps = {
   number: number;
   location: string;
   count: number;
+  avatar?: ReactNode;
+  address?: string;
 };
 
-const LocationHeader: FC<LocationHeaderProps> = ({ number, location, count }) => {
+const Ranking: FC<RankingProps> = ({ number, location, count, avatar, address }) => {
   return (
-    <View className="flex-row items-center gap-md px-3 py-4 w-full">
-      {/* 번호 (왼쪽) */}
-      <Typography
-        variant="body1"
-        className={number === 1 ? 'w-8 text-primary-500' : 'w-8 text-gray-800'}
-      >
+    <View
+      className={`w-full flex-row items-center justify-between px-md ${avatar ? 'py-md' : 'py-lg'}`}
+    >
+      <Typography variant="body1" className={number <= 3 ? 'text-primary-600' : 'text-gray-600'}>
         {number}
       </Typography>
-      {/* 위치명 (중앙) */}
-      <Typography variant="body1" className="flex-1 text-gray-800 items-center">
-        {location}
-      </Typography>
-      {/* 점수 (오른쪽) */}
-      <Typography variant="body1" className="text-primary-500 font-semibold w-16 text-right">
+
+      {avatar}
+
+      <View className="items-start gap-xs">
+        <Typography variant="body1" className="text-gray-900">
+          {location}
+        </Typography>
+        {address && (
+          <View className="flex-row items-center gap-xs">
+            <PlaceIcon width={12} height={12} color={COLOR_GRAY} />
+            <Typography variant="body3" className="text-[10px] text-gray-600">
+              {address}
+            </Typography>
+          </View>
+        )}
+      </View>
+
+      <Typography variant="body1" className="text-primary-600">
         {count}점
       </Typography>
     </View>
   );
 };
 
-export default LocationHeader;
+export default Ranking;
