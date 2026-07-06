@@ -1,3 +1,4 @@
+import CategoryTabs from '@/components/ui/CategoryTabs';
 import Typography from '@/components/ui/Typography';
 import { DEFAULT_CHARACTER_CONFIG } from '@/constants/character/assets';
 import {
@@ -35,43 +36,8 @@ const CharacterPreview = ({ config }: { config: CharacterConfig }) => (
   </View>
 );
 
-/** 카테고리 탭 줄 (가로 스크롤) */
-const CategoryTabs = ({
-  selectedIndex,
-  onSelect,
-}: {
-  selectedIndex: number;
-  onSelect: (index: number) => void;
-}) => (
-  // 탭 줄은 내용 높이만 차지하고, 남는 높이는 아래 카드가 모두 채운다
-  <View className="shrink-0">
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerClassName="gap-sm"
-    >
-      {CATEGORY_DEFS.map((category, index) => {
-        const active = index === selectedIndex;
-        return (
-          <Pressable
-            key={category.label}
-            onPress={() => onSelect(index)}
-            className={`w-[60px] items-center rounded-t-lg py-sm ${
-              active ? 'bg-primary-600' : 'bg-secondary-100'
-            }`}
-          >
-            <Typography
-              variant={active ? 'h4' : 'body3'}
-              className={active ? 'text-gray-50' : 'text-primary-600'}
-            >
-              {category.label}
-            </Typography>
-          </Pressable>
-        );
-      })}
-    </ScrollView>
-  </View>
-);
+/** 카테고리 라벨 목록 (탭에 표시할 순서). */
+const CATEGORY_LABELS = CATEGORY_DEFS.map((category) => category.label);
 
 /** 색상 스와치 줄 (단색 원, 색상 축이 있는 파츠만) */
 const ColorSwatches = ({
@@ -139,8 +105,8 @@ export default function CharacterCustomizer({
   initialConfig?: CharacterConfig;
 }) {
   const [config, setConfig] = useState<CharacterConfig>(initialConfig);
-  const [selected, setSelected] = useState(0);
-  const category = CATEGORY_DEFS[selected];
+  const [selectedLabel, setSelectedLabel] = useState(CATEGORY_LABELS[0]);
+  const category = CATEGORY_DEFS.find((c) => c.label === selectedLabel) ?? CATEGORY_DEFS[0];
   const shapes = category.buildShapes(config);
   const colors = category.buildColors?.(config);
 
@@ -149,7 +115,7 @@ export default function CharacterCustomizer({
       <CharacterPreview config={config} />
 
       <View className="flex-1">
-        <CategoryTabs selectedIndex={selected} onSelect={setSelected} />
+        <CategoryTabs tabs={CATEGORY_LABELS} selected={selectedLabel} onSelect={setSelectedLabel} />
 
         <View className="-mx-lg flex-1 rounded-t-md border-2 border-b-0 border-primary-600 bg-gray-50 p-lg">
           {colors && <ColorSwatches colors={colors} onSelect={setConfig} />}
