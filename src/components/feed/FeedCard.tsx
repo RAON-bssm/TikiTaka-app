@@ -1,0 +1,94 @@
+import { router } from 'expo-router';
+import { Image, Pressable, View } from 'react-native';
+
+import FavoriteIcon from '@/assets/icons/favorite.svg';
+import MoreIcon from '@/assets/icons/more-vert.svg';
+import PlaceIcon from '@/assets/icons/place.svg';
+import Typography from '@/components/ui/Typography';
+
+const COLOR_GRAY = '#9DAABB'; // gray-500
+const COLOR_ORANGE = '#FC8253'; // primary-600
+const COLOR_ICON = '#6E7D94'; // gray-600 (더보기 아이콘)
+
+export interface FeedAuthor {
+  name: string;
+  avatarUrl: string;
+}
+
+interface Props {
+  author: FeedAuthor;
+  imageUrl: string;
+  title: string;
+  place: string;
+  timeAgo: string;
+  likeCount: number;
+  onPressMore?: () => void;
+  onPressLike?: () => void;
+}
+
+export default function FeedCard({
+  author,
+  imageUrl,
+  title,
+  place,
+  timeAgo,
+  likeCount,
+  onPressMore,
+  onPressLike,
+}: Props) {
+  return (
+    // TODO: 상세 이동 시 실제 post_id 사용 (현재 하드코딩)
+    <Pressable
+      onPress={() => router.push('/feed/1')}
+      className="w-full gap-lg rounded-md border border-gray-200 bg-white p-lg active:opacity-90"
+    >
+      <View className="w-full flex-row items-center justify-between">
+        <View className="flex-row items-center gap-sm">
+          <Image source={{ uri: author.avatarUrl }} className="size-5 rounded-full bg-gray-200" />
+          <Typography variant="body2" className="text-gray-900">
+            {author.name}
+          </Typography>
+        </View>
+        <Pressable onPress={onPressMore} className="active:opacity-70">
+          <MoreIcon width={24} height={24} color={COLOR_ICON} />
+        </Pressable>
+      </View>
+
+      <View className="h-[225px] w-full overflow-hidden rounded-lg bg-gray-500">
+        <Image source={{ uri: imageUrl }} resizeMode="cover" className="h-full w-full" />
+      </View>
+
+      <View className="w-full flex-row items-center justify-between">
+        <View className="gap-xs">
+          <Typography variant="h3" className="text-gray-900">
+            {title}
+          </Typography>
+          <View className="flex-row items-center gap-sm">
+            <View className="flex-row items-center gap-xs">
+              <PlaceIcon width={20} height={20} color={COLOR_GRAY} />
+              <Typography variant="body3" className="text-gray-500">
+                {place}
+              </Typography>
+            </View>
+            <Typography variant="body3" className="text-gray-500">
+              ·
+            </Typography>
+            <Typography variant="body3" className="text-gray-500">
+              {timeAgo}
+            </Typography>
+          </View>
+        </View>
+
+        <Pressable
+          onPress={onPressLike}
+          className="items-center justify-center gap-[2px] active:opacity-70"
+        >
+          <FavoriteIcon width={20} height={20} color={COLOR_ORANGE} />
+          <Typography variant="body3" className="text-gray-800">
+            {likeCount}
+          </Typography>
+        </Pressable>
+      </View>
+    </Pressable>
+  );
+}
