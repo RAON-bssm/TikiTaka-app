@@ -1,145 +1,47 @@
 import { useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import FilterIcon from '@/assets/icons/filter.svg';
-import Character from '@/components/character/Character';
+import BattleSection from '@/components/ranking/BattleSection';
+import RankingList from '@/components/ranking/RankingList';
+import RankingTabs from '@/components/ranking/RankingTabs';
+import SortFilter from '@/components/ranking/SortFilter';
 import Header from '@/components/ui/header';
-import MatchCard, { type MatchTeam } from '@/components/ui/MatchCard';
-import Ranking from '@/components/ui/Ranking';
-import Typography from '@/components/ui/Typography';
-import { DEFAULT_CHARACTER_CONFIG } from '@/constants/character/assets';
-
-const TABS = ['동네랭킹', '개인랭킹'] as const;
-type Tab = (typeof TABS)[number];
-
-const SORTS = ['가장 높은 순', '가장 낮은 순'] as const;
-type Sort = (typeof SORTS)[number];
-
-type Match = { id: number; left: MatchTeam; right: MatchTeam };
-
-// TODO: 서버 연동 시 TanStack Query로 대체
-const MATCHES: Match[] = [
-  { id: 1, left: { name: '사상구', score: 80 }, right: { name: '영도구', score: 67 } },
-  { id: 2, left: { name: '사상구', score: 67 }, right: { name: '영도구', score: 99 } },
-  { id: 3, left: { name: '사상구', score: 80 }, right: { name: '영도구', score: 67 } },
-];
-
-// TODO: 서버 연동 시 TanStack Query로 대체
-const DISTRICT_RANKINGS = Array.from({ length: 9 }, (_, i) => ({
-  rank: i + 1,
-  location: '부산시 사상구',
-  score: 580,
-}));
-
-// TODO: 서버 연동 시 TanStack Query로 대체 (character는 각 유저의 CharacterConfig)
-const PERSONAL_RANKINGS = Array.from({ length: 9 }, (_, i) => ({
-  rank: i + 1,
-  name: '니코꼬리찜',
-  address: '부산시 사상구',
-  score: 580,
-  character: DEFAULT_CHARACTER_CONFIG,
-}));
+import {
+  DISTRICT_RANKINGS,
+  MATCHES,
+  PERSONAL_RANKINGS,
+  RANKING_SORTS,
+  RANKING_TABS,
+  type RankingSort,
+  type RankingTab,
+} from '@/constants/ranking';
 
 export default function RankingScreen() {
-  const [tab, setTab] = useState<Tab>('동네랭킹');
-  const [sort, setSort] = useState<Sort>('가장 높은 순');
+  const [tab, setTab] = useState<RankingTab>('동네랭킹');
+  const [sort, setSort] = useState<RankingSort>('가장 높은 순');
 
   return (
     <SafeAreaView className="flex-1 bg-gray-100" edges={['top']}>
       <ScrollView
         className="flex-1"
-        contentContainerClassName="gap-2xl pb-2xl"
+        contentContainerClassName="grow gap-2xl"
         showsVerticalScrollIndicator={false}
+        bounces={false}
+        overScrollMode="never"
       >
-        <View className="px-xl pt-lg">
+        {/* 상단(헤더 + 대결)은 회색 배경 위에 좌우 여백만 준다 */}
+        <View className="gap-2xl px-xl pt-lg">
           <Header />
+          <BattleSection matches={MATCHES} />
         </View>
 
-        {/* 현재 진행 중인 대결 */}
-        <View className="gap-sm">
-          <Typography variant="h4" className="px-xl text-gray-800">
-            현재 진행 중인 대결
-          </Typography>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerClassName="gap-sm px-xl"
-          >
-            {MATCHES.map((match) => (
-              <MatchCard key={match.id} left={match.left} right={match.right} />
-            ))}
-          </ScrollView>
-        </View>
-
-        {/* 랭킹 */}
-        <View className="gap-lg bg-gray-50 px-xl py-lg">
-          {/* 종류 탭 */}
-          <View className="flex-row">
-            {TABS.map((label) => {
-              const active = label === tab;
-              return (
-                <Pressable
-                  key={label}
-                  onPress={() => setTab(label)}
-                  className={`items-center justify-center p-sm ${
-                    active ? 'border-b border-primary-600' : ''
-                  }`}
-                >
-                  <Typography variant="h3" className={active ? 'text-gray-800' : 'text-gray-500'}>
-                    {label}
-                  </Typography>
-                </Pressable>
-              );
-            })}
-          </View>
-
-          <View className="flex-row items-center gap-xs">
-            <View className="size-8 items-center justify-center rounded-full bg-gray-100">
-              <FilterIcon width={20} height={20} color="#6E7D94" />
-            </View>
-            {SORTS.map((label) => {
-              const active = label === sort;
-              return (
-                <Pressable
-                  key={label}
-                  onPress={() => setSort(label)}
-                  className={`rounded-full px-lg py-sm ${active ? 'bg-primary-100' : 'bg-gray-100'}`}
-                >
-                  <Typography
-                    variant="body3"
-                    className={active ? 'text-primary-600' : 'text-gray-600'}
-                  >
-                    {label}
-                  </Typography>
-                </Pressable>
-              );
-            })}
-          </View>
-
-          {/* 랭킹 리스트 — 탭에 따라 동네/개인 전환 */}
-          <View>
-            {tab === '동네랭킹'
-              ? DISTRICT_RANKINGS.map((item) => (
-                  <Ranking
-                    key={item.rank}
-                    number={item.rank}
-                    location={item.location}
-                    count={item.score}
-                  />
-                ))
-              : PERSONAL_RANKINGS.map((item) => (
-                  <Ranking
-                    key={item.rank}
-                    number={item.rank}
-                    location={item.name}
-                    address={item.address}
-                    count={item.score}
-                    avatar={<Character config={item.character} size={50} />}
-                  />
-                ))}
-          </View>
+        {/* 랭킹 — 전체폭 흰색 블록. 남는 세로 공간을 채워 하단까지 흰색이 이어지게 한다 */}
+        <View className="grow gap-lg bg-gray-50 px-xl py-lg">
+          <RankingTabs tabs={RANKING_TABS} selected={tab} onSelect={setTab} />
+          <SortFilter sorts={RANKING_SORTS} selected={sort} onSelect={setSort} />
+          <RankingList tab={tab} districts={DISTRICT_RANKINGS} persons={PERSONAL_RANKINGS} />
         </View>
       </ScrollView>
     </SafeAreaView>

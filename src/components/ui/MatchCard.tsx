@@ -30,7 +30,7 @@ export default function MatchCard({ left, right }: Props) {
   const leader = leftLeading ? left : right;
 
   return (
-    <View className="items-center gap-sm rounded-sm border border-gray-200 bg-white p-md">
+    <View className="items-center gap-md rounded-sm border border-gray-200 bg-white px-lg py-md">
       {/* 우세 뱃지 — 앞선 팀 색으로 */}
       <View
         className={`flex-row items-center gap-xs rounded-full px-sm py-xs ${
@@ -44,7 +44,7 @@ export default function MatchCard({ left, right }: Props) {
       </View>
 
       {/* 점수 대결 */}
-      <View className="flex-row items-center gap-md">
+      <View className="flex-row items-center gap-lg">
         <View className="items-center">
           <Typography variant="body3" className="text-[10px] text-secondary-500">
             {left.name}
