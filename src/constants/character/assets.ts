@@ -80,6 +80,11 @@ const COLOR_ASSETS: Record<ColorGroup, Record<string, Record<string, number>>> =
       blond: require('@/assets/character/hair-back/side-bob/blond.webp'),
       brown: require('@/assets/character/hair-back/side-bob/brown.webp'),
     },
+    'low-tail': {
+      black: require('@/assets/character/hair-back/low-tail/black.webp'),
+      blond: require('@/assets/character/hair-back/low-tail/blond.webp'),
+      brown: require('@/assets/character/hair-back/low-tail/brown.webp'),
+    },
     'side-wave': {
       black: require('@/assets/character/hair-back/side-wave/black.webp'),
       blond: require('@/assets/character/hair-back/side-wave/blond.webp'),
