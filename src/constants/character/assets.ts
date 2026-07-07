@@ -39,6 +39,7 @@ const SIMPLE_ASSETS: Record<SimpleGroup, Record<string, number>> = {
     clothing03: require('@/assets/character/clothing/clothing03.webp'),
     clothing04: require('@/assets/character/clothing/clothing04.webp'),
     clothing05: require('@/assets/character/clothing/clothing05.webp'),
+    clothing06: require('@/assets/character/clothing/clothing06.webp'),
   },
   accessory: {
     'red-glasses': require('@/assets/character/accessory/red-glasses.webp'),
