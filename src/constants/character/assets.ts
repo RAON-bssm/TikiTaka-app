@@ -41,6 +41,8 @@ const SIMPLE_ASSETS: Record<SimpleGroup, Record<string, number>> = {
   },
   accessory: {
     'red-glasses': require('@/assets/character/accessory/red-glasses.webp'),
+    'red-glasses-hair-pin': require('@/assets/character/accessory/red-glasses-hair-pin.webp'),
+    plaster: require('@/assets/character/accessory/plaster.webp'),
   },
 };
 
@@ -52,6 +54,7 @@ const COLOR_ASSETS: Record<ColorGroup, Record<string, Record<string, number>>> =
       orange: require('@/assets/character/eyes/eyes01/orange.webp'),
       pink: require('@/assets/character/eyes/eyes01/pink.webp'),
       sky: require('@/assets/character/eyes/eyes01/sky.webp'),
+      blue: require('@/assets/character/eyes/eyes01/blue.webp'),
     },
   },
   hairBack: {
@@ -112,6 +115,7 @@ const TINT_ASSETS: Record<TintGroup, Record<string, number>> = {
     orange: require('@/assets/character/hair-highlights/orange.webp'),
     pink: require('@/assets/character/hair-highlights/pink.webp'),
     sky: require('@/assets/character/hair-highlights/sky.webp'),
+    blue: require('@/assets/character/hair-highlights/blue.webp'),
   },
 };
 
