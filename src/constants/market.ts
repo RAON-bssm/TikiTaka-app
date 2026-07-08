@@ -69,3 +69,53 @@ export function getShopItems(category: ShopCategory): ShopItem[] {
     };
   });
 }
+
+// ──────────────────────────── 뽑기 (가챠) ────────────────────────────
+
+/** 뽑기 비용 (포인트). */
+export const GOTCHA_COSTS = {
+  single: 500,
+  multi: 2500,
+} as const;
+
+/** 가챠로 획득 가능한 꾸미기 아이템. id는 캐릭터 파츠 에셋 id와 동일하다. */
+export interface GotchaItem {
+  id: string;
+  name: string;
+  /** 캐릭터에 착용되는 파츠 그룹 */
+  part: 'clothing' | 'accessory';
+}
+
+/** 한 번의 뽑기 결과. 아이템 + 착용 미리보기용 캐릭터 구성. */
+export interface GotchaPull {
+  item: GotchaItem;
+  preview: CharacterConfig;
+}
+
+/** 가챠 아이템 풀. */
+// TODO: 서버 연동 시 아이템 풀/확률은 API 응답으로 대체
+const GOTCHA_ITEM_POOL: GotchaItem[] = [
+  { id: 'clothing01', name: '베이직 티셔츠', part: 'clothing' },
+  { id: 'clothing02', name: '스트라이프 셔츠', part: 'clothing' },
+  { id: 'clothing03', name: '체크 남방', part: 'clothing' },
+  { id: 'clothing04', name: '후드 집업', part: 'clothing' },
+  { id: 'red-glasses', name: '빨간 안경', part: 'accessory' },
+];
+
+/**
+ * 풀에서 무작위 1개를 뽑아, 기본 캐릭터에 착용시킨 미리보기와 함께 반환한다.
+ * (getShopItems와 동일하게 기본 캐릭터 기준, 누적 X)
+ */
+function pullOne(): GotchaPull {
+  const item = GOTCHA_ITEM_POOL[Math.floor(Math.random() * GOTCHA_ITEM_POOL.length)];
+  return {
+    item,
+    // TODO: 유저의 실제 캐릭터 config를 받아오면 그걸 기반으로 교체
+    preview: { ...DEFAULT_CHARACTER_CONFIG, [item.part]: item.id },
+  };
+}
+
+/** count회 뽑기 결과 목록을 반환한다. (1회 / 5회) */
+export function pullGotcha(count: 1 | 5): GotchaPull[] {
+  return Array.from({ length: count }, pullOne);
+}
