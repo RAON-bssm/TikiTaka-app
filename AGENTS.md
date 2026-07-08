@@ -93,3 +93,51 @@
 ## 6. EAS 빌드 규칙 (EAS Build Rules)
 
 - EAS 빌드는 `eas.json`에 정의된 `EXPO_USE_PNPM=1` 환경변수를 반드시 사용해야 합니다. 해당 설정을 제거하지 마세요.
+
+---
+
+## 7. 캐릭터 시스템 (Character System)
+
+사용자 아바타는 여러 파츠(part) 이미지를 겹쳐서 합성합니다. 관련 코드는 `src/constants/character/`(로직·데이터)와 `src/components/character/`(렌더 UI)에 있습니다.
+
+### 7.1 핵심 원칙
+
+- **이미지가 아니라 config만 저장한다.** 한 캐릭터는 `CharacterConfig`(파츠 id들의 JSON)로 표현되며, 서버에는 이 JSON만 저장/전송합니다. 실제 이미지는 클라이언트가 config를 보고 합성합니다.
+- **파츠 에셋은 정적으로 등록한다.** React Native/Metro는 동적 경로 `require`를 지원하지 않으므로, 새 파츠 이미지를 추가하면 반드시 `src/constants/character/assets.ts`의 레지스트리에 `id ↔ require(...)`를 직접 매핑해야 합니다. 매핑하지 않은 에셋은 화면에 나타나지 않습니다.
+- **모양(shape)과 색상(color)은 독립 축이다.** 눈·머리처럼 "모양은 유지하고 색만 바꾸는" 파츠는 config에 색상 키(`eyesColor`, `hairColor`)를 따로 둡니다.
+- **모든 파츠 이미지는 동일한 1:1 캔버스 기준의 WebP(알파 포함)** 로 export 되어, 같은 크기로 겹치기만 하면 정렬이 맞습니다. (정위치 export가 전제)
+
+### 7.2 파일 역할
+
+| 파일                                               | 역할                                                                                                                        |
+| -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `src/constants/character/types.ts`                 | `CharacterConfig` 타입, 파츠 그룹 타입, 레이어 정의(`LAYERS`), 그리는 순서(z-index)를 관리. **파츠 추가/순서 변경의 기준.** |
+| `src/constants/character/assets.ts`                | 파츠 에셋 정적 레지스트리(`require` 매핑)와 config→이미지 해석 함수(`resolveLayerSource` 등), `DEFAULT_CHARACTER_CONFIG`.   |
+| `src/constants/character/customize.ts`             | 꾸미기 화면의 카테고리 탭 정의(`CATEGORY_DEFS`)와 선택지 생성 로직, 색상 스와치 hex(`COLOR_HEX`).                           |
+| `src/components/character/Character.tsx`           | config를 받아 파츠를 순서대로 겹쳐 그리는 순수 렌더 컴포넌트. 아바타/미리보기 등 어디서든 재사용.                           |
+| `src/components/character/CharacterCustomizer.tsx` | config 상태를 소유하고 미리보기 + 파츠 선택 UI를 묶는 편집기 컴포넌트.                                                      |
+
+### 7.3 파츠 그룹 3종
+
+`assets.ts`의 레지스트리는 파츠 성격에 따라 3가지로 나뉩니다.
+
+- **SIMPLE_ASSETS** (`body`, `mouth`, `clothing`, `accessory`): 모양만 있는 파츠. `그룹 → 모양 → 이미지`. 파일 경로 `assets/character/<그룹>/<모양>.webp`.
+- **COLOR_ASSETS** (`eyes`, `hairBack`, `hairFront`): 모양 × 색상 파츠. `그룹 → 모양 → 색상 → 이미지`. 파일 경로 `assets/character/<그룹>/<모양>/<색상>.webp`.
+- **TINT_ASSETS** (`hairHighlights`): 모양 없이 색상만으로 고르는 파츠. `그룹 → 색상 → 이미지`. (예: 눈 색에 맞춘 머리 하이라이트)
+
+> 규칙: **id = 폴더/파일명(확장자 제외).** 앞머리·뒷머리는 모양은 독립이지만 색상 키(`black`/`blond`/`brown`)를 맞춰, `hairColor` 하나로 앞/뒤가 같은 색으로 렌더됩니다.
+
+### 7.4 새 파츠(에셋) 추가 방법
+
+1. 위 경로 규칙에 맞춰 `assets/character/...`에 WebP를 넣습니다. (1:1 캔버스, 정위치 export)
+2. `assets.ts`의 해당 레지스트리(`SIMPLE_ASSETS`/`COLOR_ASSETS`/`TINT_ASSETS`)에 `'<id>': require('@/assets/character/...')`를 추가합니다.
+3. 끝. `getShapeOptions`/`getColorOptions`가 레지스트리를 읽어 꾸미기 화면의 선택지를 **자동으로** 만들어냅니다. 화면 코드는 건드릴 필요가 없습니다.
+
+- **완전히 새로운 파츠 종류**를 추가하려면(기존 그룹이 아닌): `types.ts`에 그룹 타입과 `LAYERS` 배열(그리는 순서)을, 필요하면 `CharacterConfig` 키와 `customize.ts`의 `CATEGORY_DEFS` 탭을 함께 추가합니다.
+
+### 7.5 그리는 순서 (z-index)
+
+레이어 순서는 `types.ts`의 `LAYERS` 배열 하나로 관리합니다(아래→위, 배열 앞→뒤가 뒤→앞). 순서를 바꾸려면 이 배열만 수정하세요. 예: 뒷머리 → 몸 → 코스튬 → 눈 → 입 → 앞머리 → 악세서리 → 머리 하이라이트(최상단).
+
+- `clothing`·`accessory`는 선택 파츠(옵셔널)입니다. 매핑된 이미지가 없거나 미선택이면 `Character` 컴포넌트가 해당 레이어를 자동으로 skip 합니다.
+- 꾸미기 화면에서 이미 선택된 악세서리를 다시 누르면 벗겨집니다(`accessory: undefined`). 반면 코스튬은 항상 착용 상태로, 벗을 수 없습니다.
