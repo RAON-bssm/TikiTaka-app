@@ -141,3 +141,55 @@
 
 - `clothing`·`accessory`는 선택 파츠(옵셔널)입니다. 매핑된 이미지가 없거나 미선택이면 `Character` 컴포넌트가 해당 레이어를 자동으로 skip 합니다.
 - 꾸미기 화면에서 이미 선택된 악세서리를 다시 누르면 벗겨집니다(`accessory: undefined`). 반면 코스튬은 항상 착용 상태로, 벗을 수 없습니다.
+
+---
+
+## 8. 디자인 시스템 & 테마 토큰 (Design System & Theme Tokens)
+
+색상·간격·폰트 등 디자인 값은 모두 `tailwind.config.js`의 `theme.extend`에 토큰으로 정의되어 있습니다. **임의값(`p-[13px]`, `text-[#FF8800]`, `bg-[#123456]` 등)을 쓰지 말고 반드시 아래 토큰을 사용하세요.** 새 값이 필요하면 임의값을 박지 말고 `tailwind.config.js`에 토큰을 먼저 추가합니다.
+
+### 8.1 색상 (Colors)
+
+각 팔레트는 100~900 스케일이며 `text-`, `bg-`, `border-` 접두사로 사용합니다.
+
+- **`gray`** 50(`#FFFFFF`)~900(`#1A202C`): 배경·텍스트·보더 등 중립색.
+- **`primary`** 100~900, 대표색 `primary-600`(`#FC8253`, 주황): 브랜드 강조·CTA.
+- **`secondary`** 100~900, 대표색 `secondary-500`(`#4078FF`, 파랑): 보조 강조.
+- 예: `bg-primary-600`, `text-gray-800`, `border-secondary-500`.
+
+### 8.2 간격 · 반경 (Spacing & Radius)
+
+간격(`p-`, `m-`, `gap-` 등)과 반경(`rounded-`)은 아래 토큰만 사용합니다. **px 임의값 금지.**
+
+| 토큰   | spacing | radius |
+| ------ | ------- | ------ |
+| `xs`   | 4px     | 4px    |
+| `sm`   | 8px     | 8px    |
+| `md`   | 12px    | 12px   |
+| `lg`   | 16px    | 16px   |
+| `xl`   | 20px    | 24px   |
+| `2xl`  | 24px    | —      |
+| `3xl`  | 40px    | —      |
+| `4xl`  | 48px    | —      |
+| `full` | —       | 9999px |
+
+- 예: `px-lg`, `gap-2xl`, `rounded-md`, `rounded-full`.
+
+### 8.3 타이포그래피 (Typography)
+
+- **텍스트는 raw `<Text>` 대신 `src/components/ui/Typography.tsx`의 `Typography` 컴포넌트를 사용합니다.** `variant`로 스타일을 지정하세요: `display`, `h1`~`h4`, `body1`~`body3`, `caption`. 추가 스타일은 `className`으로 얹습니다.
+- 폰트 패밀리(`className`으로 직접 지정 시): `font-regular`/`font-medium`/`font-bold`(Pretendard), `font-title`(OkDanDan-Bold, 제목 전용). 폰트는 `app.json`의 `expo-font` 플러그인으로 로드됩니다.
+- 폰트 크기 토큰: `text-xs`(12) ~ `text-4xl`(40). 각 토큰에 lineHeight가 함께 정의되어 있습니다.
+
+### 8.4 NativeWind `safelist` 주의
+
+`tailwind.config.js`의 `content` 글롭에 실제 클래스 문자열이 그대로 나타나지 않고 **동적으로 조합**되는 경우(예: 변수로 클래스명을 만들 때), 해당 클래스를 `safelist`에 등록하지 않으면 스타일이 빌드에서 제거되어 적용되지 않습니다. `Typography` 등에서 쓰는 클래스가 `safelist`에 들어 있는 이유이며, 동적 클래스를 새로 도입하면 `safelist`도 함께 갱신하세요.
+
+---
+
+## 9. 컴파일러 · 라우팅 실험 기능 (React Compiler & Typed Routes)
+
+`app.json`의 `expo.experiments`에 다음이 **활성화**되어 있습니다. 코드 작성 방식에 직접 영향을 주므로 유의하세요.
+
+- **`reactCompiler: true`** — React Compiler가 자동으로 메모이제이션을 처리합니다. 따라서 `useMemo`, `useCallback`, `React.memo`를 **습관적으로 남발하지 마세요.** 대부분의 경우 불필요하며, 컴파일러가 최적화합니다. (참조 동일성이 외부 계약상 꼭 필요한 특수한 경우에만 명시적으로 사용)
+- **`typedRoutes: true`** — Expo Router가 라우트 경로에 대한 타입을 생성합니다. `router.push('/...')`, `<Link href="...">` 등의 경로 문자열이 타입 체크되므로, 존재하지 않는 경로는 컴파일 에러가 납니다. 경로는 문자열 리터럴로 넘겨 타입 추론이 되게 하세요.
