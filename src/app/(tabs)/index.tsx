@@ -47,7 +47,7 @@ export default function HomeScreen() {
   ];
   const router = useRouter();
   return (
-    <SafeAreaView className="flex-1 bg-gray-100" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
       <ScrollView
         className="flex-1"
         contentContainerClassName="gap-2xl px-xl pt-lg"
@@ -67,11 +67,11 @@ export default function HomeScreen() {
 
         <View className="flex flex-col gap-md">
           <View className="flex flex-row justify-between w-full items-center">
-            <Typography variant="h3" className="text-gray-900">
+            <Typography variant="h3" className="text-gray-800">
               동네 훔쳐보기
             </Typography>
             <Pressable onPress={() => router.push('/feed')}>
-              <Typography variant="body2" className="text-gray-600">
+              <Typography variant="body2" className="text-gray-500">
                 더보기
               </Typography>
             </Pressable>

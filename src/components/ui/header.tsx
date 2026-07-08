@@ -6,7 +6,7 @@ import ProfileImageIcon from '@/assets/icons/header/ProfileImage.svg';
 import VectorIcon from '@/assets/icons/header/Vector.svg';
 import LogoImage from '@/assets/icons/logo.webp';
 
-const COLOR_ICON = '#9DAABB'; // gray-500
+const COLOR_ICON = '#9DAABB'; // gray-400
 
 const Header = () => {
   return (

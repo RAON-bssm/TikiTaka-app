@@ -38,7 +38,7 @@ export default function CategoryTabs<T extends string>({ tabs, selected, onSelec
             >
               <Typography
                 variant={active ? 'h4' : 'body3'}
-                className={active ? 'text-gray-50' : 'text-primary-600'}
+                className={active ? 'text-white' : 'text-primary-600'}
               >
                 {label}
               </Typography>

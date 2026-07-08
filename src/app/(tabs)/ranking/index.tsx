@@ -23,7 +23,7 @@ export default function RankingScreen() {
   const [sort, setSort] = useState<RankingSort>('가장 높은 순');
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-100" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
       <ScrollView
         className="flex-1"
         contentContainerClassName="grow gap-2xl"
@@ -38,7 +38,7 @@ export default function RankingScreen() {
         </View>
 
         {/* 랭킹 — 전체폭 흰색 블록. 남는 세로 공간을 채워 하단까지 흰색이 이어지게 한다 */}
-        <View className="grow gap-lg bg-gray-50 px-xl py-lg">
+        <View className="grow gap-lg bg-white px-xl py-lg">
           <RankingTabs tabs={RANKING_TABS} selected={tab} onSelect={setTab} />
           <SortFilter sorts={RANKING_SORTS} selected={sort} onSelect={setSort} />
           <RankingList tab={tab} districts={DISTRICT_RANKINGS} persons={PERSONAL_RANKINGS} />

@@ -22,7 +22,7 @@ export default function BottomSheet({ visible, onClose, children }: Props) {
         style={{ paddingBottom: insets.bottom + 24 }}
       >
         {/* 드래그 핸들 */}
-        <View className="mb-lg h-[8px] w-[35px] self-center rounded-full bg-gray-300" />
+        <View className="mb-lg h-[8px] w-[35px] self-center rounded-full bg-gray-200" />
         {children}
       </View>
     </Modal>

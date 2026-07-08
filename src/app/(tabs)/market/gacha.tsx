@@ -40,7 +40,7 @@ export default function GachaScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-100" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
       <View className="flex flex-1 flex-col gap-2xl px-lg pt-lg">
         <Header />
 
@@ -56,7 +56,7 @@ export default function GachaScreen() {
             <Typography variant="h2" className="text-primary-600">
               행운의 가챠
             </Typography>
-            <Typography variant="body1" className="text-gray-400">
+            <Typography variant="body1" className="text-gray-300">
               무엇이 나올까요? 두근두근...
             </Typography>
           </View>

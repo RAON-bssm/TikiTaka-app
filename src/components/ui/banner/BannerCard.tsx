@@ -35,12 +35,12 @@ export default function BannerCard({ slide }: Props) {
           </Typography>
           <View>
             {slide.title.map((line, lineIndex) => (
-              <Typography key={lineIndex} variant="h1" className="text-gray-800">
+              <Typography key={lineIndex} variant="h1" className="text-gray-700">
                 {line.map((segment, segmentIndex) => (
                   <Typography
                     key={segmentIndex}
                     variant="h1"
-                    className={segment.highlight ? 'text-primary-600' : 'text-gray-800'}
+                    className={segment.highlight ? 'text-primary-600' : 'text-gray-700'}
                   >
                     {segment.text}
                   </Typography>

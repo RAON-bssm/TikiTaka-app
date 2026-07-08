@@ -30,7 +30,7 @@ export default function MatchCard({ left, right }: Props) {
   const leader = leftLeading ? left : right;
 
   return (
-    <View className="items-center gap-md rounded-sm border border-gray-200 bg-white px-lg py-md">
+    <View className="items-center gap-md rounded-sm border border-gray-100 bg-white px-lg py-md">
       {/* 우세 뱃지 — 앞선 팀 색으로 */}
       <View
         className={`flex-row items-center gap-xs rounded-full px-sm py-xs ${
@@ -38,7 +38,7 @@ export default function MatchCard({ left, right }: Props) {
         }`}
       >
         <FireIcon width={12} height={12} color={leftLeading ? COLOR_BLUE : COLOR_ORANGE} />
-        <Typography variant="body3" className="text-[10px] text-gray-800">
+        <Typography variant="body3" className="text-[10px] text-gray-700">
           {leader.name}가 우세합니다!
         </Typography>
       </View>
@@ -49,18 +49,18 @@ export default function MatchCard({ left, right }: Props) {
           <Typography variant="body3" className="text-[10px] text-secondary-500">
             {left.name}
           </Typography>
-          <Typography variant="h2" className="text-gray-900">
+          <Typography variant="h2" className="text-gray-800">
             {left.score}점
           </Typography>
         </View>
-        <Typography variant="h4" className="text-gray-900">
+        <Typography variant="h4" className="text-gray-800">
           VS
         </Typography>
         <View className="items-center">
           <Typography variant="body3" className="text-[10px] text-primary-600">
             {right.name}
           </Typography>
-          <Typography variant="h2" className="text-gray-900">
+          <Typography variant="h2" className="text-gray-800">
             {right.score}점
           </Typography>
         </View>

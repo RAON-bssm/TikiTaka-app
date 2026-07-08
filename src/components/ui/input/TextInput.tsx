@@ -12,7 +12,7 @@ export default function TextInput({ label, placeholder, value, onChangeText }: P
   return (
     <View className="flex flex-col gap-xs w-full">
       {label ? (
-        <Typography variant="h3" className="text-gray-700">
+        <Typography variant="h3" className="text-gray-600">
           {label}
         </Typography>
       ) : null}
@@ -21,7 +21,7 @@ export default function TextInput({ label, placeholder, value, onChangeText }: P
         onChangeText={onChangeText}
         placeholder={placeholder}
         placeholderTextColor="#9DAABB"
-        className="w-full p-md rounded-sm border border-gray-300 bg-gray-50 font-sans text-sm text-gray-900 focus:border-primary-500"
+        className="w-full p-md rounded-sm border border-gray-200 bg-white font-sans text-sm text-gray-800 focus:border-primary-500"
       />
     </View>
   );

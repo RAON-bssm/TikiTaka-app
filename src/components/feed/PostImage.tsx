@@ -9,7 +9,7 @@ export default function PostImage({ uri }: Props) {
     <Image
       source={{ uri }}
       style={{ width: '100%', height: 320 }}
-      className="rounded-lg bg-gray-200"
+      className="rounded-lg bg-gray-100"
     />
   );
 }

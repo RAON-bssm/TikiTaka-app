@@ -64,7 +64,7 @@ export default function Banner({ slides = BANNER_SLIDES }: Props) {
             <View
               key={slide.id}
               className={`h-xs rounded-full ${
-                index === activeIndex ? 'w-lg bg-primary-600' : 'w-xs bg-gray-300'
+                index === activeIndex ? 'w-lg bg-primary-600' : 'w-xs bg-gray-200'
               }`}
             />
           ))}

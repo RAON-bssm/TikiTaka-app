@@ -10,7 +10,7 @@ export default function SignUp() {
     <View className="flex flex-col flex-1 items-start justify-between p-lg gap-4xl bg-white">
       <View className="flex flex-col items-start gap-4xl w-full">
         <BackButton title="정보등록" link={'/login'} />
-        <Typography variant="display" className="text-gray-900">
+        <Typography variant="display" className="text-gray-800">
           회원 정보 등록
         </Typography>
         <View className="flex flex-col gap-3xl w-full">

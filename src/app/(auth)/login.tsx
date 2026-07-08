@@ -17,7 +17,7 @@ export default function Login() {
         <View className="flex flex-col items-center w-full mt-[177.5px]">
           <Image source={LogoImage} style={{ width: 180, height: 46 }} resizeMode="contain" />
 
-          <Typography variant="body2" className="text-gray-600 mt-[14px]">
+          <Typography variant="body2" className="text-gray-500 mt-[14px]">
             여러분들의 동네리그에 참여해보세요!
           </Typography>
         </View>
@@ -25,10 +25,10 @@ export default function Login() {
         <View className="w-full gap-[12px] mt-[120px] flex-1 justify-end pb-lg">
           <Pressable
             onPress={handleSocialLogin}
-            className="flex-row items-center justify-center gap-sm rounded-md border border-gray-300 bg-white py-md active:bg-gray-50"
+            className="flex-row items-center justify-center gap-sm rounded-md border border-gray-200 bg-white py-md active:bg-white"
           >
             <GoogleIcon width={23} height={23} />
-            <Typography variant="h3" className="text-gray-800">
+            <Typography variant="h3" className="text-gray-700">
               구글로 계속하기
             </Typography>
           </Pressable>
@@ -38,13 +38,13 @@ export default function Login() {
             className="flex-row items-center justify-center gap-sm rounded-md bg-[#FEE500] py-md active:bg-[#EED500]"
           >
             <KakaoIcon width={23} height={23} />
-            <Typography variant="h3" className="text-gray-800">
+            <Typography variant="h3" className="text-gray-700">
               카카오로 계속하기
             </Typography>
           </Pressable>
 
           <Pressable className="items-center py-sm mt-[17px] mb-[174px]">
-            <Typography variant="body2" className="text-gray-500">
+            <Typography variant="body2" className="text-gray-400">
               게스트로 시작하기
             </Typography>
           </Pressable>

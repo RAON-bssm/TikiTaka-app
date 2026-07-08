@@ -15,23 +15,23 @@ export default function PostAuthor({ name, profile, place, createdAt }: Props) {
       <Image
         source={{ uri: profile }}
         style={{ width: 40, height: 40 }}
-        className="rounded-full bg-gray-50"
+        className="rounded-full bg-white"
       />
       <View className="flex flex-col gap-xs">
-        <Typography variant="h3" className="text-gray-900">
+        <Typography variant="h3" className="text-gray-800">
           {name}
         </Typography>
         <View className="flex flex-row items-center gap-sm">
           <View className="flex flex-row items-center gap-xs">
             <PlaceIcon width={24} height={24} color="#9DAABB" />
-            <Typography variant="body2" className="text-gray-500 text-[10px]">
+            <Typography variant="body2" className="text-gray-400 text-[10px]">
               {place}
             </Typography>
           </View>
-          <Typography variant="body2" className="text-gray-500 text-[10px]">
+          <Typography variant="body2" className="text-gray-400 text-[10px]">
             ·
           </Typography>
-          <Typography variant="body2" className="text-gray-500 text-[10px]">
+          <Typography variant="body2" className="text-gray-400 text-[10px]">
             {createdAt}
           </Typography>
         </View>

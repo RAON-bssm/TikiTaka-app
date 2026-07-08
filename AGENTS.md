@@ -152,10 +152,10 @@
 
 각 팔레트는 100~900 스케일이며 `text-`, `bg-`, `border-` 접두사로 사용합니다.
 
-- **`gray`** 50(`#FFFFFF`)~900(`#1A202C`): 배경·텍스트·보더 등 중립색.
+- **`gray`** 50(`#F8F9FB`)~800(`#1A202C`): 배경·텍스트·보더 등 중립색. **순백(`#FFFFFF`)은 `gray` 스케일에 없으므로 `bg-white`/`text-white`/`border-white`를 사용한다.**
 - **`primary`** 100~900, 대표색 `primary-600`(`#FC8253`, 주황): 브랜드 강조·CTA.
 - **`secondary`** 100~900, 대표색 `secondary-500`(`#4078FF`, 파랑): 보조 강조.
-- 예: `bg-primary-600`, `text-gray-800`, `border-secondary-500`.
+- 예: `bg-primary-600`, `text-gray-800`, `border-secondary-500`, `bg-white`.
 
 ### 8.2 간격 · 반경 (Spacing & Radius)
 

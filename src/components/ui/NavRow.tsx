@@ -12,14 +12,14 @@ export default function NavRow({ title, description, onPress }: Props) {
   return (
     <Pressable
       onPress={onPress}
-      className="flex flex-row items-center justify-between rounded-md bg-gray-200 p-lg"
+      className="flex flex-row items-center justify-between rounded-md bg-gray-100 p-lg"
     >
       <View className="flex flex-col gap-xs">
-        <Typography variant="h3" className="text-gray-800">
+        <Typography variant="h3" className="text-gray-700">
           {title}
         </Typography>
         {description && (
-          <Typography variant="body3" className="text-gray-600">
+          <Typography variant="body3" className="text-gray-500">
             {description}
           </Typography>
         )}

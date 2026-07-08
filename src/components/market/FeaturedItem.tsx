@@ -24,7 +24,7 @@ export default function FeaturedItem({ item, onBuy }: Props) {
           <Typography variant="h4" className="text-secondary-500">
             {item.name}
           </Typography>
-          <Typography variant="body3" className="text-gray-700">
+          <Typography variant="body3" className="text-gray-600">
             {item.description}
           </Typography>
         </View>

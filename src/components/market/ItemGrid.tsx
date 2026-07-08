@@ -30,8 +30,8 @@ export default function ItemGrid({ items, selectedId, onSelect }: Props) {
           <Pressable
             key={item.id}
             onPress={() => onSelect(item.id)}
-            className={`aspect-square basis-[30%] items-center justify-center overflow-hidden rounded-lg bg-gray-200 ${
-              active ? 'border-2 border-primary-600' : 'border border-gray-50'
+            className={`aspect-square basis-[30%] items-center justify-center overflow-hidden rounded-lg bg-gray-100 ${
+              active ? 'border-2 border-primary-600' : 'border border-white'
             }`}
           >
             {item.source != null && (

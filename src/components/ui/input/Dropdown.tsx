@@ -32,20 +32,20 @@ export default function Dropdown({ label, placeholder, options, value, onChange 
 
   return (
     <View className="flex flex-col gap-xs w-full">
-      <Typography variant="h3" className="text-gray-700">
+      <Typography variant="h3" className="text-gray-600">
         {label}
       </Typography>
       <Pressable
         ref={triggerRef}
         onPress={openDropdown}
-        className="flex flex-row items-center justify-between gap-auto w-full p-md rounded-sm border border-gray-300 bg-gray-50 text-gray-900 placeholder:text-gray-500 font-sans text-sm focus:outline-none focus:border-primary-500"
+        className="flex flex-row items-center justify-between gap-auto w-full p-md rounded-sm border border-gray-200 bg-white text-gray-800 placeholder:text-gray-400 font-sans text-sm focus:outline-none focus:border-primary-500"
       >
         {selectedValue ? (
-          <Typography variant="body2" className="text-gray-900">
+          <Typography variant="body2" className="text-gray-800">
             {selectedValue}
           </Typography>
         ) : (
-          <Typography variant="body2" className="text-gray-500">
+          <Typography variant="body2" className="text-gray-400">
             {placeholder}
           </Typography>
         )}
@@ -70,7 +70,7 @@ export default function Dropdown({ label, placeholder, options, value, onChange 
             left: triggerLayout.x,
             width: triggerLayout.width,
           }}
-          className="flex flex-col gap-sm bg-white rounded-sm border border-gray-300 p-sm"
+          className="flex flex-col gap-sm bg-white rounded-sm border border-gray-200 p-sm"
         >
           {options.map((option, idx) => (
             <Pressable
@@ -78,7 +78,7 @@ export default function Dropdown({ label, placeholder, options, value, onChange 
               onPress={() => onSelectOption(option)}
               className="bg-white p-sm rounded-md w-full"
             >
-              <Typography variant="body2" className="text-gray-900">
+              <Typography variant="body2" className="text-gray-800">
                 {option}
               </Typography>
             </Pressable>

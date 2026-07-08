@@ -20,7 +20,7 @@ export default function Upload() {
   };
 
   return (
-    <View className="flex-1 bg-gray-100" style={{ paddingTop: insets.top }}>
+    <View className="flex-1 bg-gray-50" style={{ paddingTop: insets.top }}>
       <View className="flex flex-col gap-2xl px-xl py-2xl">
         <Topic title="예쁜 돌멩이 찾기" />
 
@@ -29,14 +29,14 @@ export default function Upload() {
           <Image
             source={{ uri }}
             resizeMode="cover"
-            className="w-full overflow-hidden rounded-md bg-gray-200"
+            className="w-full overflow-hidden rounded-md bg-gray-100"
             style={{ aspectRatio: photoRatio }}
           />
         ) : uri ? (
-          <View className="h-[232px] w-full overflow-hidden rounded-md bg-gray-200" />
+          <View className="h-[232px] w-full overflow-hidden rounded-md bg-gray-100" />
         ) : (
-          <View className="h-[232px] w-full items-center justify-center overflow-hidden rounded-md bg-gray-200">
-            <Typography variant="body1" className="text-gray-600">
+          <View className="h-[232px] w-full items-center justify-center overflow-hidden rounded-md bg-gray-100">
+            <Typography variant="body1" className="text-gray-500">
               사진을 불러올 수 없어요.
             </Typography>
           </View>

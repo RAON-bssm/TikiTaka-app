@@ -31,7 +31,7 @@ export default function ShopTabs() {
               active ? 'border-primary-600' : 'border-transparent'
             }`}
           >
-            <Typography variant={active ? 'h2' : 'body1'} className="text-gray-900">
+            <Typography variant={active ? 'h2' : 'body1'} className="text-gray-800">
               {label}
             </Typography>
           </Pressable>

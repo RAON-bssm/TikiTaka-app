@@ -26,7 +26,7 @@ export default function Gotcha({ result, progress, onDismiss }: Props) {
       style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
     >
       {/* 오버레이 전체가 Pressable — 공백 어디를 눌러도 닫힌다 */}
-      <Pressable className="flex-1 items-center justify-center bg-gray-500/50" onPress={onDismiss}>
+      <Pressable className="flex-1 items-center justify-center bg-gray-400/50" onPress={onDismiss}>
         <View className="items-center justify-center">
           {/* 흰 글로우 — 반투명 원 3겹으로 라디얼 효과 */}
           <View className="absolute h-[340px] w-[340px] rounded-full bg-white/30" />

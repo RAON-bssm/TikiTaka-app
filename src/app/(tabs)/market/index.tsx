@@ -22,7 +22,7 @@ export default function MarketScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-100" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
       <View className="flex flex-1 flex-col gap-2xl px-lg pt-lg">
         <Header />
 
@@ -37,7 +37,7 @@ export default function MarketScreen() {
           <CategoryTabs tabs={SHOP_CATEGORIES} selected={category} onSelect={selectCategory} />
 
           {/* 알약형 탭과 이어지는 전체 폭 테두리 카드 (캐릭터 꾸미기와 동일한 형태) */}
-          <View className="-mx-lg flex-1 rounded-t-md border-2 border-b-0 border-primary-600 bg-gray-50 p-lg">
+          <View className="-mx-lg flex-1 rounded-t-md border-2 border-b-0 border-primary-600 bg-white p-lg">
             <ItemGrid items={items} selectedId={selectedId} onSelect={selectItem} />
           </View>
         </View>

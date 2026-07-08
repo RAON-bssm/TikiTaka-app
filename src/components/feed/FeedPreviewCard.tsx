@@ -25,13 +25,13 @@ export default function FeedPreviewCard({ imgUrl, user, place, postId }: Props) 
         <View className="flex-1 justify-between p-md">
           <View className="flex flex-row items-center gap-xs">
             <Image source={{ uri: user.profile }} className="w-8 h-8 rounded-full" />
-            <Typography variant="h4" className="text-gray-50">
+            <Typography variant="h4" className="text-white">
               {user.name}
             </Typography>
           </View>
           <View className="flex flex-row items-center gap-xs">
             <PlaceIcon width={16} height={16} color="#F9FAFB" />
-            <Typography variant="h4" className="text-gray-50">
+            <Typography variant="h4" className="text-white">
               {place}
             </Typography>
           </View>

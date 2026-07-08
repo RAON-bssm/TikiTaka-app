@@ -21,7 +21,7 @@ export default function BackButton({ link, title }: Props) {
       <Pressable onPress={onPress}>
         <ChevronLeftIcon width={24} height={24} color="#6E7D94" />
       </Pressable>
-      <Typography variant="h3" className="text-gray-600">
+      <Typography variant="h3" className="text-gray-500">
         {title}
       </Typography>
     </View>

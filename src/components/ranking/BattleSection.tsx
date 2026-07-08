@@ -9,7 +9,7 @@ import type { Match } from '@/constants/ranking';
 export default function BattleSection({ matches }: { matches: Match[] }) {
   return (
     <View className="gap-md">
-      <Typography variant="h4" className="text-gray-800">
+      <Typography variant="h4" className="text-gray-700">
         현재 진행 중인 대결
       </Typography>
       <ScrollView
