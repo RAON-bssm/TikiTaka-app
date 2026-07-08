@@ -18,6 +18,7 @@ export const COLOR_HEX: Record<string, string> = {
   orange: '#FC8253',
   pink: '#ef89c6',
   sky: '#e2e9f7',
+  blue: '#4078FF',
 };
 
 /** 선택지 공통 필드. next는 선택했을 때 반영할 config. */
