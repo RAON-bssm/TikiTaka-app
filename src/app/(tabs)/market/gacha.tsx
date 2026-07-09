@@ -56,7 +56,7 @@ export default function GachaScreen() {
             <Typography variant="h2" className="text-primary-600">
               행운의 가챠
             </Typography>
-            <Typography variant="body1" className="text-gray-300">
+            <Typography variant="body1" className="text-gray-400">
               무엇이 나올까요? 두근두근...
             </Typography>
           </View>
