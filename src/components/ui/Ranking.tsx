@@ -2,9 +2,10 @@ import type { FC, ReactNode } from 'react';
 import { View } from 'react-native';
 
 import PlaceIcon from '@/assets/icons/place.svg';
+import { palette } from '@/constants/colors';
 import Typography from './Typography';
 
-const COLOR_GRAY = '#6E7D94'; // gray-500
+const COLOR_GRAY = palette.gray[500];
 
 type RankingProps = {
   number: number;

@@ -1,3 +1,5 @@
+const { palette } = require('./src/constants/colors');
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
@@ -27,40 +29,11 @@ module.exports = {
   corePlugins: { borderOpacity: true },
   theme: {
     extend: {
+      // 색상은 src/constants/colors.js 를 단일 소스로 공유한다 (앱 코드와 동일한 팔레트).
       colors: {
-        gray: {
-          50: '#F8F9FB',
-          100: '#EEF1F6',
-          200: '#DDE2EC',
-          300: '#C4CCDA',
-          400: '#9DAABB',
-          500: '#6E7D94',
-          600: '#4A5568',
-          700: '#2D3748',
-          800: '#1A202C',
-        },
-        primary: {
-          100: '#FFF3EE',
-          200: '#FED8CA',
-          300: '#FEC6B0',
-          400: '#FDAB8C',
-          500: '#FD9B75',
-          600: '#FC8253',
-          700: '#E5764C',
-          800: '#B35C3B',
-          900: '#6A3723',
-        },
-        secondary: {
-          100: '#ECF2FF',
-          200: '#C4D5FF',
-          300: '#A7C1FF',
-          400: '#6693FF',
-          500: '#4078FF',
-          600: '#3A6DE8',
-          700: '#2D55B5',
-          800: '#23428C',
-          900: '#1B326B',
-        },
+        gray: palette.gray,
+        primary: palette.primary,
+        secondary: palette.secondary,
       },
       spacing: {
         xs: '4px',

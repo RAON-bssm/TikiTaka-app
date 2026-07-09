@@ -5,8 +5,9 @@ import NotificationsIcon from '@/assets/icons/header/notifications.svg';
 import ProfileImageIcon from '@/assets/icons/header/ProfileImage.svg';
 import VectorIcon from '@/assets/icons/header/Vector.svg';
 import LogoImage from '@/assets/icons/logo.webp';
+import { palette } from '@/constants/colors';
 
-const COLOR_ICON = '#9DAABB'; // gray-400
+const COLOR_ICON = palette.gray[400];
 
 const Header = () => {
   return (

@@ -1,6 +1,7 @@
 import { View } from 'react-native';
 
 import FireIcon from '@/assets/icons/fire.svg';
+import { palette } from '@/constants/colors';
 import Typography from './Typography';
 
 /** 대결 카드에 표시할 한 팀 정보. */
@@ -18,8 +19,8 @@ interface Props {
   right: MatchTeam;
 }
 
-const COLOR_BLUE = '#4078FF'; // secondary-500
-const COLOR_ORANGE = '#FC8253'; // primary-600
+const COLOR_BLUE = palette.secondary[500];
+const COLOR_ORANGE = palette.primary[600];
 
 /**
  * "현재 진행 중인 대결" 카드. 두 동네의 점수를 VS로 보여준다.

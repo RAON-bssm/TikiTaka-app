@@ -5,10 +5,11 @@ import FavoriteIcon from '@/assets/icons/favorite.svg';
 import MoreIcon from '@/assets/icons/more-vert.svg';
 import PlaceIcon from '@/assets/icons/place.svg';
 import Typography from '@/components/ui/Typography';
+import { palette } from '@/constants/colors';
 
-const COLOR_GRAY = '#9DAABB'; // gray-400
-const COLOR_ORANGE = '#FC8253'; // primary-600
-const COLOR_ICON = '#6E7D94'; // gray-500 (더보기 아이콘)
+const COLOR_GRAY = palette.gray[400];
+const COLOR_ORANGE = palette.primary[600];
+const COLOR_ICON = palette.gray[500]; // 더보기 아이콘
 
 export interface FeedAuthor {
   name: string;
