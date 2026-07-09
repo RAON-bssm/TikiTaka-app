@@ -18,15 +18,14 @@ export default function PullButton({ label, cost, onPress }: Props) {
     <Pressable onPress={onPress}>
       {({ pressed }) => (
         <View
-          className={`items-center gap-xs rounded-2xl px-2xl py-md ${pressed ? 'opacity-70' : ''}`}
-          style={{ backgroundColor: BUTTON_BLUE }}
+          className={`items-center gap-xs rounded-2xl px-2xl py-md ${pressed ? 'opacity-70' : ''} bg-secondary-600`}
         >
           <Typography variant="h4" className="text-white">
             {label}
           </Typography>
           <View className="flex-row items-center gap-xs rounded-full bg-white/90 px-md py-xs">
             <PointIcon width={16} height={16} />
-            <Typography variant="body1" style={{ color: BUTTON_BLUE }}>
+            <Typography variant="body1" className="text-secondary-600">
               {cost.toLocaleString()}
             </Typography>
           </View>
