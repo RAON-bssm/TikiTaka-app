@@ -24,14 +24,14 @@ export default function PostAuthor({ name, profile, place, createdAt }: Props) {
         <View className="flex flex-row items-center gap-sm">
           <View className="flex flex-row items-center gap-xs">
             <PlaceIcon width={24} height={24} color="#9DAABB" />
-            <Typography variant="body2" className="text-gray-400 text-[10px]">
+            <Typography variant="body2" className="text-gray-300 text-md">
               {place}
             </Typography>
           </View>
-          <Typography variant="body2" className="text-gray-400 text-[10px]">
+          <Typography variant="body2" className="text-gray-300 text-md">
             ·
           </Typography>
-          <Typography variant="body2" className="text-gray-400 text-[10px]">
+          <Typography variant="body2" className="text-gray-300 text-md">
             {createdAt}
           </Typography>
         </View>
