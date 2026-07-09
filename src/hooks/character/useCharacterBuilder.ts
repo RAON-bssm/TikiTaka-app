@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 
 import {
   DEFAULT_CHARACTER_CONFIG,
@@ -32,7 +32,7 @@ export default function useCharacterBuilder(initial: CharacterConfig = DEFAULT_C
    * 특정 파츠의 모양을 변경한다.
    * 색상 파츠(eyes/hairBack/hairFront)는 새 모양이 현재 색상을 지원하지 않으면 첫 색상으로 보정한다.
    */
-  const setShape = useCallback((part: PartConfigKey, shapeId: string) => {
+  const setShape = (part: PartConfigKey, shapeId: string) => {
     setConfig((prev) => {
       const next = { ...prev, [part]: shapeId };
       const colorable = COLORABLE_PARTS[part as ColorablePart];
@@ -44,44 +44,38 @@ export default function useCharacterBuilder(initial: CharacterConfig = DEFAULT_C
       }
       return next;
     });
-  }, []);
+  };
 
   /** 색상 파츠(eyes/hair)의 색상을 변경한다. 머리는 앞/뒤가 함께 바뀐다. */
-  const setColor = useCallback((part: ColorablePart, colorId: string) => {
+  const setColor = (part: ColorablePart, colorId: string) => {
     setConfig((prev) => ({ ...prev, [COLORABLE_PARTS[part].colorKey]: colorId }));
-  }, []);
+  };
 
   /** 특정 파츠의 모양을 다음/이전 옵션으로 순환한다. */
-  const cycleShape = useCallback(
-    (part: PartConfigKey, direction: 1 | -1 = 1) => {
-      const options = getShapeOptions(part);
-      const nextShape = nextInList(options, config[part] ?? '', direction);
-      if (nextShape !== undefined) setShape(part, nextShape);
-    },
-    [config, setShape],
-  );
+  const cycleShape = (part: PartConfigKey, direction: 1 | -1 = 1) => {
+    const options = getShapeOptions(part);
+    const nextShape = nextInList(options, config[part] ?? '', direction);
+    if (nextShape !== undefined) setShape(part, nextShape);
+  };
 
   /** 색상 파츠(eyes/hair)의 색상을 다음/이전 옵션으로 순환한다. */
-  const cycleColor = useCallback(
-    (part: ColorablePart, direction: 1 | -1 = 1) => {
-      const colorKey = COLORABLE_PARTS[part].colorKey;
-      const options = getColorOptions(part, config[part]);
-      const nextColor = nextInList(options, config[colorKey], direction);
-      if (nextColor !== undefined) setColor(part, nextColor);
-    },
-    [config, setColor],
-  );
+  const cycleColor = (part: ColorablePart, direction: 1 | -1 = 1) => {
+    const colorKey = COLORABLE_PARTS[part].colorKey;
+    const options = getColorOptions(part, config[part]);
+    const nextColor = nextInList(options, config[colorKey], direction);
+    if (nextColor !== undefined) setColor(part, nextColor);
+  };
 
   /** 선택 파츠(clothing/accessory)를 해제한다. */
-  const clearPart = useCallback((part: 'clothing' | 'accessory') => {
+  const clearPart = (part: 'clothing' | 'accessory') => {
     setConfig((prev) => {
       const next = { ...prev };
       delete next[part];
       return next;
     });
-  }, []);
+  };
 
-  const reset = useCallback(() => setConfig(initial), [initial]);
+  const reset = () => setConfig(initial);
 
   return { config, setConfig, setShape, setColor, cycleShape, cycleColor, clearPart, reset };
 }

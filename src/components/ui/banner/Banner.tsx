@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import {
   type LayoutChangeEvent,
   type NativeScrollEvent,
@@ -27,17 +27,14 @@ export default function Banner({ slides = BANNER_SLIDES }: Props) {
   const [activeIndex, setActiveIndex] = useState(0);
   const isCarousel = slides.length > 1;
 
-  const handleLayout = useCallback((e: LayoutChangeEvent) => {
+  const handleLayout = (e: LayoutChangeEvent) => {
     setWidth(e.nativeEvent.layout.width);
-  }, []);
+  };
 
-  const handleScroll = useCallback(
-    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-      if (width === 0) return;
-      setActiveIndex(Math.round(e.nativeEvent.contentOffset.x / width));
-    },
-    [width],
-  );
+  const handleScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    if (width === 0) return;
+    setActiveIndex(Math.round(e.nativeEvent.contentOffset.x / width));
+  };
 
   return (
     <View className="w-full" onLayout={handleLayout}>
