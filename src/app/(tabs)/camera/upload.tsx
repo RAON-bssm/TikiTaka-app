@@ -6,10 +6,10 @@ import Typography from '@/components/ui/Typography';
 import useImageRatio from '@/hooks/useImageRatio';
 import { useLocalSearchParams } from 'expo-router';
 import { Image, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ScrollView } from 'react-native-gesture-handler';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Upload() {
-  const insets = useSafeAreaInsets();
   const { uri } = useLocalSearchParams<{ uri?: string }>();
   // 가로는 부모 폭으로 고정, 세로는 원본 비율(가로/세로)에 맞춰 유동
   const photoRatio = useImageRatio(uri);
@@ -20,8 +20,12 @@ export default function Upload() {
   };
 
   return (
-    <View className="flex-1 bg-gray-50" style={{ paddingTop: insets.top }}>
-      <View className="flex flex-col gap-2xl px-xl py-2xl">
+    <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
+      <ScrollView
+        className="flex-1"
+        contentContainerClassName="flex flex-col gap-2xl px-xl py-2xl"
+        showsVerticalScrollIndicator={false}
+      >
         <Topic title="예쁜 돌멩이 찾기" />
 
         {/* 촬영한 사진 미리보기: 폭은 부모를 채우고, 높이는 사진 원본 비율에 맞춰 반응형 */}
@@ -52,7 +56,7 @@ export default function Upload() {
         </View>
 
         <Button content="게시물 업로드" onclick={handleUpload} />
-      </View>
-    </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
