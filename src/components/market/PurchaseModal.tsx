@@ -23,7 +23,7 @@ export default function PurchaseModal({ visible, item, onClose, onConfirm }: Pro
         {/* 카드 - 내부 탭은 배경으로 전달하지 않아 닫히지 않는다 */}
         <Pressable
           onPress={() => {}}
-          className="w-[240px] items-center gap-lg rounded-lg border border-gray-200 bg-white p-lg"
+          className="w-[240px] items-center gap-lg rounded-lg border border-gray-100 bg-white p-lg"
         >
           <Typography variant="h3" className="w-full text-center text-primary-600">
             {item.name}
@@ -33,14 +33,14 @@ export default function PurchaseModal({ visible, item, onClose, onConfirm }: Pro
 
           <PointBadge point={item.price} />
 
-          <Typography variant="body3" className="text-center text-gray-500">
+          <Typography variant="body3" className="text-center text-gray-400">
             {item.description}
           </Typography>
 
           <View className="w-full items-center gap-sm">
             <Button content="구매하기" size="sm" className="w-full" onclick={onConfirm} />
             <Pressable onPress={onClose} className="active:opacity-70">
-              <Typography variant="caption" className="text-[10px] text-gray-600 underline">
+              <Typography variant="caption" className="text-[10px] text-gray-500 underline">
                 돌아가기
               </Typography>
             </Pressable>

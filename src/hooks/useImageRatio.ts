@@ -31,5 +31,5 @@ export default function useImageRatio(uri?: string) {
   }, [uri]);
 
   // 현재 uri에 해당하는 비율만 반환 (로딩 전·uri 변경 직후·실패 시 undefined)
-  return resolved?.uri === uri ? resolved.ratio : undefined;
+  return resolved && resolved.uri === uri ? resolved.ratio : undefined;
 }

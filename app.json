@@ -55,6 +55,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "06b5b7fc-9c3e-4802-89c6-ae6ce7d2b445"
+      }
+    },
+    "owner": "whitebreadcat"
   }
 }

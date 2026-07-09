@@ -50,3 +50,7 @@ pnpm-debug.log*
 .env.local
 .env.*
 !.env.example
+
+# pnpm 전용 프로젝트 — npm/yarn 락파일 금지
+package-lock.json
+yarn.lock

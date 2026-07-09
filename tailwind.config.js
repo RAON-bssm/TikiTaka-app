@@ -1,3 +1,5 @@
+const { palette } = require('./src/constants/colors');
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
@@ -18,50 +20,20 @@ module.exports = {
     'text-primary-800',
     'text-primary-500',
     'text-primary-600',
+    'text-gray-400',
+    'text-gray-700',
     'text-gray-500',
-    'text-gray-800',
-    'text-gray-600',
     'text-secondary-500',
   ],
   presets: [require('nativewind/preset')],
   corePlugins: { borderOpacity: true },
   theme: {
     extend: {
+      // 색상은 src/constants/colors.js 를 단일 소스로 공유한다 (앱 코드와 동일한 팔레트).
       colors: {
-        gray: {
-          50: '#FFFFFF',
-          100: '#F8F9FB',
-          200: '#EEF1F6',
-          300: '#DDE2EC',
-          400: '#C4CCDA',
-          500: '#9DAABB',
-          600: '#6E7D94',
-          700: '#4A5568',
-          800: '#2D3748',
-          900: '#1A202C',
-        },
-        primary: {
-          100: '#FFF3EE',
-          200: '#FED8CA',
-          300: '#FEC6B0',
-          400: '#FDAB8C',
-          500: '#FD9B75',
-          600: '#FC8253',
-          700: '#E5764C',
-          800: '#B35C3B',
-          900: '#6A3723',
-        },
-        secondary: {
-          100: '#ECF2FF',
-          200: '#C4D5FF',
-          300: '#A7C1FF',
-          400: '#6693FF',
-          500: '#4078FF',
-          600: '#3A6DE8',
-          700: '#2D55B5',
-          800: '#23428C',
-          900: '#1B326B',
-        },
+        gray: palette.gray,
+        primary: palette.primary,
+        secondary: palette.secondary,
       },
       spacing: {
         xs: '4px',

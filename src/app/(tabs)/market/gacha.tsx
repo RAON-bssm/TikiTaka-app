@@ -40,7 +40,7 @@ export default function GachaScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-100" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
       <View className="flex flex-1 flex-col gap-2xl px-lg pt-lg">
         <Header />
 

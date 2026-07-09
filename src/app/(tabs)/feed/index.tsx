@@ -36,7 +36,7 @@ const FEEDS = [
 
 export default function FeedScreen() {
   return (
-    <SafeAreaView className="flex-1 bg-gray-100" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
       <ScrollView
         className="flex-1"
         contentContainerClassName="gap-2xl px-xl pt-lg"

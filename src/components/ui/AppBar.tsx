@@ -10,6 +10,7 @@ import FeedIcon from '@/assets/icons/app-var/feed.svg';
 import HomeIcon from '@/assets/icons/app-var/home.svg';
 import MarketIcon from '@/assets/icons/app-var/market.svg';
 import RankingIcon from '@/assets/icons/app-var/ranking.svg';
+import { palette } from '@/constants/colors';
 import Typography from './Typography';
 
 type TabConfig = {
@@ -17,9 +18,9 @@ type TabConfig = {
   Icon: FC<SvgProps>;
 };
 
-// SVG fill은 currentColor라서 color prop으로 제어합니다. (tailwind.config.js 값과 일치)
-const COLOR_FOCUSED = '#FC8253'; // primary-600
-const COLOR_DEFAULT = '#9DAABB'; // gray-500
+// SVG fill은 currentColor라서 color prop으로 제어합니다. (팔레트 단일 소스에서 가져옴)
+const COLOR_FOCUSED = palette.primary[600];
+const COLOR_DEFAULT = palette.gray[400];
 
 // 라우트 이름(파일명) -> 바텀바 표시 정보. SVG는 컴포넌트로 import 합니다.
 // 노출 순서는 (tabs)/_layout.tsx의 Tabs.Screen 선언 순서를 따릅니다.
@@ -76,7 +77,7 @@ export default function AppBar({ state, navigation }: BottomTabBarProps) {
             <Icon width={24} height={24} color={focused ? COLOR_FOCUSED : COLOR_DEFAULT} />
             <Typography
               variant="caption"
-              className={`${focused ? 'text-primary-600' : 'text-gray-500'}`}
+              className={`${focused ? 'text-primary-600' : 'text-gray-400'}`}
             >
               {config.label}
             </Typography>

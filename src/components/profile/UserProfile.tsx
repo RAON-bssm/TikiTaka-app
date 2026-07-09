@@ -18,12 +18,12 @@ export default function UserProfile({ character, point, userName, userPlace }: P
       <View className="flex flex-row justify-content items-center gap-sm">
         <Character config={character} size={72} />
         <View className="flex flex-col ">
-          <Typography variant="h2" className="text-gray-800">
+          <Typography variant="h2" className="text-gray-700">
             {userName}
           </Typography>
           <View className="flex flex-row items-center gap-xs">
             <PlaceIcon width={24} height={24} color="#9DAABB" />
-            <Typography variant="body2" className="text-gray-500 text-[10px]">
+            <Typography variant="body2" className="text-gray-400 text-[10px]">
               {userPlace}
             </Typography>
           </View>

@@ -5,10 +5,11 @@ import FavoriteIcon from '@/assets/icons/favorite.svg';
 import MoreIcon from '@/assets/icons/more-vert.svg';
 import PlaceIcon from '@/assets/icons/place.svg';
 import Typography from '@/components/ui/Typography';
+import { palette } from '@/constants/colors';
 
-const COLOR_GRAY = '#9DAABB'; // gray-500
-const COLOR_ORANGE = '#FC8253'; // primary-600
-const COLOR_ICON = '#6E7D94'; // gray-600 (더보기 아이콘)
+const COLOR_GRAY = palette.gray[400];
+const COLOR_ORANGE = palette.primary[600];
+const COLOR_ICON = palette.gray[500]; // 더보기 아이콘
 
 export interface FeedAuthor {
   name: string;
@@ -40,12 +41,12 @@ export default function FeedCard({
     // TODO: 상세 이동 시 실제 post_id 사용 (현재 하드코딩)
     <Pressable
       onPress={() => router.push('/feed/1')}
-      className="w-full gap-lg rounded-md border border-gray-200 bg-white p-lg active:opacity-90"
+      className="w-full gap-lg rounded-md border border-gray-100 bg-white p-lg active:opacity-90"
     >
       <View className="w-full flex-row items-center justify-between">
         <View className="flex-row items-center gap-sm">
-          <Image source={{ uri: author.avatarUrl }} className="size-5 rounded-full bg-gray-200" />
-          <Typography variant="body2" className="text-gray-900">
+          <Image source={{ uri: author.avatarUrl }} className="size-5 rounded-full bg-gray-100" />
+          <Typography variant="body2" className="text-gray-800">
             {author.name}
           </Typography>
         </View>
@@ -54,26 +55,26 @@ export default function FeedCard({
         </Pressable>
       </View>
 
-      <View className="h-[225px] w-full overflow-hidden rounded-lg bg-gray-500">
+      <View className="h-[225px] w-full overflow-hidden rounded-lg bg-gray-400">
         <Image source={{ uri: imageUrl }} resizeMode="cover" className="h-full w-full" />
       </View>
 
       <View className="w-full flex-row items-center justify-between">
         <View className="gap-xs">
-          <Typography variant="h3" className="text-gray-900">
+          <Typography variant="h3" className="text-gray-800">
             {title}
           </Typography>
           <View className="flex-row items-center gap-sm">
             <View className="flex-row items-center gap-xs">
               <PlaceIcon width={20} height={20} color={COLOR_GRAY} />
-              <Typography variant="body3" className="text-gray-500">
+              <Typography variant="body3" className="text-gray-400">
                 {place}
               </Typography>
             </View>
-            <Typography variant="body3" className="text-gray-500">
+            <Typography variant="body3" className="text-gray-400">
               ·
             </Typography>
-            <Typography variant="body3" className="text-gray-500">
+            <Typography variant="body3" className="text-gray-400">
               {timeAgo}
             </Typography>
           </View>
@@ -84,7 +85,7 @@ export default function FeedCard({
           className="items-center justify-center gap-[2px] active:opacity-70"
         >
           <FavoriteIcon width={20} height={20} color={COLOR_ORANGE} />
-          <Typography variant="body3" className="text-gray-800">
+          <Typography variant="body3" className="text-gray-700">
             {likeCount}
           </Typography>
         </Pressable>

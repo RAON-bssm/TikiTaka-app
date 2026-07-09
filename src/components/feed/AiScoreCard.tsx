@@ -9,12 +9,12 @@ interface Props {
 
 export default function AiScoreCard({ score, comment }: Props) {
   return (
-    <View className="relative flex flex-row items-center gap-xl rounded-md bg-white p-lg border border-gray-200">
+    <View className="relative flex flex-row items-center gap-xl rounded-md bg-white p-lg border border-gray-100">
       <View className="absolute right-sm top-sm">
         <InfoIcon width={24} height={24} color="#C4CCDA" />
       </View>
       <View className="flex flex-col items-center gap-xs">
-        <Typography variant="h3" className="text-gray-900">
+        <Typography variant="h3" className="text-gray-800">
           AI 평가 점수
         </Typography>
         <Typography
@@ -24,8 +24,8 @@ export default function AiScoreCard({ score, comment }: Props) {
           {score}
         </Typography>
       </View>
-      <View className="h-[81px] w-[2px] rounded-xs bg-gray-300" />
-      <Typography variant="body3" className="flex-1 pr-xl pt-md text-gray-800 leading-5">
+      <View className="h-[81px] w-[2px] rounded-xs bg-gray-200" />
+      <Typography variant="body3" className="flex-1 pr-xl pt-md text-gray-700 leading-5">
         {comment}
       </Typography>
     </View>

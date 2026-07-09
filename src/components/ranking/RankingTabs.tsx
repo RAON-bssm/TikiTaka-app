@@ -24,7 +24,7 @@ export default function RankingTabs<T extends string>({ tabs, selected, onSelect
               active ? 'border-b border-primary-600' : ''
             }`}
           >
-            <Typography variant="h3" className={active ? 'text-gray-800' : 'text-gray-500'}>
+            <Typography variant="h3" className={active ? 'text-gray-700' : 'text-gray-400'}>
               {label}
             </Typography>
           </Pressable>

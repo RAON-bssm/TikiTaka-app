@@ -29,7 +29,7 @@ const CharacterPreview = ({ config }: { config: CharacterConfig }) => (
       <Character config={config} size={160} className="-translate-x-[4px] translate-y-[4px]" />
     </View>
     <Pressable className="absolute bottom-0 right-0 items-center justify-center rounded-sm bg-primary-600/80 p-md">
-      <Typography variant="h4" className="text-gray-100">
+      <Typography variant="h4" className="text-gray-50">
         수정하기
       </Typography>
     </Pressable>
@@ -48,7 +48,7 @@ const ColorSwatches = ({
   onSelect: SelectHandler;
 }) => (
   <View className="mb-md shrink-0 gap-sm">
-    <Typography variant="body3" className="text-gray-500">
+    <Typography variant="body3" className="text-gray-400">
       색상
     </Typography>
     <View className="flex-row gap-sm">
@@ -77,7 +77,7 @@ const ShapeGrid = ({ shapes, onSelect }: { shapes: ShapeOption[]; onSelect: Sele
       <Pressable
         key={shape.id}
         onPress={() => onSelect(shape.next)}
-        className={`aspect-square basis-[30%] items-center justify-center overflow-hidden rounded-lg bg-gray-200 ${
+        className={`aspect-square basis-[30%] items-center justify-center overflow-hidden rounded-lg bg-gray-100 ${
           shape.active ? 'border-2 border-primary-600' : ''
         }`}
       >
@@ -117,7 +117,7 @@ export default function CharacterCustomizer({
       <View className="flex-1">
         <CategoryTabs tabs={CATEGORY_LABELS} selected={selectedLabel} onSelect={setSelectedLabel} />
 
-        <View className="-mx-lg flex-1 rounded-t-md border-2 border-b-0 border-primary-600 bg-gray-50 p-lg">
+        <View className="-mx-lg flex-1 rounded-t-md border-2 border-b-0 border-primary-600 bg-white p-lg">
           {colors && <ColorSwatches colors={colors} onSelect={setConfig} />}
           <ShapeGrid shapes={shapes} onSelect={setConfig} />
         </View>

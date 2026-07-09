@@ -35,13 +35,13 @@ export default function Onboarding() {
   };
 
   return (
-    <View className="flex-1 bg-gray-50">
+    <View className="flex-1 bg-white">
       <View className="flex-1 justify-center items-center px-lg">
         {slide.lines.map((line, i) => (
           <Typography
             key={i}
             variant="display"
-            className={line.highlight ? 'text-primary-600' : 'text-gray-800'}
+            className={line.highlight ? 'text-primary-600' : 'text-gray-700'}
           >
             {line.text}
           </Typography>
@@ -53,7 +53,7 @@ export default function Onboarding() {
           {Array.from({ length: SLIDES.length }).map((_, i) => (
             <View
               key={i}
-              className={`w-2 h-2 rounded-full ${i === index ? 'bg-primary-600' : 'bg-gray-300'}`}
+              className={`w-2 h-2 rounded-full ${i === index ? 'bg-primary-600' : 'bg-gray-200'}`}
             />
           ))}
         </View>

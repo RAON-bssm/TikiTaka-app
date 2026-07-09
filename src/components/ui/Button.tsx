@@ -17,7 +17,7 @@ const sizeVariant: Record<Size, 'h3' | 'h4'> = {
 
 // 색상 조합(배경 + 글자색)
 const variantClass: Record<Variant, { bg: string; text: string }> = {
-  primary: { bg: 'bg-primary-600', text: 'text-gray-50' },
+  primary: { bg: 'bg-primary-600', text: 'text-white' },
   light: { bg: 'bg-primary-100', text: 'text-primary-600' },
 };
 

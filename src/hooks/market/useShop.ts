@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
 import { getShopItems, SHOP_CATEGORIES, type ShopCategory } from '@/constants/market';
 
@@ -11,7 +11,7 @@ import { getShopItems, SHOP_CATEGORIES, type ShopCategory } from '@/constants/ma
  */
 export function useShop() {
   const [category, setCategory] = useState<ShopCategory>(SHOP_CATEGORIES[0]);
-  const items = useMemo(() => getShopItems(category), [category]);
+  const items = getShopItems(category);
 
   const [selectedId, setSelectedId] = useState<string>(items[0]?.id ?? '');
   const selectedItem = items.find((item) => item.id === selectedId) ?? items[0];

@@ -37,10 +37,10 @@ export default function NeighborhoodSheet({ visible, onClose }: Props) {
     <BottomSheet visible={visible} onClose={onClose}>
       <View className="flex flex-col gap-2xl">
         <View className="flex flex-col gap-md">
-          <Typography variant="h1" className="text-gray-800">
+          <Typography variant="h1" className="text-gray-700">
             내 동네 설정
           </Typography>
-          <Typography variant="body2" className="text-gray-500">
+          <Typography variant="body2" className="text-gray-400">
             최대 2개의 동네를 선택할 수 있어요.
           </Typography>
         </View>
@@ -61,7 +61,7 @@ export default function NeighborhoodSheet({ visible, onClose }: Props) {
                   )}
                   <Typography
                     variant="body2"
-                    className={selected ? 'text-primary-600' : 'text-gray-600'}
+                    className={selected ? 'text-primary-600' : 'text-gray-500'}
                   >
                     {neighborhood.name}
                   </Typography>

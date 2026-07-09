@@ -19,16 +19,16 @@ export default function DistrictBattleStatus({ myTeam, opponentTeam }: Props) {
   const myRatio = totalScore === 0 ? 0.5 : myTeam.score / totalScore;
 
   return (
-    <View className="flex flex-col w-full p-lg bg-white items-center rounded-md border border-gray-200 gap-lg">
-      <Typography variant="h4" className="text-gray-700">
+    <View className="flex flex-col w-full p-lg bg-white items-center rounded-md border border-gray-100 gap-lg">
+      <Typography variant="h4" className="text-gray-600">
         우리 팀의 현재 상황
       </Typography>
       <View className="flex flex-row justify-contents items-center gap-2xl">
         <View className="flex flex-col items-center gap-xs">
-          <Typography variant="caption" className="text-gray-600">
+          <Typography variant="caption" className="text-gray-500">
             우리팀
           </Typography>
-          <Typography variant="h1" className="text-gray-900">
+          <Typography variant="h1" className="text-gray-800">
             {myTeam.name}
           </Typography>
           <Typography variant="h3" className="text-primary-600">
@@ -39,10 +39,10 @@ export default function DistrictBattleStatus({ myTeam, opponentTeam }: Props) {
           VS
         </Typography>
         <View className="flex flex-col items-center gap-xs">
-          <Typography variant="caption" className="text-gray-600">
+          <Typography variant="caption" className="text-gray-500">
             상대팀
           </Typography>
-          <Typography variant="h1" className="text-gray-900">
+          <Typography variant="h1" className="text-gray-800">
             {opponentTeam.name}
           </Typography>
           <Typography variant="h3" className="text-primary-600">
@@ -51,7 +51,7 @@ export default function DistrictBattleStatus({ myTeam, opponentTeam }: Props) {
         </View>
       </View>
       <View
-        className="w-full bg-gray-300 rounded-full overflow-hidden flex-row rounded-full"
+        className="w-full bg-gray-200 rounded-full overflow-hidden flex-row rounded-full"
         style={{ height: 8 }}
       >
         <View className="bg-primary-600" style={{ flex: myRatio }} />
@@ -61,7 +61,7 @@ export default function DistrictBattleStatus({ myTeam, opponentTeam }: Props) {
         <Typography variant="body3" className="text-primary-600">
           +67점
         </Typography>
-        <Typography variant="body3" className="text-gray-700">
+        <Typography variant="body3" className="text-gray-600">
           {' '}
           앞서나가고 있어요!
         </Typography>
