@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -31,7 +32,11 @@ export default function MarketScreen() {
           <PointBadge point={USER_POINT} />
         </View>
 
-        <FeaturedItem item={selectedItem} onBuy={() => setPurchaseOpen(true)} />
+        <FeaturedItem
+          item={selectedItem}
+          onBuy={() => setPurchaseOpen(true)}
+          onCustomize={() => router.push('/profile/character')}
+        />
 
         <View className="flex-1">
           <CategoryTabs tabs={SHOP_CATEGORIES} selected={category} onSelect={selectCategory} />
