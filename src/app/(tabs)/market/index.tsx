@@ -8,7 +8,7 @@ import ItemGrid from '@/components/market/ItemGrid';
 import PurchaseModal from '@/components/market/PurchaseModal';
 import ShopTabs from '@/components/market/ShopTabs';
 import CategoryTabs from '@/components/ui/CategoryTabs';
-import Header from '@/components/ui/header';
+import Header from '@/components/ui/Header';
 import PointBadge from '@/components/ui/PointBadge';
 import { SHOP_CATEGORIES, USER_POINT } from '@/constants/market';
 import { useShop } from '@/hooks/market/useShop';

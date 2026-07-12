@@ -3,7 +3,7 @@ import FeedCard from '@/components/feed/FeedCard';
 import FeedCardSkeleton from '@/components/feed/FeedCardSkeleton';
 import Button from '@/components/ui/Button';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
-import Header from '@/components/ui/header';
+import Header from '@/components/ui/Header';
 import { palette } from '@/constants/colors';
 import { usePosts } from '@/hooks/post/usePosts';
 import { RefreshControl, View } from 'react-native';

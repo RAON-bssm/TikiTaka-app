@@ -2,7 +2,7 @@ import FeedCard from '@/components/feed/FeedCard';
 import NeighborhoodSheet from '@/components/profile/NeighborhoodSheet';
 import UserProfile from '@/components/profile/UserProfile';
 import Button from '@/components/ui/Button';
-import Header from '@/components/ui/header';
+import Header from '@/components/ui/Header';
 import NavRow from '@/components/ui/NavRow';
 import Typography from '@/components/ui/Typography';
 import { router } from 'expo-router';

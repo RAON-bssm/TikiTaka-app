@@ -1,6 +1,6 @@
 import CharacterCustomizer from '@/components/character/CharacterCustomizer';
 import BackButton from '@/components/ui/BackButton';
-import Header from '@/components/ui/header';
+import Header from '@/components/ui/Header';
 import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 

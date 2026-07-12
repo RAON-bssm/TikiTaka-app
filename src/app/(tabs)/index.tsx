@@ -2,7 +2,7 @@ import DistrictBattleStatus from '@/components/feed/DistrictBattleStatus';
 import FeedPreviewCard from '@/components/feed/FeedPreviewCard';
 import Banner from '@/components/ui/banner/Banner';
 import Button from '@/components/ui/Button';
-import Header from '@/components/ui/header';
+import Header from '@/components/ui/Header';
 import Typography from '@/components/ui/Typography';
 import { useRouter } from 'expo-router';
 import { Pressable, View } from 'react-native';

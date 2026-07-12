@@ -11,7 +11,7 @@ import PostDetailSkeleton from '@/components/feed/PostDetailSkeleton';
 import PostImage from '@/components/feed/PostImage';
 import PostTitleRow from '@/components/feed/PostTitleRow';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
-import Header from '@/components/ui/header';
+import Header from '@/components/ui/Header';
 import { palette } from '@/constants/colors';
 import { usePostDetail } from '@/hooks/post/usePostDetail';
 

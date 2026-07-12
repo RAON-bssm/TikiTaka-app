@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Gotcha from '@/components/market/gotcha/Gotcha';
 import PullButton from '@/components/market/gotcha/PullButton';
 import ShopTabs from '@/components/market/ShopTabs';
-import Header from '@/components/ui/header';
+import Header from '@/components/ui/Header';
 import PointBadge from '@/components/ui/PointBadge';
 import Typography from '@/components/ui/Typography';
 import { GOTCHA_COSTS, pullGotcha, USER_POINT, type GotchaPull } from '@/constants/market';
