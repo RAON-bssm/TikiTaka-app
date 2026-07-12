@@ -24,8 +24,25 @@ export async function getPostDetail(postId: string): Promise<Post> {
   return data.data;
 }
 
-export async function createPost(req: CreatePostRequest) {
-  const { data } = await client.post<ApiResponse<Post>>(`/api/post`, req);
+/**
+ * 게시물 생성. 사진 파일을 함께 올려야 하므로 multipart/form-data로 전송한다.
+ * post_image 파트에는 로컬 파일(uri/name/type)을 담는다.
+ */
+export async function createPost({ board_id, fileUri, content }: CreatePostRequest) {
+  const fileName = fileUri.split('/').pop() ?? `photo-${Date.now()}.jpg`;
+
+  const formData = new FormData();
+  formData.append('board_id', String(board_id));
+  formData.append('content', content);
+  formData.append('post_image', {
+    uri: fileUri,
+    name: fileName,
+    type: 'image/jpeg',
+  } as unknown as Blob);
+
+  const { data } = await client.post<ApiResponse<Post>>(`/api/post`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
   return data.data;
 }
 

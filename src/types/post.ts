@@ -28,7 +28,8 @@ export interface PostListData {
 
 export interface CreatePostRequest {
   board_id: number;
-  post_image: string;
+  /** 업로드할 사진의 로컬 경로 (file:///...). form-data의 post_image 파트로 전송된다. */
+  fileUri: string;
   content: string;
 }
 
