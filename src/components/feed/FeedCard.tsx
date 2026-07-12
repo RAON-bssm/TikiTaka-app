@@ -46,7 +46,7 @@ export default function FeedCard({
     >
       <View className="w-full flex-row items-center justify-between">
         <View className="flex-row items-center gap-sm">
-          <Image source={{ uri: author.avatarUrl }} className="size-5 rounded-full bg-gray-100" />
+          <Image source={{ uri: author.avatarUrl }} className="size-10 rounded-full bg-gray-100" />
           <Typography variant="body2" className="text-gray-800">
             {author.name}
           </Typography>

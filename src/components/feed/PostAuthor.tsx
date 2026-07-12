@@ -13,11 +13,7 @@ interface Props {
 export default function PostAuthor({ name, profile, place, createdAt }: Props) {
   return (
     <View className="flex flex-row items-center gap-md">
-      <Image
-        source={{ uri: profile }}
-        style={{ width: 40, height: 40 }}
-        className="rounded-full bg-white"
-      />
+      <Image source={{ uri: profile }} className="size-14 rounded-full bg-white" />
       <View className="flex flex-col gap-xs">
         <Typography variant="h3" className="text-gray-800">
           {name}

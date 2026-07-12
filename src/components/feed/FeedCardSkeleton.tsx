@@ -10,7 +10,7 @@ export default function FeedCardSkeleton() {
     <View className="w-full gap-lg rounded-md border border-gray-100 bg-white p-lg">
       <View className="w-full flex-row items-center justify-between">
         <View className="flex-row items-center gap-sm">
-          <Skeleton className="size-5 rounded-full" />
+          <Skeleton className="size-10 rounded-full" />
           <Skeleton className="h-4 w-24 rounded-sm" />
         </View>
         <Skeleton className="size-6 rounded-sm" />

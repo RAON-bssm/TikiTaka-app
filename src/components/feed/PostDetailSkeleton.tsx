@@ -11,7 +11,7 @@ export default function PostDetailSkeleton() {
     <>
       <View className="flex flex-col gap-lg">
         <View className="flex flex-row items-center gap-md">
-          <Skeleton className="size-10 rounded-full" />
+          <Skeleton className="size-14 rounded-full" />
           <View className="flex flex-col gap-xs">
             <Skeleton className="h-5 w-24 rounded-sm" />
             <Skeleton className="h-4 w-32 rounded-sm" />
