@@ -1,12 +1,7 @@
 import CategoryTabs from '@/components/ui/CategoryTabs';
 import Typography from '@/components/ui/Typography';
 import { DEFAULT_CHARACTER_CONFIG } from '@/constants/character/assets';
-import {
-  CATEGORY_DEFS,
-  COLOR_HEX,
-  type ColorOption,
-  type ShapeOption,
-} from '@/constants/character/customize';
+import { CATEGORY_DEFS, type ColorOption, type ShapeOption } from '@/constants/character/customize';
 import { CharacterConfig } from '@/constants/character/types';
 import { Image } from 'expo-image';
 import { useState } from 'react';
@@ -56,7 +51,7 @@ const ColorSwatches = ({
         <Pressable
           key={color.id}
           onPress={() => onSelect(color.next)}
-          style={{ backgroundColor: COLOR_HEX[color.id] ?? '#DDE2EC' }}
+          style={{ backgroundColor: color.hex }}
           className={`h-[44px] w-[44px] rounded-full ${
             color.active ? 'border-2 border-primary-600' : ''
           }`}

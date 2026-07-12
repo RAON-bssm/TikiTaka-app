@@ -65,46 +65,55 @@ const COLOR_ASSETS: Record<ColorGroup, Record<string, Record<string, number>>> =
       black: require('@/assets/character/hair-back/bob/black.webp'),
       blond: require('@/assets/character/hair-back/bob/blond.webp'),
       brown: require('@/assets/character/hair-back/bob/brown.webp'),
+      pink: require('@/assets/character/hair-back/bob/pink.webp'),
     },
     long: {
       black: require('@/assets/character/hair-back/long/black.webp'),
       blond: require('@/assets/character/hair-back/long/blond.webp'),
       brown: require('@/assets/character/hair-back/long/brown.webp'),
+      pink: require('@/assets/character/hair-back/long/pink.webp'),
     },
     puff: {
       black: require('@/assets/character/hair-back/puff/black.webp'),
       blond: require('@/assets/character/hair-back/puff/blond.webp'),
       brown: require('@/assets/character/hair-back/puff/brown.webp'),
+      pink: require('@/assets/character/hair-back/puff/pink.webp'),
     },
     short: {
       black: require('@/assets/character/hair-back/short/black.webp'),
       blond: require('@/assets/character/hair-back/short/blond.webp'),
       brown: require('@/assets/character/hair-back/short/brown.webp'),
+      pink: require('@/assets/character/hair-back/short/pink.webp'),
     },
     'side-bob': {
       black: require('@/assets/character/hair-back/side-bob/black.webp'),
       blond: require('@/assets/character/hair-back/side-bob/blond.webp'),
       brown: require('@/assets/character/hair-back/side-bob/brown.webp'),
+      pink: require('@/assets/character/hair-back/side-bob/pink.webp'),
     },
     'low-tail': {
       black: require('@/assets/character/hair-back/low-tail/black.webp'),
       blond: require('@/assets/character/hair-back/low-tail/blond.webp'),
       brown: require('@/assets/character/hair-back/low-tail/brown.webp'),
+      pink: require('@/assets/character/hair-back/low-tail/pink.webp'),
     },
     'low-pigtails': {
       black: require('@/assets/character/hair-back/low-pigtails/black.webp'),
       blond: require('@/assets/character/hair-back/low-pigtails/blond.webp'),
       brown: require('@/assets/character/hair-back/low-pigtails/brown.webp'),
+      pink: require('@/assets/character/hair-back/low-pigtails/pink.webp'),
     },
     'side-wave': {
       black: require('@/assets/character/hair-back/side-wave/black.webp'),
       blond: require('@/assets/character/hair-back/side-wave/blond.webp'),
       brown: require('@/assets/character/hair-back/side-wave/brown.webp'),
+      pink: require('@/assets/character/hair-back/side-wave/pink.webp'),
     },
     wave: {
       black: require('@/assets/character/hair-back/wave/black.webp'),
       blond: require('@/assets/character/hair-back/wave/blond.webp'),
       brown: require('@/assets/character/hair-back/wave/brown.webp'),
+      pink: require('@/assets/character/hair-back/wave/pink.webp'),
     },
   },
   hairFront: {
@@ -112,6 +121,7 @@ const COLOR_ASSETS: Record<ColorGroup, Record<string, Record<string, number>>> =
       black: require('@/assets/character/hair-front/basic/black.webp'),
       blond: require('@/assets/character/hair-front/basic/blond.webp'),
       brown: require('@/assets/character/hair-front/basic/brown.webp'),
+      pink: require('@/assets/character/hair-front/basic/pink.webp'),
     },
   },
 };
