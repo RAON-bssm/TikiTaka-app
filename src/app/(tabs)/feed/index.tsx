@@ -2,6 +2,7 @@ import DistrictBattleStatus from '@/components/feed/DistrictBattleStatus';
 import FeedCard from '@/components/feed/FeedCard';
 import Button from '@/components/ui/Button';
 import Header from '@/components/ui/header';
+import { usePosts } from '@/hooks/post/usePosts';
 import { View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -35,6 +36,9 @@ const FEEDS = [
 ];
 
 export default function FeedScreen() {
+  const { data: posts, isLoading, isError } = usePosts(1);
+  console.log('posts:', { posts, isLoading, isError });
+
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
       <ScrollView
