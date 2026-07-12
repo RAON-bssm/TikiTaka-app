@@ -25,3 +25,13 @@ export interface Post {
 export interface PostListData {
   post: Post[];
 }
+
+export interface CreatePostRequest {
+  board_id: number;
+  post_image: string;
+  content: string;
+}
+
+export interface UpdatePostRequest {
+  content: string;
+}
