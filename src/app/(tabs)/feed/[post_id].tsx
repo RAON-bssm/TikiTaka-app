@@ -1,5 +1,5 @@
 import { useLocalSearchParams } from 'expo-router';
-import { View } from 'react-native';
+import { RefreshControl, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -8,13 +8,14 @@ import PostAuthor from '@/components/feed/PostAuthor';
 import PostDetailSkeleton from '@/components/feed/PostDetailSkeleton';
 import PostImage from '@/components/feed/PostImage';
 import PostTitleRow from '@/components/feed/PostTitleRow';
+import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Header from '@/components/ui/header';
-import Typography from '@/components/ui/Typography';
+import { palette } from '@/constants/colors';
 import { usePostDetail } from '@/hooks/post/usePostDetail';
 
 export default function PostDetailScreen() {
   const { post_id } = useLocalSearchParams<{ post_id: string }>();
-  const { data: post, isLoading, isError } = usePostDetail(post_id);
+  const { data: post, isLoading, isError, refetch, isRefetching } = usePostDetail(post_id);
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
@@ -22,15 +23,21 @@ export default function PostDetailScreen() {
         className="flex-1"
         contentContainerClassName="gap-2xl px-xl pt-lg"
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefetching}
+            onRefresh={refetch}
+            tintColor={palette.primary[600]}
+            colors={[palette.primary[600]]}
+          />
+        }
       >
         <Header />
 
         {isLoading ? (
           <PostDetailSkeleton />
         ) : isError || !post ? (
-          <Typography variant="body2" className="py-2xl text-center text-gray-400">
-            게시글을 불러오지 못했어요.
-          </Typography>
+          <ErrorRetry onRetry={refetch} />
         ) : (
           // TODO: 백엔드 Post 모델에 place·title·like_count·avatar·ai_comment 필드 추가 시 매핑 보강
           <>

@@ -2,17 +2,18 @@ import DistrictBattleStatus from '@/components/feed/DistrictBattleStatus';
 import FeedCard from '@/components/feed/FeedCard';
 import FeedCardSkeleton from '@/components/feed/FeedCardSkeleton';
 import Button from '@/components/ui/Button';
+import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Header from '@/components/ui/header';
-import Typography from '@/components/ui/Typography';
+import { palette } from '@/constants/colors';
 import { usePosts } from '@/hooks/post/usePosts';
-import { View } from 'react-native';
+import { RefreshControl, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const SKELETON_COUNT = 3;
 
 export default function FeedScreen() {
-  const { data: posts, isLoading, isError } = usePosts(1);
+  const { data: posts, isLoading, isError, refetch, isRefetching } = usePosts(1);
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
@@ -20,6 +21,14 @@ export default function FeedScreen() {
         className="flex-1"
         contentContainerClassName="gap-2xl px-xl pt-lg"
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefetching}
+            onRefresh={refetch}
+            tintColor={palette.primary[600]}
+            colors={[palette.primary[600]]}
+          />
+        }
       >
         <Header />
         <View className="flex flex-col gap-sm">
@@ -35,9 +44,7 @@ export default function FeedScreen() {
               <FeedCardSkeleton key={index} />
             ))
           ) : isError ? (
-            <Typography variant="body2" className="py-2xl text-center text-gray-400">
-              게시글을 불러오지 못했어요.
-            </Typography>
+            <ErrorRetry onRetry={refetch} />
           ) : (
             // TODO: 백엔드 Post 모델에 title·place·like_count·avatar 필드 추가 시 매핑 보강
             posts?.map((post) => (
