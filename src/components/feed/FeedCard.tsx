@@ -17,6 +17,7 @@ export interface FeedAuthor {
 }
 
 interface Props {
+  postId: string;
   author: FeedAuthor;
   imageUrl: string;
   title: string;
@@ -28,6 +29,7 @@ interface Props {
 }
 
 export default function FeedCard({
+  postId,
   author,
   imageUrl,
   title,
@@ -38,9 +40,8 @@ export default function FeedCard({
   onPressLike,
 }: Props) {
   return (
-    // TODO: 상세 이동 시 실제 post_id 사용 (현재 하드코딩)
     <Pressable
-      onPress={() => router.push('/feed/1')}
+      onPress={() => router.push(`/feed/${postId}`)}
       className="w-full gap-lg rounded-md border border-gray-100 bg-white p-lg active:opacity-90"
     >
       <View className="w-full flex-row items-center justify-between">

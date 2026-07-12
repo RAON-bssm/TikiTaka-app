@@ -95,6 +95,7 @@ export default function ProfileScreen() {
             {MY_FEEDS.map((feed) => (
               <FeedCard
                 key={feed.id}
+                postId={String(feed.id)}
                 author={feed.author}
                 imageUrl={feed.imageUrl}
                 title={feed.title}

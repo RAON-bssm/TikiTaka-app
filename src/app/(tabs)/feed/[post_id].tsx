@@ -1,27 +1,20 @@
-import AiScoreCard from '@/components/feed/AiScoreCard';
-import PostAuthor from '@/components/feed/PostAuthor';
-import PostImage from '@/components/feed/PostImage';
-import PostTitleRow from '@/components/feed/PostTitleRow';
-import Header from '@/components/ui/header';
+import { useLocalSearchParams } from 'expo-router';
 import { View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import AiScoreCard from '@/components/feed/AiScoreCard';
+import PostAuthor from '@/components/feed/PostAuthor';
+import PostDetailSkeleton from '@/components/feed/PostDetailSkeleton';
+import PostImage from '@/components/feed/PostImage';
+import PostTitleRow from '@/components/feed/PostTitleRow';
+import Header from '@/components/ui/header';
+import Typography from '@/components/ui/Typography';
+import { usePostDetail } from '@/hooks/post/usePostDetail';
+
 export default function PostDetailScreen() {
-  const post = {
-    user: {
-      name: '사이다사주',
-      profile: 'https://i.pinimg.com/736x/db/4b/95/db4b954a0e9191b2d38e69b2568f7013.jpg',
-    },
-    place: '영도구',
-    createdAt: '3분 전',
-    imgUrl: 'https://i.pinimg.com/736x/f8/95/1a/f8951a0f7b8523223d87d0ab42498056.jpg',
-    title: '영도 맛도리 전봇대',
-    likeCount: 1,
-    aiScore: 67,
-    aiComment:
-      '사진이 너무 흐릿해서 뭐라는 모르겠고 나무의 색깔과 모양이 마음에 안들어요. 저건 무엇인지도 모르겠고 사진 찍는 연습을 더하시길 바라요.',
-  };
+  const { post_id } = useLocalSearchParams<{ post_id: string }>();
+  const { data: post, isLoading, isError } = usePostDetail(post_id);
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
@@ -32,19 +25,25 @@ export default function PostDetailScreen() {
       >
         <Header />
 
-        <View className="flex flex-col gap-lg">
-          <PostAuthor
-            name={post.user.name}
-            profile={post.user.profile}
-            place={post.place}
-            createdAt={post.createdAt}
-          />
-          <PostImage uri={post.imgUrl} />
-        </View>
+        {isLoading ? (
+          <PostDetailSkeleton />
+        ) : isError || !post ? (
+          <Typography variant="body2" className="py-2xl text-center text-gray-400">
+            게시글을 불러오지 못했어요.
+          </Typography>
+        ) : (
+          // TODO: 백엔드 Post 모델에 place·title·like_count·avatar·ai_comment 필드 추가 시 매핑 보강
+          <>
+            <View className="flex flex-col gap-lg">
+              <PostAuthor name={post.user_name} profile="" place="" createdAt={post.created_at} />
+              <PostImage uri={post.post_image} />
+            </View>
 
-        <PostTitleRow authorName={post.user.name} title={post.title} likeCount={post.likeCount} />
+            <PostTitleRow authorName={post.user_name} title="" likeCount={0} />
 
-        <AiScoreCard score={post.aiScore} comment={post.aiComment} />
+            <AiScoreCard score={post.score} comment="" />
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
