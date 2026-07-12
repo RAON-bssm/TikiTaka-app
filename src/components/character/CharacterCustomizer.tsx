@@ -66,32 +66,47 @@ const ColorSwatches = ({
   </View>
 );
 
-/** 모양 선택 그리드 (실제 파츠 에셋 썸네일) */
-const ShapeGrid = ({ shapes, onSelect }: { shapes: ShapeOption[]; onSelect: SelectHandler }) => (
-  <ScrollView
-    className="flex-1"
-    showsVerticalScrollIndicator={false}
-    contentContainerClassName="flex-row flex-wrap gap-sm"
-  >
-    {shapes.map((shape) => (
-      <Pressable
-        key={shape.id}
-        onPress={() => onSelect(shape.next)}
-        className={`aspect-square basis-[30%] items-center justify-center overflow-hidden rounded-lg bg-gray-100 ${
-          shape.active ? 'border-2 border-primary-600' : ''
-        }`}
-      >
-        {shape.source != null && (
-          <Image
-            source={shape.source}
-            contentFit="contain"
-            style={{ width: '100%', height: '100%' }}
-          />
-        )}
-      </Pressable>
-    ))}
-  </ScrollView>
-);
+const GRID_GAP = 8;
+const MIN_ITEM_WIDTH = 100;
+
+const ShapeGrid = ({ shapes, onSelect }: { shapes: ShapeOption[]; onSelect: SelectHandler }) => {
+  // 박스 너비를 측정해 열 수를 유동적으로 계산한다.
+  // (작은 폰은 2칸, 보통 3칸, 큰 화면은 4칸+) — 남는 여백 없이 칸 크기를 딱 맞춘다.
+  const [width, setWidth] = useState(0);
+  const columns = Math.max(1, Math.floor((width + GRID_GAP) / (MIN_ITEM_WIDTH + GRID_GAP)));
+  // 소수 폭은 픽셀 반올림 시 합이 컨테이너를 넘어 마지막 칸이 밀릴 수 있으므로 내림한다.
+  const itemSize = Math.floor((width - GRID_GAP * (columns - 1)) / columns);
+
+  return (
+    <ScrollView
+      className="flex-1"
+      showsVerticalScrollIndicator={false}
+      onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
+      contentContainerClassName="flex-row flex-wrap"
+      contentContainerStyle={{ gap: GRID_GAP }}
+    >
+      {width > 0 &&
+        shapes.map((shape) => (
+          <Pressable
+            key={shape.id}
+            onPress={() => onSelect(shape.next)}
+            style={{ width: itemSize, height: itemSize }}
+            className={`items-center justify-center overflow-hidden rounded-lg bg-gray-100 ${
+              shape.active ? 'border-2 border-primary-600' : ''
+            }`}
+          >
+            {shape.source != null && (
+              <Image
+                source={shape.source}
+                contentFit="contain"
+                style={{ width: '100%', height: '100%' }}
+              />
+            )}
+          </Pressable>
+        ))}
+    </ScrollView>
+  );
+};
 
 /**
  * 캐릭터 꾸미기 편집기.
