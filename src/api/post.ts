@@ -30,6 +30,10 @@ async function compressImageForUpload(uri: string): Promise<string> {
     format: SaveFormat.JPEG,
   });
 
+  // [DEBUG] 실제로 이미지가 로드·재인코딩됐는지 확인용. width/height가 0이 아니면 유효한 이미지 바이트가 만들어진 것.
+  console.log('[upload] source uri:', uri);
+  console.log('[upload] compressed:', result.uri, `${result.width}x${result.height}`);
+
   // 사용이 끝난 네이티브 객체는 메모리 해제
   context.release();
   image.release();
@@ -61,17 +65,21 @@ export async function createPost({ board_id, fileUri, content }: CreatePostReque
   const compressedUri = await compressImageForUpload(fileUri);
   const fileName = compressedUri.split('/').pop() ?? `photo-${Date.now()}.jpg`;
 
+  // 서버 DTO(CreatePostRequest: boardId, content, image)와 필드명이 정확히 일치해야
+  // @ModelAttribute 바인딩이 된다. snake_case로 보내면 null 바인딩되어 400이 난다.
   const formData = new FormData();
-  formData.append('board_id', String(board_id));
+  formData.append('boardId', String(board_id));
   formData.append('content', content);
-  formData.append('post_image', {
+  formData.append('image', {
     uri: compressedUri,
     name: fileName,
     type: 'image/jpeg',
   } as unknown as Blob);
 
+  // Content-Type을 직접 'multipart/form-data'로 박으면 boundary가 빠져 서버가 파트를 파싱하지 못해 400이 난다.
+  // undefined로 넘겨 axios 인스턴스 기본값(application/json)을 해제하면, RN 네트워킹이 boundary 포함 헤더를 자동 생성한다.
   const { data } = await client.post<ApiResponse<Post>>(`/api/post`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
+    headers: { 'Content-Type': undefined },
   });
   return data.data;
 }

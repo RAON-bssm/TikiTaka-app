@@ -5,6 +5,7 @@ import Button from '@/components/ui/Button';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Header from '@/components/ui/Header';
 import { palette } from '@/constants/colors';
+import { pickRankingCharacter } from '@/constants/ranking';
 import { usePosts } from '@/hooks/post/usePosts';
 import { formatRelativeTime } from '@/hooks/useRelativeTime';
 import { RefreshControl, View } from 'react-native';
@@ -52,7 +53,7 @@ export default function FeedScreen() {
               <FeedCard
                 key={post.post_id}
                 postId={post.post_id}
-                author={{ name: post.user_name }}
+                author={{ name: post.user_name, character: pickRankingCharacter(post.post_id) }}
                 imageUrl={post.post_image}
                 title=""
                 place=""

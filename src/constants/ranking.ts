@@ -177,3 +177,26 @@ export const PERSONAL_RANKINGS: PersonalRanking[] = [
   { rank: 8, name: '니코꼬리찜', address: '부산시 금정구', score: 233, character: RANK8_CHARACTER },
   { rank: 9, name: '니코꼬리찜', address: '부산시 강서구', score: 120, character: RANK9_CHARACTER },
 ];
+
+/** 랭킹에 등장하는 캐릭터 구성 목록. (게시글 아바타를 랜덤으로 채울 때 재사용) */
+export const RANKING_CHARACTERS: CharacterConfig[] = PERSONAL_RANKINGS.map((r) => r.character);
+
+/**
+ * 랭킹 캐릭터 중 하나를 골라 반환한다.
+ *
+ * seed(예: post_id)를 주면 그 문자열을 해시해 **항상 같은 캐릭터**를 반환한다.
+ * (같은 게시글이 매 렌더마다 다른 캐릭터로 깜빡이지 않도록 하기 위함.)
+ * seed가 없으면 매 호출마다 무작위로 고른다.
+ */
+export function pickRankingCharacter(seed?: string): CharacterConfig {
+  if (!seed) {
+    return RANKING_CHARACTERS[Math.floor(Math.random() * RANKING_CHARACTERS.length)];
+  }
+  // 간단한 문자열 해시(djb2 변형) → 인덱스로 매핑
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = (hash * 31 + seed.charCodeAt(i)) | 0;
+  }
+  const index = Math.abs(hash) % RANKING_CHARACTERS.length;
+  return RANKING_CHARACTERS[index];
+}

@@ -40,9 +40,14 @@ export default function Upload() {
     uploadPost(
       { fileUri: uri, boardId, content },
       {
-        onSuccess: () => {
+        onSuccess: (postId) => {
           showToast('게시물이 등록됐어요');
-          router.back();
+          // 방금 올린 글의 상세 페이지로 이동한다. id를 못 받은 경우엔 이전 화면으로 되돌아간다.
+          if (postId) {
+            router.replace({ pathname: '/feed/[post_id]', params: { post_id: postId } });
+          } else {
+            router.back();
+          }
         },
         onError: () => showToast('업로드에 실패했어요. 다시 시도해주세요.'),
       },
