@@ -76,7 +76,7 @@ export default function ProfileScreen() {
               content="프로필 수정"
               variant="light"
               className="flex-1"
-              onclick={() => router.push('/profile/edit-region')}
+              onclick={() => router.push('/profile/edit')}
             />
             <Button
               content="캐릭터 꾸미기"
