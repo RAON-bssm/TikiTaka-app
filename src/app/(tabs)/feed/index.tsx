@@ -6,6 +6,7 @@ import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Header from '@/components/ui/Header';
 import { palette } from '@/constants/colors';
 import { usePosts } from '@/hooks/post/usePosts';
+import { formatRelativeTime } from '@/hooks/useRelativeTime';
 import { RefreshControl, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -55,7 +56,7 @@ export default function FeedScreen() {
                 imageUrl={post.post_image}
                 title=""
                 place=""
-                timeAgo={post.created_at}
+                timeAgo={formatRelativeTime(post.created_at)}
                 likeCount={0}
               />
             ))

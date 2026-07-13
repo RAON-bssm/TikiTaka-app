@@ -2,6 +2,7 @@ import PlaceIcon from '@/assets/icons/place.svg';
 import { DEFAULT_CHARACTER_CONFIG } from '@/constants/character/assets';
 import type { CharacterConfig } from '@/constants/character/types';
 import { palette } from '@/constants/colors';
+import useRelativeTime from '@/hooks/useRelativeTime';
 import { View } from 'react-native';
 import Character from '../character/Character';
 import Typography from '../ui/Typography';
@@ -20,6 +21,7 @@ export default function PostAuthor({
   place,
   createdAt,
 }: Props) {
+  const timeAgo = useRelativeTime(createdAt);
   return (
     <View className="flex flex-row items-center gap-md">
       <Character config={character} size={56} />
@@ -38,7 +40,7 @@ export default function PostAuthor({
             ·
           </Typography>
           <Typography variant="body2" className="text-gray-400 text-md">
-            {createdAt}
+            {timeAgo}
           </Typography>
         </View>
       </View>
