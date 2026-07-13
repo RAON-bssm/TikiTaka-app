@@ -51,7 +51,7 @@ export default function FeedScreen() {
               <FeedCard
                 key={post.post_id}
                 postId={post.post_id}
-                author={{ name: post.user_name, avatarUrl: '' }}
+                author={{ name: post.user_name }}
                 imageUrl={post.post_image}
                 title=""
                 place=""

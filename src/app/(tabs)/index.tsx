@@ -12,7 +12,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 export default function HomeScreen() {
   const user = {
     name: '하린',
-    profile: 'https://i.pinimg.com/736x/db/4b/95/db4b954a0e9191b2d38e69b2568f7013.jpg',
   };
 
   const feedPreviews = [

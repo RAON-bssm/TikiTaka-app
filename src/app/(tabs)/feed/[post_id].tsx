@@ -47,7 +47,7 @@ export default function PostDetailScreen() {
           // TODO: 백엔드 Post 모델에 place·title·like_count·avatar·ai_comment 필드 추가 시 매핑 보강
           <>
             <View className="flex flex-col gap-lg">
-              <PostAuthor name={post.user_name} profile="" place="" createdAt={post.created_at} />
+              <PostAuthor name={post.user_name} place="" createdAt={post.created_at} />
               <PostImage uri={post.post_image} />
             </View>
 

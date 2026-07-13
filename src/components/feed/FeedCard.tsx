@@ -4,7 +4,10 @@ import { Image, Pressable, View } from 'react-native';
 import FavoriteIcon from '@/assets/icons/favorite.svg';
 import MoreIcon from '@/assets/icons/more-vert.svg';
 import PlaceIcon from '@/assets/icons/place.svg';
+import Character from '@/components/character/Character';
 import Typography from '@/components/ui/Typography';
+import { DEFAULT_CHARACTER_CONFIG } from '@/constants/character/assets';
+import type { CharacterConfig } from '@/constants/character/types';
 import { palette } from '@/constants/colors';
 
 const COLOR_GRAY = palette.gray[400];
@@ -13,7 +16,8 @@ const COLOR_ICON = palette.gray[500]; // 더보기 아이콘
 
 export interface FeedAuthor {
   name: string;
-  avatarUrl: string;
+  /** 작성자 캐릭터 구성. 없으면 기본 캐릭터로 렌더한다. */
+  character?: CharacterConfig;
 }
 
 interface Props {
@@ -46,7 +50,7 @@ export default function FeedCard({
     >
       <View className="w-full flex-row items-center justify-between">
         <View className="flex-row items-center gap-sm">
-          <Image source={{ uri: author.avatarUrl }} className="size-10 rounded-full bg-gray-100" />
+          <Character config={author.character ?? DEFAULT_CHARACTER_CONFIG} size={40} />
           <Typography variant="body2" className="text-gray-800">
             {author.name}
           </Typography>

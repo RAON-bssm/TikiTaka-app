@@ -17,7 +17,6 @@ const MY_FEEDS = [
     id: 1,
     author: {
       name: '그만말해인제',
-      avatarUrl: 'https://i.pinimg.com/736x/db/4b/95/db4b954a0e9191b2d38e69b2568f7013.jpg',
     },
     imageUrl: 'https://i.pinimg.com/736x/f8/95/1a/f8951a0f7b8523223d87d0ab42498056.jpg',
     title: '영도 맛도리 전봇대',
@@ -29,7 +28,6 @@ const MY_FEEDS = [
     id: 2,
     author: {
       name: '그만말해인제',
-      avatarUrl: 'https://i.pinimg.com/736x/db/4b/95/db4b954a0e9191b2d38e69b2568f7013.jpg',
     },
     imageUrl: 'https://i.pinimg.com/736x/db/4b/95/db4b954a0e9191b2d38e69b2568f7013.jpg',
     title: '오늘의 동네 한 컷',
