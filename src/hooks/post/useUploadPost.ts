@@ -1,6 +1,5 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-
 import { createPost } from '@/api/post';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface UploadPostParams {
   fileUri: string;
