@@ -6,6 +6,7 @@ import type {
   BoardListData,
   CreatePostRequest,
   Post,
+  PostDetail,
   PostListData,
   UpdatePostRequest,
 } from '@/types/post';
@@ -46,8 +47,8 @@ export async function getPosts(boardId: number): Promise<Post[]> {
   return data.data.post;
 }
 
-export async function getPostDetail(postId: string): Promise<Post> {
-  const { data } = await client.get<ApiResponse<Post>>(`/api/post/${postId}`);
+export async function getPostDetail(postId: string): Promise<PostDetail> {
+  const { data } = await client.get<ApiResponse<PostDetail>>(`/api/post/${postId}`);
   return data.data;
 }
 

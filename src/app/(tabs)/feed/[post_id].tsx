@@ -44,17 +44,21 @@ export default function PostDetailScreen() {
         ) : isError || !post ? (
           <ErrorRetry onRetry={refetch} />
         ) : (
-          // TODO: 백엔드 Post 모델에 place·title·like_count·avatar·ai_comment 필드 추가 시 매핑 보강
+          // TODO: 백엔드 Post 모델에 avatar 필드 추가 시 캐릭터 매핑 보강
           <>
             <View className="flex flex-col gap-lg">
-              <PostAuthor name={post.user_name} place="" createdAt={post.created_at} />
+              <PostAuthor name={post.user_name} place={post.location} createdAt={post.created_at} />
               <PostImage uri={post.post_image} />
             </View>
 
-            <PostTitleRow authorName={post.user_name} title="" likeCount={0} />
+            <PostTitleRow
+              authorName={post.user_name}
+              title={post.content}
+              likeCount={post.like_count}
+            />
 
             {scoreRevealed ? (
-              <AiScoreCard score={post.score} comment="" />
+              <AiScoreCard score={post.score} comment={post.ai_review} />
             ) : (
               <AiScoreCheckCard onCheck={() => setScoreRevealed(true)} />
             )}
