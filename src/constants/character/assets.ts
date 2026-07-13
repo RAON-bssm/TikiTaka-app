@@ -180,23 +180,16 @@ export function getColorOptions(part: ColorablePart, shapeId: string): string[] 
 }
 
 /**
- * 등록된 에셋 중 각 파츠의 첫 옵션으로 구성한 기본 캐릭터.
- * 아직 에셋이 없는 파츠는 빈 문자열이 되며, Character 컴포넌트에서 자동 skip 된다.
+ * 홈 배너에 나오는 캐릭터와 동일한 파츠로 구성한 기본 캐릭터.
+ * (배너 슬라이드: `src/constants/banner.ts`)
  */
-function firstShape(part: PartConfigKey): string {
-  return getShapeOptions(part)[0] ?? '';
-}
-function firstColor(part: ColorablePart): string {
-  return getColorOptions(part, firstShape(part))[0] ?? '';
-}
-
 export const DEFAULT_CHARACTER_CONFIG: CharacterConfig = {
-  body: firstShape('body'),
-  eyes: firstShape('eyes'),
-  eyesColor: firstColor('eyes'),
-  mouth: firstShape('mouth'),
-  hairBack: firstShape('hairBack'),
-  hairFront: firstShape('hairFront'),
-  hairColor: firstColor('hairFront'),
-  clothing: firstShape('clothing'), // 코스튬은 항상 착용 상태(기본 clothing01) — 벗을 수 없다
+  body: 'body02',
+  eyes: 'eyes01',
+  eyesColor: 'orange',
+  mouth: 'mouth01',
+  hairBack: 'long',
+  hairFront: 'basic',
+  hairColor: 'black',
+  clothing: 'clothing01', // 코스튬은 항상 착용 상태 — 벗을 수 없다
 };
