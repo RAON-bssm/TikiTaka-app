@@ -1,5 +1,6 @@
 import FavoriteIcon from '@/assets/icons/favorite.svg';
 import { View } from 'react-native';
+import { palette } from '@/constants/colors';
 import Typography from '../ui/Typography';
 
 interface Props {
@@ -23,7 +24,7 @@ export default function PostTitleRow({ authorName, title, likeCount }: Props) {
         </Typography>
       </View>
       <View className="flex flex-row items-center gap-xs">
-        <FavoriteIcon width={20} height={20} color="#FC8253" />
+        <FavoriteIcon width={20} height={20} color={palette.gray[400]} />
         <Typography variant="body3" className="text-gray-600">
           {likeCount}
         </Typography>

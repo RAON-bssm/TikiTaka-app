@@ -11,7 +11,6 @@ import type { CharacterConfig } from '@/constants/character/types';
 import { palette } from '@/constants/colors';
 
 const COLOR_GRAY = palette.gray[400];
-const COLOR_ORANGE = palette.primary[600];
 const COLOR_ICON = palette.gray[500]; // 더보기 아이콘
 
 export interface FeedAuthor {
@@ -89,7 +88,7 @@ export default function FeedCard({
           onPress={onPressLike}
           className="items-center justify-center gap-[2px] active:opacity-70"
         >
-          <FavoriteIcon width={20} height={20} color={COLOR_ORANGE} />
+          <FavoriteIcon width={20} height={20} color={COLOR_GRAY} />
           <Typography variant="body3" className="text-gray-700">
             {likeCount}
           </Typography>
