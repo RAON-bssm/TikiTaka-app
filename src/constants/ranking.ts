@@ -172,10 +172,10 @@ export const PERSONAL_RANKINGS: PersonalRanking[] = [
     score: 299,
     character: RANK5_CHARACTER,
   },
-  { rank: 6, name: '니코꼬리찜', address: '부산시 연제구', score: 280, character: RANK6_CHARACTER },
-  { rank: 7, name: '니코꼬리찜', address: '부산시 수영구', score: 277, character: RANK7_CHARACTER },
-  { rank: 8, name: '니코꼬리찜', address: '부산시 금정구', score: 233, character: RANK8_CHARACTER },
-  { rank: 9, name: '니코꼬리찜', address: '부산시 강서구', score: 120, character: RANK9_CHARACTER },
+  { rank: 6, name: '거제야호', address: '부산시 연제구', score: 280, character: RANK6_CHARACTER },
+  { rank: 7, name: 'SOMONOX', address: '부산시 수영구', score: 277, character: RANK7_CHARACTER },
+  { rank: 8, name: '야르끙끙', address: '부산시 금정구', score: 233, character: RANK8_CHARACTER },
+  { rank: 9, name: '고양이식빵', address: '부산시 강서구', score: 120, character: RANK9_CHARACTER },
 ];
 
 /** 랭킹에 등장하는 캐릭터 구성 목록. (게시글 아바타를 랜덤으로 채울 때 재사용) */

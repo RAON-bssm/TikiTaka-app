@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import { useState } from 'react';
 import { Image, Pressable, View } from 'react-native';
 
 import FavoriteIcon from '@/assets/icons/favorite.svg';
@@ -11,6 +12,7 @@ import type { CharacterConfig } from '@/constants/character/types';
 import { palette } from '@/constants/colors';
 
 const COLOR_GRAY = palette.gray[400];
+const COLOR_PRIMARY = palette.primary[600];
 const COLOR_ICON = palette.gray[500]; // 더보기 아이콘
 
 export interface FeedAuthor {
@@ -42,6 +44,8 @@ export default function FeedCard({
   onPressMore,
   onPressLike,
 }: Props) {
+  const [liked, setLiked] = useState(false);
+
   return (
     <Pressable
       onPress={() => router.push(`/feed/${postId}`)}
@@ -85,12 +89,15 @@ export default function FeedCard({
         </View>
 
         <Pressable
-          onPress={onPressLike}
+          onPress={() => {
+            setLiked((prev) => !prev);
+            onPressLike?.();
+          }}
           className="items-center justify-center gap-[2px] active:opacity-70"
         >
-          <FavoriteIcon width={20} height={20} color={COLOR_GRAY} />
+          <FavoriteIcon width={20} height={20} color={liked ? COLOR_PRIMARY : COLOR_GRAY} />
           <Typography variant="body3" className="text-gray-700">
-            {likeCount}
+            {likeCount + (liked ? 1 : 0)}
           </Typography>
         </Pressable>
       </View>
