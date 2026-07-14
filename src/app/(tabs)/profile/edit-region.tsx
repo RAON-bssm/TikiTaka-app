@@ -1,6 +1,6 @@
 import BackButton from '@/components/ui/BackButton';
 import Button from '@/components/ui/Button';
-import Header from '@/components/ui/header';
+import Header from '@/components/ui/Header';
 import RegionSelect from '@/components/ui/input/RegionSelect';
 import Typography from '@/components/ui/Typography';
 import { View } from 'react-native';

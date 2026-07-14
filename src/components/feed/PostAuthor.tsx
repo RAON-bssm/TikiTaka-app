@@ -1,23 +1,30 @@
 import PlaceIcon from '@/assets/icons/place.svg';
+import { DEFAULT_CHARACTER_CONFIG } from '@/constants/character/assets';
+import type { CharacterConfig } from '@/constants/character/types';
 import { palette } from '@/constants/colors';
-import { Image, View } from 'react-native';
+import useRelativeTime from '@/hooks/useRelativeTime';
+import { View } from 'react-native';
+import Character from '../character/Character';
 import Typography from '../ui/Typography';
 
 interface Props {
   name: string;
-  profile: string;
+  /** 작성자 캐릭터 구성. 없으면 기본 캐릭터로 렌더한다. */
+  character?: CharacterConfig;
   place: string;
   createdAt: string;
 }
 
-export default function PostAuthor({ name, profile, place, createdAt }: Props) {
+export default function PostAuthor({
+  name,
+  character = DEFAULT_CHARACTER_CONFIG,
+  place,
+  createdAt,
+}: Props) {
+  const timeAgo = useRelativeTime(createdAt);
   return (
     <View className="flex flex-row items-center gap-md">
-      <Image
-        source={{ uri: profile }}
-        style={{ width: 40, height: 40 }}
-        className="rounded-full bg-white"
-      />
+      <Character config={character} size={56} />
       <View className="flex flex-col gap-xs">
         <Typography variant="h3" className="text-gray-800">
           {name}
@@ -33,7 +40,7 @@ export default function PostAuthor({ name, profile, place, createdAt }: Props) {
             ·
           </Typography>
           <Typography variant="body2" className="text-gray-400 text-md">
-            {createdAt}
+            {timeAgo}
           </Typography>
         </View>
       </View>

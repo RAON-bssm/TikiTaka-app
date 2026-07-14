@@ -11,11 +11,20 @@ const client = axios.create({
   },
 });
 
-// 요청 인터셉터 추가 (토큰 주입 등 필요 시 활성화)
+// 개발용 고정 토큰(임시): 실제 저장된 토큰 대신 항상 이 값을 사용한다.
+const DEV_TOKEN = '11111111-1111-1111-1111-111111111111';
+
+// 요청 인터셉터: 저장된 액세스 토큰을 모든 요청에 자동으로 주입한다.
 client.interceptors.request.use(
-  (config) => {
-    // 예: const token = await AsyncStorage.getItem('token');
-    // if (token) { config.headers.Authorization = `Bearer ${token}`; }
+  async (config) => {
+    // 임시: 개발용 고정 토큰 사용
+    config.headers.Authorization = `Bearer ${DEV_TOKEN}`;
+
+    // TODO: 개발 완료 후 아래 원래 로직으로 복구
+    // const token = await getAccessToken();
+    // if (token) {
+    //   config.headers.Authorization = `Bearer ${token}`;
+    // }
     return config;
   },
   (error) => {

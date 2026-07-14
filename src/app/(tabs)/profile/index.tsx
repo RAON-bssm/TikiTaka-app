@@ -2,9 +2,10 @@ import FeedCard from '@/components/feed/FeedCard';
 import NeighborhoodSheet from '@/components/profile/NeighborhoodSheet';
 import UserProfile from '@/components/profile/UserProfile';
 import Button from '@/components/ui/Button';
-import Header from '@/components/ui/header';
+import Header from '@/components/ui/Header';
 import NavRow from '@/components/ui/NavRow';
 import Typography from '@/components/ui/Typography';
+import { useCharacterConfig } from '@/hooks/character/useCharacterConfig';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
@@ -17,7 +18,6 @@ const MY_FEEDS = [
     id: 1,
     author: {
       name: '그만말해인제',
-      avatarUrl: 'https://i.pinimg.com/736x/db/4b/95/db4b954a0e9191b2d38e69b2568f7013.jpg',
     },
     imageUrl: 'https://i.pinimg.com/736x/f8/95/1a/f8951a0f7b8523223d87d0ab42498056.jpg',
     title: '영도 맛도리 전봇대',
@@ -29,7 +29,6 @@ const MY_FEEDS = [
     id: 2,
     author: {
       name: '그만말해인제',
-      avatarUrl: 'https://i.pinimg.com/736x/db/4b/95/db4b954a0e9191b2d38e69b2568f7013.jpg',
     },
     imageUrl: 'https://i.pinimg.com/736x/db/4b/95/db4b954a0e9191b2d38e69b2568f7013.jpg',
     title: '오늘의 동네 한 컷',
@@ -41,16 +40,8 @@ const MY_FEEDS = [
 
 export default function ProfileScreen() {
   const [isNeighborhoodSheetOpen, setIsNeighborhoodSheetOpen] = useState(false);
-  const character = {
-    body: 'body02',
-    eyes: 'eyes01',
-    eyesColor: 'orange',
-    mouth: 'mouth01',
-    hairBack: 'long',
-    hairFront: 'basic',
-    hairColor: 'black',
-    clothing: 'clothing01',
-  };
+  // 꾸미기 화면과 같은 저장된 config를 공유한다(수정 시 즉시 반영).
+  const { config: character } = useCharacterConfig();
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top']}>
       <ScrollView
@@ -76,7 +67,7 @@ export default function ProfileScreen() {
               content="프로필 수정"
               variant="light"
               className="flex-1"
-              onclick={() => router.push('/profile/edit-region')}
+              onclick={() => router.push('/profile/edit')}
             />
             <Button
               content="캐릭터 꾸미기"
@@ -95,6 +86,7 @@ export default function ProfileScreen() {
             {MY_FEEDS.map((feed) => (
               <FeedCard
                 key={feed.id}
+                postId={String(feed.id)}
                 author={feed.author}
                 imageUrl={feed.imageUrl}
                 title={feed.title}

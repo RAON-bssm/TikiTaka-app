@@ -25,7 +25,7 @@ export default function AiScoreCard({ score, comment }: Props) {
         </Typography>
       </View>
       <View className="h-[81px] w-[2px] rounded-xs bg-gray-200" />
-      <Typography variant="body3" className="flex-1 pr-xl pt-md text-gray-700 leading-5">
+      <Typography variant="body2" className="flex-1 pr-xl pt-md text-gray-700 leading-5">
         {comment}
       </Typography>
     </View>

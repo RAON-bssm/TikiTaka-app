@@ -21,6 +21,19 @@ export const COLOR_HEX: Record<string, string> = {
   blue: '#4078FF',
 };
 
+/**
+ * 머리 전용 색상 오버라이드. 같은 색 id라도 파츠마다 표시 색을 달리해야 할 때 사용한다.
+ * (예: 머리 pink는 연한 톤, 눈 pink는 진한 톤) 여기 없는 색은 COLOR_HEX로 폴백한다.
+ */
+export const HAIR_COLOR_HEX: Record<string, string> = {
+  pink: '#f9d7e4',
+};
+
+/** 스와치 표시 색을 해석한다. override → COLOR_HEX → 회색 순으로 폴백. */
+function resolveHex(id: string, override?: Record<string, string>): string {
+  return override?.[id] ?? COLOR_HEX[id] ?? '#DDE2EC';
+}
+
 /** 선택지 공통 필드. next는 선택했을 때 반영할 config. */
 interface Option {
   id: string;
@@ -33,8 +46,10 @@ export interface ShapeOption extends Option {
   source: number | undefined;
 }
 
-/** 색상 선택지 (스와치). 단색 원으로 표시하므로 이미지가 필요 없다. */
-export type ColorOption = Option;
+/** 색상 선택지 (스와치). 단색 원으로 표시하므로 이미지 대신 표시 색(hex)을 담는다. */
+export interface ColorOption extends Option {
+  hex: string;
+}
 
 /**
  * 모양 선택지 목록을 만든다.
@@ -57,13 +72,22 @@ function shapeOptions(
   });
 }
 
-/** 색상 선택지 목록을 만든다. */
+/**
+ * 색상 선택지 목록을 만든다.
+ * hexOverride를 주면 해당 색 id의 스와치 표시 색을 파츠별로 덮어쓴다. (예: 머리 pink)
+ */
 function colorOptions(
   ids: string[],
   currentId: string,
   apply: (id: string) => CharacterConfig,
+  hexOverride?: Record<string, string>,
 ): ColorOption[] {
-  return ids.map((id) => ({ id, active: currentId === id, next: apply(id) }));
+  return ids.map((id) => ({
+    id,
+    active: currentId === id,
+    next: apply(id),
+    hex: resolveHex(id, hexOverride),
+  }));
 }
 
 /**
@@ -86,10 +110,12 @@ export const CATEGORY_DEFS: CategoryDef[] = [
         hairBack: id,
       })),
     buildColors: (c) =>
-      colorOptions(getColorOptions('hairBack', c.hairBack), c.hairColor, (id) => ({
-        ...c,
-        hairColor: id,
-      })),
+      colorOptions(
+        getColorOptions('hairBack', c.hairBack),
+        c.hairColor,
+        (id) => ({ ...c, hairColor: id }),
+        HAIR_COLOR_HEX,
+      ),
   },
   {
     label: '눈',

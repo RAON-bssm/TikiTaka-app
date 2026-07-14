@@ -2,7 +2,7 @@ import DistrictBattleStatus from '@/components/feed/DistrictBattleStatus';
 import FeedPreviewCard from '@/components/feed/FeedPreviewCard';
 import Banner from '@/components/ui/banner/Banner';
 import Button from '@/components/ui/Button';
-import Header from '@/components/ui/header';
+import Header from '@/components/ui/Header';
 import Typography from '@/components/ui/Typography';
 import { useRouter } from 'expo-router';
 import { Pressable, View } from 'react-native';
@@ -12,7 +12,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 export default function HomeScreen() {
   const user = {
     name: '하린',
-    profile: 'https://i.pinimg.com/736x/db/4b/95/db4b954a0e9191b2d38e69b2568f7013.jpg',
   };
 
   const feedPreviews = [

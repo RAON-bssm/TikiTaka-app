@@ -1,13 +1,17 @@
 import PlaceIcon from '@/assets/icons/place.svg';
+import { DEFAULT_CHARACTER_CONFIG } from '@/constants/character/assets';
+import type { CharacterConfig } from '@/constants/character/types';
 import { useRouter } from 'expo-router';
-import { Image, ImageBackground, Pressable, View } from 'react-native';
+import { ImageBackground, Pressable, View } from 'react-native';
+import Character from '../character/Character';
 import Typography from '../ui/Typography';
 
 interface Props {
   imgUrl: string;
   user: {
     name: string;
-    profile: string;
+    /** 유저 캐릭터 구성. 없으면 기본 캐릭터로 렌더한다. */
+    character?: CharacterConfig;
   };
   place: string;
   postId: string;
@@ -24,7 +28,7 @@ export default function FeedPreviewCard({ imgUrl, user, place, postId }: Props) 
         <View className="absolute inset-0 bg-black/20" />
         <View className="flex-1 justify-between p-md">
           <View className="flex flex-row items-center gap-xs">
-            <Image source={{ uri: user.profile }} className="w-8 h-8 rounded-full" />
+            <Character config={user.character ?? DEFAULT_CHARACTER_CONFIG} size={32} />
             <Typography variant="h4" className="text-white">
               {user.name}
             </Typography>

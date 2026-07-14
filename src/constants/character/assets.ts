@@ -65,46 +65,61 @@ const COLOR_ASSETS: Record<ColorGroup, Record<string, Record<string, number>>> =
       black: require('@/assets/character/hair-back/bob/black.webp'),
       blond: require('@/assets/character/hair-back/bob/blond.webp'),
       brown: require('@/assets/character/hair-back/bob/brown.webp'),
+      pink: require('@/assets/character/hair-back/bob/pink.webp'),
     },
     long: {
       black: require('@/assets/character/hair-back/long/black.webp'),
       blond: require('@/assets/character/hair-back/long/blond.webp'),
       brown: require('@/assets/character/hair-back/long/brown.webp'),
+      pink: require('@/assets/character/hair-back/long/pink.webp'),
     },
     puff: {
       black: require('@/assets/character/hair-back/puff/black.webp'),
       blond: require('@/assets/character/hair-back/puff/blond.webp'),
       brown: require('@/assets/character/hair-back/puff/brown.webp'),
+      pink: require('@/assets/character/hair-back/puff/pink.webp'),
     },
     short: {
       black: require('@/assets/character/hair-back/short/black.webp'),
       blond: require('@/assets/character/hair-back/short/blond.webp'),
       brown: require('@/assets/character/hair-back/short/brown.webp'),
+      pink: require('@/assets/character/hair-back/short/pink.webp'),
     },
     'side-bob': {
       black: require('@/assets/character/hair-back/side-bob/black.webp'),
       blond: require('@/assets/character/hair-back/side-bob/blond.webp'),
       brown: require('@/assets/character/hair-back/side-bob/brown.webp'),
+      pink: require('@/assets/character/hair-back/side-bob/pink.webp'),
+    },
+    'side-tail': {
+      black: require('@/assets/character/hair-back/side-tail/black.webp'),
+      blond: require('@/assets/character/hair-back/side-tail/blond.webp'),
+      brown: require('@/assets/character/hair-back/side-tail/brown.webp'),
+      pink: require('@/assets/character/hair-back/side-tail/pink.webp'),
     },
     'low-tail': {
       black: require('@/assets/character/hair-back/low-tail/black.webp'),
       blond: require('@/assets/character/hair-back/low-tail/blond.webp'),
       brown: require('@/assets/character/hair-back/low-tail/brown.webp'),
+      pink: require('@/assets/character/hair-back/low-tail/pink.webp'),
     },
     'low-pigtails': {
       black: require('@/assets/character/hair-back/low-pigtails/black.webp'),
       blond: require('@/assets/character/hair-back/low-pigtails/blond.webp'),
       brown: require('@/assets/character/hair-back/low-pigtails/brown.webp'),
+      pink: require('@/assets/character/hair-back/low-pigtails/pink.webp'),
     },
     'side-wave': {
       black: require('@/assets/character/hair-back/side-wave/black.webp'),
       blond: require('@/assets/character/hair-back/side-wave/blond.webp'),
       brown: require('@/assets/character/hair-back/side-wave/brown.webp'),
+      pink: require('@/assets/character/hair-back/side-wave/pink.webp'),
     },
     wave: {
       black: require('@/assets/character/hair-back/wave/black.webp'),
       blond: require('@/assets/character/hair-back/wave/blond.webp'),
       brown: require('@/assets/character/hair-back/wave/brown.webp'),
+      pink: require('@/assets/character/hair-back/wave/pink.webp'),
     },
   },
   hairFront: {
@@ -112,6 +127,7 @@ const COLOR_ASSETS: Record<ColorGroup, Record<string, Record<string, number>>> =
       black: require('@/assets/character/hair-front/basic/black.webp'),
       blond: require('@/assets/character/hair-front/basic/blond.webp'),
       brown: require('@/assets/character/hair-front/basic/brown.webp'),
+      pink: require('@/assets/character/hair-front/basic/pink.webp'),
     },
   },
 };
@@ -164,23 +180,16 @@ export function getColorOptions(part: ColorablePart, shapeId: string): string[] 
 }
 
 /**
- * 등록된 에셋 중 각 파츠의 첫 옵션으로 구성한 기본 캐릭터.
- * 아직 에셋이 없는 파츠는 빈 문자열이 되며, Character 컴포넌트에서 자동 skip 된다.
+ * 홈 배너에 나오는 캐릭터와 동일한 파츠로 구성한 기본 캐릭터.
+ * (배너 슬라이드: `src/constants/banner.ts`)
  */
-function firstShape(part: PartConfigKey): string {
-  return getShapeOptions(part)[0] ?? '';
-}
-function firstColor(part: ColorablePart): string {
-  return getColorOptions(part, firstShape(part))[0] ?? '';
-}
-
 export const DEFAULT_CHARACTER_CONFIG: CharacterConfig = {
-  body: firstShape('body'),
-  eyes: firstShape('eyes'),
-  eyesColor: firstColor('eyes'),
-  mouth: firstShape('mouth'),
-  hairBack: firstShape('hairBack'),
-  hairFront: firstShape('hairFront'),
-  hairColor: firstColor('hairFront'),
-  clothing: firstShape('clothing'), // 코스튬은 항상 착용 상태(기본 clothing01) — 벗을 수 없다
+  body: 'body02',
+  eyes: 'eyes01',
+  eyesColor: 'orange',
+  mouth: 'mouth01',
+  hairBack: 'long',
+  hairFront: 'basic',
+  hairColor: 'black',
+  clothing: 'clothing01', // 코스튬은 항상 착용 상태 — 벗을 수 없다
 };

@@ -7,7 +7,7 @@ import BattleSection from '@/components/ranking/BattleSection';
 import RankingList from '@/components/ranking/RankingList';
 import RankingTabs from '@/components/ranking/RankingTabs';
 import SortFilter from '@/components/ranking/SortFilter';
-import Header from '@/components/ui/header';
+import Header from '@/components/ui/Header';
 import {
   DISTRICT_RANKINGS,
   MATCHES,

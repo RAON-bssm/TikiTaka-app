@@ -2,9 +2,13 @@ import Topic from '@/components/camera/Topic';
 import Button from '@/components/ui/Button';
 import Dropdown from '@/components/ui/input/Dropdown';
 import TextInput from '@/components/ui/input/TextInput';
+import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
+import { useBoards } from '@/hooks/post/useBoards';
+import { useUploadPost } from '@/hooks/post/useUploadPost';
 import useImageRatio from '@/hooks/useImageRatio';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useState } from 'react';
 import { Image, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -14,9 +18,40 @@ export default function Upload() {
   // 가로는 부모 폭으로 고정, 세로는 원본 비율(가로/세로)에 맞춰 유동
   const photoRatio = useImageRatio(uri);
 
+  const [content, setContent] = useState('');
+  const { showToast } = useToast();
+  const { mutate: uploadPost, isPending } = useUploadPost();
+
+  // TODO: 실제 미션 선택 UI와 연결. 지금은 게시판 목록의 첫 항목에 올린다.
+  const { data: boards } = useBoards();
+  const boardId = boards?.[0]?.board_id || 1;
+
   const handleUpload = () => {
-    // TODO: 서버 업로드 API 연동 (TanStack Query useMutation)
-    console.log('upload photo:', uri);
+    if (isPending) return;
+    if (!uri) {
+      showToast('사진을 불러올 수 없어요.');
+      return;
+    }
+    if (boardId == null) {
+      showToast('게시판 정보를 불러오는 중이에요.');
+      return;
+    }
+
+    uploadPost(
+      { fileUri: uri, boardId, content },
+      {
+        onSuccess: (postId) => {
+          showToast('게시물이 등록됐어요');
+          // 방금 올린 글의 상세 페이지로 이동한다. id를 못 받은 경우엔 이전 화면으로 되돌아간다.
+          if (postId) {
+            router.replace({ pathname: '/feed/[post_id]', params: { post_id: postId } });
+          } else {
+            router.back();
+          }
+        },
+        onError: () => showToast('업로드에 실패했어요. 다시 시도해주세요.'),
+      },
+    );
   };
 
   return (
@@ -47,7 +82,12 @@ export default function Upload() {
         )}
 
         <View className="flex flex-col gap-md">
-          <TextInput label="미션 한마디" placeholder="게시물을 표현하는 한마디를 작성해주세요" />
+          <TextInput
+            label="미션 한마디"
+            placeholder="게시물을 표현하는 한마디를 작성해주세요"
+            value={content}
+            onChangeText={setContent}
+          />
           <Dropdown
             label="공개 범위"
             placeholder="공개 범위를 선택해주세요"
@@ -55,7 +95,7 @@ export default function Upload() {
           />
         </View>
 
-        <Button content="게시물 업로드" onclick={handleUpload} />
+        <Button content={isPending ? '업로드 중...' : '게시물 업로드'} onclick={handleUpload} />
       </ScrollView>
     </SafeAreaView>
   );

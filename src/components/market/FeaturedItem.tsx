@@ -6,13 +6,12 @@ import Typography from '@/components/ui/Typography';
 import type { ShopItem } from '@/constants/market';
 
 interface Props {
-  /** 미리보기로 노출할 아이템. */
   item: ShopItem;
   onBuy?: () => void;
+  onCustomize?: () => void;
 }
 
-/** 추천/선택된 꾸미기 아이템 미리보기 — 캐릭터 + 아이템 정보 + 구매 버튼. */
-export default function FeaturedItem({ item, onBuy }: Props) {
+export default function FeaturedItem({ item, onBuy, onCustomize }: Props) {
   return (
     <View className="w-full flex-row items-center justify-between">
       <View className="w-[110px] items-center">
@@ -27,8 +26,20 @@ export default function FeaturedItem({ item, onBuy }: Props) {
           <Typography variant="body3" className="text-gray-600">
             {item.description}
           </Typography>
+          <Typography variant="h4" className="text-secondary-500">
+            {item.price} 포인트
+          </Typography>
         </View>
-        <Button content={`${item.price} 포인트`} size="sm" onclick={onBuy} />
+        <View className="flex-row gap-sm">
+          <Button content="구매" size="sm" className="flex-1" onclick={onBuy} />
+          <Button
+            content="옷장"
+            size="sm"
+            variant="light"
+            className="flex-1"
+            onclick={onCustomize}
+          />
+        </View>
       </View>
     </View>
   );

@@ -1,22 +1,29 @@
 import { router } from 'expo-router';
-import { Image, Pressable, View } from 'react-native';
+import { useState } from 'react';
+import { ActivityIndicator, Image, Pressable, View } from 'react-native';
 
 import FavoriteIcon from '@/assets/icons/favorite.svg';
 import MoreIcon from '@/assets/icons/more-vert.svg';
 import PlaceIcon from '@/assets/icons/place.svg';
+import Character from '@/components/character/Character';
 import Typography from '@/components/ui/Typography';
+import { DEFAULT_CHARACTER_CONFIG } from '@/constants/character/assets';
+import type { CharacterConfig } from '@/constants/character/types';
 import { palette } from '@/constants/colors';
+import { useViewUrl } from '@/hooks/storage/useViewUrl';
 
 const COLOR_GRAY = palette.gray[400];
-const COLOR_ORANGE = palette.primary[600];
+const COLOR_PRIMARY = palette.primary[600];
 const COLOR_ICON = palette.gray[500]; // 더보기 아이콘
 
 export interface FeedAuthor {
   name: string;
-  avatarUrl: string;
+  /** 작성자 캐릭터 구성. 없으면 기본 캐릭터로 렌더한다. */
+  character?: CharacterConfig;
 }
 
 interface Props {
+  postId: string;
   author: FeedAuthor;
   imageUrl: string;
   title: string;
@@ -28,6 +35,7 @@ interface Props {
 }
 
 export default function FeedCard({
+  postId,
   author,
   imageUrl,
   title,
@@ -37,15 +45,18 @@ export default function FeedCard({
   onPressMore,
   onPressLike,
 }: Props) {
+  const [liked, setLiked] = useState(false);
+  // imageUrl은 서버가 준 이미지 key. 표시용 조회 URL로 변환한다.
+  const { uri: resolvedImageUri, isLoading: imageLoading } = useViewUrl(imageUrl);
+
   return (
-    // TODO: 상세 이동 시 실제 post_id 사용 (현재 하드코딩)
     <Pressable
-      onPress={() => router.push('/feed/1')}
+      onPress={() => router.push(`/feed/${postId}`)}
       className="w-full gap-lg rounded-md border border-gray-100 bg-white p-lg active:opacity-90"
     >
       <View className="w-full flex-row items-center justify-between">
         <View className="flex-row items-center gap-sm">
-          <Image source={{ uri: author.avatarUrl }} className="size-5 rounded-full bg-gray-100" />
+          <Character config={author.character ?? DEFAULT_CHARACTER_CONFIG} size={40} />
           <Typography variant="body2" className="text-gray-800">
             {author.name}
           </Typography>
@@ -55,8 +66,12 @@ export default function FeedCard({
         </Pressable>
       </View>
 
-      <View className="h-[225px] w-full overflow-hidden rounded-lg bg-gray-400">
-        <Image source={{ uri: imageUrl }} resizeMode="cover" className="h-full w-full" />
+      <View className="h-[225px] w-full items-center justify-center overflow-hidden rounded-lg bg-gray-400">
+        {resolvedImageUri && !imageLoading ? (
+          <Image source={{ uri: resolvedImageUri }} resizeMode="cover" className="h-full w-full" />
+        ) : (
+          <ActivityIndicator color={palette.gray[100]} />
+        )}
       </View>
 
       <View className="w-full flex-row items-center justify-between">
@@ -81,12 +96,15 @@ export default function FeedCard({
         </View>
 
         <Pressable
-          onPress={onPressLike}
+          onPress={() => {
+            setLiked((prev) => !prev);
+            onPressLike?.();
+          }}
           className="items-center justify-center gap-[2px] active:opacity-70"
         >
-          <FavoriteIcon width={20} height={20} color={COLOR_ORANGE} />
+          <FavoriteIcon width={20} height={20} color={liked ? COLOR_PRIMARY : COLOR_GRAY} />
           <Typography variant="body3" className="text-gray-700">
-            {likeCount}
+            {likeCount + (liked ? 1 : 0)}
           </Typography>
         </Pressable>
       </View>

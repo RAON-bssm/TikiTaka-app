@@ -5,6 +5,39 @@ import Character from '@/components/character/Character';
 import Typography from '@/components/ui/Typography';
 import type { GotchaPull } from '@/constants/market';
 
+// 외곽선을 만들기 위해 검은 텍스트를 겹칠 8방향 오프셋(px). RN Text에는 text-stroke가 없어
+// 같은 글자를 방향별로 살짝 밀어 겹쳐 스트로크처럼 보이게 한다.
+const OUTLINE_OFFSETS = [
+  { width: 0, height: -1 },
+  { width: 0, height: 1 },
+  { width: -1, height: 0 },
+  { width: 1, height: 0 },
+] as const;
+
+/**
+ * 아이템 이름을 검은 외곽선 + 진한 그림자와 함께 흰 글자로 렌더한다.
+ * 밝은 글로우/밝은 아이템 위에서도 이름이 또렷하게 보이도록 한다.
+ */
+function OutlinedItemName({ name }: { name: string }) {
+  return (
+    <View className="z-10 -mb-sm">
+      {/* 외곽선: 같은 글자를 검게 8방향으로 겹쳐 스트로크 효과 */}
+      {OUTLINE_OFFSETS.map((offset, i) => (
+        <Text
+          key={i}
+          aria-hidden
+          className="absolute font-title text-xl text-gray-800"
+          style={{ transform: [{ translateX: offset.width }, { translateY: offset.height }] }}
+        >
+          {name}
+        </Text>
+      ))}
+      {/* 본문: 흰 글자 (외곽선으로만 대비) */}
+      <Text className="font-title text-xl text-white">{name}</Text>
+    </View>
+  );
+}
+
 interface Props {
   /** 현재 보여줄 뽑기 결과 */
   result: GotchaPull;
@@ -34,24 +67,15 @@ export default function Gotcha({ result, progress, onDismiss }: Props) {
           <View className="absolute h-[190px] w-[190px] rounded-full bg-white/70" />
 
           <Animated.View entering={ZoomIn.springify()} className="items-center">
-            {/* 아이템 이름 — 흰 글자 + 그림자로 캐릭터 위에 겹친다 */}
-            <Text
-              className="z-10 -mb-sm font-title text-xl text-white"
-              style={{
-                textShadowColor: 'rgba(0, 0, 0, 0.45)',
-                textShadowOffset: { width: 0, height: 1 },
-                textShadowRadius: 4,
-              }}
-            >
-              {result.item.name}
-            </Text>
+            {/* 아이템 이름 — 흰 글자에 검은 외곽선 + 진한 그림자로 밝은 글로우 위에서도 또렷하게 */}
+            <OutlinedItemName name={result.item.name} />
 
             {/* 아이템을 착용한 캐릭터 */}
             <Character config={result.preview} size={230} />
 
             {/* 5회 뽑기일 때만 진행 표시 */}
             {progress ? (
-              <Typography variant="body1" className="text-white">
+              <Typography variant="body1" className="text-gray-500">
                 {progress.current} / {progress.total}
               </Typography>
             ) : null}
