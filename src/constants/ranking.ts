@@ -41,21 +41,21 @@ export interface PersonalRanking {
 // TODO: 서버 연동 시 TanStack Query로 대체
 export const MATCHES: Match[] = [
   { id: 1, left: { name: '사상구', score: 80 }, right: { name: '영도구', score: 67 } },
-  { id: 2, left: { name: '사상구', score: 67 }, right: { name: '영도구', score: 99 } },
-  { id: 3, left: { name: '사상구', score: 80 }, right: { name: '영도구', score: 67 } },
+  { id: 2, left: { name: '동래구', score: 67 }, right: { name: '강서구', score: 99 } },
+  { id: 3, left: { name: '부산진구', score: 80 }, right: { name: '중구', score: 67 } },
 ];
 
 // TODO: 서버 연동 시 TanStack Query로 대체
 export const DISTRICT_RANKINGS: DistrictRanking[] = [
-  { rank: 1, location: '부산시 사상구', score: 580 },
+  { rank: 1, location: '부산시 영도구', score: 670 },
   { rank: 2, location: '부산시 사상구', score: 580 },
-  { rank: 3, location: '부산시 사상구', score: 580 },
-  { rank: 4, location: '부산시 사상구', score: 580 },
-  { rank: 5, location: '부산시 사상구', score: 580 },
-  { rank: 6, location: '부산시 사상구', score: 580 },
-  { rank: 7, location: '부산시 사상구', score: 580 },
-  { rank: 8, location: '부산시 사상구', score: 580 },
-  { rank: 9, location: '부산시 사상구', score: 580 },
+  { rank: 3, location: '부산시 부산진구', score: 550 },
+  { rank: 4, location: '부산시 연제구', score: 530 },
+  { rank: 5, location: '부산시 동래구', score: 420 },
+  { rank: 6, location: '부산시 강서구', score: 390 },
+  { rank: 7, location: '부산시 중구', score: 330 },
+  { rank: 8, location: '부산시 해운대구', score: 320 },
+  { rank: 9, location: '부산시 수영구', score: 220 },
 ];
 
 // 개인랭킹 각 유저의 캐릭터. 순위별로 하나하나 수정할 수 있도록 개별 config로 분리했다.
