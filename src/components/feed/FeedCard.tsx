@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Image, Pressable, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, View } from 'react-native';
 
 import FavoriteIcon from '@/assets/icons/favorite.svg';
 import MoreIcon from '@/assets/icons/more-vert.svg';
@@ -10,6 +10,7 @@ import Typography from '@/components/ui/Typography';
 import { DEFAULT_CHARACTER_CONFIG } from '@/constants/character/assets';
 import type { CharacterConfig } from '@/constants/character/types';
 import { palette } from '@/constants/colors';
+import { useViewUrl } from '@/hooks/storage/useViewUrl';
 
 const COLOR_GRAY = palette.gray[400];
 const COLOR_PRIMARY = palette.primary[600];
@@ -45,6 +46,8 @@ export default function FeedCard({
   onPressLike,
 }: Props) {
   const [liked, setLiked] = useState(false);
+  // imageUrl은 서버가 준 이미지 key. 표시용 조회 URL로 변환한다.
+  const { uri: resolvedImageUri, isLoading: imageLoading } = useViewUrl(imageUrl);
 
   return (
     <Pressable
@@ -63,8 +66,12 @@ export default function FeedCard({
         </Pressable>
       </View>
 
-      <View className="h-[225px] w-full overflow-hidden rounded-lg bg-gray-400">
-        <Image source={{ uri: imageUrl }} resizeMode="cover" className="h-full w-full" />
+      <View className="h-[225px] w-full items-center justify-center overflow-hidden rounded-lg bg-gray-400">
+        {resolvedImageUri && !imageLoading ? (
+          <Image source={{ uri: resolvedImageUri }} resizeMode="cover" className="h-full w-full" />
+        ) : (
+          <ActivityIndicator color={palette.gray[100]} />
+        )}
       </View>
 
       <View className="w-full flex-row items-center justify-between">

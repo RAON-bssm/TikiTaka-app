@@ -8,6 +8,7 @@ import { palette } from '@/constants/colors';
 import { pickRankingCharacter } from '@/constants/ranking';
 import { usePosts } from '@/hooks/post/usePosts';
 import { formatRelativeTime } from '@/hooks/useRelativeTime';
+import { useState } from 'react';
 import { RefreshControl, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -16,6 +17,9 @@ const SKELETON_COUNT = 3;
 
 export default function FeedScreen() {
   const { data: posts, isLoading, isError, refetch, isRefetching } = usePosts(1);
+
+  // TODO: 서버 참여 API 연동 시 useMutation으로 대체. 지금은 UI 반응만 목업.
+  const [joined, setJoined] = useState(false);
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
@@ -38,7 +42,11 @@ export default function FeedScreen() {
             myTeam={{ name: '강서구', score: 99 }}
             opponentTeam={{ name: '영도구', score: 67 }}
           />
-          <Button content="바로 참여" />
+          <Button
+            content={joined ? '참여 중' : '바로 참여'}
+            variant={joined ? 'light' : 'primary'}
+            onclick={() => setJoined(true)}
+          />
         </View>
         <View className="flex flex-col gap-md">
           {isLoading ? (
