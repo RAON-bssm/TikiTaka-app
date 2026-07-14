@@ -20,6 +20,8 @@ export interface Post {
   score: number;
   created_at: string;
   updated_at: string;
+  content: string;
+  location: string;
 }
 
 export interface PostListData {

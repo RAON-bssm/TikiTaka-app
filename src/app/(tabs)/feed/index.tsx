@@ -48,15 +48,15 @@ export default function FeedScreen() {
           ) : isError ? (
             <ErrorRetry onRetry={refetch} />
           ) : (
-            // TODO: 백엔드 Post 모델에 title·place·like_count·avatar 필드 추가 시 매핑 보강
+            // TODO: 백엔드 Post 모델에 like_count·avatar 필드 추가 시 매핑 보강
             posts?.map((post) => (
               <FeedCard
                 key={post.post_id}
                 postId={post.post_id}
                 author={{ name: post.user_name, character: pickRankingCharacter(post.post_id) }}
                 imageUrl={post.post_image}
-                title=""
-                place=""
+                title={post.content}
+                place={post.location}
                 timeAgo={formatRelativeTime(post.created_at)}
                 likeCount={0}
               />
