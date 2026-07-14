@@ -5,6 +5,7 @@ import Button from '@/components/ui/Button';
 import Header from '@/components/ui/Header';
 import NavRow from '@/components/ui/NavRow';
 import Typography from '@/components/ui/Typography';
+import { useCharacterConfig } from '@/hooks/character/useCharacterConfig';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
@@ -39,16 +40,8 @@ const MY_FEEDS = [
 
 export default function ProfileScreen() {
   const [isNeighborhoodSheetOpen, setIsNeighborhoodSheetOpen] = useState(false);
-  const character = {
-    body: 'body02',
-    eyes: 'eyes01',
-    eyesColor: 'orange',
-    mouth: 'mouth01',
-    hairBack: 'long',
-    hairFront: 'basic',
-    hairColor: 'black',
-    clothing: 'clothing01',
-  };
+  // 꾸미기 화면과 같은 저장된 config를 공유한다(수정 시 즉시 반영).
+  const { config: character } = useCharacterConfig();
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top']}>
       <ScrollView

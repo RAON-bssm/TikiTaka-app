@@ -3,6 +3,7 @@ import Typography from '@/components/ui/Typography';
 import { DEFAULT_CHARACTER_CONFIG } from '@/constants/character/assets';
 import { CATEGORY_DEFS, type ColorOption, type ShapeOption } from '@/constants/character/customize';
 import { CharacterConfig } from '@/constants/character/types';
+import { useCharacterConfig } from '@/hooks/character/useCharacterConfig';
 import { Image } from 'expo-image';
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
@@ -114,11 +115,17 @@ export default function CharacterCustomizer({
 }: {
   initialConfig?: CharacterConfig;
 }) {
-  const [config, setConfig] = useState<CharacterConfig>(initialConfig);
+  // config는 훅이 소유하며, 변경 시마다 기기에 자동 저장되고 진입 시 저장값으로 복원된다.
+  const { config, setConfig, isLoaded } = useCharacterConfig(initialConfig);
   const [selectedLabel, setSelectedLabel] = useState(CATEGORY_LABELS[0]);
   const category = CATEGORY_DEFS.find((c) => c.label === selectedLabel) ?? CATEGORY_DEFS[0];
   const shapes = category.buildShapes(config);
   const colors = category.buildColors?.(config);
+
+  // 저장된 config를 불러오기 전에는 기본값이 잠깐 보이지 않도록 렌더를 보류한다.
+  if (!isLoaded) {
+    return <View className="flex-1" />;
+  }
 
   return (
     <View className="flex-1 gap-2xl">
