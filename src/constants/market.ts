@@ -17,6 +17,8 @@ export type ShopCategory = (typeof SHOP_CATEGORIES)[number];
 export interface ShopItem {
   /** 파츠 id (예: 'bob', 'eyes01'). */
   id: string;
+  /** 이 아이템이 착용되는 캐릭터 파츠 그룹 (착용 시 config의 어느 키를 바꿀지). */
+  group: PartConfigKey;
   /** 표시 이름. */
   name: string;
   /** 아이템 설명. */
@@ -61,6 +63,7 @@ export function getShopItems(category: ShopCategory): ShopItem[] {
     const character: CharacterConfig = { ...DEFAULT_CHARACTER_CONFIG, [group]: id };
     return {
       id,
+      group,
       name: `${category} 아이템 ${index + 1}`,
       description: ITEM_DESCRIPTION,
       price: 500,

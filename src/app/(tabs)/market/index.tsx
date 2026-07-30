@@ -11,14 +11,20 @@ import CategoryTabs from '@/components/ui/CategoryTabs';
 import Header from '@/components/ui/Header';
 import PointBadge from '@/components/ui/PointBadge';
 import { SHOP_CATEGORIES, USER_POINT } from '@/constants/market';
+import { useCharacterConfig } from '@/hooks/character/useCharacterConfig';
 import { useShop } from '@/hooks/market/useShop';
 
 export default function MarketScreen() {
   const { category, items, selectedId, selectedItem, selectCategory, selectItem } = useShop();
+  const { config, setConfig } = useCharacterConfig();
   const [purchaseOpen, setPurchaseOpen] = useState(false);
 
   const handleConfirmPurchase = () => {
     // TODO: 서버 연동 시 구매 요청(useMutation) 후 포인트/보유 목록 갱신
+    // 구매한 아이템을 현재 캐릭터에 착용시켜 저장한다(마이페이지·꾸미기에 즉시 반영).
+    if (selectedItem) {
+      setConfig({ ...config, [selectedItem.group]: selectedItem.id });
+    }
     setPurchaseOpen(false);
   };
 
