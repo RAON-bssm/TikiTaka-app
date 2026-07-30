@@ -30,21 +30,24 @@ export default function MarketScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
-      <View className="flex flex-1 flex-col gap-2xl px-lg pt-lg">
-        <Header />
+      <View className="flex flex-1 flex-col gap-2xl pt-lg">
+        {/* 상단 요소는 다른 페이지와 동일하게 좌우 여백(px-xl)을 준다 */}
+        <View className="gap-2xl px-xl">
+          <Header />
 
-        <View className="w-full flex-row items-center justify-between">
-          <ShopTabs />
-          <PointBadge point={USER_POINT} />
+          <View className="w-full flex-row items-center justify-between">
+            <ShopTabs />
+            <PointBadge point={USER_POINT} />
+          </View>
+
+          <FeaturedItem
+            item={selectedItem}
+            onBuy={() => setPurchaseOpen(true)}
+            onCustomize={() => router.push('/profile/character')}
+          />
         </View>
 
-        <FeaturedItem
-          item={selectedItem}
-          onBuy={() => setPurchaseOpen(true)}
-          onCustomize={() => router.push('/profile/character')}
-        />
-
-        <View className="flex-1">
+        <View className="flex-1 px-lg">
           <CategoryTabs tabs={SHOP_CATEGORIES} selected={category} onSelect={selectCategory} />
 
           {/* 알약형 탭과 이어지는 전체 폭 테두리 카드 (캐릭터 꾸미기와 동일한 형태) */}

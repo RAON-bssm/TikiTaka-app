@@ -41,7 +41,7 @@ export default function GachaScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
-      <View className="flex flex-1 flex-col gap-2xl px-lg pt-lg">
+      <View className="flex flex-1 flex-col gap-2xl px-xl pt-lg">
         <Header />
 
         <View className="w-full flex-row items-center justify-between">
