@@ -10,7 +10,7 @@ import useImageRatio from '@/hooks/useImageRatio';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Image, View } from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Upload() {
@@ -57,10 +57,12 @@ export default function Upload() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
-      <ScrollView
+      <KeyboardAwareScrollView
         className="flex-1"
         contentContainerClassName="flex flex-col gap-2xl px-xl py-2xl"
         showsVerticalScrollIndicator={false}
+        bottomOffset={16}
+        keyboardShouldPersistTaps="handled"
       >
         <Topic title={currentBoard?.mission ?? ''} />
 
@@ -97,7 +99,7 @@ export default function Upload() {
         </View>
 
         <Button content={isPending ? '업로드 중...' : '게시물 업로드'} onclick={handleUpload} />
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 }
