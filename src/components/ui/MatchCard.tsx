@@ -31,22 +31,22 @@ export default function MatchCard({ left, right }: Props) {
   const leader = leftLeading ? left : right;
 
   return (
-    <View className="items-center gap-md rounded-sm border border-gray-100 bg-white px-lg py-md">
+    <View className="items-center gap-lg rounded-sm border border-gray-100 bg-white px-lg py-md">
       {/* 우세 뱃지 — 앞선 팀 색으로 */}
       <View
         className={`flex-row items-center gap-xs rounded-full px-sm py-xs ${
           leftLeading ? 'bg-secondary-100' : 'bg-primary-100'
         }`}
       >
-        <FireIcon width={12} height={12} color={leftLeading ? COLOR_BLUE : COLOR_ORANGE} />
+        <FireIcon width={20} height={20} color={leftLeading ? COLOR_BLUE : COLOR_ORANGE} />
         <Typography variant="body3" className="text-[10px] text-gray-700">
           {leader.name}가 우세합니다!
         </Typography>
       </View>
 
       {/* 점수 대결 */}
-      <View className="flex-row items-center gap-lg">
-        <View className="items-center">
+      <View className="flex-row items-center gap-xl">
+        <View className="items-center gap-xs">
           <Typography variant="body3" className="text-[10px] text-secondary-500">
             {left.name}
           </Typography>
@@ -54,7 +54,7 @@ export default function MatchCard({ left, right }: Props) {
             {left.score}점
           </Typography>
         </View>
-        <Typography variant="h4" className="text-gray-800">
+        <Typography variant="h4" className="text-gray-700">
           VS
         </Typography>
         <View className="items-center">

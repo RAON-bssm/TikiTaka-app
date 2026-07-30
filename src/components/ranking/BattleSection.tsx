@@ -8,8 +8,8 @@ import type { Match } from '@/constants/ranking';
 /** "현재 진행 중인 대결" 섹션 — 대결 카드 가로 스크롤. */
 export default function BattleSection({ matches }: { matches: Match[] }) {
   return (
-    <View className="gap-md">
-      <Typography variant="h4" className="text-gray-700">
+    <View className="gap-lg">
+      <Typography variant="h3" className="text-gray-800">
         현재 진행 중인 대결
       </Typography>
       <ScrollView
