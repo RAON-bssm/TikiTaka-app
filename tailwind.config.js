@@ -67,7 +67,7 @@ module.exports = {
         lg: ['18px', { lineHeight: '21px' }],
         xl: ['20px', { lineHeight: '24px' }],
         '2xl': ['24px', { lineHeight: '28px' }],
-        '3xl': ['28px', { lineHeight: '36px' }],
+        '3xl': ['32px', { lineHeight: '36px' }],
         '4xl': ['40px', { lineHeight: '48px' }],
       },
     },
