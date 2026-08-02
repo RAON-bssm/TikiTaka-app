@@ -57,7 +57,7 @@ export default function DistrictBattleStatus({ myTeam, opponentTeam }: Props) {
         <View className="bg-primary-600" style={{ flex: myRatio }} />
         <View style={{ flex: 1 - myRatio }} />
       </View>
-      <View className="flex flex-row items-center w-full justify-center p-xs bg-primary-100 rounded-full">
+      <View className="flex flex-row items-center w-full justify-center">
         <Typography variant="body3" className="text-primary-600">
           +67점
         </Typography>
