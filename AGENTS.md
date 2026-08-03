@@ -179,7 +179,7 @@
 
 - **텍스트는 raw `<Text>` 대신 `src/components/ui/Typography.tsx`의 `Typography` 컴포넌트를 사용합니다.** `variant`로 스타일을 지정하세요: `display`, `h1`~`h4`, `body1`~`body3`, `caption`. 추가 스타일은 `className`으로 얹습니다.
 - 폰트 패밀리(`className`으로 직접 지정 시): `font-regular`/`font-medium`/`font-bold`(Pretendard), `font-title`(OkDanDan-Bold, 제목 전용). 폰트는 `app.json`의 `expo-font` 플러그인으로 로드됩니다.
-- 폰트 크기 토큰: `text-xs`(12) ~ `text-4xl`(40). 각 토큰에 lineHeight가 함께 정의되어 있습니다.
+- 폰트 크기 토큰: `text-xs`(12) ~ `text-5xl`(64). 각 토큰에 lineHeight가 함께 정의되어 있습니다.
 
 ### 8.4 NativeWind `safelist` 주의
 

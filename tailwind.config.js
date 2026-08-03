@@ -69,6 +69,7 @@ module.exports = {
         '2xl': ['24px', { lineHeight: '28px' }],
         '3xl': ['32px', { lineHeight: '36px' }],
         '4xl': ['40px', { lineHeight: '48px' }],
+        '5xl': ['64px', { lineHeight: '72px' }],
       },
     },
   },
