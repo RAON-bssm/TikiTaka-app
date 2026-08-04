@@ -17,9 +17,7 @@ type RankingProps = {
 
 const Ranking: FC<RankingProps> = ({ number, location, count, avatar, address }) => {
   return (
-    <View
-      className={`w-full flex-row items-center justify-between px-md ${avatar ? 'py-md' : 'py-lg'}`}
-    >
+    <View className="w-full flex-row items-center justify-between px-md py-xl">
       <Typography variant="body1" className={number <= 3 ? 'text-primary-600' : 'text-gray-500'}>
         {number}
       </Typography>
@@ -33,7 +31,7 @@ const Ranking: FC<RankingProps> = ({ number, location, count, avatar, address })
         {address && (
           <View className="flex-row items-center gap-xs">
             <PlaceIcon width={12} height={12} color={COLOR_GRAY} />
-            <Typography variant="body3" className="text-[10px] text-gray-500">
+            <Typography variant="body3" className="text-xs text-gray-500">
               {address}
             </Typography>
           </View>

@@ -6,6 +6,7 @@ import MissionTitle from '@/components/camera/MissionTitle';
 import ShutterButton from '@/components/camera/ShutterButton';
 import ZoomControl from '@/components/camera/ZoomControl';
 import useCameraZoom from '@/hooks/camera/useCameraZoom';
+import { useBoards } from '@/hooks/post/useBoards';
 import { router, useIsFocused } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -26,6 +27,10 @@ const LENS_FILTER: DeviceFilter = {
 export default function CameraScreen() {
   const insets = useSafeAreaInsets();
   const isFocused = useIsFocused();
+
+  // 현재 게시판(목록 첫 항목)의 미션을 상단 타이틀로 표시한다.
+  const { data: boards } = useBoards();
+  const mission = boards?.[0]?.mission ?? '';
 
   const { hasPermission, requestPermission } = useCameraPermission();
   const [facing, setFacing] = useState<'back' | 'front'>('back');
@@ -69,7 +74,7 @@ export default function CameraScreen() {
         />
       </GestureDetector>
 
-      <MissionTitle title="예쁜 돌멩이 찾기" />
+      <MissionTitle title={mission} />
       <CameraBackButton />
 
       {/* 하단 컨트롤: safe area(홈 인디케이터)는 inset으로, 그 위 여백은 디자인 토큰(2xl)으로 분리 */}

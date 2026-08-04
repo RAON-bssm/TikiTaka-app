@@ -1,5 +1,5 @@
 import DistrictBattleStatus from '@/components/feed/DistrictBattleStatus';
-import FeedPreviewCard from '@/components/feed/FeedPreviewCard';
+import FeedCard from '@/components/feed/FeedCard';
 import Banner from '@/components/ui/banner/Banner';
 import Button from '@/components/ui/Button';
 import Header from '@/components/ui/Header';
@@ -21,6 +21,9 @@ export default function HomeScreen() {
       user,
       place: '영도구',
       postId: '1',
+      title: '오늘의 미션 인증',
+      timeAgo: '5분 전',
+      likeCount: 12,
     },
     {
       id: 2,
@@ -28,6 +31,9 @@ export default function HomeScreen() {
       user,
       place: '강서구',
       postId: '2',
+      title: '동네 산책 인증',
+      timeAgo: '10분 전',
+      likeCount: 8,
     },
     {
       id: 3,
@@ -35,6 +41,9 @@ export default function HomeScreen() {
       user,
       place: '해운대구',
       postId: '3',
+      title: '바다 앞 미션 완료',
+      timeAgo: '30분 전',
+      likeCount: 21,
     },
     {
       id: 4,
@@ -42,6 +51,9 @@ export default function HomeScreen() {
       user,
       place: '수영구',
       postId: '4',
+      title: '오늘도 출석 완료',
+      timeAgo: '1시간 전',
+      likeCount: 5,
     },
   ];
   const router = useRouter();
@@ -75,21 +87,20 @@ export default function HomeScreen() {
               </Typography>
             </Pressable>
           </View>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerClassName="gap-md"
-          >
+          <View className="flex flex-col gap-md">
             {feedPreviews.map((feed) => (
-              <FeedPreviewCard
+              <FeedCard
                 key={feed.id}
-                imgUrl={feed.imgUrl}
-                user={feed.user}
-                place={feed.place}
                 postId={feed.postId}
+                author={feed.user}
+                imageUrl={feed.imgUrl}
+                title={feed.title}
+                place={feed.place}
+                timeAgo={feed.timeAgo}
+                likeCount={feed.likeCount}
               />
             ))}
-          </ScrollView>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>

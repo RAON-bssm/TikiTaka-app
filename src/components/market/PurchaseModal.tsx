@@ -40,7 +40,7 @@ export default function PurchaseModal({ visible, item, onClose, onConfirm }: Pro
           <View className="w-full items-center gap-sm">
             <Button content="구매하기" size="sm" className="w-full" onclick={onConfirm} />
             <Pressable onPress={onClose} className="active:opacity-70">
-              <Typography variant="caption" className="text-[10px] text-gray-500 underline">
+              <Typography variant="caption" className="text-xs text-gray-500 underline">
                 돌아가기
               </Typography>
             </Pressable>

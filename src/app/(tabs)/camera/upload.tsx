@@ -10,7 +10,7 @@ import useImageRatio from '@/hooks/useImageRatio';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Image, View } from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Upload() {
@@ -22,9 +22,10 @@ export default function Upload() {
   const { showToast } = useToast();
   const { mutate: uploadPost, isPending } = useUploadPost();
 
-  // TODO: 실제 미션 선택 UI와 연결. 지금은 게시판 목록의 첫 항목에 올린다.
+  // TODO: 실제 미션 선택 UI와 연결. 지금은 게시판 목록의 첫 항목(현재 게시판)에 올린다.
   const { data: boards } = useBoards();
-  const boardId = boards?.[0]?.board_id || 1;
+  const currentBoard = boards?.[0];
+  const boardId = currentBoard?.board_id;
 
   const handleUpload = () => {
     if (isPending) return;
@@ -56,12 +57,14 @@ export default function Upload() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
-      <ScrollView
+      <KeyboardAwareScrollView
         className="flex-1"
         contentContainerClassName="flex flex-col gap-2xl px-xl py-2xl"
         showsVerticalScrollIndicator={false}
+        bottomOffset={16}
+        keyboardShouldPersistTaps="handled"
       >
-        <Topic title="예쁜 돌멩이 찾기" />
+        <Topic title={currentBoard?.mission ?? ''} />
 
         {/* 촬영한 사진 미리보기: 폭은 부모를 채우고, 높이는 사진 원본 비율에 맞춰 반응형 */}
         {uri && photoRatio ? (
@@ -96,7 +99,7 @@ export default function Upload() {
         </View>
 
         <Button content={isPending ? '업로드 중...' : '게시물 업로드'} onclick={handleUpload} />
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 }
