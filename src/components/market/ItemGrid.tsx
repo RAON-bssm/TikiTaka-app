@@ -24,8 +24,11 @@ const COLUMNS = 3;
  */
 export default function ItemGrid({ items, selectedId, onSelect }: Props) {
   const [width, setWidth] = useState(0);
-  // 소수 폭은 픽셀 반올림 시 합이 컨테이너를 넘어 마지막 칸이 밀릴 수 있으므로 내림한다.
-  const itemSize = Math.floor((width - GRID_GAP * (COLUMNS - 1)) / COLUMNS);
+  // 소수 폭은 픽셀 반올림 시 합이 컨테이너를 넘어 마지막 칸이 밀릴 수 있으므로 내림하되,
+  // 내림으로 남는 나머지 픽셀은 앞쪽 열부터 1px씩 나눠 주어 행이 컨테이너 폭을 꽉 채우게 한다.
+  const innerWidth = Math.floor(width - GRID_GAP * (COLUMNS - 1));
+  const itemSize = Math.floor(innerWidth / COLUMNS);
+  const remainder = innerWidth % COLUMNS;
 
   return (
     <ScrollView
@@ -36,13 +39,15 @@ export default function ItemGrid({ items, selectedId, onSelect }: Props) {
       contentContainerStyle={{ gap: GRID_GAP }}
     >
       {width > 0 &&
-        items.map((item) => {
+        items.map((item, index) => {
           const active = item.id === selectedId;
+          // 높이는 모든 칸이 동일(itemSize)해야 행이 어긋나지 않으므로 폭에만 나머지를 더한다.
+          const itemWidth = itemSize + (index % COLUMNS < remainder ? 1 : 0);
           return (
             <Pressable
               key={item.id}
               onPress={() => onSelect(item.id)}
-              style={{ width: itemSize, height: itemSize }}
+              style={{ width: itemWidth, height: itemSize }}
               className={`items-center justify-center overflow-hidden rounded-lg bg-gray-100 ${
                 active ? 'border-2 border-primary-600' : 'border border-white'
               }`}
