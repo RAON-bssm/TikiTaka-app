@@ -25,7 +25,7 @@ export default function Upload() {
   // TODO: 실제 미션 선택 UI와 연결. 지금은 게시판 목록의 첫 항목(현재 게시판)에 올린다.
   const { data: boards } = useBoards();
   const currentBoard = boards?.[0];
-  const boardId = currentBoard?.board_id || 1;
+  const boardId = currentBoard?.board_id;
 
   const handleUpload = () => {
     if (isPending) return;

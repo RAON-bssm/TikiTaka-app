@@ -16,13 +16,14 @@ import { useShop } from '@/hooks/market/useShop';
 
 export default function MarketScreen() {
   const { category, items, selectedId, selectedItem, selectCategory, selectItem } = useShop();
-  const { config, setConfig } = useCharacterConfig();
+  const { config, setConfig, isLoaded } = useCharacterConfig();
   const [purchaseOpen, setPurchaseOpen] = useState(false);
 
   const handleConfirmPurchase = () => {
     // TODO: 서버 연동 시 구매 요청(useMutation) 후 포인트/보유 목록 갱신
     // 구매한 아이템을 현재 캐릭터에 착용시켜 저장한다(마이페이지·꾸미기에 즉시 반영).
-    if (selectedItem) {
+    // 저장된 캐릭터를 불러오기 전에 저장하면 기본 config로 저장본을 덮어쓴다.
+    if (selectedItem && isLoaded) {
       setConfig({ ...config, [selectedItem.group]: selectedItem.id });
     }
     setPurchaseOpen(false);
@@ -42,7 +43,7 @@ export default function MarketScreen() {
 
           <FeaturedItem
             item={selectedItem}
-            onBuy={() => setPurchaseOpen(true)}
+            onBuy={() => isLoaded && setPurchaseOpen(true)}
             onCustomize={() => router.push('/profile/character')}
           />
         </View>
