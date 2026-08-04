@@ -23,7 +23,7 @@ export default function UserProfile({ character, point, userName, userPlace }: P
           </Typography>
           <View className="flex flex-row items-center gap-xs">
             <PlaceIcon width={24} height={24} color="#9DAABB" />
-            <Typography variant="body2" className="text-gray-400 text-[10px]">
+            <Typography variant="body2" className="text-gray-400 text-sm">
               {userPlace}
             </Typography>
           </View>

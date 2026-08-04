@@ -31,7 +31,7 @@ const Ranking: FC<RankingProps> = ({ number, location, count, avatar, address })
         {address && (
           <View className="flex-row items-center gap-xs">
             <PlaceIcon width={12} height={12} color={COLOR_GRAY} />
-            <Typography variant="body3" className="text-[10px] text-gray-500">
+            <Typography variant="body3" className="text-xs text-gray-500">
               {address}
             </Typography>
           </View>

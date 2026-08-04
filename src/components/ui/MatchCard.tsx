@@ -39,7 +39,7 @@ export default function MatchCard({ left, right }: Props) {
         }`}
       >
         <FireIcon width={20} height={20} color={leftLeading ? COLOR_BLUE : COLOR_ORANGE} />
-        <Typography variant="body3" className="text-[10px] text-gray-700">
+        <Typography variant="body3" className="text-xs text-gray-700">
           {leader.name}가 우세합니다!
         </Typography>
       </View>
@@ -47,7 +47,7 @@ export default function MatchCard({ left, right }: Props) {
       {/* 점수 대결 */}
       <View className="flex-row items-center gap-xl">
         <View className="items-center gap-xs">
-          <Typography variant="body3" className="text-[10px] text-secondary-500">
+          <Typography variant="body3" className="text-xs text-secondary-500">
             {left.name}
           </Typography>
           <Typography variant="h2" className="text-gray-800">
@@ -57,8 +57,8 @@ export default function MatchCard({ left, right }: Props) {
         <Typography variant="h4" className="text-gray-700">
           VS
         </Typography>
-        <View className="items-center">
-          <Typography variant="body3" className="text-[10px] text-primary-600">
+        <View className="items-center gap-xs">
+          <Typography variant="body3" className="text-xs text-primary-600">
             {right.name}
           </Typography>
           <Typography variant="h2" className="text-gray-800">
