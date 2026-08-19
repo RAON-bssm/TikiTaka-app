@@ -53,6 +53,7 @@
     "lint-staged": "^17.0.7",
     "prettier": "^3.8.4",
     "react-native-svg-transformer": "^1.5.3",
+    "sharp": "^0.35.3",
     "tailwindcss": "^3.4.19",
     "typescript": "~6.0.3"
   },
@@ -66,7 +67,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "prepare": "husky"
+    "prepare": "husky",
+    "generate:part-meta": "node scripts/generate-part-meta.mjs"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
