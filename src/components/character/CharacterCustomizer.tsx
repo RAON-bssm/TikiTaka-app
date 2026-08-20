@@ -1,6 +1,6 @@
 import CategoryTabs from '@/components/ui/CategoryTabs';
 import Typography from '@/components/ui/Typography';
-import { DEFAULT_CHARACTER_CONFIG } from '@/constants/character/assets';
+import { DEFAULT_CHARACTER_CONFIG, getPartMeta, type PartMeta } from '@/constants/character/assets';
 import { CATEGORY_DEFS, type ColorOption, type ShapeOption } from '@/constants/character/customize';
 import { CharacterConfig } from '@/constants/character/types';
 import { useCharacterConfig } from '@/hooks/character/useCharacterConfig';
@@ -65,6 +65,51 @@ const ColorSwatches = ({
 const GRID_GAP = 8;
 const MIN_ITEM_WIDTH = 100;
 
+// bbox 주변에 남길 여유. 1.15 = 콘텐츠가 타일의 약 87%를 차지
+const BBOX_PADDING = 1.15;
+// 점처럼 작은 파츠가 과하게 확대되지 않도록 상한을 둔다
+const MAX_SCALE = 3;
+
+/** 파츠 썸네일. 메타(bbox)가 있으면 콘텐츠 영역을 타일 중앙에 확대해서 보여준다. */
+const PartThumb = ({
+  source,
+  meta,
+  size,
+}: {
+  source: number;
+  meta: PartMeta | undefined;
+  size: number;
+}) => {
+  // 메타가 없는 파츠는 확대 없이 원본 그대로 (폴백)
+  if (!meta) {
+    return <Image source={source} contentFit="contain" style={{ width: '100%', height: '100%' }} />;
+  }
+
+  const { bbox } = meta;
+  const scale = Math.min(
+    1 / (bbox.width * BBOX_PADDING),
+    1 / (bbox.height * BBOX_PADDING),
+    MAX_SCALE,
+  );
+
+  // bbox 중심을 타일 중심(0.5)으로 끌어오는 이동량을 픽셀로 환산
+  const translateX = (0.5 - (bbox.x + bbox.width / 2)) * size;
+  const translateY = (0.5 - (bbox.y + bbox.height / 2)) * size;
+
+  return (
+    <Image
+      source={source}
+      contentFit="contain"
+      style={{
+        width: '100%',
+        height: '100%',
+        // 배열 뒤쪽이 먼저 적용된다. scale을 앞에 둬야 translate가 확대 전 좌표 기준이 된다
+        transform: [{ scale }, { translateX }, { translateY }],
+      }}
+    />
+  );
+};
+
 const ShapeGrid = ({ shapes, onSelect }: { shapes: ShapeOption[]; onSelect: SelectHandler }) => {
   // 박스 너비를 측정해 열 수를 유동적으로 계산한다.
   // (작은 폰은 2칸, 보통 3칸, 큰 화면은 4칸+) — 남는 여백 없이 칸 크기를 딱 맞춘다.
@@ -82,24 +127,24 @@ const ShapeGrid = ({ shapes, onSelect }: { shapes: ShapeOption[]; onSelect: Sele
       contentContainerStyle={{ gap: GRID_GAP }}
     >
       {width > 0 &&
-        shapes.map((shape) => (
-          <Pressable
-            key={shape.id}
-            onPress={() => onSelect(shape.next)}
-            style={{ width: itemSize, height: itemSize }}
-            className={`items-center justify-center overflow-hidden rounded-lg bg-gray-100 ${
-              shape.active ? 'border-2 border-primary-600' : ''
-            }`}
-          >
-            {shape.source != null && (
-              <Image
-                source={shape.source}
-                contentFit="contain"
-                style={{ width: '100%', height: '100%' }}
-              />
-            )}
-          </Pressable>
-        ))}
+        shapes.map((shape) => {
+          const meta = getPartMeta(shape.source);
+          return (
+            <Pressable
+              key={shape.id}
+              onPress={() => onSelect(shape.next)}
+              style={{ width: itemSize, height: itemSize }}
+              // 밝은 파츠만 어두운 배경에 올린다. 메타가 없으면 밝은 배경으로 폴백
+              className={`items-center justify-center overflow-hidden rounded-lg ${
+                meta?.isDark === false ? 'bg-gray-700' : 'bg-gray-100'
+              } ${shape.active ? 'border-2 border-primary-600' : ''}`}
+            >
+              {shape.source != null && (
+                <PartThumb source={shape.source} meta={meta} size={itemSize} />
+              )}
+            </Pressable>
+          );
+        })}
     </ScrollView>
   );
 };

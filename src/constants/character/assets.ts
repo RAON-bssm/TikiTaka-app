@@ -1,3 +1,4 @@
+import { PART_META } from './partMeta';
 import {
   COLORABLE_PARTS,
   type CharacterConfig,
@@ -193,3 +194,49 @@ export const DEFAULT_CHARACTER_CONFIG: CharacterConfig = {
   hairColor: 'black',
   clothing: 'clothing01', // 코스튬은 항상 착용 상태 — 벗을 수 없다
 };
+
+// PART_META 항목 하나의 타입 (bbox + isDark). partMeta.ts가 as const라서 여기서 뽑아서 사용
+export type PartMeta = (typeof PART_META)[keyof typeof PART_META];
+
+// 그룹명을 에셋 폴더명으로 바꾼다 camelCase -> kebab-case
+const toKebab = (value: string) => value.replace(/[A-Z]/g, (ch) => `-${ch.toLowerCase()}`);
+
+let sourceMetaMap: Map<number, PartMeta> | null = null;
+
+function buildSourceMetaMap(): Map<number, PartMeta> {
+  const map = new Map<number, PartMeta>();
+
+  const register = (source: number, key: string) => {
+    const meta = (PART_META as Record<string, PartMeta | undefined>)[key];
+    if (meta) map.set(source, meta);
+  };
+
+  for (const [group, shapes] of Object.entries(SIMPLE_ASSETS)) {
+    for (const [shape, source] of Object.entries(shapes)) {
+      register(source, `${toKebab(group)}/${shape}`);
+    }
+  }
+
+  for (const [group, shapes] of Object.entries(COLOR_ASSETS)) {
+    for (const [shape, colors] of Object.entries(shapes)) {
+      for (const [color, source] of Object.entries(colors)) {
+        register(source, `${toKebab(group)}/${shape}/${color}`);
+      }
+    }
+  }
+
+  for (const [group, colors] of Object.entries(TINT_ASSETS)) {
+    for (const [color, source] of Object.entries(colors)) {
+      register(source, `${toKebab(group)}/${color}`);
+    }
+  }
+
+  return map;
+}
+
+/** require 소스 번호로 파츠 메타(bbox/isDark)를 찾는다. 메타가 없으면 undefined. */
+export function getPartMeta(source: number | undefined): PartMeta | undefined {
+  if (source == null) return undefined;
+  if (!sourceMetaMap) sourceMetaMap = buildSourceMetaMap();
+  return sourceMetaMap.get(source);
+}
