@@ -109,13 +109,14 @@
 
 ### 7.2 파일 역할
 
-| 파일                                               | 역할                                                                                                                        |
-| -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `src/constants/character/types.ts`                 | `CharacterConfig` 타입, 파츠 그룹 타입, 레이어 정의(`LAYERS`), 그리는 순서(z-index)를 관리. **파츠 추가/순서 변경의 기준.** |
-| `src/constants/character/assets.ts`                | 파츠 에셋 정적 레지스트리(`require` 매핑)와 config→이미지 해석 함수(`resolveLayerSource` 등), `DEFAULT_CHARACTER_CONFIG`.   |
-| `src/constants/character/customize.ts`             | 꾸미기 화면의 카테고리 탭 정의(`CATEGORY_DEFS`)와 선택지 생성 로직, 색상 스와치 hex(`COLOR_HEX`).                           |
-| `src/components/character/Character.tsx`           | config를 받아 파츠를 순서대로 겹쳐 그리는 순수 렌더 컴포넌트. 아바타/미리보기 등 어디서든 재사용.                           |
-| `src/components/character/CharacterCustomizer.tsx` | config 상태를 소유하고 미리보기 + 파츠 선택 UI를 묶는 편집기 컴포넌트.                                                      |
+| 파일                                               | 역할                                                                                                                                                             |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/constants/character/types.ts`                 | `CharacterConfig` 타입, 파츠 그룹 타입, 레이어 정의(`LAYERS`), 그리는 순서(z-index)를 관리. **파츠 추가/순서 변경의 기준.**                                      |
+| `src/constants/character/assets.ts`                | 파츠 에셋 정적 레지스트리(`require` 매핑)와 config→이미지 해석 함수(`resolveLayerSource` 등), `DEFAULT_CHARACTER_CONFIG`, 썸네일용 메타 조회(`getPartMeta`).     |
+| `src/constants/character/partMeta.ts`              | **자동 생성 파일.** 파츠별 콘텐츠 영역(`bbox`)과 밝기(`isDark`). 꾸미기 화면 썸네일의 확대·배경색에 사용. 직접 수정하지 말고 `pnpm generate:part-meta`로 재생성. |
+| `src/constants/character/customize.ts`             | 꾸미기 화면의 카테고리 탭 정의(`CATEGORY_DEFS`)와 선택지 생성 로직, 색상 스와치 hex(`COLOR_HEX`).                                                                |
+| `src/components/character/Character.tsx`           | config를 받아 파츠를 순서대로 겹쳐 그리는 순수 렌더 컴포넌트. 아바타/미리보기 등 어디서든 재사용.                                                                |
+| `src/components/character/CharacterCustomizer.tsx` | config 상태를 소유하고 미리보기 + 파츠 선택 UI를 묶는 편집기 컴포넌트.                                                                                           |
 
 ### 7.3 파츠 그룹 3종
 
@@ -131,7 +132,8 @@
 
 1. 위 경로 규칙에 맞춰 `assets/character/...`에 WebP를 넣습니다. (1:1 캔버스, 정위치 export)
 2. `assets.ts`의 해당 레지스트리(`SIMPLE_ASSETS`/`COLOR_ASSETS`/`TINT_ASSETS`)에 `'<id>': require('@/assets/character/...')`를 추가합니다.
-3. 끝. `getShapeOptions`/`getColorOptions`가 레지스트리를 읽어 꾸미기 화면의 선택지를 **자동으로** 만들어냅니다. 화면 코드는 건드릴 필요가 없습니다.
+3. `pnpm generate:part-meta`를 실행해 `partMeta.ts`를 재생성하고, 생성 결과를 함께 커밋합니다. (레지스트리에 있는데 메타가 없으면 스크립트가 실패로 알려줍니다)
+4. 끝. `getShapeOptions`/`getColorOptions`가 레지스트리를 읽어 꾸미기 화면의 선택지를 **자동으로** 만들어냅니다. 화면 코드는 건드릴 필요가 없습니다.
 
 - **완전히 새로운 파츠 종류**를 추가하려면(기존 그룹이 아닌): `types.ts`에 그룹 타입과 `LAYERS` 배열(그리는 순서)을, 필요하면 `CharacterConfig` 키와 `customize.ts`의 `CATEGORY_DEFS` 탭을 함께 추가합니다.
 
