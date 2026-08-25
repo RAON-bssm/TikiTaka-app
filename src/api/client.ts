@@ -1,8 +1,14 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
-import { router } from 'expo-router';
 
 import { reissue } from './refresh';
-import { clearSignupToken, clearTokens, getAccessToken, getRefreshToken, setTokens } from './token';
+import {
+  DEV_TOKEN,
+  clearSignupToken,
+  clearTokens,
+  getAccessToken,
+  getRefreshToken,
+  setTokens,
+} from './token';
 
 // 기본 Axios 클라이언트 인스턴스 생성
 // axios 타입 선언상 `create`가 named export로도 잡혀서 발생하는 false positive이므로 비활성화합니다.
@@ -14,16 +20,6 @@ const client = axios.create({
     'Content-Type': 'application/json',
   },
 });
-
-/**
- * 개발용 임시 토큰(선택).
- *
- * 소셜 로그인 SDK가 아직 연결되지 않아 실제 토큰을 받을 수 없을 때를 위한 폴백이다.
- * `.env`에 EXPO_PUBLIC_DEV_TOKEN을 넣어두면 저장된 토큰이 없을 때만 이 값을 대신 사용한다.
- * 로그인에 성공해 실제 토큰이 저장되면 항상 실제 토큰이 우선한다.
- * 소셜 로그인이 붙으면 이 상수와 아래 폴백을 제거한다.
- */
-const DEV_TOKEN = process.env.EXPO_PUBLIC_DEV_TOKEN;
 
 /**
  * 토큰이 없어도 되는(=인증 실패해도 재발급 대상이 아닌) 공개 엔드포인트.
@@ -107,10 +103,10 @@ client.interceptors.response.use(
       originalRequest.headers.Authorization = `Bearer ${accessToken}`;
       return await client(originalRequest);
     } catch (refreshError) {
-      // 재발급까지 실패 = 세션이 끝난 것. 로컬 토큰을 비우고 로그인 화면으로 보낸다.
+      // 재발급까지 실패 = 세션이 끝난 것. 토큰을 비우면 로그인 상태가 'unauthenticated'로 바뀌고,
+      // 이를 구독하는 AuthGate가 로그인 화면으로 돌려보낸다. (화면 전환 책임은 AuthGate 한 곳에 둔다)
       await clearTokens();
       clearSignupToken();
-      router.replace('/(auth)/login');
       return Promise.reject(refreshError);
     }
   },
