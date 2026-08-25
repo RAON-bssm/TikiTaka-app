@@ -1,7 +1,6 @@
-import GoogleIcon from '@/assets/icons/google.svg';
+import { getProviderAccessToken } from '@/api/social';
 import KakaoIcon from '@/assets/icons/kakao.svg';
 import LogoImage from '@/assets/icons/logo.webp';
-import { getProviderAccessToken } from '@/api/social';
 import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
 import { useLogin } from '@/hooks/auth/useLogin';
@@ -36,44 +35,30 @@ export default function Login() {
 
   return (
     <SafeAreaView className="flex flex-col flex-1 bg-white">
-      <View className="flex flex-col flex-1 p-lg">
-        <View className="flex flex-col items-center w-full mt-[177.5px]">
-          <Image source={LogoImage} style={{ width: 180, height: 46 }} resizeMode="contain" />
+      <View className="flex flex-col flex-1 px-lg pb-3xl">
+        <View style={{ flex: 1 }} />
 
-          <Typography variant="body2" className="text-gray-500 mt-[14px]">
+        <View className="flex flex-col items-center gap-md">
+          <Image source={LogoImage} style={{ width: 250, height: 64 }} resizeMode="contain" />
+
+          <Typography variant="body2" className="text-gray-500">
             여러분들의 동네리그에 참여해보세요!
           </Typography>
         </View>
 
-        <View className="w-full gap-[12px] mt-[120px] flex-1 justify-end pb-lg">
-          <Pressable
-            onPress={() => handleSocialLogin('GOOGLE')}
-            disabled={isPending}
-            className="flex-row items-center justify-center gap-sm rounded-md border border-gray-200 bg-white py-md active:bg-white disabled:opacity-50"
-          >
-            <GoogleIcon width={23} height={23} />
-            <Typography variant="h3" className="text-gray-700">
-              구글로 계속하기
-            </Typography>
-          </Pressable>
+        <View style={{ flex: 3 }} />
 
-          <Pressable
-            onPress={() => handleSocialLogin('KAKAO')}
-            disabled={isPending}
-            className="flex-row items-center justify-center gap-sm rounded-md bg-[#FEE500] py-md active:bg-[#EED500] disabled:opacity-50"
-          >
-            <KakaoIcon width={23} height={23} />
-            <Typography variant="h3" className="text-gray-700">
-              카카오로 계속하기
-            </Typography>
-          </Pressable>
-
-          <Pressable className="items-center py-sm mt-[17px] mb-[174px]">
-            <Typography variant="body2" className="text-gray-400">
-              게스트로 시작하기
-            </Typography>
-          </Pressable>
-        </View>
+        {/* 로그인 버튼: 화면 하단 고정 */}
+        <Pressable
+          onPress={() => handleSocialLogin('KAKAO')}
+          disabled={isPending}
+          className="flex-row items-center mb-2xl justify-center gap-sm rounded-md bg-[#FEE500] py-md active:bg-[#EED500] disabled:opacity-50"
+        >
+          <KakaoIcon width={24} height={24} />
+          <Typography variant="h3" className="text-gray-700">
+            카카오로 계속하기
+          </Typography>
+        </Pressable>
       </View>
     </SafeAreaView>
   );
