@@ -1,14 +1,37 @@
 import GoogleIcon from '@/assets/icons/google.svg';
 import KakaoIcon from '@/assets/icons/kakao.svg';
 import LogoImage from '@/assets/icons/logo.webp';
+import { getProviderAccessToken } from '@/api/social';
+import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
+import { useLogin } from '@/hooks/auth/useLogin';
+import type { Provider } from '@/types/auth';
 import { router } from 'expo-router';
 import { Image, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Login() {
-  const handleSocialLogin = () => {
-    router.push('/(auth)/signup');
+  const { showToast } = useToast();
+  const { mutate: login, isPending } = useLogin();
+
+  const handleSocialLogin = async (provider: Provider) => {
+    const providerAccessToken = await getProviderAccessToken(provider);
+
+    // TODO(소셜 SDK 연동): SDK가 붙으면 이 분기를 통째로 지운다.
+    // 지금은 토큰을 받을 수 없어 UI 확인용으로 회원가입 화면만 열어둔다.
+    if (!providerAccessToken) {
+      showToast('소셜 로그인은 준비 중이에요');
+      router.push('/(auth)/signup');
+      return;
+    }
+
+    login(
+      { provider, providerAccessToken },
+      {
+        // 로그인 실패(소셜 토큰 만료·서버 오류)는 화면 전환 없이 토스트로만 알린다.
+        onError: () => showToast('로그인에 실패했어요. 다시 시도해주세요'),
+      },
+    );
   };
 
   return (
@@ -24,8 +47,9 @@ export default function Login() {
 
         <View className="w-full gap-[12px] mt-[120px] flex-1 justify-end pb-lg">
           <Pressable
-            onPress={handleSocialLogin}
-            className="flex-row items-center justify-center gap-sm rounded-md border border-gray-200 bg-white py-md active:bg-white"
+            onPress={() => handleSocialLogin('GOOGLE')}
+            disabled={isPending}
+            className="flex-row items-center justify-center gap-sm rounded-md border border-gray-200 bg-white py-md active:bg-white disabled:opacity-50"
           >
             <GoogleIcon width={23} height={23} />
             <Typography variant="h3" className="text-gray-700">
@@ -34,8 +58,9 @@ export default function Login() {
           </Pressable>
 
           <Pressable
-            onPress={handleSocialLogin}
-            className="flex-row items-center justify-center gap-sm rounded-md bg-[#FEE500] py-md active:bg-[#EED500]"
+            onPress={() => handleSocialLogin('KAKAO')}
+            disabled={isPending}
+            className="flex-row items-center justify-center gap-sm rounded-md bg-[#FEE500] py-md active:bg-[#EED500] disabled:opacity-50"
           >
             <KakaoIcon width={23} height={23} />
             <Typography variant="h3" className="text-gray-700">
