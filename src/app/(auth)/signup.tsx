@@ -2,14 +2,15 @@ import BackButton from '@/components/ui/BackButton';
 import Button from '@/components/ui/Button';
 import RegionSelect from '@/components/ui/input/RegionSelect';
 import TextInput from '@/components/ui/input/TextInput';
-import Typography from '@/components/ui/Typography';
 import { useToast } from '@/components/ui/Toast';
+import Typography from '@/components/ui/Typography';
 import { getTempLocationId } from '@/constants/regions';
 import { useSignup } from '@/hooks/auth/useSignup';
 import { isAxiosError } from 'axios';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 /** 서버 응답 상태코드를 사용자에게 보여줄 문구로 옮긴다. */
 function getSignupErrorMessage(error: unknown) {
@@ -71,13 +72,13 @@ export default function SignUp() {
   };
 
   return (
-    <View className="flex flex-col flex-1 items-start justify-between p-lg gap-4xl bg-white">
-      <View className="flex flex-col items-start gap-4xl w-full">
-        <BackButton title="정보등록" link={'/login'} />
-        <Typography variant="display" className="text-gray-800">
-          회원 정보 등록
-        </Typography>
-        <View className="flex flex-col gap-3xl w-full">
+    <SafeAreaView className="flex-1 bg-white">
+      <View className="flex flex-1 flex-col items-start justify-between gap-4xl p-lg">
+        <View className="flex flex-col items-start gap-3xl w-full">
+          <BackButton title="정보등록" link={'/login'} />
+          <Typography variant="display" className="text-gray-800">
+            회원 정보 등록
+          </Typography>
           <View className="flex flex-row gap-sm items-end w-full">
             <View className="flex-1">
               <TextInput
@@ -97,14 +98,14 @@ export default function SignUp() {
             onDistrictChange={setDistrict}
           />
         </View>
+        <View className="w-full">
+          <Button
+            content={isPending ? '가입 중...' : '가입하기'}
+            onclick={handleSignUp}
+            className={isPending ? 'opacity-50' : ''}
+          />
+        </View>
       </View>
-      <View className="w-full">
-        <Button
-          content={isPending ? '가입 중...' : '가입하기'}
-          onclick={handleSignUp}
-          className={isPending ? 'opacity-50' : ''}
-        />
-      </View>
-    </View>
+    </SafeAreaView>
   );
 }
