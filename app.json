@@ -53,12 +53,6 @@
       ],
       "expo-secure-store",
       [
-        "@react-native-seoul/kakao-login",
-        {
-          "kakaoAppKey": "PUT_KAKAO_NATIVE_APP_KEY_HERE"
-        }
-      ],
-      [
         "expo-build-properties",
         {
           "android": {

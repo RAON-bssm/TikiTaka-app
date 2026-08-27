@@ -56,16 +56,24 @@ keytool -exportcert -alias androiddebugkey -keystore ~/.android/debug.keystore \
 
 ### 2. 네이티브 앱 키 넣기
 
-`app.json`의 `PUT_KAKAO_NATIVE_APP_KEY_HERE`를 발급받은 **네이티브 앱 키**로 교체합니다.
+`.env`에 발급받은 **네이티브 앱 키**를 넣습니다.
 
-```jsonc
-["@react-native-seoul/kakao-login", { "kakaoAppKey": "발급받은_네이티브_앱_키" }]
+```bash
+KAKAO_NATIVE_APP_KEY=발급받은_네이티브_앱_키
 ```
 
-> 이 값은 `.env`가 아니라 `app.json`에 둡니다. 네이티브 앱 키는 URL 스킴(`kakao{앱키}://oauth`)으로
-> 앱 바이너리에 어차피 노출되는 **공개값**이고, 감춘다고 얻는 게 없습니다. 오히려 `.env`는
-> gitignore 대상이라 EAS 클라우드 빌드에 올라가지 않아 빌드가 깨집니다.
-> 반대로 **REST API 키와 client secret은 앱에 절대 넣지 않습니다.** 코드↔토큰 교환은 카카오 SDK가
+`app.config.ts`가 빌드 시점에 이 값을 읽어 네이티브 설정(URL 스킴, `strings.xml`, `Info.plist`)에
+주입합니다. 값이 없으면 prebuild가 **즉시 에러와 함께 멈춥니다.** (키 없이 빌드하면 빌드는 성공하는데
+로그인만 조용히 실패해서, 일부러 먼저 터지게 해뒀습니다.)
+
+> **EAS 클라우드 빌드는 `.env`를 읽지 못합니다.** gitignore 대상이라 업로드되지 않기 때문입니다.
+> 클라우드 빌드를 쓴다면 한 번만 등록해두세요.
+>
+> ```bash
+> eas env:create --name KAKAO_NATIVE_APP_KEY --value 발급받은_네이티브_앱_키
+> ```
+
+> **REST API 키와 client secret은 앱에 절대 넣지 않습니다.** 코드↔토큰 교환은 카카오 SDK가
 > 처리하고, 앱은 발급받은 access token만 서버로 넘깁니다.
 
 ### 3. 네이티브 코드 재생성 후 빌드
