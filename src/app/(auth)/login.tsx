@@ -5,7 +5,7 @@ import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
 import { useLogin } from '@/hooks/auth/useLogin';
 import type { Provider } from '@/types/auth';
-import { router } from 'expo-router';
+import { useState } from 'react';
 import { Image, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -13,16 +13,27 @@ export default function Login() {
   const { showToast } = useToast();
   const { mutate: login, isPending } = useLogin();
 
-  const handleSocialLogin = async (provider: Provider) => {
-    const providerAccessToken = await getProviderAccessToken(provider);
+  // 카카오 로그인 창이 떠 있는 동안의 상태. isPending은 서버 요청 구간만 덮기 때문에,
+  // 이게 없으면 카카오톡으로 넘어가는 찰나에 버튼을 또 눌러 로그인 창이 두 번 뜬다.
+  const [isProviderPending, setIsProviderPending] = useState(false);
+  const isBusy = isProviderPending || isPending;
 
-    // TODO(소셜 SDK 연동): SDK가 붙으면 이 분기를 통째로 지운다.
-    // 지금은 토큰을 받을 수 없어 UI 확인용으로 회원가입 화면만 열어둔다.
-    if (!providerAccessToken) {
-      showToast('소셜 로그인은 준비 중이에요');
-      router.push('/(auth)/signup');
+  const handleSocialLogin = async (provider: Provider) => {
+    if (isBusy) return;
+
+    let providerAccessToken: string | null;
+    setIsProviderPending(true);
+    try {
+      providerAccessToken = await getProviderAccessToken(provider);
+    } catch {
+      showToast('소셜 로그인에 실패했어요. 다시 시도해주세요');
       return;
+    } finally {
+      setIsProviderPending(false);
     }
+
+    // 사용자가 로그인 창을 직접 닫은 경우(취소). 본인이 그만둔 것이므로 따로 알리지 않는다.
+    if (!providerAccessToken) return;
 
     login(
       { provider, providerAccessToken },
@@ -51,7 +62,7 @@ export default function Login() {
         {/* 로그인 버튼: 화면 하단 고정 */}
         <Pressable
           onPress={() => handleSocialLogin('KAKAO')}
-          disabled={isPending}
+          disabled={isBusy}
           className="flex-row items-center mb-2xl justify-center gap-sm rounded-md bg-[#FEE500] py-md active:bg-[#EED500] disabled:opacity-50"
         >
           <KakaoIcon width={24} height={24} />
