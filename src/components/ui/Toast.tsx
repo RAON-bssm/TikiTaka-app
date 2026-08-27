@@ -64,7 +64,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             className="w-full flex-row items-center gap-md rounded-full bg-white px-md py-sm shadow-md"
           >
             <CheckIcon width={32} height={32} />
-            <Typography variant="body1" className="flex-1">
+            <Typography variant="body2" className="flex-1">
               {toast.message}
             </Typography>
           </Animated.View>
