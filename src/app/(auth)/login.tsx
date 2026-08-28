@@ -25,8 +25,7 @@ export default function Login() {
     setIsProviderPending(true);
     try {
       providerAccessToken = await getProviderAccessToken(provider);
-    } catch (error) {
-      console.error(`[auth] ${provider} 로그인 실패`, error);
+    } catch {
       showToast('소셜 로그인에 실패했어요. 다시 시도해주세요');
       return;
     } finally {
