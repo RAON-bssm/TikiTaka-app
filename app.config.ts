@@ -14,6 +14,53 @@ import type { ConfigContext } from 'expo/config';
  */
 const KAKAO_NATIVE_APP_KEY = process.env.KAKAO_NATIVE_APP_KEY;
 
+/**
+ * 평문 HTTP(`http://`) API 서버를 쓰는 동안에만 iOS ATS 예외를 열어줄 호스트. https면 null.
+ *
+ * iOS의 ATS는 기본적으로 평문 HTTP를 막는다. API 주소가 `http://<공인 IP>:<포트>`면
+ * 예외 없이는 요청이 앱 밖으로 나가지도 못하고 곧바로 네트워크 에러가 난다.
+ * `NSAllowsLocalNetworking`은 `.local`·링크로컬 주소만 허용하므로 공인 IP는 해당되지
+ * 않는다. (시뮬레이터·디버그 빌드도 똑같이 막힌다)
+ *
+ * 주소를 하드코딩하지 않고 `EXPO_PUBLIC_API_URL`에서 호스트만 뽑아 쓴다. 서버가 바뀌면
+ * `.env`만 고쳐 다시 prebuild 하면 되고, https로 옮기면 예외가 저절로 사라진다.
+ */
+const cleartextHost = (() => {
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+  if (!apiUrl) return null;
+
+  let url: URL;
+  try {
+    url = new URL(apiUrl);
+  } catch {
+    // 스킴이 빠진 값(`43.201.205.114` 같은)이 여기서 걸린다. 이런 값은 axios baseURL로도
+    // 쓸 수 없어(상대 경로가 되어 요청이 전송조차 되지 않는다) 조용히 넘기면 안 된다.
+    throw new Error(
+      `EXPO_PUBLIC_API_URL 형식이 잘못됐습니다: "${apiUrl}"\n` +
+        'http:// 또는 https:// 로 시작하는 전체 주소여야 합니다. (예: http://43.201.205.114:8090)',
+    );
+  }
+
+  return url.protocol === 'http:' ? url.hostname : null;
+})();
+
+/**
+ * ATS 예외 도메인의 키로 쓸 문자열. 호스트명이면 그대로, IP 주소면 CIDR 표기로 바꾼다.
+ *
+ * `NSExceptionDomains`는 원래 **도메인 이름만** 키로 받는다. `43.201.205.114`처럼 숫자 IP를
+ * 그대로 적으면 어떤 예외에도 매칭되지 않아, 예외를 넣었는데도 계속 조용히 차단된다.
+ * iOS 17부터 이 키가 CIDR 표기를 지원하므로, IP는 단일 호스트 마스크(IPv4 `/32`,
+ * IPv6 `/128`)를 붙여야 실제로 걸린다.
+ */
+const toExceptionDomainKey = (host: string) => {
+  // URL.hostname은 IPv6를 대괄호째 돌려준다(`http://[::1]:8090` → `[::1]`).
+  const bare = host.replace(/^\[|\]$/g, '');
+
+  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(bare)) return `${bare}/32`;
+  if (bare.includes(':')) return `${bare}/128`;
+  return bare;
+};
+
 // 반환 타입은 추론에 맡긴다. ExpoConfig로 못 박으면 name/slug가 optional인
 // ConfigContext['config']와 안 맞아, app.json에 이미 있는 값을 여기에 또 적어야 한다.
 export default ({ config }: ConfigContext) => {
@@ -28,6 +75,23 @@ export default ({ config }: ConfigContext) => {
 
   return {
     ...config,
+    ios: {
+      ...config.ios,
+      infoPlist: {
+        ...config.ios?.infoPlist,
+        // 생성되는 Info.plist의 NSAppTransportSecurity를 통째로 대체하므로,
+        // Expo가 기본으로 넣어주던 로컬 네트워크 허용도 함께 적어준다.
+        ...(cleartextHost && {
+          NSAppTransportSecurity: {
+            NSAllowsArbitraryLoads: false,
+            NSAllowsLocalNetworking: true,
+            NSExceptionDomains: {
+              [toExceptionDomainKey(cleartextHost)]: { NSExceptionAllowsInsecureHTTPLoads: true },
+            },
+          },
+        }),
+      },
+    },
     plugins: [
       ...(config.plugins ?? []),
       ['@react-native-seoul/kakao-login', { kakaoAppKey: KAKAO_NATIVE_APP_KEY }],
