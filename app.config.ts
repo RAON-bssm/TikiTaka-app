@@ -41,6 +41,14 @@ const cleartextHost = (() => {
     );
   }
 
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+    throw new Error(
+      `EXPO_PUBLIC_API_URL 의 프로토콜이 잘못됐습니다: "${apiUrl}" (protocol: ${url.protocol})\n` +
+        'http:// 또는 https:// 로 시작하는 전체 주소여야 합니다. (예: http://localhost:8090)',
+    );
+  }
+
+  // https 는 ATS 예외가 필요 없으므로 null.
   return url.protocol === 'http:' ? url.hostname : null;
 })();
 
