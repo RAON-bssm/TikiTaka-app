@@ -47,8 +47,12 @@ function setAuthStatus(next: AuthStatus) {
  * 로그인 상태로 봐도 된다.
  */
 export async function loadAuthStatus() {
-  const refreshToken = await getRefreshToken();
-  setAuthStatus(refreshToken ? 'authenticated' : 'unauthenticated');
+  try {
+    const refreshToken = await getRefreshToken();
+    setAuthStatus(refreshToken ? 'authenticated' : 'unauthenticated');
+  } catch {
+    setAuthStatus('unauthenticated');
+  }
 }
 
 export async function setTokens(accessToken: string, refreshToken: string) {
