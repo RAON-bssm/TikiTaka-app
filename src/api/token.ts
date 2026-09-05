@@ -3,16 +3,6 @@ import * as SecureStore from 'expo-secure-store';
 const ACCESS_KEY = 'accessToken';
 const REFRESH_KEY = 'refreshToken';
 
-/**
- * 개발용 임시 액세스 토큰(선택).
- *
- * 소셜 로그인 SDK가 아직 연결되지 않아 실제 토큰을 받을 수 없을 때를 위한 폴백이다.
- * `.env`에 EXPO_PUBLIC_DEV_TOKEN을 넣어두면 저장된 토큰이 없을 때만 이 값을 대신 사용하고,
- * 로그인 가드도 이 값을 로그인된 것으로 취급해 개발 중 앱에 진입할 수 있게 한다.
- * 소셜 로그인이 붙으면 이 상수와 관련 폴백을 모두 제거한다.
- */
-export const DEV_TOKEN = process.env.EXPO_PUBLIC_DEV_TOKEN;
-
 export const getAccessToken = () => SecureStore.getItemAsync(ACCESS_KEY);
 export const getRefreshToken = () => SecureStore.getItemAsync(REFRESH_KEY);
 

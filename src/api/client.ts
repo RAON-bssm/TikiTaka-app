@@ -1,14 +1,7 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 
 import { reissue } from './refresh';
-import {
-  DEV_TOKEN,
-  clearSignupToken,
-  clearTokens,
-  getAccessToken,
-  getRefreshToken,
-  setTokens,
-} from './token';
+import { clearSignupToken, clearTokens, getAccessToken, getRefreshToken, setTokens } from './token';
 
 // 기본 Axios 클라이언트 인스턴스 생성
 // axios 타입 선언상 `create`가 named export로도 잡혀서 발생하는 false positive이므로 비활성화합니다.
@@ -62,7 +55,7 @@ function refreshAccessToken(): Promise<string> {
 // 요청 인터셉터: 저장된 액세스 토큰을 모든 요청에 자동으로 주입한다.
 client.interceptors.request.use(
   async (config) => {
-    const token = (await getAccessToken()) ?? DEV_TOKEN;
+    const token = await getAccessToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

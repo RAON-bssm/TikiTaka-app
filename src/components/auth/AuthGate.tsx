@@ -2,7 +2,7 @@ import { router, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 
-import { DEV_TOKEN, loadAuthStatus } from '@/api/token';
+import { loadAuthStatus } from '@/api/token';
 import { useAuthStatus } from '@/hooks/auth/useAuthStatus';
 
 // 저장된 토큰을 확인하기 전까지 스플래시를 띄워둔다.
@@ -30,14 +30,6 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    // 개발용 토큰을 쓰는 동안에는 가드를 통과시킨다.
-    // 소셜 로그인 SDK가 붙기 전까지는 실제 토큰을 받을 방법이 없어, 가드를 걸면 앱에 들어올 수 없다.
-    // TODO(소셜 SDK 연동): 이 우회를 제거한다.
-    if (DEV_TOKEN) {
-      SplashScreen.hideAsync().catch(() => {});
-      return;
-    }
-
     if (status === 'loading') return;
 
     // 로그인/회원가입 화면은 로그인하지 않아야 갈 수 있는 곳이므로 가드에서 제외한다.
