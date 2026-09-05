@@ -98,10 +98,9 @@ client.interceptors.response.use(
     // 재시도한 요청이 또 401이면 무한 재시도로 이어지므로 한 번만 시도한다.
     originalRequest._retry = true;
 
+    let accessToken: string;
     try {
-      const accessToken = await refreshAccessToken();
-      originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-      return await client(originalRequest);
+      accessToken = await refreshAccessToken();
     } catch (refreshError) {
       // 재발급까지 실패 = 세션이 끝난 것. 토큰을 비우면 로그인 상태가 'unauthenticated'로 바뀌고,
       // 이를 구독하는 AuthGate가 로그인 화면으로 돌려보낸다. (화면 전환 책임은 AuthGate 한 곳에 둔다)
@@ -109,6 +108,8 @@ client.interceptors.response.use(
       clearSignupToken();
       return Promise.reject(refreshError);
     }
+    originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+    return client(originalRequest);
   },
 );
 
