@@ -47,12 +47,50 @@ pnpm dev
 - **카카오 로그인 활성화** (ON)
 - **동의항목**: 서버가 `kapi.kakao.com/v2/user/me`로 사용자를 식별하므로 최소한 프로필 정보는 필요
 
-Android 키 해시는 아래로 뽑습니다. (디버그용)
+Android 키 해시는 **서명 인증서마다 다릅니다.** 디버그용만 등록하면 로컬 개발 빌드에서는
+로그인이 되지만 **스토어에 올린 빌드에서는 조용히 인증 실패**합니다. 아래 해시를 모두 뽑아
+Kakao Developers에 등록하세요.
+
+**디버그용** (로컬 development build)
 
 ```bash
 keytool -exportcert -alias androiddebugkey -keystore ~/.android/debug.keystore \
   -storepass android -keypass android | openssl sha1 -binary | openssl base64
 ```
+
+> `~/.android/debug.keystore`는 첫 Android 빌드 때 생성됩니다. 파일이 없으면 keytool이
+> 에러를 내면서도 stdout에 값을 흘려서 **그럴듯한 가짜 해시가 찍힙니다.** 위 명령이 안 되면
+> `pnpm android`를 한 번 돌린 뒤 다시 실행하세요.
+
+**릴리스용** (EAS production 빌드)
+
+키스토어를 EAS가 관리하므로 먼저 내려받습니다. (`credentials.json`을 쓰지 않는 구성)
+
+```bash
+eas credentials --platform android
+# → production 프로필 → Keystore → Download existing keystore
+```
+
+내려받은 `.jks`와 함께 출력되는 key alias·비밀번호로 해시를 뽑습니다. (`*.jks`는 gitignore 대상)
+
+```bash
+keytool -exportcert -alias <key alias> -keystore <내려받은>.jks \
+  -storepass <keystore password> -keypass <key password> \
+  | openssl sha1 -binary | openssl base64
+```
+
+**Play 배포용** (Google Play App Signing)
+
+Play는 업로드한 AAB를 **자기 키로 다시 서명**하므로, 사용자 기기에 설치되는 앱의 인증서는
+위 릴리스 키스토어가 아닙니다. Play Console의 **앱 완전성(App integrity) → 앱 서명**에서
+`앱 서명 키 인증서`의 SHA-1 지문(hex)을 복사해 base64로 변환한 값도 등록해야 합니다.
+
+```bash
+echo <SHA-1_지문에서_콜론_제거> | xxd -r -p | openssl base64
+```
+
+**등록 위치**: Kakao Developers → 내 애플리케이션 → 앱 설정 → 플랫폼 → Android → 키 해시.
+줄바꿈으로 여러 개를 넣을 수 있으니 위 해시를 모두 추가합니다.
 
 ### 2. 네이티브 앱 키 넣기
 
