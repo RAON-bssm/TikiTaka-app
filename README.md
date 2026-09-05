@@ -71,12 +71,28 @@ eas credentials --platform android
 # → production 프로필 → Keystore → Download existing keystore
 ```
 
-내려받은 `.jks`와 함께 출력되는 key alias·비밀번호로 해시를 뽑습니다. (`*.jks`는 gitignore 대상)
+내려받은 `.jks`와 함께 key alias·비밀번호가 출력됩니다. (`*.jks`는 gitignore 대상)
+
+**비밀번호는 명령줄 인자로 넘기지 않습니다.** 프로세스 인자는 같은 머신의 다른 사용자에게 `ps`로
+보이고 셸 히스토리에도 남습니다. 아래처럼 실행하면 keytool이 비밀번호를 직접 물어봅니다.
 
 ```bash
 keytool -exportcert -alias <key alias> -keystore <내려받은>.jks \
-  -storepass <keystore password> -keypass <key password> \
   | openssl sha1 -binary | openssl base64
+# 키 저장소 비밀번호 입력: (붙여넣기, 화면에 표시되지 않음)
+```
+
+> `-exportcert`는 인증서만 꺼내므로 개인키가 필요 없습니다. 그래서 `-keypass`는 아예 넣지 않아도
+> 됩니다.
+
+CI 등에서 자동화해야 한다면 비밀번호를 셸 변수로 펼쳐 넣지 말고, keytool이 환경변수나 파일에서
+직접 읽게 합니다.
+
+```bash
+keytool -exportcert -alias <key alias> -keystore <내려받은>.jks \
+  -storepass:env KEYSTORE_PASSWORD \
+  | openssl sha1 -binary | openssl base64
+# 또는 파일에서: -storepass:file <비밀번호_파일_경로>
 ```
 
 **Play 배포용** (Google Play App Signing)
