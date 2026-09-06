@@ -1,3 +1,4 @@
+import AuthGate from '@/components/auth/AuthGate';
 import { ToastProvider } from '@/components/ui/Toast';
 import '@/global.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -15,7 +16,9 @@ export default function RootLayout() {
         <SafeAreaProvider>
           <QueryClientProvider client={queryClient}>
             <ToastProvider>
-              <Stack screenOptions={{ headerShown: false }} />
+              <AuthGate>
+                <Stack screenOptions={{ headerShown: false }} />
+              </AuthGate>
             </ToastProvider>
           </QueryClientProvider>
         </SafeAreaProvider>

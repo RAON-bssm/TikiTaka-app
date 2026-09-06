@@ -32,6 +32,115 @@ pnpm dev
 
 ---
 
+## 카카오 로그인 설정 (Kakao Login)
+
+카카오 로그인은 **네이티브 SDK**(`@react-native-seoul/kakao-login`)를 사용합니다.
+네이티브 모듈이라 **Expo Go에서는 동작하지 않고, development build가 필요합니다.**
+
+### 1. 카카오 앱 등록
+
+[Kakao Developers](https://developers.kakao.com) → 내 애플리케이션에서 앱을 만들고 아래를 설정합니다.
+
+- **플랫폼 등록**
+  - Android: 패키지명 `com.anonymous.TikiTaka` + 키 해시
+  - iOS: 번들 ID `com.tikitaka.raon`
+- **카카오 로그인 활성화** (ON)
+- **동의항목**: 서버가 `kapi.kakao.com/v2/user/me`로 사용자를 식별하므로 최소한 프로필 정보는 필요
+
+Android 키 해시는 **서명 인증서마다 다릅니다.** 디버그용만 등록하면 로컬 개발 빌드에서는
+로그인이 되지만 **스토어에 올린 빌드에서는 조용히 인증 실패**합니다. 아래 해시를 모두 뽑아
+Kakao Developers에 등록하세요.
+
+**디버그용** (로컬 development build)
+
+```bash
+keytool -exportcert -alias androiddebugkey -keystore ~/.android/debug.keystore \
+  -storepass android -keypass android | openssl sha1 -binary | openssl base64
+```
+
+> `~/.android/debug.keystore`는 첫 Android 빌드 때 생성됩니다. 파일이 없으면 keytool이
+> 에러를 내면서도 stdout에 값을 흘려서 **그럴듯한 가짜 해시가 찍힙니다.** 위 명령이 안 되면
+> `pnpm android`를 한 번 돌린 뒤 다시 실행하세요.
+
+**릴리스용** (EAS production 빌드)
+
+키스토어를 EAS가 관리하므로 먼저 내려받습니다. (`credentials.json`을 쓰지 않는 구성)
+
+```bash
+eas credentials --platform android
+# → production 프로필 → Keystore → Download existing keystore
+```
+
+내려받은 `.jks`와 함께 key alias·비밀번호가 출력됩니다. (`*.jks`는 gitignore 대상)
+
+**비밀번호는 명령줄 인자로 넘기지 않습니다.** 프로세스 인자는 같은 머신의 다른 사용자에게 `ps`로
+보이고 셸 히스토리에도 남습니다. 아래처럼 실행하면 keytool이 비밀번호를 직접 물어봅니다.
+
+```bash
+keytool -exportcert -alias <key alias> -keystore <내려받은>.jks \
+  | openssl sha1 -binary | openssl base64
+# 키 저장소 비밀번호 입력: (붙여넣기, 화면에 표시되지 않음)
+```
+
+> `-exportcert`는 인증서만 꺼내므로 개인키가 필요 없습니다. 그래서 `-keypass`는 아예 넣지 않아도
+> 됩니다.
+
+CI 등에서 자동화해야 한다면 비밀번호를 셸 변수로 펼쳐 넣지 말고, keytool이 환경변수나 파일에서
+직접 읽게 합니다.
+
+```bash
+keytool -exportcert -alias <key alias> -keystore <내려받은>.jks \
+  -storepass:env KEYSTORE_PASSWORD \
+  | openssl sha1 -binary | openssl base64
+# 또는 파일에서: -storepass:file <비밀번호_파일_경로>
+```
+
+**Play 배포용** (Google Play App Signing)
+
+Play는 업로드한 AAB를 **자기 키로 다시 서명**하므로, 사용자 기기에 설치되는 앱의 인증서는
+위 릴리스 키스토어가 아닙니다. Play Console의 **앱 완전성(App integrity) → 앱 서명**에서
+`앱 서명 키 인증서`의 SHA-1 지문(hex)을 복사해 base64로 변환한 값도 등록해야 합니다.
+
+```bash
+echo <SHA-1_지문에서_콜론_제거> | xxd -r -p | openssl base64
+```
+
+**등록 위치**: Kakao Developers → 내 애플리케이션 → 앱 설정 → 플랫폼 → Android → 키 해시.
+줄바꿈으로 여러 개를 넣을 수 있으니 위 해시를 모두 추가합니다.
+
+### 2. 네이티브 앱 키 넣기
+
+`.env`에 발급받은 **네이티브 앱 키**를 넣습니다.
+
+```bash
+KAKAO_NATIVE_APP_KEY=발급받은_네이티브_앱_키
+```
+
+`app.config.ts`가 빌드 시점에 이 값을 읽어 네이티브 설정(URL 스킴, `strings.xml`, `Info.plist`)에
+주입합니다. 값이 없으면 prebuild가 **즉시 에러와 함께 멈춥니다.** (키 없이 빌드하면 빌드는 성공하는데
+로그인만 조용히 실패해서, 일부러 먼저 터지게 해뒀습니다.)
+
+> **EAS 클라우드 빌드는 `.env`를 읽지 못합니다.** gitignore 대상이라 업로드되지 않기 때문입니다.
+> 클라우드 빌드를 쓴다면 한 번만 등록해두세요.
+>
+> ```bash
+> eas env:create --name KAKAO_NATIVE_APP_KEY --value 발급받은_네이티브_앱_키
+> ```
+
+> **REST API 키와 client secret은 앱에 절대 넣지 않습니다.** 코드↔토큰 교환은 카카오 SDK가
+> 처리하고, 앱은 발급받은 access token만 서버로 넘깁니다.
+
+### 3. 네이티브 코드 재생성 후 빌드
+
+`ios/`, `android/` 는 생성물이라 gitignore되어 있습니다. 앱 키를 바꾼 뒤에는 반드시 다시 만들어야 합니다.
+
+```bash
+pnpm expo prebuild --clean
+pnpm ios      # 또는 pnpm android
+```
+
+---
+
 ## 주요 명령어 (Scripts)
 
 - `pnpm dev` 또는 `pnpm start`: 로컬 개발 서버 실행
