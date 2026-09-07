@@ -5,10 +5,13 @@ import type {
   Board,
   BoardListData,
   CreatePostRequest,
+  CreatePostResponse,
+  DeletePostResponse,
   Post,
   PostDetail,
   PostListData,
   UpdatePostRequest,
+  UpdatePostResponse,
 } from '@/types/post';
 import client from './client';
 
@@ -60,7 +63,7 @@ export async function getPostDetail(postId: string): Promise<PostDetail> {
  * 게시물 생성. 사진 파일을 함께 올려야 하므로 multipart/form-data로 전송한다.
  * post_image 파트에는 로컬 파일(uri/name/type)을 담는다.
  */
-export async function createPost({ board_id, fileUri, content }: CreatePostRequest) {
+export async function createPost({ board_id, fileUri, content }: CreatePostRequest): Promise<void> {
   // 원본 대신 압축/리사이즈한 이미지를 업로드한다(413 방지).
   const compressedUri = await compressImageForUpload(fileUri);
   const fileName = compressedUri.split('/').pop() ?? `photo-${Date.now()}.jpg`;
@@ -78,18 +81,16 @@ export async function createPost({ board_id, fileUri, content }: CreatePostReque
 
   // Content-Type을 직접 'multipart/form-data'로 박으면 boundary가 빠져 서버가 파트를 파싱하지 못해 400이 난다.
   // undefined로 넘겨 axios 인스턴스 기본값(application/json)을 해제하면, RN 네트워킹이 boundary 포함 헤더를 자동 생성한다.
-  const { data } = await client.post<ApiResponse<Post>>(`/api/post`, formData, {
+  // 서버는 생성된 게시물을 돌려주지 않는다(data: null). 반환값이 없으므로 post_id가 필요하면 목록을 다시 받아야 한다. (useUploadPost 참고)
+  await client.post<CreatePostResponse>(`/api/post`, formData, {
     headers: { 'Content-Type': undefined },
   });
-  return data.data;
 }
 
-export async function updatePost(postId: string, req: UpdatePostRequest) {
-  const { data } = await client.patch(`/api/post/patch/${postId}`, req);
-  return data.data;
+export async function updatePost(postId: string, req: UpdatePostRequest): Promise<void> {
+  await client.patch<UpdatePostResponse>(`/api/post/patch/${postId}`, req);
 }
 
-export async function deletePost(postId: string) {
-  const { data } = await client.patch(`/api/post/delete/${postId}`);
-  return data.data;
+export async function deletePost(postId: string): Promise<void> {
+  await client.patch<DeletePostResponse>(`/api/post/delete/${postId}`);
 }
