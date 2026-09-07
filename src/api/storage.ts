@@ -1,5 +1,5 @@
 import type { ApiResponse } from '@/types/api';
-import type { ViewUrlData } from '@/types/storage';
+import type { PresignedUrlData } from '@/types/storage';
 import client from './client';
 
 /**
@@ -7,7 +7,7 @@ import client from './client';
  * GET /api/storage/view-url?key=... → data.url (유효 10분)
  */
 export async function getViewUrl(key: string): Promise<string> {
-  const { data } = await client.get<ApiResponse<ViewUrlData>>('/api/storage/view-url', {
+  const { data } = await client.get<ApiResponse<PresignedUrlData>>('/api/storage/view-url', {
     params: { key },
   });
   return data.data.url;
