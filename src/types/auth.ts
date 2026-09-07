@@ -1,3 +1,5 @@
+import type { EmptyResponse } from './api';
+
 /**
  * 로그인 제공자.
  *
@@ -58,3 +60,11 @@ export interface TokenData {
   access_token: string;
   refresh_token: string;
 }
+
+/**
+ * 로그아웃 응답. `POST /api/auth/logout` (body 없음)
+ *
+ * 서버는 refresh 토큰만 지운다. 이미 발급된 access token은 만료까지 유효하므로
+ * 호출부가 로컬 토큰도 비워야 실제로 로그아웃된다.
+ */
+export type LogoutResponse = EmptyResponse;
