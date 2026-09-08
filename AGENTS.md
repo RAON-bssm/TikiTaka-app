@@ -87,7 +87,7 @@
   - **예외:** `memo`, `forwardRef` 등으로 감싸야 하는 경우에만 `const Name = memo(...)` + 별도 export를 사용하세요. 파일 내부에서만 쓰는 작은 헬퍼 컴포넌트는 `const` 화살표 함수도 허용합니다.
 - 가능한 한 인라인 스타일(`style={{...}}`)이나 `StyleSheet.create` 대신 **NativeWind** 클래스명(`className="..."`)을 사용하여 스타일을 정의해 주세요.
 - NativeWind v4(Tailwind CSS v3)를 사용하므로, 테마 설정이나 커스텀 스타일은 `tailwind.config.js` 파일에서 관리해 주세요. 또한 `babel.config.js` 및 `metro.config.js`에 NativeWind v4 관련 설정이 유지되어야 합니다.
-- API 호출은 **Axios**로 래핑하여 작성하고, 비동기 상태(로딩, 에러, 캐싱 등)는 **TanStack Query**의 훅(`useQuery`, `useMutation`)을 사용해 관리해 주세요.
+- API 호출은 **Axios**로 래핑하여 작성하고, 비동기 상태(로딩, 에러, 캐싱 등)는 **TanStack Query**의 훅(`useQuery`, `useMutation`)을 사용해 관리해 주세요. 계층 분리·쿼리 키·에러 처리 규약은 **10번**을 따르세요.
 - 코드 내 기존 주석이나 문서(Docstring)는 훼손하지 않고 온전히 보존해야 합니다.
 
 ---
@@ -197,3 +197,57 @@
 
 - **`reactCompiler: true`** — React Compiler가 자동으로 메모이제이션을 처리합니다. 따라서 `useMemo`, `useCallback`, `React.memo`를 **습관적으로 남발하지 마세요.** 대부분의 경우 불필요하며, 컴파일러가 최적화합니다. (참조 동일성이 외부 계약상 꼭 필요한 특수한 경우에만 명시적으로 사용)
 - **`typedRoutes: true`** — Expo Router가 라우트 경로에 대한 타입을 생성합니다. `router.push('/...')`, `<Link href="...">` 등의 경로 문자열이 타입 체크되므로, 존재하지 않는 경로는 컴파일 에러가 납니다. 경로는 문자열 리터럴로 넘겨 타입 추론이 되게 하세요.
+
+---
+
+## 10. API 연동 규약 (API Integration)
+
+서버 연동 코드는 **api 모듈 → 훅 → 화면** 3계층으로 나눕니다. 도메인마다 파일이 겹치지 않아 여러 사람이 동시에 다른 도메인을 붙일 수 있습니다.
+
+| 계층     | 위치                         | 책임                                                   |
+| -------- | ---------------------------- | ------------------------------------------------------ |
+| api 모듈 | `src/api/<도메인>.ts`        | 엔드포인트 호출. 공통 래퍼를 벗겨 **도메인 값만** 반환 |
+| 훅       | `src/hooks/<도메인>/use*.ts` | `useQuery`/`useMutation`. 쿼리 키와 캐시 무효화 담당   |
+| 화면     | `src/app/**`                 | 로딩·에러 UI, 토스트 등 **사용자에게 보이는 것**       |
+
+### 10.1 api 모듈
+
+`ApiResponse<T>` 래퍼는 api 모듈에서 벗기고, 훅·화면에는 도메인 값만 넘깁니다.
+
+```ts
+export async function getBoards(): Promise<Board[]> {
+  const { data } = await client.get<ApiResponse<BoardListData>>('/api/board');
+  return data.data.board; // 래퍼는 여기서 끝난다
+}
+```
+
+- 요청·응답 타입은 `src/types/<도메인>.ts`에 두고 api 모듈이 import 합니다.
+- data가 없는 API는 제네릭에 `EmptyResponse`를 넣고 `Promise<void>`로 선언합니다. **서버가 주지 않는 값을 반환 타입에 적지 마세요.**
+
+### 10.2 쿼리 키
+
+`src/api/queryKeys.ts`의 팩토리만 사용합니다. 훅에 문자열 배열을 직접 쓰지 마세요. 새 도메인은 여기에 키를 먼저 추가합니다. (규칙은 파일 상단 주석 참고)
+
+### 10.3 캐시 무효화
+
+- 무효화는 도메인의 `all`을 씁니다. 접두사가 겹치므로 목록과 상세가 함께 갱신됩니다.
+- **다른 도메인까지 바뀌면 그 키도 함께 무효화**합니다. 예를 들어 게시물 삭제는 서버에서 동네·개인 점수를 차감하므로 랭킹 키도 무효화해야 화면이 맞습니다.
+
+### 10.4 에러 처리
+
+- 실패 문구는 `getApiErrorMessage(error, fallback)`(`src/api/error.ts`)로 만듭니다. 서버가 보낸 사유를 우선 쓰고, 없을 때만 fallback으로 내려갑니다.
+- **토스트는 화면에서 띄웁니다.** 훅의 `onError`와 호출부의 `onError`가 **둘 다** 실행되므로, 훅에 넣으면 같은 메시지가 두 번 뜹니다.
+- 재시도·`staleTime` 기본값은 `src/api/queryClient.ts`에 있습니다. 훅에서 꼭 필요할 때만 덮어쓰세요.
+
+### 10.5 로딩 · 에러 UI
+
+- 로딩은 `Skeleton`, 실패는 `ErrorRetry`(`src/components/ui/feedback/`)를 씁니다. `ErrorRetry`에는 `refetch`를 넘깁니다.
+- 스피너나 실패 화면을 새로 만들지 말고 위 두 개를 재사용하세요.
+
+### 10.6 새 도메인 연동 절차
+
+1. `src/types/<도메인>.ts`에 요청·응답 타입 (대부분 이미 정의돼 있습니다)
+2. `src/api/queryKeys.ts`에 쿼리 키 추가
+3. `src/api/<도메인>.ts`에 호출 함수
+4. `src/hooks/<도메인>/`에 훅
+5. 화면의 목 데이터를 제거하고 훅 연결
