@@ -11,7 +11,7 @@ export function useUpdatePost() {
     mutationFn: ({ postId, req }: { postId: string; req: UpdatePostRequest }) =>
       updatePost(postId, req),
     onSuccess: () => {
-      // 목록과 상세를 함께 무효화한다. (postKeys.all이 두 키의 공통 접두사)
+      // 목록·상세 캐시 무효화
       queryClient.invalidateQueries({ queryKey: postKeys.all });
     },
     onError: (error) => {

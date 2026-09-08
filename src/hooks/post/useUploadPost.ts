@@ -27,7 +27,7 @@ export function useUploadPost() {
       return posts[0]?.post_id ?? null;
     },
     onSuccess: () => {
-      // 목록과 상세를 함께 무효화 → 피드가 자동으로 새 글을 반영한다.
+      // 목록·상세 캐시 무효화 → 피드가 자동으로 새 글을 반영한다.
       queryClient.invalidateQueries({ queryKey: postKeys.all });
     },
     onError: (error) => {
