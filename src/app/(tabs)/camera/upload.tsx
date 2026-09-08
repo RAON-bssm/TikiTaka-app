@@ -1,3 +1,4 @@
+import { getApiErrorMessage } from '@/api/error';
 import Topic from '@/components/camera/Topic';
 import Button from '@/components/ui/Button';
 import Dropdown from '@/components/ui/input/Dropdown';
@@ -50,7 +51,8 @@ export default function Upload() {
             router.back();
           }
         },
-        onError: () => showToast('업로드에 실패했어요. 다시 시도해주세요.'),
+        onError: (error) =>
+          showToast(getApiErrorMessage(error, '업로드에 실패했어요. 다시 시도해주세요.')),
       },
     );
   };
