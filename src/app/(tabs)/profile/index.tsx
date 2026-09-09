@@ -1,11 +1,14 @@
 import FeedCard from '@/components/feed/FeedCard';
 import NeighborhoodSheet from '@/components/profile/NeighborhoodSheet';
+import ProfileSummarySkeleton from '@/components/profile/ProfileSummarySkeleton';
 import UserProfile from '@/components/profile/UserProfile';
 import Button from '@/components/ui/Button';
+import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Header from '@/components/ui/Header';
 import NavRow from '@/components/ui/NavRow';
 import Typography from '@/components/ui/Typography';
 import { useCharacterConfig } from '@/hooks/character/useCharacterConfig';
+import { useMyProfile } from '@/hooks/user/useMyProfile';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
@@ -38,10 +41,16 @@ const MY_FEEDS = [
   },
 ];
 
+/** 서브 동네 미설정 시 안내. 서버는 이 경우 `sub_location_name` 키 자체를 주지 않는다. */
+const NO_SUB_LOCATION_TEXT = '동네를 추가해보세요';
+
 export default function ProfileScreen() {
   const [isNeighborhoodSheetOpen, setIsNeighborhoodSheetOpen] = useState(false);
   // 꾸미기 화면과 같은 저장된 config를 공유한다(수정 시 즉시 반영).
   const { config: character } = useCharacterConfig();
+  // 표시용이라 동네를 이름으로만 받는다. 동네를 고치는 화면은 useMyInfo(id 포함)를 쓴다.
+  const { data: profile, isLoading, isError, refetch } = useMyProfile();
+
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top']}>
       <ScrollView
@@ -51,17 +60,27 @@ export default function ProfileScreen() {
       >
         <View className="flex flex-col gap-2xl bg-white p-xl border-b border-gray-100">
           <Header />
-          <UserProfile
-            character={character}
-            point={9999}
-            userName="그만말해인제"
-            userPlace="부산시 영도구"
-          />
-          <NavRow
-            title="동네 확인하기"
-            description="부산시 사상구"
-            onPress={() => setIsNeighborhoodSheetOpen(true)}
-          />
+          {isLoading ? (
+            <ProfileSummarySkeleton />
+          ) : isError || !profile ? (
+            <ErrorRetry message="프로필을 불러오지 못했어요." onRetry={refetch} />
+          ) : (
+            <>
+              <UserProfile
+                character={character}
+                point={profile.point}
+                userName={profile.user_name}
+                userPlace={profile.main_location_name}
+              />
+              <NavRow
+                title="동네 확인하기"
+                description={profile.sub_location_name ?? NO_SUB_LOCATION_TEXT}
+                onPress={() => setIsNeighborhoodSheetOpen(true)}
+              />
+            </>
+          )}
+          {/* 화면 이동일 뿐이라 프로필 요청 결과와 무관하게 항상 보여준다.
+              캐릭터 꾸미기는 기기 로컬 데이터라 요청이 실패해도 정상 동작한다. */}
           <View className="flex flex-row gap-md w-full">
             <Button
               content="프로필 수정"
