@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { getPosts } from '@/api/post';
+import { postKeys } from '@/api/queryKeys';
 
 /**
  * 게시판(board_id)의 게시물 목록 조회 훅.
@@ -10,7 +11,7 @@ import { getPosts } from '@/api/post';
  */
 export function usePosts(boardId: number) {
   return useQuery({
-    queryKey: ['posts', boardId],
+    queryKey: postKeys.list(boardId),
     queryFn: () => getPosts(boardId),
   });
 }

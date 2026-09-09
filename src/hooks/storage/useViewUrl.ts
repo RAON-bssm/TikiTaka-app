@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { getViewUrl } from '@/api/storage';
+import { storageKeys } from '@/api/queryKeys';
 
 /** presigned 조회 URL 유효시간(10분)보다 살짝 짧게 잡아 만료 전에 갱신되도록 한다. */
 const VIEW_URL_STALE_TIME = 9 * 60 * 1000;
@@ -21,7 +22,7 @@ function isAbsoluteUrl(value: string): boolean {
  */
 export function useViewUrl(key: string | undefined) {
   const query = useQuery({
-    queryKey: ['viewUrl', key],
+    queryKey: storageKeys.viewUrl(key),
     queryFn: () => getViewUrl(key as string),
     enabled: !!key && !isAbsoluteUrl(key),
     staleTime: VIEW_URL_STALE_TIME,
