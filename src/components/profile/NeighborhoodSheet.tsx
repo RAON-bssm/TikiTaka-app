@@ -1,4 +1,3 @@
-import CloseIcon from '@/assets/icons/close.svg';
 import RadioOffIcon from '@/assets/icons/radio-selected.svg';
 import RadioOnIcon from '@/assets/icons/radio.svg';
 import { useRouter } from 'expo-router';
@@ -19,19 +18,14 @@ interface Props {
 }
 
 // TODO: 실제 사용자 동네 목록으로 대체
-const INITIAL_NEIGHBORHOODS: Neighborhood[] = [
+const NEIGHBORHOODS: Neighborhood[] = [
   { id: '1', name: '부산시 동래구' },
   { id: '2', name: '부산시 사상구' },
 ];
 
 export default function NeighborhoodSheet({ visible, onClose }: Props) {
-  const [neighborhoods, setNeighborhoods] = useState(INITIAL_NEIGHBORHOODS);
   const [selectedId, setSelectedId] = useState('2');
   const router = useRouter();
-
-  const removeNeighborhood = (id: string) => {
-    setNeighborhoods((prev) => prev.filter((n) => n.id !== id));
-  };
 
   return (
     <BottomSheet visible={visible} onClose={onClose}>
@@ -46,30 +40,26 @@ export default function NeighborhoodSheet({ visible, onClose }: Props) {
         </View>
 
         <View className="flex flex-col gap-lg">
-          {neighborhoods.map((neighborhood) => {
+          {NEIGHBORHOODS.map((neighborhood) => {
             const selected = neighborhood.id === selectedId;
             return (
-              <View key={neighborhood.id} className="flex flex-row items-center justify-between">
-                <Pressable
-                  onPress={() => setSelectedId(neighborhood.id)}
-                  className="flex flex-row items-center gap-xs"
+              <Pressable
+                key={neighborhood.id}
+                onPress={() => setSelectedId(neighborhood.id)}
+                className="flex flex-row items-center gap-xs"
+              >
+                {selected ? (
+                  <RadioOnIcon width={24} height={24} />
+                ) : (
+                  <RadioOffIcon width={24} height={24} />
+                )}
+                <Typography
+                  variant="body2"
+                  className={selected ? 'text-primary-600' : 'text-gray-500'}
                 >
-                  {selected ? (
-                    <RadioOnIcon width={24} height={24} />
-                  ) : (
-                    <RadioOffIcon width={24} height={24} />
-                  )}
-                  <Typography
-                    variant="body2"
-                    className={selected ? 'text-primary-600' : 'text-gray-500'}
-                  >
-                    {neighborhood.name}
-                  </Typography>
-                </Pressable>
-                <Pressable onPress={() => removeNeighborhood(neighborhood.id)}>
-                  <CloseIcon width={24} height={24} />
-                </Pressable>
-              </View>
+                  {neighborhood.name}
+                </Typography>
+              </Pressable>
             );
           })}
         </View>
