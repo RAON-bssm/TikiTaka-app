@@ -25,7 +25,7 @@ const QUERY_RETRY_COUNT = 1;
  * `AxiosError`가 아닐 수 있어, axios 에러가 아닌 실패도 재시도하지 않는다.
  */
 function retryQuery(failureCount: number, error: unknown): boolean {
-  if (failureCount > QUERY_RETRY_COUNT) {
+  if (failureCount >= QUERY_RETRY_COUNT) {
     return false;
   }
   if (isAxiosError(error)) {
