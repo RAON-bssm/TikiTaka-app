@@ -3,7 +3,6 @@ import RadioOffIcon from '@/assets/icons/radio.svg';
 import { getApiErrorMessage } from '@/api/error';
 import { useCancelLocationSwap, useRequestLocationSwap } from '@/hooks/user/useLocationSwap';
 import { useMyInfo } from '@/hooks/user/useMyInfo';
-import type { Location } from '@/types/location';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
@@ -16,13 +15,6 @@ import Typography from '../ui/Typography';
 interface Props {
   visible: boolean;
   onClose: () => void;
-}
-
-/** `city_name`을 주지 않는 응답도 있을 수 있어 있을 때만 앞에 붙인다. */
-function formatLocationName(location: Location): string {
-  return location.city_name
-    ? `${location.city_name} ${location.location_name}`
-    : location.location_name;
 }
 
 /**
@@ -109,7 +101,7 @@ export default function NeighborhoodSheet({ visible, onClose }: Props) {
                       variant="body2"
                       className={selected ? 'text-primary-600' : 'text-gray-500'}
                     >
-                      {formatLocationName(neighborhood)}
+                      {neighborhood.location_name}
                     </Typography>
                   </Pressable>
                 );

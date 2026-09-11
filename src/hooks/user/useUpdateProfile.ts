@@ -11,7 +11,7 @@ export function useUpdateProfile() {
     mutationFn: (req: UpdateProfileRequest) => updateProfile(req),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: userKeys.all });
-      // 메인 동네를 함께 바꿀 수 있고, 그러면 점수 소속 동네가 달라진다.
+      // 랭킹 목록이 닉네임을 함께 내려주므로 이름이 바뀌면 거기도 갱신돼야 한다.
       queryClient.invalidateQueries({ queryKey: rankingKeys.all });
     },
   });
