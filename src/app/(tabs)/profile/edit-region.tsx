@@ -18,7 +18,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 export default function EditRegion() {
   const { showToast } = useToast();
   const locationsQuery = useLocations();
-  // 동네를 고르는 화면이라 이름만 주는 프로필이 아니라 id를 주는 내 정보를 쓴다.
   const myInfoQuery = useMyInfo();
   const { mutate: setSubLocation, isPending } = useSetSubLocation();
 
@@ -49,7 +48,6 @@ export default function EditRegion() {
         showToast('동네를 등록했어요');
         router.back();
       },
-      // 실패는 전부 400이고 사유(없는 동네·메인과 동일)가 message로만 구분된다.
       onError: (error) => showToast(getApiErrorMessage(error, '동네 등록에 실패했어요')),
     });
   };
@@ -65,7 +63,6 @@ export default function EditRegion() {
               동네 정보 입력
             </Typography>
             {isLoading ? (
-              // 라벨 19 + gap-xs 4 + 선택칸 42(p-md 24 + text-sm 16 + border 2)
               <Skeleton className="h-[65px] w-full rounded-sm" />
             ) : isError ? (
               <ErrorRetry message="동네 목록을 불러오지 못했어요." onRetry={retry} />

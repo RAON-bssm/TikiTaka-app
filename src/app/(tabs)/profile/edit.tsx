@@ -19,8 +19,7 @@ export default function EditProfile() {
   const { data: profile, isLoading, isError, refetch } = useMyProfile();
   const { mutate: updateProfile, isPending } = useUpdateProfile();
 
-  // null은 "아직 손대지 않음"을 뜻해 서버 닉네임을 그대로 보여주고, 한 번 고치면 그 값이 이긴다.
-  // 빈 문자열은 null이 아니므로, 입력을 다 지워도 서버 값으로 되돌아가지 않는다.
+  // null은 "아직 손대지 않음". 빈 문자열은 null이 아니라 서버 값으로 되돌아가지 않는다.
   const [editedName, setEditedName] = useState<string | null>(null);
   const userName = editedName ?? profile?.user_name ?? '';
 
@@ -32,7 +31,6 @@ export default function EditProfile() {
       showToast('닉네임을 입력해주세요');
       return;
     }
-    // 부분 수정이라 같은 값을 보내도 통과하지만, 굳이 요청을 낼 이유가 없다.
     if (nextName === profile?.user_name) {
       showToast('닉네임이 이전과 같아요');
       return;
@@ -45,7 +43,6 @@ export default function EditProfile() {
           showToast('닉네임을 변경했어요');
           router.back();
         },
-        // 닉네임 중복(409) 등 거절 사유는 서버가 message로 내려주므로 그걸 우선 보여준다.
         onError: (error) => showToast(getApiErrorMessage(error, '닉네임 변경에 실패했어요')),
       },
     );
@@ -82,7 +79,7 @@ export default function EditProfile() {
           </View>
         </View>
         <View className="w-full">
-          {/* 현재 닉네임을 모르는 상태로 보내면 "이전과 같음"을 가려낼 수 없어, 불러오기 전에는 숨긴다. */}
+          {/* 현재 닉네임을 모르면 "이전과 같음"을 가려낼 수 없어 불러오기 전에는 숨긴다. */}
           {profile && (
             <Button
               content={isPending ? '수정 중...' : '수정하기'}

@@ -15,7 +15,6 @@ import { useState } from 'react';
 import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-/** 서버 응답 상태코드를 사용자에게 보여줄 문구로 옮긴다. */
 function getSignupErrorMessage(error: unknown) {
   if (!isAxiosError(error)) {
     return error instanceof Error ? error.message : '가입에 실패했어요';
@@ -60,10 +59,8 @@ export default function SignUp() {
       {
         onError: (error) => {
           showToast(getSignupErrorMessage(error));
-          // 401(만료)뿐 아니라 토큰이 아예 없는 경우도 로그인부터 다시 해야 한다.
-          // signup token은 메모리에만 있어 앱을 재시작하면 사라지는데, 이때 useSignup은
-          // Axios 에러가 아닌 일반 Error를 던진다. 이걸 걸러내지 않으면 안내 문구만 뜨고
-          // 화면에 그대로 남아, 다시 눌러도 같은 에러만 반복되는 막다른 길이 된다.
+          // signup token은 메모리에만 있어 앱을 재시작하면 사라진다. 이때 useSignup은 Axios
+          // 에러가 아닌 일반 Error를 던져, 걸러내지 않으면 같은 에러만 반복되는 막다른 길이 된다.
           const isExpired = isAxiosError(error) && error.response?.status === 401;
           if (isExpired || !getSignupToken()) {
             router.replace('/(auth)/login');
@@ -94,7 +91,6 @@ export default function SignUp() {
             <Button content="중복확인" />
           </View>
           {isLoading ? (
-            // 라벨 19 + gap-xs 4 + 선택칸 42(p-md 24 + text-sm 16 + border 2)
             <Skeleton className="h-[65px] w-full rounded-sm" />
           ) : isError ? (
             <ErrorRetry message="동네 목록을 불러오지 못했어요." onRetry={refetch} />

@@ -6,8 +6,7 @@ import type { ApiResponse } from './api';
  * 가입의 `main_location_id` 등에 넣는 값이 이 `location_id`다. 서버 DB의 PK라
  * **목록 순서를 id로 가정하면 안 된다.**
  *
- * `city_name`은 시/도(예: `'부산광역시'`)다. 이름이 겹치는 구/군(부산 북구 · 대구 북구)을
- * 가르는 축이기도 하므로, 동네를 보여줄 때 구/군 이름만 쓰면 모호해질 수 있다.
+ * `city_name`은 시/도(예: `'부산광역시'`)다.
  */
 export interface Location {
   location_id: number;

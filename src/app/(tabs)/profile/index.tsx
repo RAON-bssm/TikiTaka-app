@@ -41,14 +41,11 @@ const MY_FEEDS = [
   },
 ];
 
-/** 서브 동네 미설정 시 안내. 서버는 이 경우 `sub_location_name` 키 자체를 주지 않는다. */
 const NO_SUB_LOCATION_TEXT = '동네를 추가해보세요';
 
 export default function ProfileScreen() {
   const [isNeighborhoodSheetOpen, setIsNeighborhoodSheetOpen] = useState(false);
-  // 꾸미기 화면과 같은 저장된 config를 공유한다(수정 시 즉시 반영).
   const { config: character } = useCharacterConfig();
-  // 표시용이라 동네를 이름으로만 받는다. 동네를 고치는 화면은 useMyInfo(id 포함)를 쓴다.
   const { data: profile, isLoading, isError, refetch } = useMyProfile();
 
   return (
@@ -79,8 +76,7 @@ export default function ProfileScreen() {
               />
             </>
           )}
-          {/* 화면 이동일 뿐이라 프로필 요청 결과와 무관하게 항상 보여준다.
-              캐릭터 꾸미기는 기기 로컬 데이터라 요청이 실패해도 정상 동작한다. */}
+          {/* 화면 이동일 뿐이라 프로필 요청 결과와 무관하게 항상 보여준다. */}
           <View className="flex flex-row gap-md w-full">
             <Button
               content="프로필 수정"
