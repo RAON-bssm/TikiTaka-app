@@ -47,6 +47,9 @@ export default function RegionSelect({
   const districts = groups.find((group) => group.city === city)?.locations ?? [];
 
   const handleCityChange = (nextCity: string) => {
+    // Dropdown은 같은 항목을 다시 골라도 onChange를 부른다. 시/도가 그대로면 구/군도 그대로 둔다.
+    if (nextCity === city) return;
+
     setCity(nextCity);
     // 이전 구/군은 다른 시/도 소속이므로 선택을 버린다.
     onChange?.(undefined);
