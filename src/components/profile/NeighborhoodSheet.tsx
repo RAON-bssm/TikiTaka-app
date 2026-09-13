@@ -1,6 +1,6 @@
+import { getApiErrorMessage } from '@/api/error';
 import RadioOnIcon from '@/assets/icons/radio-selected.svg';
 import RadioOffIcon from '@/assets/icons/radio.svg';
-import { getApiErrorMessage } from '@/api/error';
 import { useCancelLocationSwap, useRequestLocationSwap } from '@/hooks/user/useLocationSwap';
 import { useMyInfo } from '@/hooks/user/useMyInfo';
 import type { UserLocation } from '@/types/location';
@@ -49,6 +49,11 @@ export default function NeighborhoodSheet({ visible, onClose }: Props) {
     onClose();
   };
 
+  const handleRetry = () => {
+    setErrorMessage(undefined);
+    refetch();
+  };
+
   const handleSelect = (locationId: number) => {
     // 항목이 둘뿐이라 "선택되지 않은 쪽을 누른다 = 예약을 뒤집는다"로 충분하다.
     if (isSwapping || locationId === selectedId) return;
@@ -85,7 +90,7 @@ export default function NeighborhoodSheet({ visible, onClose }: Props) {
             <Skeleton className="h-6 w-40 rounded-sm" />
           </View>
         ) : isError || !myInfo ? (
-          <ErrorRetry message="동네 정보를 불러오지 못했어요." onRetry={refetch} />
+          <ErrorRetry message="동네 정보를 불러오지 못했어요." onRetry={handleRetry} />
         ) : (
           <View className="flex flex-col gap-md">
             <View className="flex flex-col gap-lg">
