@@ -18,7 +18,6 @@ interface Props {
   onClose: () => void;
 }
 
-/** 시/도 + 구/군. 배포된 서버가 시/도를 아직 안 주면 구/군만 남는다. */
 function formatPlace(location: UserLocation) {
   return [location.location_city_name, location.location_name].filter(Boolean).join(' ');
 }

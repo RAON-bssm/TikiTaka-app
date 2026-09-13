@@ -18,7 +18,6 @@ export interface Location {
  * `/api/user/me`의 `main_location`·`sub_location`.
  *
  * 담긴 값은 `Location`과 같지만 **시/도 키 이름이 `location_city_name`으로 다르다.**
- * 서버 DTO가 엔드포인트마다 따로 정의돼 있어, 두 타입을 합칠 수 없다.
  */
 export interface UserLocation {
   location_id: number;

@@ -43,7 +43,6 @@ const MY_FEEDS = [
 
 const NO_SUB_LOCATION_TEXT = '동네를 추가해보세요';
 
-/** 시/도 + 구/군. 배포된 서버가 시/도를 아직 안 주면 구/군만 남는다. */
 function joinPlace(cityName: string | undefined, locationName: string | undefined) {
   return [cityName, locationName].filter(Boolean).join(' ');
 }
