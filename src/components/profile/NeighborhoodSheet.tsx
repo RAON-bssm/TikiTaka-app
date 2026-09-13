@@ -100,6 +100,9 @@ export default function NeighborhoodSheet({ visible, onClose }: Props) {
                   <Pressable
                     key={neighborhood.location_id}
                     onPress={() => handleSelect(neighborhood.location_id)}
+                    disabled={isSwapping}
+                    accessibilityRole="radio"
+                    accessibilityState={{ selected, disabled: isSwapping }}
                     className={`flex flex-row items-center gap-xs ${isSwapping ? 'opacity-50' : ''}`}
                   >
                     {selected ? (
