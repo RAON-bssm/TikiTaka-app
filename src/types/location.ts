@@ -6,16 +6,23 @@ import type { ApiResponse } from './api';
  * 가입의 `main_location_id` 등에 넣는 값이 이 `location_id`다. 서버 DB의 PK라
  * **목록 순서를 id로 가정하면 안 된다.**
  *
- * `city_name`은 시/도(예: `'부산광역시'`)다. **목록에만 붙는다** — `/api/user/me`가 주는
- * 메인·서브 동네는 시/도 없이 `LocationSummary` 모양으로 온다.
+ * `city_name`은 시/도(예: `'부산광역시'`)다.
  */
-export interface Location extends LocationSummary {
+export interface Location {
+  location_id: number;
   city_name: string;
+  location_name: string;
 }
 
-/** 시/도가 빠진 동네. `/api/user/me`의 `main_location`·`sub_location`이 이 모양이다. */
-export interface LocationSummary {
+/**
+ * `/api/user/me`의 `main_location`·`sub_location`.
+ *
+ * 담긴 값은 `Location`과 같지만 **시/도 키 이름이 `location_city_name`으로 다르다.**
+ * 서버 DTO가 엔드포인트마다 따로 정의돼 있어, 두 타입을 합칠 수 없다.
+ */
+export interface UserLocation {
   location_id: number;
+  location_city_name: string;
   location_name: string;
 }
 

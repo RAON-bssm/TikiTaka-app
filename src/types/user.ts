@@ -1,17 +1,16 @@
 import type { ApiResponse, EmptyResponse } from './api';
-import type { LocationSummary } from './location';
+import type { UserLocation } from './location';
 
 /**
  * 내 정보. `GET /api/user/me`
  *
  * `sub_location`은 설정 전이면 **키 자체가 내려오지 않는다.**
- * 동네에는 시/도가 붙지 않는다 — 시/도가 필요하면 `GET /api/location`과 id로 맞춰야 한다.
  */
 export interface UserInfo {
   user_id: string;
   user_name: string;
-  main_location: LocationSummary;
-  sub_location?: LocationSummary;
+  main_location: UserLocation;
+  sub_location?: UserLocation;
   /** true면 다음 라운드 시작 직후 메인/서브 동네가 교환된다. */
   pending_location_swap: boolean;
   point: number;
@@ -28,7 +27,9 @@ export type UserInfoResponse = ApiResponse<UserInfo>;
  */
 export interface UserProfile {
   user_name: string;
+  main_location_city_name: string;
   main_location_name: string;
+  sub_location_city_name?: string;
   sub_location_name?: string;
   user_rank?: number;
   user_score?: number;

@@ -43,6 +43,11 @@ const MY_FEEDS = [
 
 const NO_SUB_LOCATION_TEXT = '동네를 추가해보세요';
 
+/** 시/도 + 구/군. 배포된 서버가 시/도를 아직 안 주면 구/군만 남는다. */
+function joinPlace(cityName: string | undefined, locationName: string | undefined) {
+  return [cityName, locationName].filter(Boolean).join(' ');
+}
+
 export default function ProfileScreen() {
   const [isNeighborhoodSheetOpen, setIsNeighborhoodSheetOpen] = useState(false);
   const { config: character } = useCharacterConfig();
@@ -67,11 +72,14 @@ export default function ProfileScreen() {
                 character={character}
                 point={profile.point}
                 userName={profile.user_name}
-                userPlace={profile.main_location_name}
+                userPlace={joinPlace(profile.main_location_city_name, profile.main_location_name)}
               />
               <NavRow
                 title="동네 확인하기"
-                description={profile.sub_location_name ?? NO_SUB_LOCATION_TEXT}
+                description={
+                  joinPlace(profile.sub_location_city_name, profile.sub_location_name) ||
+                  NO_SUB_LOCATION_TEXT
+                }
                 onPress={() => setIsNeighborhoodSheetOpen(true)}
               />
             </>

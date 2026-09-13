@@ -3,6 +3,7 @@ import RadioOffIcon from '@/assets/icons/radio.svg';
 import { getApiErrorMessage } from '@/api/error';
 import { useCancelLocationSwap, useRequestLocationSwap } from '@/hooks/user/useLocationSwap';
 import { useMyInfo } from '@/hooks/user/useMyInfo';
+import type { UserLocation } from '@/types/location';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
@@ -15,6 +16,11 @@ import Typography from '../ui/Typography';
 interface Props {
   visible: boolean;
   onClose: () => void;
+}
+
+/** 시/도 + 구/군. 배포된 서버가 시/도를 아직 안 주면 구/군만 남는다. */
+function formatPlace(location: UserLocation) {
+  return [location.location_city_name, location.location_name].filter(Boolean).join(' ');
 }
 
 /**
@@ -101,7 +107,7 @@ export default function NeighborhoodSheet({ visible, onClose }: Props) {
                       variant="body2"
                       className={selected ? 'text-primary-600' : 'text-gray-500'}
                     >
-                      {neighborhood.location_name}
+                      {formatPlace(neighborhood)}
                     </Typography>
                   </Pressable>
                 );
