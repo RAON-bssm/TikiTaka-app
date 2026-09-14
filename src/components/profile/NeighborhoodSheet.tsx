@@ -1,40 +1,79 @@
-import CloseIcon from '@/assets/icons/close.svg';
-import RadioOffIcon from '@/assets/icons/radio-selected.svg';
-import RadioOnIcon from '@/assets/icons/radio.svg';
+import { getApiErrorMessage } from '@/api/error';
+import RadioOnIcon from '@/assets/icons/radio-selected.svg';
+import RadioOffIcon from '@/assets/icons/radio.svg';
+import { useCancelLocationSwap, useRequestLocationSwap } from '@/hooks/user/useLocationSwap';
+import { useMyInfo } from '@/hooks/user/useMyInfo';
+import type { UserLocation } from '@/types/location';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import BottomSheet from '../ui/BottomSheet';
 import Button from '../ui/Button';
+import ErrorRetry from '../ui/feedback/ErrorRetry';
+import Skeleton from '../ui/feedback/Skeleton';
 import Typography from '../ui/Typography';
-
-interface Neighborhood {
-  id: string;
-  name: string;
-}
 
 interface Props {
   visible: boolean;
   onClose: () => void;
 }
 
-// TODO: 실제 사용자 동네 목록으로 대체
-const INITIAL_NEIGHBORHOODS: Neighborhood[] = [
-  { id: '1', name: '부산시 동래구' },
-  { id: '2', name: '부산시 사상구' },
-];
+function formatPlace(location: UserLocation) {
+  return [location.location_city_name, location.location_name].filter(Boolean).join(' ');
+}
 
+/**
+ * 라디오는 "지금 메인 동네"가 아니라 **다음 라운드에 대표할 동네**를 가리킨다.
+ * 서브를 고르면 그 자리에서 교환되지 않고 스위칭이 예약되며, 예약 상태에서 메인을
+ * 다시 고르면 취소된다.
+ */
 export default function NeighborhoodSheet({ visible, onClose }: Props) {
-  const [neighborhoods, setNeighborhoods] = useState(INITIAL_NEIGHBORHOODS);
-  const [selectedId, setSelectedId] = useState('2');
   const router = useRouter();
+  const { data: myInfo, isLoading, isError, refetch } = useMyInfo();
+  const { mutate: requestSwap, isPending: isRequesting } = useRequestLocationSwap();
+  const { mutate: cancelSwap, isPending: isCancelling } = useCancelLocationSwap();
+  const [errorMessage, setErrorMessage] = useState<string>();
 
-  const removeNeighborhood = (id: string) => {
-    setNeighborhoods((prev) => prev.filter((n) => n.id !== id));
+  const isSwapping = isRequesting || isCancelling;
+  const isSwapReserved = myInfo?.pending_location_swap ?? false;
+
+  const neighborhoods = myInfo
+    ? [myInfo.main_location, ...(myInfo.sub_location ? [myInfo.sub_location] : [])]
+    : [];
+  const selectedId = isSwapReserved
+    ? myInfo?.sub_location?.location_id
+    : myInfo?.main_location.location_id;
+
+  const handleClose = () => {
+    setErrorMessage(undefined);
+    onClose();
+  };
+
+  const handleRetry = () => {
+    setErrorMessage(undefined);
+    refetch();
+  };
+
+  const handleSelect = (locationId: number) => {
+    // 항목이 둘뿐이라 "선택되지 않은 쪽을 누른다 = 예약을 뒤집는다"로 충분하다.
+    if (isSwapping || locationId === selectedId) return;
+    setErrorMessage(undefined);
+
+    // 이 시트는 RN Modal이고 ToastProvider는 그 아래 트리라 토스트가 가린다. 시트 안에 적는다.
+    const options = {
+      onError: (error: unknown) =>
+        setErrorMessage(getApiErrorMessage(error, '동네 변경 예약에 실패했어요.')),
+    };
+
+    if (isSwapReserved) {
+      cancelSwap(undefined, options);
+    } else {
+      requestSwap(undefined, options);
+    }
   };
 
   return (
-    <BottomSheet visible={visible} onClose={onClose}>
+    <BottomSheet visible={visible} onClose={handleClose}>
       <View className="flex flex-col gap-2xl">
         <View className="flex flex-col gap-md">
           <Typography variant="h1" className="text-gray-700">
@@ -45,37 +84,58 @@ export default function NeighborhoodSheet({ visible, onClose }: Props) {
           </Typography>
         </View>
 
-        <View className="flex flex-col gap-lg">
-          {neighborhoods.map((neighborhood) => {
-            const selected = neighborhood.id === selectedId;
-            return (
-              <View key={neighborhood.id} className="flex flex-row items-center justify-between">
-                <Pressable
-                  onPress={() => setSelectedId(neighborhood.id)}
-                  className="flex flex-row items-center gap-xs"
-                >
-                  {selected ? (
-                    <RadioOnIcon width={24} height={24} />
-                  ) : (
-                    <RadioOffIcon width={24} height={24} />
-                  )}
-                  <Typography
-                    variant="body2"
-                    className={selected ? 'text-primary-600' : 'text-gray-500'}
+        {isLoading ? (
+          <View className="flex flex-col gap-lg">
+            <Skeleton className="h-6 w-40 rounded-sm" />
+            <Skeleton className="h-6 w-40 rounded-sm" />
+          </View>
+        ) : isError || !myInfo ? (
+          <ErrorRetry message="동네 정보를 불러오지 못했어요." onRetry={handleRetry} />
+        ) : (
+          <View className="flex flex-col gap-md">
+            <View className="flex flex-col gap-lg">
+              {neighborhoods.map((neighborhood) => {
+                const selected = neighborhood.location_id === selectedId;
+                return (
+                  <Pressable
+                    key={neighborhood.location_id}
+                    onPress={() => handleSelect(neighborhood.location_id)}
+                    disabled={isSwapping}
+                    accessibilityRole="radio"
+                    accessibilityState={{ selected, disabled: isSwapping }}
+                    className={`flex flex-row items-center gap-xs ${isSwapping ? 'opacity-50' : ''}`}
                   >
-                    {neighborhood.name}
-                  </Typography>
-                </Pressable>
-                <Pressable onPress={() => removeNeighborhood(neighborhood.id)}>
-                  <CloseIcon width={24} height={24} />
-                </Pressable>
-              </View>
-            );
-          })}
-        </View>
+                    {selected ? (
+                      <RadioOnIcon width={24} height={24} />
+                    ) : (
+                      <RadioOffIcon width={24} height={24} />
+                    )}
+                    <Typography
+                      variant="body2"
+                      className={selected ? 'text-primary-600' : 'text-gray-500'}
+                    >
+                      {formatPlace(neighborhood)}
+                    </Typography>
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            {isSwapReserved && (
+              <Typography variant="caption" className="text-gray-400">
+                다음 라운드가 시작되면 대표 동네가 바뀌어요.
+              </Typography>
+            )}
+            {errorMessage && (
+              <Typography variant="caption" className="text-primary-600">
+                {errorMessage}
+              </Typography>
+            )}
+          </View>
+        )}
 
         <Button
-          content="동네 추가"
+          content={myInfo?.sub_location ? '동네 변경' : '동네 추가'}
           onclick={() => router.push('/profile/edit-region')}
           className="w-full"
         />
