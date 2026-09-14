@@ -4,6 +4,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import BattleSection from '@/components/ranking/BattleSection';
+import MyRankingRow from '@/components/ranking/MyRankingRow';
 import RankingList from '@/components/ranking/RankingList';
 import RankingTabs from '@/components/ranking/RankingTabs';
 import SortFilter from '@/components/ranking/SortFilter';
@@ -73,6 +74,9 @@ export default function RankingScreen() {
         {/* 랭킹 — 전체폭 흰색 블록. 남는 세로 공간을 채워 하단까지 흰색이 이어지게 한다 */}
         <View className="grow gap-lg bg-white px-xl py-lg">
           <RankingTabs tabs={RANKING_TABS} selected={tab} onSelect={setTab} />
+          {tab === '개인랭킹' && userRanking.isSuccess && (
+            <MyRankingRow myRanking={userRanking.data.my_ranking} />
+          )}
           <SortFilter sorts={RANKING_SORTS} selected={sort} onSelect={setSort} />
           {rankingQuery.isLoading ? (
             <Skeleton className="h-96 w-full rounded-sm" />
