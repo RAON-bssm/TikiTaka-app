@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { deletePost } from '@/api/post';
-import { postKeys, rankingKeys } from '@/api/queryKeys';
+import { postKeys, rankingKeys, userKeys } from '@/api/queryKeys';
 
 export function useDeletePost() {
   const queryClient = useQueryClient();
@@ -12,6 +12,7 @@ export function useDeletePost() {
       // 목록·상세 캐시 무효화
       queryClient.invalidateQueries({ queryKey: postKeys.all });
       queryClient.invalidateQueries({ queryKey: rankingKeys.all });
+      queryClient.invalidateQueries({ queryKey: userKeys.all });
     },
     onError: (error) => {
       console.log('error:', error);

@@ -10,9 +10,11 @@ interface Props {
   point: number;
   userName: string;
   userPlace: string;
+  rank?: number;
+  score?: number;
 }
 
-export default function UserProfile({ character, point, userName, userPlace }: Props) {
+export default function UserProfile({ character, point, userName, userPlace, rank, score }: Props) {
   return (
     <View className="flex flex-row justify-between items-center">
       <View className="flex flex-row justify-content items-center gap-sm">
@@ -27,6 +29,11 @@ export default function UserProfile({ character, point, userName, userPlace }: P
               {userPlace}
             </Typography>
           </View>
+          {rank !== undefined && score !== undefined && (
+            <Typography variant="body3" className="text-primary-600">
+              이번 라운드 {rank}위 · {score}점
+            </Typography>
+          )}
         </View>
       </View>
       <PointBadge point={point} />

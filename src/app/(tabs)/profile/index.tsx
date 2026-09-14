@@ -72,6 +72,8 @@ export default function ProfileScreen() {
                 point={profile.point}
                 userName={profile.user_name}
                 userPlace={joinPlace(profile.main_location_city_name, profile.main_location_name)}
+                rank={profile.user_rank}
+                score={profile.user_score}
               />
               <NavRow
                 title="동네 확인하기"
