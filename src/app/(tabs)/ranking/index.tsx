@@ -8,6 +8,7 @@ import MyRankingRow from '@/components/ranking/MyRankingRow';
 import RankingList from '@/components/ranking/RankingList';
 import RankingTabs from '@/components/ranking/RankingTabs';
 import SortFilter from '@/components/ranking/SortFilter';
+import StageBadge from '@/components/ranking/StageBadge';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Skeleton from '@/components/ui/feedback/Skeleton';
 import Header from '@/components/ui/Header';
@@ -18,6 +19,7 @@ import {
   type RankingTab,
 } from '@/constants/ranking';
 import { useMatchResult } from '@/hooks/match/useMatchResult';
+import { useMatchStage } from '@/hooks/match/useMatchStage';
 import { useLocationRanking } from '@/hooks/ranking/useLocationRanking';
 import { useUserRanking } from '@/hooks/ranking/useUserRanking';
 
@@ -32,6 +34,7 @@ export default function RankingScreen() {
   const [sort, setSort] = useState<RankingSort>('가장 높은 순');
 
   const matchResult = useMatchResult();
+  const matchStage = useMatchStage();
   const locationRanking = useLocationRanking();
   const userRanking = useUserRanking();
 
@@ -74,6 +77,7 @@ export default function RankingScreen() {
         {/* 랭킹 — 전체폭 흰색 블록. 남는 세로 공간을 채워 하단까지 흰색이 이어지게 한다 */}
         <View className="grow gap-lg bg-white px-xl py-lg">
           <RankingTabs tabs={RANKING_TABS} selected={tab} onSelect={setTab} />
+          <StageBadge stage={matchStage.data} />
           {tab === '개인랭킹' && userRanking.isSuccess && (
             <MyRankingRow myRanking={userRanking.data.my_ranking} />
           )}
