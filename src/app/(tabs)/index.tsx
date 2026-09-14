@@ -2,8 +2,11 @@ import DistrictBattleStatus from '@/components/feed/DistrictBattleStatus';
 import FeedCard from '@/components/feed/FeedCard';
 import Banner from '@/components/ui/banner/Banner';
 import Button from '@/components/ui/Button';
+import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
+import Skeleton from '@/components/ui/feedback/Skeleton';
 import Header from '@/components/ui/Header';
 import Typography from '@/components/ui/Typography';
+import { useCurrentBattle } from '@/hooks/match/useCurrentBattle';
 import { useRouter } from 'expo-router';
 import { Pressable, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -57,6 +60,7 @@ export default function HomeScreen() {
     },
   ];
   const router = useRouter();
+  const battle = useCurrentBattle();
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
       <ScrollView
@@ -69,10 +73,19 @@ export default function HomeScreen() {
         <Banner />
 
         <View className="flex flex-col gap-sm">
-          <DistrictBattleStatus
-            myTeam={{ name: '강서구', score: 99 }}
-            opponentTeam={{ name: '영도구', score: 67 }}
-          />
+          {battle.isLoading ? (
+            <Skeleton className="h-[184px] w-full rounded-md" />
+          ) : battle.isError ? (
+            <ErrorRetry message="대결 상황을 불러오지 못했어요." onRetry={battle.refetch} />
+          ) : (
+            battle.battle && (
+              <DistrictBattleStatus
+                myTeam={battle.battle.myTeam}
+                opponentTeam={battle.battle.opponentTeam}
+                isBye={battle.battle.isBye}
+              />
+            )
+          )}
           <Button content="바로 참여" />
         </View>
 

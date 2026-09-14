@@ -3,6 +3,7 @@ import type { ApiResponse, DateTimeString } from './api';
 /** 동네 랭킹 한 행. `GET /api/location/rank` (인증 불필요) */
 export interface LocationRanking {
   location_id: number;
+  city_name: string;
   location_name: string;
   location_rank: number;
   location_score: number;
