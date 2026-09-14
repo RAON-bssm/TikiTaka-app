@@ -10,7 +10,6 @@ export interface BattleTeam {
 }
 
 export interface CurrentBattle {
-  mission: string;
   isBye: boolean;
   myTeam: BattleTeam;
   opponentTeam: BattleTeam;
@@ -37,7 +36,6 @@ function buildBattle(
   }
 
   return {
-    mission: board.mission,
     isBye: board.match_type === '미션 위크' || board.team1_name === board.team2_name,
     myTeam: toTeam(myFullName, rows),
     opponentTeam: toTeam(isTeam1 ? board.team2_name : board.team1_name, rows),
