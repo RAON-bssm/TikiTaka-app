@@ -2,6 +2,7 @@ import { View } from 'react-native';
 
 import Character from '@/components/character/Character';
 import Ranking from '@/components/ui/Ranking';
+import { formatLocationName } from '@/constants/location';
 import { pickRankingCharacter } from '@/constants/ranking';
 import type { RankingTab } from '@/constants/ranking';
 import type { LocationRanking, UserRanking } from '@/types/ranking';
@@ -27,7 +28,7 @@ export default function RankingList({ tab, districts, persons }: Props) {
             <Ranking
               key={item.location_id}
               number={item.location_rank}
-              location={item.location_name}
+              location={formatLocationName(item.city_name, item.location_name)}
               count={item.location_score}
             />
           ))

@@ -21,7 +21,7 @@ export default function DistrictBattleStatus({ myTeam, opponentTeam, isBye = fal
           우리 팀의 현재 상황
         </Typography>
         <View className="flex flex-col items-center gap-xs">
-          <Typography variant="h1" className="text-gray-800">
+          <Typography variant="h1" className="text-center text-gray-800">
             {myTeam.name}
           </Typography>
           <Typography variant="h3" className="text-primary-600">
@@ -40,12 +40,12 @@ export default function DistrictBattleStatus({ myTeam, opponentTeam, isBye = fal
       <Typography variant="h4" className="text-gray-600">
         우리 팀의 현재 상황
       </Typography>
-      <View className="flex flex-row justify-contents items-center gap-2xl">
-        <View className="flex flex-col items-center gap-xs">
+      <View className="flex flex-row w-full justify-center items-center gap-2xl">
+        <View className="flex flex-1 flex-col items-center gap-xs">
           <Typography variant="caption" className="text-gray-500">
             우리팀
           </Typography>
-          <Typography variant="h1" className="text-gray-800">
+          <Typography variant="h1" className="text-center text-gray-800">
             {myTeam.name}
           </Typography>
           <Typography variant="h3" className="text-primary-600">
@@ -55,11 +55,11 @@ export default function DistrictBattleStatus({ myTeam, opponentTeam, isBye = fal
         <Typography variant="h3" className="text-primary-600">
           VS
         </Typography>
-        <View className="flex flex-col items-center gap-xs">
+        <View className="flex flex-1 flex-col items-center gap-xs">
           <Typography variant="caption" className="text-gray-500">
             상대팀
           </Typography>
-          <Typography variant="h1" className="text-gray-800">
+          <Typography variant="h1" className="text-center text-gray-800">
             {opponentTeam.name}
           </Typography>
           <Typography variant="h3" className="text-primary-600">

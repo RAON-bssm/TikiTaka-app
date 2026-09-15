@@ -1,6 +1,7 @@
 import { useBoards } from '@/hooks/post/useBoards';
 import { useLocationRanking } from '@/hooks/ranking/useLocationRanking';
 import { useMyProfile } from '@/hooks/user/useMyProfile';
+import { formatLocationName } from '@/constants/location';
 import type { Board } from '@/types/post';
 import type { LocationRanking } from '@/types/ranking';
 
@@ -15,13 +16,11 @@ export interface CurrentBattle {
   opponentTeam: BattleTeam;
 }
 
-function toFullName(cityName: string, locationName: string): string {
-  return `${cityName} ${locationName}`;
-}
-
 function toTeam(fullName: string, rows: LocationRanking[]): BattleTeam {
-  const row = rows.find((item) => toFullName(item.city_name, item.location_name) === fullName);
-  return { name: row?.location_name ?? fullName, score: row?.location_score ?? 0 };
+  const row = rows.find(
+    (item) => formatLocationName(item.city_name, item.location_name) === fullName,
+  );
+  return { name: fullName, score: row?.location_score ?? 0 };
 }
 
 function buildBattle(
@@ -49,7 +48,7 @@ export function useCurrentBattle() {
 
   const board = boards.data?.find((item) => item.my_match);
   const myFullName = profile.data
-    ? toFullName(profile.data.main_location_city_name, profile.data.main_location_name)
+    ? formatLocationName(profile.data.main_location_city_name, profile.data.main_location_name)
     : undefined;
 
   const battle =
