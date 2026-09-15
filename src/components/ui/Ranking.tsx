@@ -24,7 +24,7 @@ const Ranking: FC<RankingProps> = ({ number, location, count, avatar, address })
 
       {avatar}
 
-      <View className="flex-1 items-start gap-xs">
+      <View className="flex-1 items-center gap-xs">
         <Typography variant="body1" className="text-gray-800">
           {location}
         </Typography>
