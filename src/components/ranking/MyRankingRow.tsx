@@ -14,8 +14,8 @@ export default function MyRankingRow({ myRanking }: Props) {
   const { config } = useCharacterConfig();
 
   return (
-    <View className="rounded-md bg-primary-100">
-      <Typography variant="body3" className="px-md pt-md text-gray-600">
+    <View className="border-b border-gray-100">
+      <Typography variant="caption" className="px-md text-gray-400">
         내 순위
       </Typography>
       {myRanking ? (
@@ -26,7 +26,7 @@ export default function MyRankingRow({ myRanking }: Props) {
           avatar={<Character config={config} size={50} />}
         />
       ) : (
-        <Typography variant="body2" className="px-md py-lg text-gray-600">
+        <Typography variant="body2" className="px-md py-xl text-gray-400">
           이번 라운드에 아직 참여하지 않았어요.
         </Typography>
       )}
