@@ -1,19 +1,20 @@
 import { getSignupToken } from '@/api/token';
 import BackButton from '@/components/ui/BackButton';
 import Button from '@/components/ui/Button';
+import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
+import Skeleton from '@/components/ui/feedback/Skeleton';
 import RegionSelect from '@/components/ui/input/RegionSelect';
 import TextInput from '@/components/ui/input/TextInput';
 import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
-import { getTempLocationId } from '@/constants/regions';
 import { useSignup } from '@/hooks/auth/useSignup';
+import { useLocations } from '@/hooks/location/useLocations';
 import { isAxiosError } from 'axios';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-/** 서버 응답 상태코드를 사용자에게 보여줄 문구로 옮긴다. */
 function getSignupErrorMessage(error: unknown) {
   if (!isAxiosError(error)) {
     return error instanceof Error ? error.message : '가입에 실패했어요';
@@ -36,9 +37,10 @@ export default function SignUp() {
   const { showToast } = useToast();
   const { mutate: signup, isPending } = useSignup();
 
+  const { data: locations, isLoading, isError, refetch } = useLocations();
+
   const [userName, setUserName] = useState('');
-  const [city, setCity] = useState<string>();
-  const [district, setDistrict] = useState<string>();
+  const [mainLocationId, setMainLocationId] = useState<number>();
 
   const handleSignUp = () => {
     if (isPending) return;
@@ -47,15 +49,8 @@ export default function SignUp() {
       showToast('닉네임을 입력해주세요');
       return;
     }
-    if (!city || !district) {
+    if (!mainLocationId) {
       showToast('동네를 선택해주세요');
-      return;
-    }
-
-    // TODO(백엔드 동네 목록 API 연동): 지금은 목록 순서를 id로 가정한 임시 매핑이다.
-    const mainLocationId = getTempLocationId(district);
-    if (mainLocationId === null) {
-      showToast('동네를 다시 선택해주세요');
       return;
     }
 
@@ -64,10 +59,8 @@ export default function SignUp() {
       {
         onError: (error) => {
           showToast(getSignupErrorMessage(error));
-          // 401(만료)뿐 아니라 토큰이 아예 없는 경우도 로그인부터 다시 해야 한다.
-          // signup token은 메모리에만 있어 앱을 재시작하면 사라지는데, 이때 useSignup은
-          // Axios 에러가 아닌 일반 Error를 던진다. 이걸 걸러내지 않으면 안내 문구만 뜨고
-          // 화면에 그대로 남아, 다시 눌러도 같은 에러만 반복되는 막다른 길이 된다.
+          // signup token은 메모리에만 있어 앱을 재시작하면 사라진다. 이때 useSignup은 Axios
+          // 에러가 아닌 일반 Error를 던져, 걸러내지 않으면 같은 에러만 반복되는 막다른 길이 된다.
           const isExpired = isAxiosError(error) && error.response?.status === 401;
           if (isExpired || !getSignupToken()) {
             router.replace('/(auth)/login');
@@ -97,12 +90,17 @@ export default function SignUp() {
             {/* TODO: 서버에 닉네임 중복확인 엔드포인트가 없다. 현재는 가입 시 409로만 알 수 있다. */}
             <Button content="중복확인" />
           </View>
-          <RegionSelect
-            city={city}
-            district={district}
-            onCityChange={setCity}
-            onDistrictChange={setDistrict}
-          />
+          {isLoading ? (
+            <Skeleton className="h-[65px] w-full rounded-sm" />
+          ) : isError ? (
+            <ErrorRetry message="동네 목록을 불러오지 못했어요." onRetry={refetch} />
+          ) : (
+            <RegionSelect
+              locations={locations ?? []}
+              value={mainLocationId}
+              onChange={setMainLocationId}
+            />
+          )}
         </View>
         <View className="w-full">
           <Button

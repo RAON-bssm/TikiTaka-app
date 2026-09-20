@@ -1,5 +1,5 @@
 import { createPost, getPosts } from '@/api/post';
-import { postKeys } from '@/api/queryKeys';
+import { postKeys, rankingKeys, userKeys } from '@/api/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 
@@ -29,6 +29,8 @@ export function useUploadPost() {
     onSuccess: () => {
       // 목록·상세 캐시 무효화 → 피드가 자동으로 새 글을 반영한다.
       queryClient.invalidateQueries({ queryKey: postKeys.all });
+      queryClient.invalidateQueries({ queryKey: rankingKeys.all });
+      queryClient.invalidateQueries({ queryKey: userKeys.all });
     },
     onError: (error) => {
       // 400 등 서버 거부 사유는 error.response.data에 담겨 온다. Axios 객체만 찍으면 보이지 않으므로 분리해 로깅한다.

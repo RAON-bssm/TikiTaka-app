@@ -17,8 +17,12 @@ const client = axios.create({
 /**
  * 토큰이 없어도 되는(=인증 실패해도 재발급 대상이 아닌) 공개 엔드포인트.
  * 이 경로들의 401은 토큰 문제가 아니라 소셜 로그인 실패·가입 토큰 만료 같은 진짜 실패다.
+ *
+ * 동네 목록(`/api/location`)이 여기 있는 이유: 가입 화면이 토큰을 받기 전에 부른다.
+ * 재발급 흐름에 들어가면 refresh token이 없어 실패하면서 메모리의 signup token까지 지워져
+ * 가입이 막히고, 화면에도 원래 실패 사유 대신 재발급 에러가 뜬다.
  */
-const PUBLIC_PATHS = ['/api/login/', '/api/auth/signup', '/api/auth/refresh'];
+const PUBLIC_PATHS = ['/api/login/', '/api/auth/signup', '/api/auth/refresh', '/api/location'];
 
 const isPublicPath = (url?: string) => !!url && PUBLIC_PATHS.some((path) => url.startsWith(path));
 
