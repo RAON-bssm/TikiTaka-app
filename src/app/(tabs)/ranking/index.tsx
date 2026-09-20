@@ -51,7 +51,16 @@ export default function RankingScreen() {
 
         <View className="grow gap-lg bg-white px-xl py-lg">
           <RankingTabs tabs={RANKING_TABS} selected={tab} onSelect={setTab} />
-          <StageBadge stage={matchStage.data} />
+          {matchStage.isLoading ? (
+            <Skeleton className="h-3xl w-full rounded-full" />
+          ) : matchStage.isError ? (
+            <ErrorRetry
+              message="시즌 정보를 불러오지 못했어요."
+              onRetry={() => matchStage.refetch()}
+            />
+          ) : (
+            <StageBadge stage={matchStage.data} />
+          )}
           {tab === '개인랭킹' && userRanking.isSuccess && (
             <MyRankingRow myRanking={userRanking.data.my_ranking} />
           )}
