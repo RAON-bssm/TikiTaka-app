@@ -8,10 +8,6 @@ import type { CharacterConfig } from '@/constants/character/types';
 export const RANKING_TABS = ['동네랭킹', '개인랭킹'] as const;
 export type RankingTab = (typeof RANKING_TABS)[number];
 
-/** 정렬 필터 */
-export const RANKING_SORTS = ['가장 높은 순', '가장 낮은 순'] as const;
-export type RankingSort = (typeof RANKING_SORTS)[number];
-
 // 개인랭킹 아바타용 캐릭터 풀. 서버는 남의 착용 정보를 내려주지 않으므로
 // (`GET /api/users/rank` 응답에 캐릭터 정보 없음) 클라이언트에서 임의로 채워 넣는다.
 // 파츠 id는 모두 src/constants/character/assets.ts 레지스트리에 등록된 값이어야 한다.

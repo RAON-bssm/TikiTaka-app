@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 
-import type { BattleTeam } from '@/hooks/match/useCurrentBattle';
+import type { BattleTeam } from '@/hooks/match/useCurrentBattles';
 import Typography from '../ui/Typography';
 
 interface Props {
