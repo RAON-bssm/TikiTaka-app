@@ -16,7 +16,12 @@ export interface MarketItem {
   id: string;
   /** 이 아이템이 착용되는 캐릭터 파츠 그룹 (착용 시 config의 어느 키를 바꿀지). */
   group: PartConfigKey;
-  /** 표시 이름. 서버 product_name을 그대로 쓴다(= 클라이언트 파츠 에셋 id와 동일). */
+  /**
+   * `CharacterConfig`에 써 넣을 **로컬 파츠 에셋 id**. 화면에 노출하지 않는다.
+   * 표시용은 `name`을 쓴다 — 지금은 두 값의 출처가 같지만 역할이 달라 분리해 둔다.
+   */
+  assetId: string;
+  /** 화면에 보여줄 이름. 착용·썸네일 계산에는 쓰지 않는다(`assetId` 사용). */
   name: string;
   /** 아이템 설명. */
   description: string;
@@ -73,14 +78,18 @@ export function toMarketItem(product: Product): MarketItem {
   const layer = Object.values(CATEGORY_PARTS).find((part) => part.group === group)?.layer ?? {
     group,
   };
+  // 서버가 product_name을 클라이언트 파츠 에셋 id와 동일하게 내려주기로 한 계약에 기댄다.
+  // 서버가 별도 에셋 필드를 주게 되면 이 한 줄만 바꾸면 된다.
+  const assetId = product.product_name;
   const previewConfig: CharacterConfig = {
     ...DEFAULT_CHARACTER_CONFIG,
-    [group]: product.product_name,
+    [group]: assetId,
   };
 
   return {
     id: String(product.product_id),
     group,
+    assetId,
     name: product.product_name,
     description: ITEM_DESCRIPTION,
     price: product.price,

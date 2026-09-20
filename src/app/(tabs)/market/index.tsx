@@ -37,7 +37,7 @@ export default function MarketScreen() {
 
   // 현재 내 캐릭터에 선택된 아이템의 파츠 하나만 얹은 전신 미리보기.
   const previewConfig = selectedItem
-    ? { ...config, [selectedItem.group]: selectedItem.name }
+    ? { ...config, [selectedItem.group]: selectedItem.assetId }
     : config;
 
   const handleConfirmPurchase = () => {
@@ -51,7 +51,7 @@ export default function MarketScreen() {
           // 구매한 아이템을 현재 캐릭터에 착용시켜 저장한다(마이페이지·꾸미기에 즉시 반영).
           // 저장된 캐릭터를 불러오기 전에 저장하면 기본 config로 저장본을 덮어쓴다.
           if (isLoaded) {
-            setConfig({ ...config, [selectedItem.group]: selectedItem.name });
+            setConfig({ ...config, [selectedItem.group]: selectedItem.assetId });
           }
           setPurchaseOpen(false);
         },
