@@ -7,6 +7,7 @@ import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Header from '@/components/ui/Header';
 import NavRow from '@/components/ui/NavRow';
 import Typography from '@/components/ui/Typography';
+import { formatLocationName } from '@/constants/location';
 import { useCharacterConfig } from '@/hooks/character/useCharacterConfig';
 import { useMyProfile } from '@/hooks/user/useMyProfile';
 import { router } from 'expo-router';
@@ -43,10 +44,6 @@ const MY_FEEDS = [
 
 const NO_SUB_LOCATION_TEXT = '동네를 추가해보세요';
 
-function joinPlace(cityName: string | undefined, locationName: string | undefined) {
-  return [cityName, locationName].filter(Boolean).join(' ');
-}
-
 export default function ProfileScreen() {
   const [isNeighborhoodSheetOpen, setIsNeighborhoodSheetOpen] = useState(false);
   const { config: character } = useCharacterConfig();
@@ -71,12 +68,17 @@ export default function ProfileScreen() {
                 character={character}
                 point={profile.point}
                 userName={profile.user_name}
-                userPlace={joinPlace(profile.main_location_city_name, profile.main_location_name)}
+                userPlace={formatLocationName(
+                  profile.main_location_city_name,
+                  profile.main_location_name,
+                )}
+                rank={profile.user_rank}
+                score={profile.user_score}
               />
               <NavRow
                 title="동네 확인하기"
                 description={
-                  joinPlace(profile.sub_location_city_name, profile.sub_location_name) ||
+                  formatLocationName(profile.sub_location_city_name, profile.sub_location_name) ||
                   NO_SUB_LOCATION_TEXT
                 }
                 onPress={() => setIsNeighborhoodSheetOpen(true)}

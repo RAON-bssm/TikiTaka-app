@@ -1,9 +1,10 @@
-import DistrictBattleStatus from '@/components/feed/DistrictBattleStatus';
+import CurrentBattleCard from '@/components/feed/CurrentBattleCard';
 import FeedCard from '@/components/feed/FeedCard';
 import Banner from '@/components/ui/banner/Banner';
 import Button from '@/components/ui/Button';
 import Header from '@/components/ui/Header';
 import Typography from '@/components/ui/Typography';
+import { useCurrentBattle } from '@/hooks/match/useCurrentBattle';
 import { useRouter } from 'expo-router';
 import { Pressable, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -57,6 +58,7 @@ export default function HomeScreen() {
     },
   ];
   const router = useRouter();
+  const battle = useCurrentBattle();
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
       <ScrollView
@@ -69,10 +71,7 @@ export default function HomeScreen() {
         <Banner />
 
         <View className="flex flex-col gap-sm">
-          <DistrictBattleStatus
-            myTeam={{ name: '강서구', score: 99 }}
-            opponentTeam={{ name: '영도구', score: 67 }}
-          />
+          <CurrentBattleCard state={battle} />
           <Button content="바로 참여" />
         </View>
 
