@@ -1,4 +1,4 @@
-import DistrictBattleStatus from '@/components/feed/DistrictBattleStatus';
+import CurrentBattleCard from '@/components/feed/CurrentBattleCard';
 import FeedCard from '@/components/feed/FeedCard';
 import FeedCardSkeleton from '@/components/feed/FeedCardSkeleton';
 import Button from '@/components/ui/Button';
@@ -6,6 +6,7 @@ import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Header from '@/components/ui/Header';
 import { palette } from '@/constants/colors';
 import { pickRankingCharacter } from '@/constants/ranking';
+import { useCurrentBattle } from '@/hooks/match/useCurrentBattle';
 import { usePosts } from '@/hooks/post/usePosts';
 import { formatRelativeTime } from '@/hooks/useRelativeTime';
 import { useState } from 'react';
@@ -17,9 +18,15 @@ const SKELETON_COUNT = 3;
 
 export default function FeedScreen() {
   const { data: posts, isLoading, isError, refetch, isRefetching } = usePosts(1);
+  const battle = useCurrentBattle();
 
   // TODO: 서버 참여 API 연동 시 useMutation으로 대체. 지금은 UI 반응만 목업.
   const [joined, setJoined] = useState(false);
+
+  const handleRefresh = () => {
+    void refetch();
+    battle.refetch();
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
@@ -30,7 +37,7 @@ export default function FeedScreen() {
         refreshControl={
           <RefreshControl
             refreshing={isRefetching}
-            onRefresh={refetch}
+            onRefresh={handleRefresh}
             tintColor={palette.primary[600]}
             colors={[palette.primary[600]]}
           />
@@ -38,10 +45,7 @@ export default function FeedScreen() {
       >
         <Header />
         <View className="flex flex-col gap-sm">
-          <DistrictBattleStatus
-            myTeam={{ name: '강서구', score: 99 }}
-            opponentTeam={{ name: '영도구', score: 67 }}
-          />
+          <CurrentBattleCard state={battle} />
           <Button
             content={joined ? '참여 중' : '바로 참여'}
             variant={joined ? 'light' : 'primary'}
