@@ -2,9 +2,10 @@ import { View } from 'react-native';
 
 import Character from '@/components/character/Character';
 import Ranking from '@/components/ui/Ranking';
+import Typography from '@/components/ui/Typography';
 import { formatLocationName } from '@/constants/location';
-import { pickRankingCharacter } from '@/constants/ranking';
 import type { RankingTab } from '@/constants/ranking';
+import { pickRankingCharacter } from '@/constants/ranking';
 import type { LocationRanking, UserRanking } from '@/types/ranking';
 
 interface Props {
@@ -21,6 +22,18 @@ interface Props {
  * 항상 같은 캐릭터가 뜨도록 `pickRankingCharacter`로 대체한다.
  */
 export default function RankingList({ tab, districts, persons }: Props) {
+  const rows = tab === '동네랭킹' ? districts : persons;
+
+  if (rows.length === 0) {
+    return (
+      <Typography variant="body2" className="px-md py-3xl text-center text-gray-400">
+        {tab === '동네랭킹'
+          ? '아직 점수를 올린 동네가 없어요.'
+          : '아직 점수를 올린 참가자가 없어요.'}
+      </Typography>
+    );
+  }
+
   return (
     <View>
       {tab === '동네랭킹'
