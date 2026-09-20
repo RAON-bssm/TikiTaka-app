@@ -69,9 +69,8 @@ export function useCurrentBattles() {
     battles,
     isLoading: boards.isLoading || ranking.isLoading,
     isError: boards.isError || ranking.isError,
-    refetch: () => {
-      void boards.refetch();
-      void ranking.refetch();
+    refetch: async () => {
+      await Promise.all([boards.refetch(), ranking.refetch()]);
     },
   };
 }

@@ -40,7 +40,7 @@ export interface CurrentBattleState {
   hasAnyBattle: boolean;
   isLoading: boolean;
   isError: boolean;
-  refetch: () => void;
+  refetch: () => Promise<void>;
 }
 
 /** 진행 중인 라운드에서 내 동네가 치르는 대결. 내 매치가 없으면 `battle`이 undefined다. */
@@ -59,9 +59,8 @@ export function useCurrentBattle(): CurrentBattleState {
     hasAnyBattle: battles.battles.length > 0,
     isLoading: battles.isLoading || profile.isLoading,
     isError: battles.isError || profile.isError,
-    refetch: () => {
-      battles.refetch();
-      void profile.refetch();
+    refetch: async () => {
+      await Promise.all([battles.refetch(), profile.refetch()]);
     },
   };
 }

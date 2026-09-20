@@ -17,15 +17,20 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 const SKELETON_COUNT = 3;
 
 export default function FeedScreen() {
-  const { data: posts, isLoading, isError, refetch, isRefetching } = usePosts(1);
+  const { data: posts, isLoading, isError, refetch } = usePosts(1);
   const battle = useCurrentBattle();
 
   // TODO: 서버 참여 API 연동 시 useMutation으로 대체. 지금은 UI 반응만 목업.
   const [joined, setJoined] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const handleRefresh = () => {
-    void refetch();
-    battle.refetch();
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await Promise.all([refetch(), battle.refetch()]);
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   return (
@@ -36,8 +41,8 @@ export default function FeedScreen() {
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
-            refreshing={isRefetching}
-            onRefresh={handleRefresh}
+            refreshing={isRefreshing}
+            onRefresh={() => void handleRefresh()}
             tintColor={palette.primary[600]}
             colors={[palette.primary[600]]}
           />
