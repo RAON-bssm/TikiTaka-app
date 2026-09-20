@@ -10,7 +10,6 @@ import PurchaseModal from '@/components/market/PurchaseModal';
 import ShopTabs from '@/components/market/ShopTabs';
 import CategoryTabs from '@/components/ui/CategoryTabs';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
-import Skeleton from '@/components/ui/feedback/Skeleton';
 import Header from '@/components/ui/Header';
 import PointBadge from '@/components/ui/PointBadge';
 import { useToast } from '@/components/ui/Toast';
@@ -18,8 +17,6 @@ import { SHOP_CATEGORIES, USER_POINT } from '@/constants/market';
 import { useCharacterConfig } from '@/hooks/character/useCharacterConfig';
 import { useShop } from '@/hooks/market/useShop';
 import { usePurchaseProduct } from '@/hooks/product/usePurchaseProduct';
-
-const GRID_SKELETON_COUNT = 6;
 
 export default function MarketScreen() {
   const {
@@ -89,16 +86,15 @@ export default function MarketScreen() {
 
           {/* 알약형 탭과 이어지는 전체 폭 테두리 카드 (캐릭터 꾸미기와 동일한 형태) */}
           <View className="-mx-lg flex-1 rounded-t-md border-2 border-b-0 border-primary-600 bg-white p-lg">
-            {isLoading ? (
-              <View className="flex-row flex-wrap gap-sm">
-                {Array.from({ length: GRID_SKELETON_COUNT }).map((_, index) => (
-                  <Skeleton key={index} className="aspect-square w-[30%] rounded-lg" />
-                ))}
-              </View>
-            ) : isError ? (
+            {isError ? (
               <ErrorRetry message="상점 목록을 불러오지 못했어요." onRetry={refetch} />
             ) : (
-              <ItemGrid items={items} selectedId={selectedId} onSelect={selectItem} />
+              <ItemGrid
+                items={items}
+                selectedId={selectedId}
+                onSelect={selectItem}
+                isLoading={isLoading}
+              />
             )}
           </View>
         </View>
