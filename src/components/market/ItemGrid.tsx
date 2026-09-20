@@ -3,10 +3,10 @@ import { useState } from 'react';
 import { Pressable } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 
-import type { ShopItem } from '@/constants/market';
+import type { MarketItem } from '@/constants/market';
 
 interface Props {
-  items: ShopItem[];
+  items: MarketItem[];
   /** 현재 선택된 아이템 id. */
   selectedId: string | null;
   onSelect: (id: string) => void;
@@ -52,9 +52,9 @@ export default function ItemGrid({ items, selectedId, onSelect }: Props) {
                 active ? 'border-2 border-primary-600' : 'border border-white'
               }`}
             >
-              {item.source != null && (
+              {item.gridSource != null && (
                 <Image
-                  source={item.source}
+                  source={item.gridSource}
                   contentFit="contain"
                   style={{ width: '100%', height: '100%' }}
                 />

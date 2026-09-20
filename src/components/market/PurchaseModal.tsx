@@ -4,18 +4,25 @@ import Character from '@/components/character/Character';
 import Button from '@/components/ui/Button';
 import PointBadge from '@/components/ui/PointBadge';
 import Typography from '@/components/ui/Typography';
-import type { ShopItem } from '@/constants/market';
+import type { CharacterConfig } from '@/constants/character/types';
+import type { MarketItem } from '@/constants/market';
 
 interface Props {
   visible: boolean;
   /** 구매 대상 아이템. */
-  item: ShopItem;
+  item: MarketItem | undefined;
+  /** 현재 내 캐릭터 구성에 item의 파츠 하나만 얹은 전신 미리보기. */
+  previewConfig: CharacterConfig;
   onClose: () => void;
   onConfirm: () => void;
 }
 
 /** 아이템 구매 확인 모달 — 중앙 팝업(캐릭터 미리보기 + 가격 + 구매/돌아가기). */
-export default function PurchaseModal({ visible, item, onClose, onConfirm }: Props) {
+export default function PurchaseModal({ visible, item, previewConfig, onClose, onConfirm }: Props) {
+  if (!item) {
+    return null;
+  }
+
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       {/* 딤 처리된 배경 - 탭하면 닫힘 */}
@@ -29,7 +36,7 @@ export default function PurchaseModal({ visible, item, onClose, onConfirm }: Pro
             {item.name}
           </Typography>
 
-          <Character config={item.character} size={110} />
+          <Character config={previewConfig} size={110} />
 
           <PointBadge point={item.price} />
 

@@ -3,19 +3,32 @@ import { View } from 'react-native';
 import Character from '@/components/character/Character';
 import Button from '@/components/ui/Button';
 import Typography from '@/components/ui/Typography';
-import type { ShopItem } from '@/constants/market';
+import type { CharacterConfig } from '@/constants/character/types';
+import type { MarketItem } from '@/constants/market';
 
 interface Props {
-  item: ShopItem;
+  item: MarketItem | undefined;
+  /** 현재 내 캐릭터 구성에 item의 파츠 하나만 얹은 전신 미리보기. */
+  previewConfig: CharacterConfig;
   onBuy?: () => void;
   onCustomize?: () => void;
 }
 
-export default function FeaturedItem({ item, onBuy, onCustomize }: Props) {
+export default function FeaturedItem({ item, previewConfig, onBuy, onCustomize }: Props) {
+  if (!item) {
+    return (
+      <View className="w-full items-center py-lg">
+        <Typography variant="body2" className="text-gray-400">
+          이 카테고리엔 살 수 있는 아이템이 없어요.
+        </Typography>
+      </View>
+    );
+  }
+
   return (
     <View className="w-full flex-row items-center justify-between">
       <View className="w-[110px] items-center">
-        <Character config={item.character} size={110} />
+        <Character config={previewConfig} size={110} />
       </View>
 
       <View className="w-[150px] gap-md">
