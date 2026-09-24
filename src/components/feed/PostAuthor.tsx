@@ -9,7 +9,7 @@ import Typography from '../ui/Typography';
 
 interface Props {
   name: string;
-  /** 작성자 캐릭터 구성. 없으면 기본 캐릭터로 렌더한다. */
+  /** 없으면 기본 캐릭터로 렌더한다. */
   character?: CharacterConfig;
   place: string;
   createdAt: string;

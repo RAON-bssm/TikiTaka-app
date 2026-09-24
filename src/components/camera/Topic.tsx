@@ -4,8 +4,7 @@ interface Props {
   title: string;
 }
 
-// 배경 이미지의 원본 크기를 읽어 가로:세로 비율을 구합니다.
-// w-full + aspectRatio 조합으로, 부모 폭을 채우면서 높이는 원본 비율대로 유지됩니다.
+// w-full + aspectRatio로 부모 폭을 채우면서 배경 원본 비율을 유지한다.
 const TOPIC_BG = require('@/assets/images/topic-bg.webp');
 const { width, height } = Image.resolveAssetSource(TOPIC_BG);
 const TOPIC_ASPECT_RATIO = width / height;
@@ -18,8 +17,7 @@ export default function Topic({ title }: Props) {
       source={TOPIC_BG}
       resizeMode="cover"
     >
-      {/* 배너 상단 탭 모양 때문에 텍스트를 중앙보다 아래로 내립니다.
-          justify-center의 재정렬 영향을 피하려고 margin 대신 transform으로 이동합니다. */}
+      {/* 배경 상단 탭 모양 때문에 아래로 내린다. margin은 justify-center 정렬을 흔들어 transform을 쓴다. */}
       <Text
         className="font-title text-xl text-primary-600"
         style={{ transform: [{ translateY: 10 }] }}

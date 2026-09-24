@@ -14,11 +14,11 @@ import { useViewUrl } from '@/hooks/storage/useViewUrl';
 
 const COLOR_GRAY = palette.gray[400];
 const COLOR_PRIMARY = palette.primary[600];
-const COLOR_ICON = palette.gray[500]; // 더보기 아이콘
+const COLOR_ICON = palette.gray[500];
 
 export interface FeedAuthor {
   name: string;
-  /** 작성자 캐릭터 구성. 없으면 기본 캐릭터로 렌더한다. */
+  /** 없으면 기본 캐릭터로 렌더한다. */
   character?: CharacterConfig;
 }
 
@@ -46,7 +46,7 @@ export default function FeedCard({
   onPressLike,
 }: Props) {
   const [liked, setLiked] = useState(false);
-  // imageUrl은 서버가 준 이미지 key. 표시용 조회 URL로 변환한다.
+  // imageUrl은 이미지 key라 조회 URL로 변환해야 한다.
   const { uri: resolvedImageUri, isLoading: imageLoading } = useViewUrl(imageUrl);
 
   return (

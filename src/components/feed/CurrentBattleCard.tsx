@@ -10,7 +10,7 @@ interface Props {
   state: CurrentBattleState;
 }
 
-/** 대결 카드와 같은 껍데기. 상태가 바뀌어도 자리가 흔들리지 않게 테두리·여백을 맞춘다. */
+/** 상태가 바뀌어도 자리가 흔들리지 않게 대결 카드와 테두리·여백을 맞춘다. */
 const EmptyBattle = ({ hasAnyBattle }: { hasAnyBattle: boolean }) => (
   <View className="w-full items-center gap-sm rounded-md border border-gray-100 bg-white p-lg">
     <Typography variant="h4" className="text-gray-600">
@@ -25,12 +25,8 @@ const EmptyBattle = ({ hasAnyBattle }: { hasAnyBattle: boolean }) => (
 );
 
 /**
- * 홈·피드 맨 위의 우리 동네 대결 현황.
- *
- * 대결이 없을 때 아무것도 그리지 않으면 카드가 통째로 사라져 사용자는 오류인지 원래 없는 건지
- * 알 수 없다. 그래서 네 상태(로딩·실패·없음·있음)를 모두 그린다.
- *
- * 훅을 직접 부르지 않고 상태를 받는 이유: 화면이 당겨서 새로고침에 `refetch`를 함께 엮는다.
+ * 대결이 없을 때도 카드를 그려야 오류와 구분되므로 로딩·실패·없음·있음을 모두 그린다.
+ * 상태를 prop으로 받는 이유: 화면이 당겨서 새로고침에 `refetch`를 엮는다.
  */
 export default function CurrentBattleCard({ state }: Props) {
   if (state.isLoading) {

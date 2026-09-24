@@ -5,15 +5,13 @@ import type { Board } from '@/types/post';
 import type { LocationRanking } from '@/types/ranking';
 
 export interface BattleTeam {
-  /** 카드에 쓰는 짧은 동네명. 예: '사상구' */
+  /** 짧은 동네명. 예: '사상구' */
   name: string;
-  /** 이번 라운드 누적 점수. */
   score: number;
 }
 
-/** 어느 동네인지 가려내야 하는 자리에서 쓰는 팀. 같은 이름의 구가 시/도마다 있다. */
+/** 같은 이름의 구가 시/도마다 있어, 동네를 가려낼 때는 `fullName`으로 비교한다. */
 export interface BattleSide extends BattleTeam {
-  /** 시/도까지 합친 전체 지역명. 매치의 팀 이름이 이 형태다. */
   fullName: string;
 }
 
@@ -21,16 +19,12 @@ export interface CurrentBattle {
   boardId: number;
   team1: BattleSide;
   team2: BattleSide;
-  /** 부전승(미션 위크). 서버가 team1과 team2를 같은 동네로 만든다. */
+  /** 부전승(미션 위크)이면 서버가 team1과 team2를 같은 동네로 만든다. */
   isBye: boolean;
-  /** 내 메인 동네가 참가한 대결. */
   isMine: boolean;
 }
 
-/**
- * 매치의 팀 이름은 시/도까지 합친 전체 지역명이라 그 형태로 랭킹 행을 찾고,
- * 폭이 좁은 카드에는 짧은 동네명만 보여준다.
- */
+// 매치의 팀 이름은 시/도까지 합친 전체 지역명이라 그 형태로 랭킹 행을 찾는다.
 function toTeam(fullName: string, rows: LocationRanking[]): BattleSide {
   const row = rows.find(
     (item) => formatLocationName(item.city_name, item.location_name) === fullName,
@@ -50,13 +44,9 @@ function toBattle(board: Board, rows: LocationRanking[]): CurrentBattle {
 }
 
 /**
- * 진행 중인 라운드의 모든 대결과 현재 점수.
- *
- * 서버에 "진행 중인 대결 점수"를 주는 API는 없다. 대신 라운드 끝에 승패를 정할 때 쓰는 것과
- * **같은 재료**로 조립한다 — 대진은 `/api/board`, 점수는 `/api/location/rank`의 현재 라운드
- * 누적 점수다. (인원수 보정 없이 두 점수를 그대로 비교한다)
- *
- * 내 동네 매치가 목록 맨 앞에 오는 것은 서버가 그렇게 정렬해 주기 때문이다.
+ * "진행 중인 대결 점수" API가 없어, 서버가 승패를 정할 때와 같은 재료로 조립한다:
+ * 대진은 `/api/board`, 점수는 `/api/location/rank`의 현재 라운드 누적 점수(인원수 보정 없음).
+ * 내 동네 매치가 맨 앞인 것은 서버 정렬 덕분이다.
  */
 export function useCurrentBattles() {
   const boards = useBoards();

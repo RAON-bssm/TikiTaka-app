@@ -5,11 +5,9 @@ import { palette } from '@/constants/colors';
 import type { CurrentBattle } from '@/hooks/match/useCurrentBattles';
 import Typography from './Typography';
 
-// 대결 카드는 왼쪽 팀을 파랑, 오른쪽 팀을 주황으로 고정한다. 우세 뱃지도 앞선 쪽 색을 따른다.
 const COLOR_TEAM1 = palette.secondary[500];
 const COLOR_TEAM2 = palette.primary[600];
 
-/** 진행 중인 대결 한 건. 점수는 라운드가 끝나면 그대로 승패 판정에 쓰이는 값이다. */
 export default function MatchCard({ team1, team2, isBye }: CurrentBattle) {
   const leader = team1.score > team2.score ? team1 : team2.score > team1.score ? team2 : undefined;
   const leaderIsTeam1 = leader === team1;

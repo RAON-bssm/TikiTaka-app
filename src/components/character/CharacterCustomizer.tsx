@@ -10,10 +10,8 @@ import { Pressable, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import Character from './Character';
 
-/** 선택 시 교체된 config를 상위로 올려주는 핸들러 */
 type SelectHandler = (config: CharacterConfig) => void;
 
-/** 캐릭터 미리보기 (실제 캐릭터 컴포넌트로 합성) */
 const CharacterPreview = ({ config }: { config: CharacterConfig }) => (
   <View className="relative w-full items-center">
     <View className="relative items-center pb-md">
@@ -32,10 +30,8 @@ const CharacterPreview = ({ config }: { config: CharacterConfig }) => (
   </View>
 );
 
-/** 카테고리 라벨 목록 (탭에 표시할 순서). */
 const CATEGORY_LABELS = CATEGORY_DEFS.map((category) => category.label);
 
-/** 색상 스와치 줄 (단색 원, 색상 축이 있는 파츠만) */
 const ColorSwatches = ({
   colors,
   onSelect,
@@ -70,7 +66,7 @@ const BBOX_PADDING = 1.15;
 // 점처럼 작은 파츠가 과하게 확대되지 않도록 상한을 둔다
 const MAX_SCALE = 3;
 
-/** 파츠 썸네일. 메타(bbox)가 있으면 콘텐츠 영역을 타일 중앙에 확대해서 보여준다. */
+/** 메타(bbox)가 있으면 콘텐츠 영역을 타일 중앙에 확대해서 보여준다. */
 const PartThumb = ({
   source,
   meta,
@@ -80,7 +76,6 @@ const PartThumb = ({
   meta: PartMeta | undefined;
   size: number;
 }) => {
-  // 메타가 없는 파츠는 확대 없이 원본 그대로 (폴백)
   if (!meta) {
     return <Image source={source} contentFit="contain" style={{ width: '100%', height: '100%' }} />;
   }
@@ -111,8 +106,7 @@ const PartThumb = ({
 };
 
 const ShapeGrid = ({ shapes, onSelect }: { shapes: ShapeOption[]; onSelect: SelectHandler }) => {
-  // 박스 너비를 측정해 열 수를 유동적으로 계산한다.
-  // (작은 폰은 2칸, 보통 3칸, 큰 화면은 4칸+) — 남는 여백 없이 칸 크기를 딱 맞춘다.
+  // 측정한 너비로 열 수를 정하고 남는 여백 없이 칸 크기를 맞춘다.
   const [width, setWidth] = useState(0);
   const columns = Math.max(1, Math.floor((width + GRID_GAP) / (MIN_ITEM_WIDTH + GRID_GAP)));
   // 소수 폭은 픽셀 반올림 시 합이 컨테이너를 넘어 마지막 칸이 밀릴 수 있으므로 내림한다.
@@ -149,18 +143,12 @@ const ShapeGrid = ({ shapes, onSelect }: { shapes: ShapeOption[]; onSelect: Sele
   );
 };
 
-/**
- * 캐릭터 꾸미기 편집기.
- *
- * config 상태를 소유하며 미리보기(상단)와 파츠 선택(하단)이 이를 공유한다.
- * 라우트 화면은 헤더 등 껍데기만 두고 이 컴포넌트를 배치하면 된다.
- */
 export default function CharacterCustomizer({
   initialConfig = DEFAULT_CHARACTER_CONFIG,
 }: {
   initialConfig?: CharacterConfig;
 }) {
-  // config는 훅이 소유하며, 변경 시마다 기기에 자동 저장되고 진입 시 저장값으로 복원된다.
+  // config는 훅이 기기에 자동 저장하고 진입 시 복원한다.
   const { config, setConfig, isLoaded } = useCharacterConfig(initialConfig);
   const [selectedLabel, setSelectedLabel] = useState(CATEGORY_LABELS[0]);
   const category = CATEGORY_DEFS.find((c) => c.label === selectedLabel) ?? CATEGORY_DEFS[0];

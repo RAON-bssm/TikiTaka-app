@@ -6,14 +6,7 @@ import { setSignupToken, setTokens } from '@/api/token';
 import type { LoginData, Provider } from '@/types/auth';
 
 /**
- * 소셜 로그인 훅.
- *
- * 서버 응답의 `status`에 따라 두 갈래로 갈린다.
- * - 'LOGIN'           → 토큰을 SecureStore에 저장하고 홈으로. 이후 요청은 client.ts 인터셉터가 토큰을 자동으로 붙인다.
- * - 'SIGNUP_REQUIRED' → 아직 가입 전. signup_token을 메모리에 두고 회원 정보 등록 화면으로 보낸다.
- *
- * 사용: const { mutate: login } = useLogin();
- *       login({ provider: 'KAKAO', providerAccessToken });
+ * 'LOGIN'이면 토큰 저장 후 홈으로, 'SIGNUP_REQUIRED'면 signup_token을 메모리에 두고 가입 화면으로 보낸다.
  */
 export function useLogin() {
   return useMutation({

@@ -23,9 +23,8 @@ function formatPlace(location: UserLocation) {
 }
 
 /**
- * 라디오는 "지금 메인 동네"가 아니라 **다음 라운드에 대표할 동네**를 가리킨다.
- * 서브를 고르면 그 자리에서 교환되지 않고 스위칭이 예약되며, 예약 상태에서 메인을
- * 다시 고르면 취소된다.
+ * 라디오는 지금 메인 동네가 아니라 다음 라운드에 대표할 동네를 가리킨다.
+ * 서브를 고르면 교환이 예약되고, 예약 중 메인을 다시 고르면 취소된다.
  */
 export default function NeighborhoodSheet({ visible, onClose }: Props) {
   const router = useRouter();

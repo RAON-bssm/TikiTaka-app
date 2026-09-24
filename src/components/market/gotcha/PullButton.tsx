@@ -3,16 +3,12 @@ import { Pressable, View } from 'react-native';
 import PointIcon from '@/assets/icons/point.svg';
 import Typography from '@/components/ui/Typography';
 
-// TODO: 팀 팔레트에 파란색(secondary) 토큰이 있으면 클래스로 교체하세요.
-const BUTTON_BLUE = '#7D8FE0';
-
 interface Props {
   label: string;
   cost: number;
   onPress: () => void;
 }
 
-/** 뽑기 버튼 — 위에 라벨, 아래에 코인 + 비용 알약 (시안의 파란 버튼). */
 export default function PullButton({ label, cost, onPress }: Props) {
   return (
     <Pressable onPress={onPress}>
