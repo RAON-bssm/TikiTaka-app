@@ -41,6 +41,12 @@ const secondary = {
   900: '#1B326B',
 };
 
-const palette = { gray, primary, secondary };
+// 카카오 로그인 버튼 브랜드색. 디자인 팔레트가 아니라 카카오 가이드 값이다.
+const kakao = {
+  DEFAULT: '#FEE500',
+  pressed: '#EED500',
+};
 
-module.exports = { palette, gray, primary, secondary };
+const palette = { gray, primary, secondary, kakao };
+
+module.exports = { palette, gray, primary, secondary, kakao };

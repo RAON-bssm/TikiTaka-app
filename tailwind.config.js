@@ -35,6 +35,7 @@ module.exports = {
         gray: palette.gray,
         primary: palette.primary,
         secondary: palette.secondary,
+        kakao: palette.kakao,
       },
       spacing: {
         xs: '4px',

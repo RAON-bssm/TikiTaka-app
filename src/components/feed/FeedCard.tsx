@@ -100,7 +100,7 @@ export default function FeedCard({
             setLiked((prev) => !prev);
             onPressLike?.();
           }}
-          className="items-center justify-center gap-[2px] active:opacity-70"
+          className="items-center justify-center gap-xs active:opacity-70"
         >
           <FavoriteIcon width={20} height={20} color={liked ? COLOR_PRIMARY : COLOR_GRAY} />
           <Typography variant="body3" className="text-gray-700">

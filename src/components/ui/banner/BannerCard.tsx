@@ -24,7 +24,7 @@ export default function BannerCard({ slide }: Props) {
         style={StyleSheet.absoluteFill}
       />
       <View className="flex-row items-center justify-between px-xl py-2xl">
-        <View className="gap-[10px]">
+        <View className="gap-sm">
           <Typography variant="body3" className="text-primary-600">
             {slide.eyebrow}
           </Typography>

@@ -61,7 +61,7 @@ export default function Login() {
         <Pressable
           onPress={() => handleSocialLogin('KAKAO')}
           disabled={isBusy}
-          className="flex-row items-center mb-2xl justify-center gap-sm rounded-md bg-[#FEE500] py-md active:bg-[#EED500] disabled:opacity-50"
+          className="flex-row items-center mb-2xl justify-center gap-sm rounded-md bg-kakao py-md active:bg-kakao-pressed disabled:opacity-50"
         >
           <KakaoIcon width={24} height={24} />
           <Typography variant="h3" className="text-gray-700">

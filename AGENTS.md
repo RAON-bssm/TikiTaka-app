@@ -172,6 +172,7 @@
 - **`gray`** 50(`#F8F9FB`)~800(`#1A202C`): 배경·텍스트·보더 등 중립색. **순백(`#FFFFFF`)은 `gray` 스케일에 없으므로 `bg-white`/`text-white`/`border-white`를 사용한다.**
 - **`primary`** 100~900, 대표색 `primary-600`(`#FC8253`, 주황): 브랜드 강조·CTA.
 - **`secondary`** 100~900, 대표색 `secondary-500`(`#4078FF`, 파랑): 보조 강조.
+- **`kakao`** (`#FEE500`), `kakao-pressed`(`#EED500`): 카카오 로그인 버튼 전용 브랜드색. 다른 용도로 쓰지 마세요.
 - 예: `bg-primary-600`, `text-gray-800`, `border-secondary-500`, `bg-white`.
 - SVG `color`처럼 className이 아니라 JS 값으로 색이 필요하면 `palette`(`@/constants/colors`)를 import 합니다. hex 리터럴을 직접 쓰지 마세요.
 

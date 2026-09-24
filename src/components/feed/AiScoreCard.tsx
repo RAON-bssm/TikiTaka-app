@@ -17,10 +17,7 @@ export default function AiScoreCard({ score, comment }: Props) {
         <Typography variant="h3" className="text-gray-800">
           AI 평가 점수
         </Typography>
-        <Typography
-          variant="display"
-          className="text-primary-600 text-[64px] leading-[72px] font-bold"
-        >
+        <Typography variant="display" className="text-primary-600 text-5xl font-bold">
           {score}
         </Typography>
       </View>
