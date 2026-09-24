@@ -5,7 +5,7 @@ import type { ApiResponse } from './api';
  *
  * 앱 `CharacterConfig` 키와 거의 같지만 **앞/뒷머리가 스네이크 케이스**이고
  * (`hair_front` ↔ `hairFront`), 서버에는 `hairHighlights`와 **색상 개념이 없다.**
- * 그래서 product_id → 앱 파츠 id 매핑은 클라이언트가 들고 있어야 한다.
+ * 이 키 변환은 `PRODUCT_TYPE_TO_PART_KEY`(`src/constants/market.ts`)가 담당한다.
  */
 export const PRODUCT_TYPES = [
   'body',
@@ -25,6 +25,11 @@ export type ProductType = (typeof PRODUCT_TYPES)[number];
  */
 export interface Product {
   product_id: number;
+  /**
+   * 표시 이름이자 **클라이언트 파츠 에셋 id**(예: `"bob"`). 서버가 두 값을 같게 내려주기로
+   * 합의해서 별도 매핑 테이블을 두지 않는다. 값이 `assets.ts` 레지스트리에 없으면
+   * 에러 없이 썸네일만 비므로, 계약이 바뀌면 `toMarketItem`의 `assetId`를 먼저 고칠 것.
+   */
   product_name: string;
   price: number;
   /** S3 key인지 완성된 URL인지 서버가 강제하지 않는다 — 시드 데이터로 확인 필요. */

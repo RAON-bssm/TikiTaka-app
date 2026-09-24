@@ -10,7 +10,7 @@ export interface InventoryItem {
   product_id: number;
   product_name: string;
   type: ProductType;
-  /** 착용 중인지. 서버 필드명이 `isActive`라 실제 키가 `active`로 올 수도 있다 — 첫 연동 때 확인할 것. */
+  /** 착용 중인지. */
   is_active: boolean;
 }
 
