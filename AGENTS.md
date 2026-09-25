@@ -47,6 +47,7 @@
 | `expo-glass-effect`               | `~56.0.4`  | Expo Go 미지원, dev client 필요                    |
 | `@react-native-seoul/kakao-login` | `^6.0.4`   | 카카오 로그인. Expo Go 미지원, dev client 필요     |
 | `expo-build-properties`           | `~56.0.26` | 카카오 SDK Maven 저장소 선언용(Android). 위와 세트 |
+| `react-native-webview`            | `13.16.1`  | 지도 탭(카카오맵 웹을 WebView로 표시)              |
 
 ---
 
