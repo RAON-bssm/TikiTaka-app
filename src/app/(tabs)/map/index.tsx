@@ -3,6 +3,7 @@ import WebView from 'react-native-webview';
 
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Skeleton from '@/components/ui/feedback/Skeleton';
+import Typography from '@/components/ui/Typography';
 import { useMapBridge } from '@/hooks/map/useMapBridge';
 import { useMyInfo } from '@/hooks/user/useMyInfo';
 import type { Neighborhood } from '@/types/mapBridge';
@@ -24,8 +25,13 @@ export default function MapScreen() {
 
   if (!MAP_WEB_URL) {
     return (
-      <View className="flex-1 justify-center bg-gray-50">
-        <ErrorRetry message="EXPO_PUBLIC_MAP_WEB_URL이 설정되지 않았어요." onRetry={reload} />
+      <View className="flex-1 items-center justify-center gap-sm bg-gray-50 px-xl">
+        <Typography variant="body2" className="text-center text-gray-500">
+          지도 주소가 설정되지 않았어요.
+        </Typography>
+        <Typography variant="caption" className="text-center text-gray-400">
+          .env에 EXPO_PUBLIC_MAP_WEB_URL을 추가하고 앱을 다시 시작해주세요.
+        </Typography>
       </View>
     );
   }
