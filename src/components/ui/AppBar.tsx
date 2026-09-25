@@ -6,8 +6,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { SvgProps } from 'react-native-svg';
 
 import CameraIcon from '@/assets/icons/app-var/camera.svg';
-import FeedIcon from '@/assets/icons/app-var/feed.svg';
 import HomeIcon from '@/assets/icons/app-var/home.svg';
+import MapIcon from '@/assets/icons/app-var/map.svg';
 import MarketIcon from '@/assets/icons/app-var/market.svg';
 import RankingIcon from '@/assets/icons/app-var/ranking.svg';
 import { palette } from '@/constants/colors';
@@ -28,7 +28,7 @@ const TAB_CONFIG: Record<string, TabConfig> = {
   index: { label: '홈', Icon: HomeIcon },
   ranking: { label: '랭킹', Icon: RankingIcon },
   camera: { label: '카메라', Icon: CameraIcon },
-  feed: { label: '피드', Icon: FeedIcon },
+  map: { label: '지도', Icon: MapIcon },
   market: { label: '상점', Icon: MarketIcon },
 };
 
