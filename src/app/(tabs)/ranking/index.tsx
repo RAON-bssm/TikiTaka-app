@@ -28,6 +28,9 @@ export default function RankingScreen() {
   const rankingQuery = tab === '동네랭킹' ? locationRanking : userRanking;
   const districts = locationRanking.data?.location_ranking ?? [];
   const persons = userRanking.data?.user_ranking ?? [];
+  const currentRows = tab === '동네랭킹' ? districts : persons;
+  // 랭킹이 하나도 없으면 시즌 배지·내 순위는 의미가 없어 포디움 empty state만 보여준다.
+  const isRankingEmpty = rankingQuery.isSuccess && currentRows.length === 0;
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
@@ -51,17 +54,18 @@ export default function RankingScreen() {
 
         <View className="grow gap-lg bg-white px-xl py-lg">
           <RankingTabs tabs={RANKING_TABS} selected={tab} onSelect={setTab} />
-          {matchStage.isLoading ? (
-            <Skeleton className="h-3xl w-full rounded-full" />
-          ) : matchStage.isError ? (
-            <ErrorRetry
-              message="시즌 정보를 불러오지 못했어요."
-              onRetry={() => matchStage.refetch()}
-            />
-          ) : (
-            <StageBadge stage={matchStage.data} />
-          )}
-          {tab === '개인랭킹' && userRanking.isSuccess && (
+          {!isRankingEmpty &&
+            (matchStage.isLoading ? (
+              <Skeleton className="h-3xl w-full rounded-full" />
+            ) : matchStage.isError ? (
+              <ErrorRetry
+                message="시즌 정보를 불러오지 못했어요."
+                onRetry={() => matchStage.refetch()}
+              />
+            ) : (
+              <StageBadge stage={matchStage.data} />
+            ))}
+          {!isRankingEmpty && tab === '개인랭킹' && userRanking.isSuccess && (
             <MyRankingRow myRanking={userRanking.data.my_ranking} />
           )}
           {rankingQuery.isLoading ? (

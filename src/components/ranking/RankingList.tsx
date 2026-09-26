@@ -1,8 +1,8 @@
 import { View } from 'react-native';
 
 import Character from '@/components/character/Character';
+import RankingEmptyState from '@/components/ranking/RankingEmptyState';
 import Ranking from '@/components/ui/Ranking';
-import Typography from '@/components/ui/Typography';
 import { formatLocationName } from '@/constants/location';
 import type { RankingTab } from '@/constants/ranking';
 import { pickRankingCharacter } from '@/constants/ranking';
@@ -19,13 +19,11 @@ export default function RankingList({ tab, districts, persons }: Props) {
   const rows = tab === '동네랭킹' ? districts : persons;
 
   if (rows.length === 0) {
-    return (
-      <Typography variant="body2" className="px-md py-3xl text-center text-gray-400">
-        {tab === '동네랭킹'
-          ? '아직 점수를 올린 동네가 없어요.'
-          : '아직 점수를 올린 참가자가 없어요.'}
-      </Typography>
-    );
+    const description =
+      tab === '동네랭킹'
+        ? '대결이 시작되면 동네 점수 순위가 실시간으로 집계돼요.'
+        : '대결이 시작되면 개인 점수 순위가 실시간으로 집계돼요.';
+    return <RankingEmptyState description={description} />;
   }
 
   return (

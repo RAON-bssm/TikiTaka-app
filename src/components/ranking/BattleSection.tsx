@@ -12,9 +12,11 @@ export default function BattleSection({ battles }: { battles: CurrentBattle[] })
         현재 진행 중인 대결
       </Typography>
       {battles.length === 0 ? (
-        <Typography variant="body2" className="py-xl text-center text-gray-400">
-          진행 중인 대결이 없어요. 다음 라운드를 기다려주세요
-        </Typography>
+        <View className="h-36 items-center justify-center">
+          <Typography variant="body2" className="text-center text-gray-400">
+            진행 중인 대결이 없어요. 다음 라운드를 기다려주세요
+          </Typography>
+        </View>
       ) : (
         <ScrollView
           horizontal
