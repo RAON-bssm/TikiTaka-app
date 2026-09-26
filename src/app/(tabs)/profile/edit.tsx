@@ -11,7 +11,7 @@ import { useMyProfile } from '@/hooks/user/useMyProfile';
 import { useUpdateProfile } from '@/hooks/user/useUpdateProfile';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { View } from 'react-native';
+import { Keyboard, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function EditProfile() {
@@ -56,7 +56,11 @@ export default function EditProfile() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
-      <View className="flex flex-1 flex-col items-start justify-between gap-4xl p-lg">
+      <Pressable
+        onPress={Keyboard.dismiss}
+        accessible={false}
+        className="flex flex-1 flex-col items-start justify-between gap-4xl p-lg"
+      >
         <View className="flex flex-col items-center gap-2xl w-full">
           <Header />
           <View className="flex flex-col items-start gap-3xl w-full">
@@ -89,7 +93,7 @@ export default function EditProfile() {
             />
           )}
         </View>
-      </View>
+      </Pressable>
     </SafeAreaView>
   );
 }
