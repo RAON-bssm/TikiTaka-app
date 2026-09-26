@@ -1,3 +1,4 @@
+import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import { useRef, useState } from 'react';
 import { Modal, Pressable, useWindowDimensions, View } from 'react-native';
 
@@ -18,6 +19,7 @@ interface Props {
 const MENU_GAP = 4;
 // className의 shadow-*는 플랫폼마다 다르게 그려져(Android는 elevation), 양쪽이 같은 boxShadow를 직접 쓴다.
 const MENU_SHADOW = `0px 4px 16px ${palette.gray[800]}1F`;
+const MENU_RADIUS = 12;
 
 export default function MoreMenu({ items }: Props) {
   const { width: windowWidth } = useWindowDimensions();
@@ -31,6 +33,27 @@ export default function MoreMenu({ items }: Props) {
   };
 
   const close = () => setAnchor(undefined);
+
+  // iOS 26 미만·Android는 글래스가 없어 흰 카드로 폴백한다.
+  const hasGlass = isLiquidGlassAvailable();
+
+  const rows = items.map((item) => (
+    <Pressable
+      key={item.label}
+      onPress={() => {
+        close();
+        item.onPress();
+      }}
+      className={`px-lg py-md ${hasGlass ? 'active:opacity-60' : 'active:bg-gray-50'}`}
+    >
+      <Typography
+        variant="body2"
+        className={item.destructive ? 'text-primary-600' : 'text-gray-800'}
+      >
+        {item.label}
+      </Typography>
+    </Pressable>
+  ));
 
   return (
     <>
@@ -47,7 +70,21 @@ export default function MoreMenu({ items }: Props) {
         onRequestClose={close}
       >
         <Pressable className="absolute inset-0" onPress={close} />
-        {anchor ? (
+        {anchor && hasGlass ? (
+          <GlassView
+            glassEffectStyle="regular"
+            colorScheme="light"
+            style={{
+              position: 'absolute',
+              top: anchor.top,
+              right: anchor.right,
+              borderRadius: MENU_RADIUS,
+              overflow: 'hidden',
+            }}
+          >
+            <View className="w-[140px] py-xs">{rows}</View>
+          </GlassView>
+        ) : anchor ? (
           <View
             style={{
               position: 'absolute',
@@ -57,23 +94,7 @@ export default function MoreMenu({ items }: Props) {
             }}
             className="w-[140px] overflow-hidden rounded-md border border-gray-100 bg-white py-xs"
           >
-            {items.map((item) => (
-              <Pressable
-                key={item.label}
-                onPress={() => {
-                  close();
-                  item.onPress();
-                }}
-                className="px-lg py-md active:bg-gray-50"
-              >
-                <Typography
-                  variant="body2"
-                  className={item.destructive ? 'text-primary-600' : 'text-gray-800'}
-                >
-                  {item.label}
-                </Typography>
-              </Pressable>
-            ))}
+            {rows}
           </View>
         ) : null}
       </Modal>
