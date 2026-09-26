@@ -110,7 +110,10 @@
 ### 7.1 핵심 원칙
 
 - **이미지가 아니라 config만 저장한다.** 한 캐릭터는 `CharacterConfig`(파츠 id들의 JSON)로 표현되며, 실제 이미지는 클라이언트가 config를 보고 합성합니다.
-  - 현재 config는 서버가 아니라 **기기 로컬(SecureStore)** 에만 저장됩니다(`src/api/character.ts`, `useCharacterConfig`). 서버 착용 API(`/api/equipment`)는 `product_id` 기반이고 색상 개념이 없어 `CharacterConfig`와 1:1로 맞지 않습니다.
+  - config 원본은 **기기 로컬(SecureStore)** 에 저장됩니다(`src/api/character.ts`, `useCharacterConfig`). 서버 착용 API(`/api/equipment`)는 `product_id` 기반이고 색상 개념이 없어 `CharacterConfig`와 1:1로 맞지 않기 때문입니다.
+  - 서버에는 **보유 상품의 착용 상태만** 맞춥니다(`useEquipCharacter`, 변환은 `src/constants/character/equipment.ts`). 기본 파츠는 상품이 아니라 보낼 수 없고, 서버 API로는 벗을 수도 없습니다.
+  - 로컬 저장본이 없을 때(새 기기·재설치)만 서버 착용 상태로 모양을 복원합니다. 색은 기본값으로 돌아갑니다. 저장 키가 기기 단위라 로그아웃 때 지웁니다.
+  - 꾸미기 화면은 상점 목록(`GET /api/product`, 보유 상품은 서버가 걸러 줌)에 있는 파츠를 미보유로 잠급니다.
 - **파츠 에셋은 정적으로 등록한다.** React Native/Metro는 동적 경로 `require`를 지원하지 않으므로, 새 파츠 이미지를 추가하면 반드시 `src/constants/character/assets.ts`의 레지스트리에 `id ↔ require(...)`를 직접 매핑해야 합니다. 매핑하지 않은 에셋은 화면에 나타나지 않습니다.
 - **모양(shape)과 색상(color)은 독립 축이다.** 눈·머리처럼 "모양은 유지하고 색만 바꾸는" 파츠는 config에 색상 키(`eyesColor`, `hairColor`)를 따로 둡니다.
 - **모든 파츠 이미지는 동일한 1:1 캔버스 기준의 WebP(알파 포함)** 로 export 되어, 같은 크기로 겹치기만 하면 정렬이 맞습니다. (정위치 export가 전제)

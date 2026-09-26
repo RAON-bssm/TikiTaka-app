@@ -2,7 +2,7 @@ import * as SecureStore from 'expo-secure-store';
 
 import type { CharacterConfig } from '@/constants/character/types';
 
-// 서버 연동 전까지 캐릭터 config를 기기에 영속화하는 키.
+// 서버가 색상을 저장하지 못해 config 원본은 기기에 둔다. 서버엔 보유 상품의 착용 상태만 맞춘다.
 const CHARACTER_CONFIG_KEY = 'characterConfig';
 
 /** 없거나 손상된 값이면 null(→ 기본값 사용). */
@@ -18,4 +18,9 @@ export async function getSavedCharacter(): Promise<CharacterConfig | null> {
 
 export async function saveCharacter(config: CharacterConfig): Promise<void> {
   await SecureStore.setItemAsync(CHARACTER_CONFIG_KEY, JSON.stringify(config));
+}
+
+/** 계정 단위가 아니라 기기 단위 키라, 로그아웃 때 지우지 않으면 다음 계정에 이전 캐릭터가 보인다. */
+export async function clearSavedCharacter(): Promise<void> {
+  await SecureStore.deleteItemAsync(CHARACTER_CONFIG_KEY);
 }
