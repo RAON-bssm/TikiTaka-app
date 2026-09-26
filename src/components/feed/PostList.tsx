@@ -1,11 +1,14 @@
+import { useState } from 'react';
 import { View } from 'react-native';
 
 import FeedCard from '@/components/feed/FeedCard';
 import FeedCardSkeleton from '@/components/feed/FeedCardSkeleton';
+import PostDeleteDialog from '@/components/feed/PostDeleteDialog';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Typography from '@/components/ui/Typography';
 import { pickRankingCharacter } from '@/constants/ranking';
 import type { CurrentBoardPostsState } from '@/hooks/post/useCurrentBoardPosts';
+import { useMyInfo } from '@/hooks/user/useMyInfo';
 import { formatRelativeTime } from '@/hooks/useRelativeTime';
 
 const SKELETON_COUNT = 3;
@@ -26,6 +29,9 @@ const EmptyPosts = ({ message }: { message: string }) => (
 
 /** 상태를 prop으로 받는 이유: 화면이 당겨서 새로고침에 `refetch`를 엮는다. */
 export default function PostList({ state, limit }: Props) {
+  const { data: myInfo } = useMyInfo();
+  const [deletingPostId, setDeletingPostId] = useState<string>();
+
   if (state.isLoading) {
     return (
       <View className="flex flex-col gap-md">
@@ -63,8 +69,20 @@ export default function PostList({ state, limit }: Props) {
           place={post.location}
           timeAgo={formatRelativeTime(post.created_at)}
           likeCount={0}
+          menuItems={
+            post.user_id === myInfo?.user_id
+              ? [
+                  {
+                    label: '삭제하기',
+                    destructive: true,
+                    onPress: () => setDeletingPostId(post.post_id),
+                  },
+                ]
+              : undefined
+          }
         />
       ))}
+      <PostDeleteDialog postId={deletingPostId} onClose={() => setDeletingPostId(undefined)} />
     </View>
   );
 }

@@ -5,6 +5,7 @@ import { palette } from '@/constants/colors';
 import useRelativeTime from '@/hooks/useRelativeTime';
 import { View } from 'react-native';
 import Character from '../character/Character';
+import MoreMenu, { type MoreMenuItem } from '../ui/MoreMenu';
 import Typography from '../ui/Typography';
 
 interface Props {
@@ -13,6 +14,7 @@ interface Props {
   character?: CharacterConfig;
   place: string;
   createdAt: string;
+  menuItems?: MoreMenuItem[];
 }
 
 export default function PostAuthor({
@@ -20,12 +22,13 @@ export default function PostAuthor({
   character = DEFAULT_CHARACTER_CONFIG,
   place,
   createdAt,
+  menuItems,
 }: Props) {
   const timeAgo = useRelativeTime(createdAt);
   return (
     <View className="flex flex-row items-center gap-md">
       <Character config={character} size={56} />
-      <View className="flex flex-col gap-xs">
+      <View className="flex flex-1 flex-col gap-xs">
         <Typography variant="h3" className="text-gray-800">
           {name}
         </Typography>
@@ -44,6 +47,7 @@ export default function PostAuthor({
           </Typography>
         </View>
       </View>
+      {menuItems?.length ? <MoreMenu items={menuItems} /> : null}
     </View>
   );
 }
