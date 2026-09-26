@@ -3,9 +3,9 @@ import { useState } from 'react';
 import { ActivityIndicator, Image, Pressable, View } from 'react-native';
 
 import FavoriteIcon from '@/assets/icons/favorite.svg';
-import MoreIcon from '@/assets/icons/more-vert.svg';
 import PlaceIcon from '@/assets/icons/place.svg';
 import Character from '@/components/character/Character';
+import MoreMenu, { type MoreMenuItem } from '@/components/ui/MoreMenu';
 import Typography from '@/components/ui/Typography';
 import { DEFAULT_CHARACTER_CONFIG } from '@/constants/character/assets';
 import type { CharacterConfig } from '@/constants/character/types';
@@ -14,7 +14,6 @@ import { useViewUrl } from '@/hooks/storage/useViewUrl';
 
 const COLOR_GRAY = palette.gray[400];
 const COLOR_PRIMARY = palette.primary[600];
-const COLOR_ICON = palette.gray[500];
 
 export interface FeedAuthor {
   name: string;
@@ -30,7 +29,7 @@ interface Props {
   place: string;
   timeAgo: string;
   likeCount: number;
-  onPressMore?: () => void;
+  menuItems?: MoreMenuItem[];
   onPressLike?: () => void;
 }
 
@@ -42,7 +41,7 @@ export default function FeedCard({
   place,
   timeAgo,
   likeCount,
-  onPressMore,
+  menuItems,
   onPressLike,
 }: Props) {
   const [liked, setLiked] = useState(false);
@@ -61,9 +60,7 @@ export default function FeedCard({
             {author.name}
           </Typography>
         </View>
-        <Pressable onPress={onPressMore} className="active:opacity-70">
-          <MoreIcon width={24} height={24} color={COLOR_ICON} />
-        </Pressable>
+        {menuItems?.length ? <MoreMenu items={menuItems} /> : null}
       </View>
 
       <View className="h-[225px] w-full items-center justify-center overflow-hidden rounded-lg bg-gray-400">

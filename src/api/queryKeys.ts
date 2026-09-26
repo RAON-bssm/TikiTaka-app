@@ -10,7 +10,8 @@ export const boardKeys = {
 
 export const postKeys = {
   all: ['post'] as const,
-  list: (boardId: number) => [...postKeys.all, 'list', boardId] as const,
+  lists: () => [...postKeys.all, 'list'] as const,
+  list: (boardId: number) => [...postKeys.lists(), boardId] as const,
   detail: (postId: string) => [...postKeys.all, 'detail', postId] as const,
 };
 

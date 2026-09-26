@@ -1,4 +1,4 @@
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { RefreshControl, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -9,16 +9,20 @@ import AiScoreCheckCard from '@/components/feed/AiScoreCheckCard';
 import PostAuthor from '@/components/feed/PostAuthor';
 import PostDetailSkeleton from '@/components/feed/PostDetailSkeleton';
 import PostImage from '@/components/feed/PostImage';
+import PostDeleteDialog from '@/components/feed/PostDeleteDialog';
 import PostTitleRow from '@/components/feed/PostTitleRow';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Header from '@/components/ui/Header';
 import { palette } from '@/constants/colors';
 import { pickRankingCharacter } from '@/constants/ranking';
 import { usePostDetail } from '@/hooks/post/usePostDetail';
+import { useMyInfo } from '@/hooks/user/useMyInfo';
 
 export default function PostDetailScreen() {
   const { post_id } = useLocalSearchParams<{ post_id: string }>();
   const { data: post, isLoading, isError, refetch, isRefetching } = usePostDetail(post_id);
+  const { data: myInfo } = useMyInfo();
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   // 점수·코멘트는 확인을 눌러야 공개한다.
   const [scoreRevealed, setScoreRevealed] = useState(false);
@@ -53,6 +57,17 @@ export default function PostDetailScreen() {
                 character={pickRankingCharacter(post_id)}
                 place={post.location}
                 createdAt={post.created_at}
+                menuItems={
+                  post.user_id === myInfo?.user_id
+                    ? [
+                        {
+                          label: '삭제하기',
+                          destructive: true,
+                          onPress: () => setIsDeleteOpen(true),
+                        },
+                      ]
+                    : undefined
+                }
               />
               <PostImage uri={post.post_image} />
             </View>
@@ -71,6 +86,11 @@ export default function PostDetailScreen() {
           </>
         )}
       </ScrollView>
+      <PostDeleteDialog
+        postId={isDeleteOpen ? post_id : undefined}
+        onClose={() => setIsDeleteOpen(false)}
+        onDeleted={() => router.back()}
+      />
     </SafeAreaView>
   );
 }
