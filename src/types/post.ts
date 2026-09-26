@@ -1,6 +1,10 @@
 import type { ApiResponse, DateTimeString, EmptyResponse } from './api';
 
-/** 내 동네가 참가한 게시판이 앞에 온다. "현재 내 미션"은 첫 항목이 아니라 `my_match`로 찾을 것. */
+/**
+ * 현재 라운드의 모든 게시판. 내 매치가 맨 앞에 오지만, 내 매치가 없으면 첫 항목은 남의 게시판이니
+ * "현재 내 미션"은 `my_match`로 찾을 것. 기준은 본진이 아니라 지금 있는 동네(`current_location`)이고,
+ * 글은 `my_match`인 게시판에만 쓸 수 있다. 토큰 없이 부르면 전부 false.
+ */
 export interface Board {
   board_id: number;
   team1_name: string;
@@ -19,7 +23,10 @@ export interface BoardListData {
 
 export type BoardListResponse = ApiResponse<BoardListData>;
 
-/** `post_image`는 URL이 아니라 S3 key다. 표시하려면 `getViewUrl(key)`를 거친다. */
+/**
+ * 삭제된 글은 빠진다. 없는 board_id도 404가 아니라 빈 목록이다.
+ * `post_image`는 URL이 아니라 S3 key다. 표시하려면 `getViewUrl(key)`를 거친다.
+ */
 export interface Post {
   post_id: string;
   user_id: string;
@@ -29,6 +36,7 @@ export interface Post {
   created_at: DateTimeString;
   updated_at: DateTimeString;
   content: string;
+  city_name: string;
   location: string;
 }
 
@@ -38,7 +46,7 @@ export interface PostListData {
 
 export type PostListResponse = ApiResponse<PostListData>;
 
-/** 목록용 Post와 달리 post_id가 없다. `like_count`는 좋아요 기능이 없어 서버가 항상 0을 넣는다. */
+/** 없거나 삭제된 글이면 404. 목록용 Post와 달리 post_id가 없다. `like_count`는 좋아요 기능이 없어 서버가 항상 0을 넣는다. */
 export interface PostDetail {
   user_id: string;
   user_name: string;
@@ -46,6 +54,7 @@ export interface PostDetail {
   content: string;
   score: number;
   ai_review: string;
+  city_name: string;
   location: string;
   like_count: number;
   created_at: DateTimeString;
