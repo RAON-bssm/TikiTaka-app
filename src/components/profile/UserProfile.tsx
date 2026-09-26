@@ -29,11 +29,6 @@ export default function UserProfile({ character, point, userName, userPlace, ran
               {userPlace}
             </Typography>
           </View>
-          {rank !== undefined && score !== undefined && (
-            <Typography variant="body3" className="text-primary-600">
-              이번 라운드 {rank}위 · {score}점
-            </Typography>
-          )}
         </View>
       </View>
       <PointBadge point={point} />

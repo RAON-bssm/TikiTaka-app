@@ -1,14 +1,12 @@
 import { getSignupToken } from '@/api/token';
+import NicknameField, { getNameCheckError, type NameCheck } from '@/components/auth/NicknameField';
 import BackButton from '@/components/ui/BackButton';
 import Button from '@/components/ui/Button';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Skeleton from '@/components/ui/feedback/Skeleton';
 import RegionSelect from '@/components/ui/input/RegionSelect';
-import TextInput from '@/components/ui/input/TextInput';
 import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
-import { getApiErrorMessage } from '@/api/error';
-import { useCheckUserName } from '@/hooks/auth/useCheckUserName';
 import { useSignup } from '@/hooks/auth/useSignup';
 import { useLocations } from '@/hooks/location/useLocations';
 import { isAxiosError } from 'axios';
@@ -43,25 +41,8 @@ export default function SignUp() {
 
   const [userName, setUserName] = useState('');
   const [mainLocationId, setMainLocationId] = useState<number>();
-  // 확인 후 닉네임을 고치면 결과가 무효가 되도록, 어떤 닉네임에 대한 결과인지 함께 둔다.
-  const [nameCheck, setNameCheck] = useState<{ name: string; available: boolean }>();
-  const { mutate: checkName, isPending: isChecking } = useCheckUserName();
-
+  const [nameCheck, setNameCheck] = useState<NameCheck>();
   const trimmedName = userName.trim();
-  const currentCheck = nameCheck?.name === trimmedName ? nameCheck : undefined;
-
-  const handleCheckName = () => {
-    if (isChecking) return;
-    if (!trimmedName) {
-      showToast('닉네임을 입력해주세요');
-      return;
-    }
-
-    checkName(trimmedName, {
-      onSuccess: (available) => setNameCheck({ name: trimmedName, available }),
-      onError: (error) => showToast(getApiErrorMessage(error, '중복확인에 실패했어요')),
-    });
-  };
 
   const handleSignUp = () => {
     if (isPending) return;
@@ -70,12 +51,9 @@ export default function SignUp() {
       showToast('닉네임을 입력해주세요');
       return;
     }
-    if (!currentCheck) {
-      showToast('닉네임 중복확인을 해주세요');
-      return;
-    }
-    if (!currentCheck.available) {
-      showToast('이미 사용 중인 닉네임이에요');
+    const nameCheckError = getNameCheckError(nameCheck, userName);
+    if (nameCheckError) {
+      showToast(nameCheckError);
       return;
     }
     if (!mainLocationId) {
@@ -107,33 +85,12 @@ export default function SignUp() {
           <Typography variant="display" className="text-gray-800">
             회원 정보 등록
           </Typography>
-          <View className="flex flex-col gap-xs w-full">
-            <View className="flex flex-row gap-sm items-end w-full">
-              <View className="flex-1">
-                <TextInput
-                  label="닉네임"
-                  placeholder="닉네임을 입력해주세요"
-                  value={userName}
-                  onChangeText={setUserName}
-                />
-              </View>
-              <Button
-                content="중복확인"
-                onclick={handleCheckName}
-                className={isChecking ? 'opacity-50' : ''}
-              />
-            </View>
-            {currentCheck ? (
-              <Typography
-                variant="caption"
-                className={currentCheck.available ? 'text-secondary-500' : 'text-primary-600'}
-              >
-                {currentCheck.available
-                  ? '사용 가능한 닉네임이에요'
-                  : '이미 사용 중인 닉네임이에요'}
-              </Typography>
-            ) : null}
-          </View>
+          <NicknameField
+            value={userName}
+            onChangeText={setUserName}
+            check={nameCheck}
+            onCheck={setNameCheck}
+          />
           {isLoading ? (
             <Skeleton className="h-[65px] w-full rounded-sm" />
           ) : isError ? (
