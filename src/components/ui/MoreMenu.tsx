@@ -1,6 +1,7 @@
 import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
-import { useRef, useState } from 'react';
+import { type FC, useRef, useState } from 'react';
 import { Modal, Pressable, useWindowDimensions, View } from 'react-native';
+import type { SvgProps } from 'react-native-svg';
 
 import MoreIcon from '@/assets/icons/more-vert.svg';
 import { palette } from '@/constants/colors';
@@ -14,6 +15,8 @@ export interface MoreMenuItem {
 
 interface Props {
   items: MoreMenuItem[];
+  icon?: FC<SvgProps>;
+  iconColor?: string;
 }
 
 const MENU_GAP = 4;
@@ -21,7 +24,11 @@ const MENU_GAP = 4;
 const MENU_SHADOW = `0px 4px 16px ${palette.gray[800]}1F`;
 const MENU_RADIUS = 12;
 
-export default function MoreMenu({ items }: Props) {
+export default function MoreMenu({
+  items,
+  icon: Icon = MoreIcon,
+  iconColor = palette.gray[500],
+}: Props) {
   const { width: windowWidth } = useWindowDimensions();
   const triggerRef = useRef<View>(null);
   const [anchor, setAnchor] = useState<{ top: number; right: number }>();
@@ -58,7 +65,7 @@ export default function MoreMenu({ items }: Props) {
   return (
     <>
       <Pressable ref={triggerRef} onPress={open} hitSlop={8} className="active:opacity-70">
-        <MoreIcon width={24} height={24} color={palette.gray[500]} />
+        <Icon width={24} height={24} color={iconColor} />
       </Pressable>
 
       {/* statusBarTranslucent가 없으면 Android에서 모달 좌표가 상태바 높이만큼 어긋나 measureInWindow 값과 맞지 않는다. */}
