@@ -8,7 +8,7 @@ import type { MarketItem } from '@/constants/market';
 
 interface Props {
   item: MarketItem | undefined;
-  /** 현재 내 캐릭터 구성에 item의 파츠 하나만 얹은 전신 미리보기. */
+  /** 내 캐릭터에 item의 파츠 하나만 얹은 구성. */
   previewConfig: CharacterConfig;
   onBuy?: () => void;
   onCustomize?: () => void;

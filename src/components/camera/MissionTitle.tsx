@@ -6,7 +6,6 @@ interface Props {
   title: string;
 }
 
-/** 상단 미션 타이틀 + 오렌지 그라데이션 오버레이. */
 export default function MissionTitle({ title }: Props) {
   const insets = useSafeAreaInsets();
 

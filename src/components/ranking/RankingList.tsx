@@ -9,18 +9,12 @@ import { pickRankingCharacter } from '@/constants/ranking';
 import type { LocationRanking, UserRanking } from '@/types/ranking';
 
 interface Props {
-  /** 현재 탭. 동네랭킹이면 지역 목록, 개인랭킹이면 아바타 목록을 렌더한다. */
   tab: RankingTab;
   districts: LocationRanking[];
   persons: UserRanking[];
 }
 
-/**
- * 탭에 따라 동네/개인 랭킹 행을 렌더한다.
- *
- * 개인랭킹은 서버가 아바타 정보를 내려주지 않으므로, user_id로 시드를 고정해
- * 항상 같은 캐릭터가 뜨도록 `pickRankingCharacter`로 대체한다.
- */
+/** 서버가 개인랭킹 아바타를 주지 않아, user_id 시드로 항상 같은 캐릭터를 고른다. */
 export default function RankingList({ tab, districts, persons }: Props) {
   const rows = tab === '동네랭킹' ? districts : persons;
 

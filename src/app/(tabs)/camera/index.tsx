@@ -28,7 +28,7 @@ export default function CameraScreen() {
   const insets = useSafeAreaInsets();
   const isFocused = useIsFocused();
 
-  // 현재 게시판(목록 첫 항목)의 미션을 상단 타이틀로 표시한다.
+  // 게시판 목록의 첫 항목이 현재 게시판이다.
   const { data: boards } = useBoards();
   const mission = boards?.[0]?.mission ?? '';
 
@@ -77,7 +77,7 @@ export default function CameraScreen() {
       <MissionTitle title={mission} />
       <CameraBackButton />
 
-      {/* 하단 컨트롤: safe area(홈 인디케이터)는 inset으로, 그 위 여백은 디자인 토큰(2xl)으로 분리 */}
+      {/* safe area는 inset으로, 그 위 여백은 토큰(pb-2xl)으로 분리한다 */}
       <View className="absolute left-0 right-0 bottom-0" style={{ paddingBottom: insets.bottom }}>
         <View className="items-center gap-lg pb-2xl">
           <ZoomControl levels={levels} selected={selectedZoom} onSelect={handleSelectZoom} />

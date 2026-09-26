@@ -3,21 +3,15 @@ import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 interface Props {
-  /** 원의 지름(px) */
   size: number;
   onPress?: () => void;
   className?: string;
   children?: ReactNode;
-  /** 글래스 틴트 색 (iOS 26 리퀴드글래스에서만 적용) */
+  /** iOS 26 리퀴드글래스에서만 적용된다. */
   tintColor?: string;
 }
 
-/**
- * 리퀴드글래스 원형 컨테이너.
- * iOS 26+에서는 `expo-glass-effect`의 글래스가 적용되고,
- * 그 외 플랫폼(Android·구버전 iOS)에서는 반투명 흰색으로 폴백되어
- * 크로스 플랫폼에서 시각적으로 일관되게 보입니다.
- */
+/** 리퀴드글래스 원. 글래스를 못 쓰는 플랫폼(Android·구버전 iOS)은 반투명 흰색으로 폴백한다. */
 export default function GlassCircle({ size, onPress, className, children, tintColor }: Props) {
   const fallbackBg = isLiquidGlassAvailable() ? undefined : 'rgba(255, 255, 255, 0.2)';
 

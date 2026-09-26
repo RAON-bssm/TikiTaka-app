@@ -9,7 +9,6 @@ interface Props {
 }
 
 export default function PostImage({ uri }: Props) {
-  // key → 표시용 조회 URL 변환. 발급 전에는 로딩 플레이스홀더를 보여준다.
   const { uri: resolvedUri, isLoading } = useViewUrl(uri);
 
   if (!resolvedUri || isLoading) {

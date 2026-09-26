@@ -20,7 +20,7 @@ export default function PostDetailScreen() {
   const { post_id } = useLocalSearchParams<{ post_id: string }>();
   const { data: post, isLoading, isError, refetch, isRefetching } = usePostDetail(post_id);
 
-  // 상세에 들어올 때마다 점수를 가린 채 시작하고, 확인을 눌러야 점수·코멘트를 공개한다.
+  // 점수·코멘트는 확인을 눌러야 공개한다.
   const [scoreRevealed, setScoreRevealed] = useState(false);
 
   return (

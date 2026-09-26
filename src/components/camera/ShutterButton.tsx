@@ -4,7 +4,6 @@ interface Props {
   onPress: () => void;
 }
 
-/** 촬영 버튼: 흰색 링 안에 오렌지 원. */
 export default function ShutterButton({ onPress }: Props) {
   return (
     <Pressable onPress={onPress} hitSlop={12}>
