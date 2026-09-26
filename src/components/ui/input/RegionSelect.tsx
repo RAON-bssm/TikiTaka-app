@@ -47,7 +47,7 @@ export default function RegionSelect({
   const districts = groups.find((group) => group.city === city)?.locations ?? [];
 
   const handleCityChange = (nextCity: string) => {
-    // Dropdown은 같은 항목을 다시 골라도 onChange를 부른다. 시/도가 그대로면 구/군도 그대로 둔다.
+    // Dropdown은 같은 항목을 다시 골라도 onChange를 부르므로 걸러낸다.
     if (nextCity === city) return;
 
     setCity(nextCity);
@@ -72,8 +72,7 @@ export default function RegionSelect({
         />
       </View>
       <View className="flex-1">
-        {/* Dropdown이 선택값을 내부 state로 들고 있어 prop만 바꿔선 표시가 갱신되지 않는다.
-            시/도가 바뀌면 remount 시켜 이전 구/군 이름이 남는 것을 막는다. */}
+        {/* Dropdown이 선택값을 내부 state로 들고 있어, 시/도가 바뀌면 key로 remount해 이전 구/군을 지운다. */}
         <Dropdown
           key={city}
           placeholder={districtPlaceholder}

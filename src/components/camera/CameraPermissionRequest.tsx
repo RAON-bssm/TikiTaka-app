@@ -5,7 +5,6 @@ interface Props {
   onRequestPermission: () => void;
 }
 
-// 카메라 권한이 없을 때 노출하는 권한 요청 화면.
 export default function CameraPermissionRequest({ onRequestPermission }: Props) {
   return (
     <View className="flex-1 items-center justify-center gap-lg bg-black p-xl">

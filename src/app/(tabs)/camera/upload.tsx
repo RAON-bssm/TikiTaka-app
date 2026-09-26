@@ -16,7 +16,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Upload() {
   const { uri } = useLocalSearchParams<{ uri?: string }>();
-  // 가로는 부모 폭으로 고정, 세로는 원본 비율(가로/세로)에 맞춰 유동
   const photoRatio = useImageRatio(uri);
 
   const [content, setContent] = useState('');
@@ -44,7 +43,7 @@ export default function Upload() {
       {
         onSuccess: (postId) => {
           showToast('게시물이 등록됐어요');
-          // 방금 올린 글의 상세 페이지로 이동한다. id를 못 받은 경우엔 이전 화면으로 되돌아간다.
+          // 서버가 id를 주지 않으면 상세로 갈 수 없어 이전 화면으로 돌아간다.
           if (postId) {
             router.replace({ pathname: '/feed/[post_id]', params: { post_id: postId } });
           } else {
@@ -68,7 +67,6 @@ export default function Upload() {
       >
         <Topic title={currentBoard?.mission ?? ''} />
 
-        {/* 촬영한 사진 미리보기: 폭은 부모를 채우고, 높이는 사진 원본 비율에 맞춰 반응형 */}
         {uri && photoRatio ? (
           <Image
             source={{ uri }}

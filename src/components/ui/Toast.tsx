@@ -6,17 +6,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CheckIcon from '@/assets/icons/check.svg';
 import Typography from './Typography';
 
-/**
- * 앱 어디서든 호출할 수 있는 토스트 알림.
- *
- * 사용법:
- *   1) 앱 루트(_layout)를 <ToastProvider> 로 감싼다.
- *   2) 컴포넌트에서 const { showToast } = useToast();
- *      showToast('게시물이 등록됐어요');
- */
-
 interface ToastOptions {
-  /** 표시 시간(ms). 기본 2000. */
+  /** ms */
   duration?: number;
 }
 
@@ -34,13 +25,12 @@ const ToastContext = createContext<ToastContextValue | null>(null);
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const insets = useSafeAreaInsets();
   const [toast, setToast] = useState<ToastState | null>(null);
-  // 다음 토스트가 오면 이전 자동 닫힘 타이머를 취소하기 위해 보관한다.
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const showToast = useCallback((message: string, options?: ToastOptions) => {
     if (timerRef.current) clearTimeout(timerRef.current);
 
-    // id를 매번 새로 줘서 연속 호출 시에도 재등장 애니메이션이 다시 실행되게 한다.
+    // 매번 새 id(key)를 줘야 연속 호출에도 등장 애니메이션이 다시 돈다.
     setToast({ id: Date.now(), message });
 
     timerRef.current = setTimeout(() => setToast(null), options?.duration ?? 2000);
@@ -50,7 +40,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     <ToastContext.Provider value={{ showToast }}>
       {children}
 
-      {/* 오버레이: 화면 하단. box-none 으로 아래 화면 터치를 막지 않는다. */}
+      {/* box-none: 아래 화면 터치를 막지 않는다. */}
       <View
         pointerEvents="box-none"
         className="absolute inset-x-lg bottom-0 items-center"
@@ -74,7 +64,6 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** 토스트를 띄우는 훅. ToastProvider 하위에서만 사용 가능. */
 export function useToast() {
   const context = useContext(ToastContext);
   if (!context) {

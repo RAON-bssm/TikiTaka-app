@@ -2,9 +2,7 @@ import { View } from 'react-native';
 
 import Skeleton from '@/components/ui/feedback/Skeleton';
 
-/**
- * FeedCard 의 로딩 상태 뼈대. 실제 FeedCard 와 동일한 레이아웃·간격을 따른다.
- */
+/** FeedCard와 레이아웃·간격을 맞춘다. */
 export default function FeedCardSkeleton() {
   return (
     <View className="w-full gap-lg rounded-md border border-gray-100 bg-white p-lg">

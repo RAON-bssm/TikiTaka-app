@@ -7,6 +7,7 @@ module.exports = {
     './src/components/**/*.{js,jsx,ts,tsx}',
     './src/features/**/*.{js,jsx,ts,tsx}',
   ],
+  // 동적으로 조합되는 클래스(Typography 등)는 빌드에서 제거되지 않도록 등록한다.
   safelist: [
     'text-2xl',
     'text-xl',
@@ -29,11 +30,12 @@ module.exports = {
   corePlugins: { borderOpacity: true },
   theme: {
     extend: {
-      // 색상은 src/constants/colors.js 를 단일 소스로 공유한다 (앱 코드와 동일한 팔레트).
+      // 앱 코드와 같은 팔레트(src/constants/colors.js)를 공유한다.
       colors: {
         gray: palette.gray,
         primary: palette.primary,
         secondary: palette.secondary,
+        kakao: palette.kakao,
       },
       spacing: {
         xs: '4px',

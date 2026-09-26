@@ -49,10 +49,7 @@ export default function AiScoreCheckCard({ onCheck }: Props) {
       <View className="items-center justify-center p-2xl">
         <View className="items-center gap-sm">
           <Animated.View style={numberStyle}>
-            <Typography
-              variant="display"
-              className="text-primary-600 text-[64px] leading-[72px] font-bold"
-            >
+            <Typography variant="display" className="text-primary-600 text-5xl font-bold">
               {rolling}
             </Typography>
           </Animated.View>

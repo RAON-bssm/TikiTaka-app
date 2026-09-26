@@ -3,7 +3,7 @@ import { Pressable, Text, View } from 'react-native';
 
 export interface ZoomLevel {
   label: string;
-  /** neutralZoom(1x) 기준 배율. 0.5는 초광각(minZoom) 렌즈로 매핑됩니다. */
+  /** neutralZoom(1x) 기준 배율. 0.5는 초광각(minZoom) 렌즈로 매핑된다. */
   factor: number;
 }
 
@@ -17,7 +17,7 @@ export const ZOOM_LEVELS: ZoomLevel[] = [
 interface Props {
   selected: string;
   onSelect: (level: ZoomLevel) => void;
-  /** 노출할 배율 목록. 기기에 초광각이 없으면 부모가 .5를 빼고 넘겨줍니다. */
+  /** 기기에 초광각이 없으면 부모가 .5를 빼고 넘긴다. */
   levels?: ZoomLevel[];
 }
 

@@ -3,7 +3,6 @@ import { router } from 'expo-router';
 import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-/** 카메라 화면 좌측 상단 뒤로가기 버튼 (흰색 chevron, 상단 안전영역 기준 배치). */
 export default function CameraBackButton() {
   const insets = useSafeAreaInsets();
 

@@ -11,17 +11,10 @@ import { BANNER_SLIDES, type BannerSlide } from '@/constants/banner';
 import BannerCard from './BannerCard';
 
 interface Props {
-  /** 표시할 배너 목록. 기본값은 공용 BANNER_SLIDES. */
   slides?: BannerSlide[];
 }
 
-/**
- * 홈 상단 배너.
- *
- * 슬라이드 데이터(`slides`)를 그대로 페이징 캐러셀로 그리고, 하단 인디케이터 점 개수도
- * 데이터에서 자동으로 파생된다. 배너를 늘리려면 `BANNER_SLIDES`에 항목만 추가하면 된다.
- * 컨테이너의 가용 너비(onLayout)를 한 페이지 폭으로 사용하므로 좌우 여백은 부모가 담당한다.
- */
+/** 측정한 컨테이너 폭을 한 페이지 폭으로 쓰므로 좌우 여백은 부모가 담당한다. */
 export default function Banner({ slides = BANNER_SLIDES }: Props) {
   const [width, setWidth] = useState(0);
   const [activeIndex, setActiveIndex] = useState(0);
