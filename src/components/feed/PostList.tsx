@@ -4,6 +4,7 @@ import { View } from 'react-native';
 import FeedCard from '@/components/feed/FeedCard';
 import FeedCardSkeleton from '@/components/feed/FeedCardSkeleton';
 import PostDeleteDialog from '@/components/feed/PostDeleteDialog';
+import PostEditDialog, { type EditingPost } from '@/components/feed/PostEditDialog';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Typography from '@/components/ui/Typography';
 import { pickRankingCharacter } from '@/constants/ranking';
@@ -31,6 +32,7 @@ const EmptyPosts = ({ message }: { message: string }) => (
 export default function PostList({ state, limit }: Props) {
   const { data: myInfo } = useMyInfo();
   const [deletingPostId, setDeletingPostId] = useState<string>();
+  const [editingPost, setEditingPost] = useState<EditingPost>();
 
   if (state.isLoading) {
     return (
@@ -73,6 +75,10 @@ export default function PostList({ state, limit }: Props) {
             post.user_id === myInfo?.user_id
               ? [
                   {
+                    label: '수정하기',
+                    onPress: () => setEditingPost({ postId: post.post_id, content: post.content }),
+                  },
+                  {
                     label: '삭제하기',
                     destructive: true,
                     onPress: () => setDeletingPostId(post.post_id),
@@ -82,6 +88,7 @@ export default function PostList({ state, limit }: Props) {
           }
         />
       ))}
+      <PostEditDialog post={editingPost} onClose={() => setEditingPost(undefined)} />
       <PostDeleteDialog postId={deletingPostId} onClose={() => setDeletingPostId(undefined)} />
     </View>
   );

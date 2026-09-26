@@ -10,6 +10,7 @@ import PostAuthor from '@/components/feed/PostAuthor';
 import PostDetailSkeleton from '@/components/feed/PostDetailSkeleton';
 import PostImage from '@/components/feed/PostImage';
 import PostDeleteDialog from '@/components/feed/PostDeleteDialog';
+import PostEditDialog from '@/components/feed/PostEditDialog';
 import PostTitleRow from '@/components/feed/PostTitleRow';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Header from '@/components/ui/Header';
@@ -23,6 +24,7 @@ export default function PostDetailScreen() {
   const { data: post, isLoading, isError, refetch, isRefetching } = usePostDetail(post_id);
   const { data: myInfo } = useMyInfo();
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
   // 점수·코멘트는 확인을 눌러야 공개한다.
   const [scoreRevealed, setScoreRevealed] = useState(false);
@@ -60,6 +62,7 @@ export default function PostDetailScreen() {
                 menuItems={
                   post.user_id === myInfo?.user_id
                     ? [
+                        { label: '수정하기', onPress: () => setIsEditOpen(true) },
                         {
                           label: '삭제하기',
                           destructive: true,
@@ -86,6 +89,10 @@ export default function PostDetailScreen() {
           </>
         )}
       </ScrollView>
+      <PostEditDialog
+        post={isEditOpen && post ? { postId: post_id, content: post.content } : undefined}
+        onClose={() => setIsEditOpen(false)}
+      />
       <PostDeleteDialog
         postId={isDeleteOpen ? post_id : undefined}
         onClose={() => setIsDeleteOpen(false)}
