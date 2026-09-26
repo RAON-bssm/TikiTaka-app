@@ -15,9 +15,15 @@ const client = axios.create({
 
 /**
  * 재발급 대상이 아닌 공개 엔드포인트. 여기서의 401은 토큰 문제가 아니라 진짜 실패다.
- * `/api/location`은 가입 화면이 토큰 발급 전에 부르므로, 재발급 흐름에 들어가면 signup token이 지워져 가입이 막힌다.
+ * `/api/location`·`/api/auth/check-name`은 가입 화면이 토큰 발급 전에 부르므로, 재발급 흐름에 들어가면 signup token이 지워져 가입이 막힌다.
  */
-const PUBLIC_PATHS = ['/api/login/', '/api/auth/signup', '/api/auth/refresh', '/api/location'];
+const PUBLIC_PATHS = [
+  '/api/login/',
+  '/api/auth/signup',
+  '/api/auth/check-name',
+  '/api/auth/refresh',
+  '/api/location',
+];
 
 const isPublicPath = (url?: string) => !!url && PUBLIC_PATHS.some((path) => url.startsWith(path));
 
