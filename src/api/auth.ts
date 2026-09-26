@@ -1,5 +1,5 @@
 import type { ApiResponse } from '@/types/api';
-import type { LoginData, Provider, SignupRequest, TokenData } from '@/types/auth';
+import type { CheckNameData, LoginData, Provider, SignupRequest, TokenData } from '@/types/auth';
 import client from './client';
 
 export { reissue } from './refresh';
@@ -16,6 +16,13 @@ export async function login(provider: Provider, providerAccessToken: string): Pr
 export async function signup(req: SignupRequest): Promise<TokenData> {
   const { data } = await client.post<ApiResponse<TokenData>>('/api/auth/signup', req);
   return data.data;
+}
+
+export async function checkUserName(userName: string): Promise<boolean> {
+  const { data } = await client.get<ApiResponse<CheckNameData>>('/api/auth/check-name', {
+    params: { user_name: userName },
+  });
+  return data.data.available;
 }
 
 /** access token이 만료됐으면 실패할 수 있으니, 호출부는 결과와 무관하게 로컬 토큰을 비워야 한다. */
