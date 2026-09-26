@@ -32,13 +32,12 @@ export default function Login() {
       setIsProviderPending(false);
     }
 
-    // 사용자가 로그인 창을 직접 닫은 경우(취소). 본인이 그만둔 것이므로 따로 알리지 않는다.
+    // 사용자가 직접 취소한 경우라 따로 알리지 않는다.
     if (!providerAccessToken) return;
 
     login(
       { provider, providerAccessToken },
       {
-        // 로그인 실패(소셜 토큰 만료·서버 오류)는 화면 전환 없이 토스트로만 알린다.
         onError: () => showToast('로그인에 실패했어요. 다시 시도해주세요'),
       },
     );
@@ -59,11 +58,10 @@ export default function Login() {
 
         <View style={{ flex: 3 }} />
 
-        {/* 로그인 버튼: 화면 하단 고정 */}
         <Pressable
           onPress={() => handleSocialLogin('KAKAO')}
           disabled={isBusy}
-          className="flex-row items-center mb-2xl justify-center gap-sm rounded-md bg-[#FEE500] py-md active:bg-[#EED500] disabled:opacity-50"
+          className="flex-row items-center mb-2xl justify-center gap-sm rounded-md bg-kakao py-md active:bg-kakao-pressed disabled:opacity-50"
         >
           <KakaoIcon width={24} height={24} />
           <Typography variant="h3" className="text-gray-700">

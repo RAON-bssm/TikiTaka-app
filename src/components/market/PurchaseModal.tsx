@@ -9,15 +9,13 @@ import type { MarketItem } from '@/constants/market';
 
 interface Props {
   visible: boolean;
-  /** 구매 대상 아이템. */
   item: MarketItem | undefined;
-  /** 현재 내 캐릭터 구성에 item의 파츠 하나만 얹은 전신 미리보기. */
+  /** 내 캐릭터에 item의 파츠 하나만 얹은 구성. */
   previewConfig: CharacterConfig;
   onClose: () => void;
   onConfirm: () => void;
 }
 
-/** 아이템 구매 확인 모달 — 중앙 팝업(캐릭터 미리보기 + 가격 + 구매/돌아가기). */
 export default function PurchaseModal({ visible, item, previewConfig, onClose, onConfirm }: Props) {
   if (!item) {
     return null;
@@ -25,9 +23,8 @@ export default function PurchaseModal({ visible, item, previewConfig, onClose, o
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      {/* 딤 처리된 배경 - 탭하면 닫힘 */}
       <Pressable className="flex-1 items-center justify-center bg-black/20" onPress={onClose}>
-        {/* 카드 - 내부 탭은 배경으로 전달하지 않아 닫히지 않는다 */}
+        {/* 빈 onPress로 탭을 삼켜 카드 안을 눌러도 닫히지 않게 한다 */}
         <Pressable
           onPress={() => {}}
           className="w-[240px] items-center gap-lg rounded-lg border border-gray-100 bg-white p-lg"

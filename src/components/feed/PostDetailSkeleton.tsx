@@ -2,10 +2,7 @@ import { View } from 'react-native';
 
 import Skeleton from '@/components/ui/feedback/Skeleton';
 
-/**
- * 게시글 상세 화면의 로딩 상태 뼈대.
- * PostAuthor + PostImage / PostTitleRow / AiScoreCard 레이아웃을 그대로 따른다.
- */
+/** PostAuthor + PostImage / PostTitleRow / AiScoreCard 레이아웃을 맞춘다. */
 export default function PostDetailSkeleton() {
   return (
     <>

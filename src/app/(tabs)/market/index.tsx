@@ -35,7 +35,6 @@ export default function MarketScreen() {
   const { showToast } = useToast();
   const [purchaseOpen, setPurchaseOpen] = useState(false);
 
-  // 현재 내 캐릭터에 선택된 아이템의 파츠 하나만 얹은 전신 미리보기.
   const previewConfig = selectedItem
     ? { ...config, [selectedItem.group]: selectedItem.assetId }
     : config;
@@ -48,8 +47,7 @@ export default function MarketScreen() {
       {
         onSuccess: () => {
           showToast('구매가 완료됐어요');
-          // 구매한 아이템을 현재 캐릭터에 착용시켜 저장한다(마이페이지·꾸미기에 즉시 반영).
-          // 저장된 캐릭터를 불러오기 전에 저장하면 기본 config로 저장본을 덮어쓴다.
+          // 구매한 아이템을 바로 착용시킨다. 저장본을 불러오기 전에 저장하면 기본 config로 덮어쓴다.
           if (isLoaded) {
             setConfig({ ...config, [selectedItem.group]: selectedItem.assetId });
           }
@@ -64,7 +62,6 @@ export default function MarketScreen() {
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
       <View className="flex flex-1 flex-col gap-2xl pt-lg">
-        {/* 상단 요소는 다른 페이지와 동일하게 좌우 여백(px-xl)을 준다 */}
         <View className="gap-2xl px-xl">
           <Header />
 
@@ -84,7 +81,6 @@ export default function MarketScreen() {
         <View className="flex-1 px-lg">
           <CategoryTabs tabs={SHOP_CATEGORIES} selected={category} onSelect={selectCategory} />
 
-          {/* 알약형 탭과 이어지는 전체 폭 테두리 카드 (캐릭터 꾸미기와 동일한 형태) */}
           <View className="-mx-lg flex-1 rounded-t-md border-2 border-b-0 border-primary-600 bg-white p-lg">
             {isError ? (
               <ErrorRetry message="상점 목록을 불러오지 못했어요." onRetry={refetch} />

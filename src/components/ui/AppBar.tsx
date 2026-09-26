@@ -18,12 +18,11 @@ type TabConfig = {
   Icon: FC<SvgProps>;
 };
 
-// SVG fill은 currentColor라서 color prop으로 제어합니다. (팔레트 단일 소스에서 가져옴)
+// SVG fill이 currentColor라 color prop으로 색을 바꾼다.
 const COLOR_FOCUSED = palette.primary[600];
 const COLOR_DEFAULT = palette.gray[400];
 
-// 라우트 이름(파일명) -> 바텀바 표시 정보. SVG는 컴포넌트로 import 합니다.
-// 노출 순서는 (tabs)/_layout.tsx의 Tabs.Screen 선언 순서를 따릅니다.
+// 키는 라우트 이름(파일명). 노출 순서는 (tabs)/_layout.tsx의 Tabs.Screen 선언 순서를 따른다.
 const TAB_CONFIG: Record<string, TabConfig> = {
   index: { label: '홈', Icon: HomeIcon },
   ranking: { label: '랭킹', Icon: RankingIcon },
@@ -35,8 +34,7 @@ const TAB_CONFIG: Record<string, TabConfig> = {
 export default function AppBar({ state, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
 
-  // 카메라 스택의 기본 화면(index)에서만 바텀바를 숨깁니다.
-  // 하위 화면(예: camera/preview)에서는 nested 라우트 이름이 잡혀 바텀바가 다시 노출됩니다.
+  // 카메라 스택의 index에서만 바텀바를 숨긴다. 하위 화면은 nested 라우트 이름이 잡혀 다시 노출된다.
   const focusedRoute = state.routes[state.index];
   const nestedRouteName = getFocusedRouteNameFromRoute(focusedRoute);
   if (
@@ -50,7 +48,7 @@ export default function AppBar({ state, navigation }: BottomTabBarProps) {
     <View className="flex-row bg-white" style={{ paddingBottom: insets.bottom }}>
       {state.routes.map((route, index) => {
         const config = TAB_CONFIG[route.name];
-        // TAB_CONFIG에 없는 라우트(상세 페이지 등)는 바텀바에 노출하지 않습니다.
+        // TAB_CONFIG에 없는 라우트(상세 페이지 등)는 노출하지 않는다.
         if (!config) return null;
 
         const focused = state.index === index;

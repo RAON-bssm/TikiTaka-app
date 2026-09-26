@@ -10,21 +10,11 @@ import {
   type TintGroup,
 } from './types';
 
-/**
- * 파츠 에셋 정적 레지스트리.
- *
- * React Native/Metro는 동적 경로 require를 지원하지 않으므로, id ↔ 에셋을 여기에 직접 매핑한다.
- *
- * 규칙
- * - id = 폴더/파일명 (확장자 제외).
- * - 단일 파츠(SIMPLE_ASSETS): `assets/character/<그룹>/<모양>.webp` → `{ '<모양>': require(...) }`.
- * - 색상 파츠(COLOR_ASSETS): `assets/character/<그룹>/<모양>/<색상>.webp`
- *   → `{ '<모양>': { '<색상>': require(...) } }`.
- * - 앞머리(hair-front)와 뒷머리(hair-back)는 독립 모양이지만 색상 키(black/blond/brown)는 맞춘다.
- *   → CharacterConfig.hairColor 하나로 앞/뒤가 같은 색으로 렌더된다.
- */
+// Metro는 동적 경로 require를 지원하지 않아 에셋을 여기에 직접 매핑한다. 매핑하지 않은 에셋은 안 보인다.
+// id = 폴더/파일명(확장자 제외). 앞/뒤 머리는 hairColor 하나로 칠해지므로 색상 키를 맞춰야 한다.
+// 에셋 추가 후 `pnpm generate:part-meta`로 partMeta.ts를 재생성한다.
 
-/** 단일 이미지 파츠: 그룹 → 모양 → 이미지 */
+/** `assets/character/<그룹>/<모양>.webp` */
 const SIMPLE_ASSETS: Record<SimpleGroup, Record<string, number>> = {
   body: {
     body01: require('@/assets/character/body/body01.webp'),
@@ -50,7 +40,7 @@ const SIMPLE_ASSETS: Record<SimpleGroup, Record<string, number>> = {
   },
 };
 
-/** 색상 파츠: 그룹 → 모양 → 색상 → 이미지 */
+/** `assets/character/<그룹>/<모양>/<색상>.webp` */
 const COLOR_ASSETS: Record<ColorGroup, Record<string, Record<string, number>>> = {
   eyes: {
     eyes01: {
@@ -133,7 +123,7 @@ const COLOR_ASSETS: Record<ColorGroup, Record<string, Record<string, number>>> =
   },
 };
 
-/** 색상만으로 고르는 파츠: 그룹 → 색상 → 이미지 (모양 없음) */
+/** `assets/character/<그룹>/<색상>.webp` (모양 없음) */
 const TINT_ASSETS: Record<TintGroup, Record<string, number>> = {
   hairHighlights: {
     green: require('@/assets/character/hair-highlights/green.webp'),
@@ -146,9 +136,8 @@ const TINT_ASSETS: Record<TintGroup, Record<string, number>> = {
 
 const COLOR_GROUPS = new Set<ColorGroup>(['eyes', 'hairBack', 'hairFront']);
 
-/** 한 레이어의 이미지 소스를 config로부터 해석한다. 없으면 undefined (해당 레이어 skip). */
+/** 매핑이 없으면 undefined(해당 레이어 skip). */
 export function resolveLayerSource(config: CharacterConfig, layer: LayerDef): number | undefined {
-  // 색상만으로 고르는 레이어 (모양 없음, 예: 눈 색 → 머리 하이라이트)
   if ('tint' in layer) {
     const colorId = config[layer.color];
     if (!colorId) return undefined;
@@ -166,7 +155,6 @@ export function resolveLayerSource(config: CharacterConfig, layer: LayerDef): nu
   return SIMPLE_ASSETS[layer.group as SimpleGroup]?.[shapeId];
 }
 
-/** 특정 파츠의 선택 가능한 모양 id 목록. */
 export function getShapeOptions(part: PartConfigKey): string[] {
   const registry = COLOR_GROUPS.has(part as ColorGroup)
     ? COLOR_ASSETS[part as ColorGroup]
@@ -174,16 +162,12 @@ export function getShapeOptions(part: PartConfigKey): string[] {
   return Object.keys(registry);
 }
 
-/** 색상 파츠(eyes/hairBack/hairFront)에서 특정 모양이 가진 색상 id 목록. */
 export function getColorOptions(part: ColorablePart, shapeId: string): string[] {
   const shapes = COLOR_ASSETS[COLORABLE_PARTS[part].group];
   return Object.keys(shapes[shapeId] ?? {});
 }
 
-/**
- * 홈 배너에 나오는 캐릭터와 동일한 파츠로 구성한 기본 캐릭터.
- * (배너 슬라이드: `src/constants/banner.ts`)
- */
+/** 홈 배너(`banner.ts`) 캐릭터와 같은 구성. */
 export const DEFAULT_CHARACTER_CONFIG: CharacterConfig = {
   body: 'body02',
   eyes: 'eyes01',
@@ -195,10 +179,9 @@ export const DEFAULT_CHARACTER_CONFIG: CharacterConfig = {
   clothing: 'clothing01', // 코스튬은 항상 착용 상태 — 벗을 수 없다
 };
 
-// PART_META 항목 하나의 타입 (bbox + isDark). partMeta.ts가 as const라서 여기서 뽑아서 사용
 export type PartMeta = (typeof PART_META)[keyof typeof PART_META];
 
-// 그룹명을 에셋 폴더명으로 바꾼다 camelCase -> kebab-case
+// 그룹명(camelCase) → 에셋 폴더명(kebab-case). PART_META 키가 폴더 경로 기준이다.
 const toKebab = (value: string) => value.replace(/[A-Z]/g, (ch) => `-${ch.toLowerCase()}`);
 
 let sourceMetaMap: Map<number, PartMeta> | null = null;
@@ -234,7 +217,7 @@ function buildSourceMetaMap(): Map<number, PartMeta> {
   return map;
 }
 
-/** require 소스 번호로 파츠 메타(bbox/isDark)를 찾는다. 메타가 없으면 undefined. */
+/** require 소스 번호로 파츠 메타를 찾는다. */
 export function getPartMeta(source: number | undefined): PartMeta | undefined {
   if (source == null) return undefined;
   if (!sourceMetaMap) sourceMetaMap = buildSourceMetaMap();

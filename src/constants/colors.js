@@ -1,17 +1,8 @@
 // @ts-check
 /**
- * 색상 팔레트 단일 소스(Single Source of Truth).
- *
- * `tailwind.config.js`(Node/CommonJS)와 앱 코드(TS) 양쪽이 이 파일 하나를 공유한다.
- * 그래서 CommonJS(`module.exports`)로 작성한다 — tailwind config 는 이 파일을 `require` 한다.
- *
- * 사용 규칙
- * - NativeWind className(`bg-primary-600`, `text-gray-500` 등)은 tailwind.config.js 를 통해 반영된다.
- * - SVG 아이콘 `color`/`fill` 처럼 JS 값(hex)이 필요한 곳은 `palette` 를 import 해서 쓴다.
- *   예: `import { palette } from '@/constants/colors'; palette.gray[500]`
- * - 컴포넌트에 hex 리터럴(`'#6E7D94'`)을 직접 박지 않는다. 색이 바뀌면 이 파일만 고치면 된다.
- *
- * 주의: `gray` 는 순백(#FFFFFF)을 포함하지 않는다. 흰색은 NativeWind `white`(=`#FFFFFF`)를 쓴다.
+ * 색상 팔레트 단일 소스. tailwind.config.js가 `require` 하므로 CommonJS로 유지한다.
+ * JS hex가 필요한 곳(SVG color 등)은 `palette`를 import 하고, hex 리터럴을 직접 쓰지 않는다.
+ * `gray`에는 순백이 없다. 흰색은 `white`를 쓴다.
  */
 
 const gray = {
@@ -50,7 +41,12 @@ const secondary = {
   900: '#1B326B',
 };
 
-/** 전체 팔레트. 앱 코드에서 `palette.gray[500]` 형태로 접근한다. */
-const palette = { gray, primary, secondary };
+// 카카오 로그인 버튼 브랜드색. 디자인 팔레트가 아니라 카카오 가이드 값이다.
+const kakao = {
+  DEFAULT: '#FEE500',
+  pressed: '#EED500',
+};
 
-module.exports = { palette, gray, primary, secondary };
+const palette = { gray, primary, secondary, kakao };
+
+module.exports = { palette, gray, primary, secondary, kakao };

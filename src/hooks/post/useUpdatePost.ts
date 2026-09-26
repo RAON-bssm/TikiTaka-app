@@ -11,7 +11,6 @@ export function useUpdatePost() {
     mutationFn: ({ postId, req }: { postId: string; req: UpdatePostRequest }) =>
       updatePost(postId, req),
     onSuccess: () => {
-      // 목록·상세 캐시 무효화
       queryClient.invalidateQueries({ queryKey: postKeys.all });
     },
     onError: (error) => {

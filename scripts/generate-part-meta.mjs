@@ -1,9 +1,6 @@
-// 캐릭터 파츠 WebP를 분석하여 src/constants/character/partMeta.ts를 생성한다.
-// 실행: pnpm generate:part-meta
-//
-// 각 파츠에 대해 뽑는 것:
-//    - bbox: 투명 여백을 제외한 실제 콘텐츠 영역 (0~1  정규화 좌표) -> 미리보기 확대에 사용
-//    - isDark: 이미지가 어두운지 여부 -> 미리보기 배경색 결정에 사용
+// 캐릭터 파츠 WebP를 분석해 partMeta.ts를 생성한다. 실행: pnpm generate:part-meta
+// - bbox: 투명 여백을 뺀 콘텐츠 영역(0~1 정규화) -> 썸네일 확대
+// - isDark: 어두운 이미지 여부 -> 썸네일 배경색
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -11,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.resolve(__dirname, '..'); //프로젝트 루트 주소
+const ROOT = path.resolve(__dirname, '..');
 
 const ASSETS_DIR = path.join(ROOT, 'assets/character');
 const REGISTRY_PATH = path.join(ROOT, 'src/constants/character/assets.ts');
@@ -25,7 +22,7 @@ function collectWebpFiles() {
     fs
       .readdirSync(ASSETS_DIR, { recursive: true })
       .filter((p) => p.endsWith('.webp'))
-      // windows에서도 키가 'mouth/smile' 형태가 되도록 구분자를 /로 통일
+      // Windows에서도 키 구분자를 /로 통일
       .map((p) => p.split(path.sep).join('/'))
   );
 }
@@ -35,13 +32,9 @@ function round(value) {
   return Number(value.toFixed(4));
 }
 
-/**
- * 파츠 이미지 하나를 분석해서 { bbox, isDark }를 반환.
- * 불투명 픽셀이 하나도 없으면 null.
- */
+/** { bbox, isDark }를 반환. 불투명 픽셀이 없으면 null. */
 async function analyzePart(relPath) {
-  // raw(): 디코딩된 픽셀 버퍼를 그대로 받는다.
-  // ensureAlpha(): 알파 채널이 없는 이미지도 RGBA 4채널로 통일시켜서 아래 루프의 인덱스 계산(픽셀당 4바이트)이 항상 성립하게 한다
+  // ensureAlpha(): 알파 없는 이미지도 RGBA로 맞춰 아래 픽셀당 4바이트 인덱스 계산이 성립하게 한다
   const { data, info } = await sharp(path.join(ASSETS_DIR, relPath))
     .ensureAlpha()
     .raw()
@@ -49,13 +42,12 @@ async function analyzePart(relPath) {
 
   const { width, height } = info;
 
-  // bbox 추적용: 불투명 픽셀을 만날 때마다 좁혀나간다
   let minX = width;
   let minY = height;
   let maxX = -1;
   let maxY = -1;
 
-  // 색 평균용: 알파 가중 합. 반투명 픽셀은 보이는 만큼만 색에 기여해야 안티앨리어싱 가장자리가 평균을 왜곡하지 않는다
+  // 알파 가중 합: 안티앨리어싱된 반투명 가장자리가 색 평균을 왜곡하지 않게 한다
   let rSum = 0;
   let gSum = 0;
   let bSum = 0;
@@ -63,7 +55,6 @@ async function analyzePart(relPath) {
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
-      // data는 [R,G,B,A, R,G,B,A, ...] 순서의 1차원 버퍼
       const i = (y * width + x) * 4;
       const a = data[i + 3];
       if (a <= ALPHA_THRESHOLD) continue;
@@ -80,16 +71,14 @@ async function analyzePart(relPath) {
     }
   }
 
-  // 불투명 픽셀이 하나도 없다 => 빈 이미지
   if (maxX < 0) return null;
 
-  // WCAG 상대 휘도 근사식. 사람 눈은 초록에 민감하기에 G의 계수가 크다
-  // 0(완점 검정) ~ 1(완전 흰색) 범위가 되도록 255로 나눈다.
+  // WCAG 상대 휘도 근사(0~1)
   const luminance =
     (0.2126 * (rSum / aSum) + 0.7152 * (gSum / aSum) + 0.0722 * (bSum / aSum)) / 255;
 
   return {
-    //픽셀 좌표를 0~1 비율로 정규화. 모든 파츠가 같은 1:1 캔버스 기준이라 에셋 해상도가 바뀌어도 이 값은 유효
+    // 모든 파츠가 같은 1:1 캔버스라 정규화하면 에셋 해상도가 바뀌어도 유효하다
     bbox: {
       x: round(minX / width),
       y: round(minY / height),
@@ -100,10 +89,7 @@ async function analyzePart(relPath) {
   };
 }
 
-/**
- * assets.ts에 require로 등록된 파츠 id 목록을 추출.
- * assets.ts는 RN용 require가 섞여 있어 Node에서 import할 수 없으므로 텍스트로 읽어 정규식으로 경로만 뽑는다
- */
+// assets.ts는 RN용 require가 섞여 Node에서 import할 수 없어, 텍스트로 읽어 경로만 뽑는다.
 function getRegistryIds() {
   if (!fs.existsSync(REGISTRY_PATH)) {
     console.warn(`레지스트리 파일 없음, 대조 생략: ${REGISTRY_PATH}`);
@@ -135,8 +121,7 @@ async function main() {
     meta[id] = result;
   }
 
-  // 레지스트리에는 등록되었지만 메타가 없는 파츠 = 화면에서 확대/배경이 풀백으로 뜨는 파츠
-  // 조용히 넘어가지 않고 실패시켜서 바로 알아채게 한다
+  // 레지스트리에 있는데 메타가 없으면 썸네일이 폴백으로 뜨므로 조용히 넘기지 않고 실패시킨다
   const missing = getRegistryIds().filter((id) => !(id in meta));
   if (missing.length > 0) {
     console.error(`assets.ts에 등록됐지만 분석 결과가 없는 파츠:`);
@@ -144,7 +129,7 @@ async function main() {
     process.exit(1);
   }
 
-  // 키를 정렬해서 파츠 추가 시 git diff가 해당 줄만 바뀌게 한다
+  // 정렬해서 파츠 추가 시 diff가 해당 줄만 바뀌게 한다
   const entries = Object.keys(meta)
     .sort()
     .map((key) => {
