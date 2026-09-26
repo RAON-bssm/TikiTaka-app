@@ -16,6 +16,8 @@ interface Props {
 }
 
 const MENU_GAP = 4;
+// className의 shadow-*는 플랫폼마다 다르게 그려져(Android는 elevation), 양쪽이 같은 boxShadow를 직접 쓴다.
+const MENU_SHADOW = `0px 4px 16px ${palette.gray[800]}1F`;
 
 export default function MoreMenu({ items }: Props) {
   const { width: windowWidth } = useWindowDimensions();
@@ -40,15 +42,20 @@ export default function MoreMenu({ items }: Props) {
       <Modal
         visible={!!anchor}
         transparent
-        animationType="none"
+        animationType="fade"
         statusBarTranslucent
         onRequestClose={close}
       >
         <Pressable className="absolute inset-0" onPress={close} />
         {anchor ? (
           <View
-            style={{ position: 'absolute', top: anchor.top, right: anchor.right }}
-            className="min-w-[160px] rounded-md border border-gray-100 bg-white py-xs shadow-lg"
+            style={{
+              position: 'absolute',
+              top: anchor.top,
+              right: anchor.right,
+              boxShadow: MENU_SHADOW,
+            }}
+            className="w-[140px] overflow-hidden rounded-md border border-gray-100 bg-white py-xs"
           >
             {items.map((item) => (
               <Pressable
@@ -60,7 +67,7 @@ export default function MoreMenu({ items }: Props) {
                 className="px-lg py-md active:bg-gray-50"
               >
                 <Typography
-                  variant="body1"
+                  variant="body2"
                   className={item.destructive ? 'text-primary-600' : 'text-gray-800'}
                 >
                   {item.label}
