@@ -1,10 +1,10 @@
 import { getApiErrorMessage } from '@/api/error';
+import NicknameField, { getNameCheckError, type NameCheck } from '@/components/auth/NicknameField';
 import BackButton from '@/components/ui/BackButton';
 import Button from '@/components/ui/Button';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Skeleton from '@/components/ui/feedback/Skeleton';
 import Header from '@/components/ui/Header';
-import TextInput from '@/components/ui/input/TextInput';
 import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
 import { useMyProfile } from '@/hooks/user/useMyProfile';
@@ -22,6 +22,7 @@ export default function EditProfile() {
   // null은 "아직 손대지 않음". 빈 문자열은 null이 아니라 서버 값으로 되돌아가지 않는다.
   const [editedName, setEditedName] = useState<string | null>(null);
   const userName = editedName ?? profile?.user_name ?? '';
+  const [nameCheck, setNameCheck] = useState<NameCheck>();
 
   const handleSubmit = () => {
     if (isPending) return;
@@ -33,6 +34,11 @@ export default function EditProfile() {
     }
     if (nextName === profile?.user_name) {
       showToast('닉네임이 이전과 같아요');
+      return;
+    }
+    const nameCheckError = getNameCheckError(nameCheck, nextName);
+    if (nameCheckError) {
+      showToast(nameCheckError);
       return;
     }
 
@@ -63,18 +69,13 @@ export default function EditProfile() {
             ) : isError || !profile ? (
               <ErrorRetry message="프로필을 불러오지 못했어요." onRetry={refetch} />
             ) : (
-              <View className="flex flex-row items-end gap-sm w-full">
-                <View className="flex-1">
-                  <TextInput
-                    label="닉네임"
-                    placeholder="닉네임을 입력해주세요"
-                    value={userName}
-                    onChangeText={setEditedName}
-                  />
-                </View>
-                {/* TODO: 서버에 닉네임 중복확인 엔드포인트가 없다. 현재는 수정 시 409로만 알 수 있다. */}
-                <Button content="중복확인" />
-              </View>
+              <NicknameField
+                value={userName}
+                onChangeText={setEditedName}
+                check={nameCheck}
+                onCheck={setNameCheck}
+                currentName={profile.user_name}
+              />
             )}
           </View>
         </View>
