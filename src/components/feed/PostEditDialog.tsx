@@ -91,7 +91,7 @@ const EditForm = ({ post, onClose }: { post: EditingPost; onClose: () => void })
               textAlignVertical="top"
               placeholder="내용을 입력해주세요"
               placeholderTextColor={palette.gray[400]}
-              className="h-[120px] w-full rounded-sm border border-gray-200 bg-white p-md font-sans text-sm text-gray-800 focus:border-primary-500"
+              className="h-[120px] w-full rounded-sm border border-gray-200 bg-white p-md font-sans text-sm text-gray-800 focus:border-gray-300"
             />
             {errorMessage && (
               <Typography variant="caption" className="text-primary-600">

@@ -48,7 +48,7 @@ export default function MoreMenu({ items }: Props) {
     >
       <Typography
         variant="body2"
-        className={item.destructive ? 'text-primary-600' : 'text-gray-800'}
+        className={item.destructive ? 'text-primary-600' : 'text-gray-500'}
       >
         {item.label}
       </Typography>
