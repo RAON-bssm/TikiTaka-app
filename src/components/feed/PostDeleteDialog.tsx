@@ -42,30 +42,23 @@ export default function PostDeleteDialog({ postId, onClose, onDeleted }: Props) 
       statusBarTranslucent
       onRequestClose={handleClose}
     >
-      <Pressable className="flex-1 items-center justify-center bg-black/20" onPress={handleClose}>
+      <Pressable className="flex-1 items-center justify-center bg-black/40" onPress={handleClose}>
         <Pressable
           onPress={() => {}}
-          className="w-[280px] gap-2xl rounded-lg border border-gray-100 bg-white p-lg"
+          className="w-[300px] gap-2xl rounded-xl bg-white px-xl pb-xl pt-2xl"
         >
-          <View className="gap-sm">
-            <Typography variant="h3" className="text-gray-800">
+          <View className="items-center gap-sm">
+            <Typography variant="h2" className="text-gray-800">
               게시글을 삭제할까요?
             </Typography>
-            <Typography variant="body3" className="text-gray-500">
+            <Typography variant="body2" className="text-center text-gray-500">
               이 글로 얻은 점수도 함께 빠져요.
             </Typography>
           </View>
           <View className="flex-row gap-sm">
-            <Button
-              content="취소"
-              variant="light"
-              size="sm"
-              className="flex-1"
-              onclick={handleClose}
-            />
+            <Button content="취소" variant="light" className="flex-1" onclick={handleClose} />
             <Button
               content={isPending ? '삭제 중...' : '삭제하기'}
-              size="sm"
               className={`flex-1 ${isPending ? 'opacity-50' : ''}`}
               onclick={handleDelete}
             />
