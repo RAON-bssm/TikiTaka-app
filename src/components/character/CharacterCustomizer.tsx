@@ -1,9 +1,14 @@
 import CategoryTabs from '@/components/ui/CategoryTabs';
+import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
 import { DEFAULT_CHARACTER_CONFIG, getPartMeta, type PartMeta } from '@/constants/character/assets';
 import { CATEGORY_DEFS, type ColorOption, type ShapeOption } from '@/constants/character/customize';
+import { toPartId } from '@/constants/character/legacyIds';
 import { CharacterConfig } from '@/constants/character/types';
+import { PRODUCT_TYPE_TO_PART_KEY } from '@/constants/market';
 import { useCharacterConfig } from '@/hooks/character/useCharacterConfig';
+import { useEquipCharacter } from '@/hooks/equipment/useEquipCharacter';
+import { useProducts } from '@/hooks/product/useProducts';
 import { Image } from 'expo-image';
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
@@ -105,7 +110,17 @@ const PartThumb = ({
   );
 };
 
-const ShapeGrid = ({ shapes, onSelect }: { shapes: ShapeOption[]; onSelect: SelectHandler }) => {
+const ShapeGrid = ({
+  shapes,
+  onSelect,
+  lockedIds,
+  onPressLocked,
+}: {
+  shapes: ShapeOption[];
+  onSelect: SelectHandler;
+  lockedIds: Set<string>;
+  onPressLocked: () => void;
+}) => {
   // 측정한 너비로 열 수를 정하고 남는 여백 없이 칸 크기를 맞춘다.
   const [width, setWidth] = useState(0);
   const columns = Math.max(1, Math.floor((width + GRID_GAP) / (MIN_ITEM_WIDTH + GRID_GAP)));
@@ -123,10 +138,11 @@ const ShapeGrid = ({ shapes, onSelect }: { shapes: ShapeOption[]; onSelect: Sele
       {width > 0 &&
         shapes.map((shape) => {
           const meta = getPartMeta(shape.source);
+          const locked = lockedIds.has(shape.id);
           return (
             <Pressable
               key={shape.id}
-              onPress={() => onSelect(shape.next)}
+              onPress={() => (locked ? onPressLocked() : onSelect(shape.next))}
               style={{ width: itemSize, height: itemSize }}
               // 밝은 파츠만 어두운 배경에 올린다. 메타가 없으면 밝은 배경으로 폴백
               className={`items-center justify-center overflow-hidden rounded-lg ${
@@ -134,7 +150,16 @@ const ShapeGrid = ({ shapes, onSelect }: { shapes: ShapeOption[]; onSelect: Sele
               } ${shape.active ? 'border-2 border-primary-600' : ''}`}
             >
               {shape.source != null && (
-                <PartThumb source={shape.source} meta={meta} size={itemSize} />
+                <View className={`h-full w-full ${locked ? 'opacity-30' : ''}`}>
+                  <PartThumb source={shape.source} meta={meta} size={itemSize} />
+                </View>
+              )}
+              {locked && (
+                <View className="absolute bottom-xs rounded-full bg-gray-800/70 px-sm py-xs">
+                  <Typography variant="caption" className="text-white">
+                    미보유
+                  </Typography>
+                </View>
               )}
             </Pressable>
           );
@@ -150,10 +175,25 @@ export default function CharacterCustomizer({
 }) {
   // config는 훅이 기기에 자동 저장하고 진입 시 복원한다.
   const { config, setConfig, isLoaded } = useCharacterConfig(initialConfig);
+  const equipCharacter = useEquipCharacter();
+  const { data: products } = useProducts();
+  const { showToast } = useToast();
   const [selectedLabel, setSelectedLabel] = useState(CATEGORY_LABELS[0]);
   const category = CATEGORY_DEFS.find((c) => c.label === selectedLabel) ?? CATEGORY_DEFS[0];
   const shapes = category.buildShapes(config);
   const colors = category.buildColors?.(config);
+  // 상점 목록은 서버가 보유 상품을 걸러 주므로, 여기 있는 파츠가 곧 아직 안 산 파츠다.
+  // 기본 파츠는 상품이 아니라 목록에 없어 잠기지 않는다. 목록을 못 받으면 잠그지 않는다.
+  const lockedIds = new Set(
+    (products ?? [])
+      .filter((product) => PRODUCT_TYPE_TO_PART_KEY[product.product_type] === category.group)
+      .map((product) => toPartId(product.product_name)),
+  );
+
+  const handleSelect = (next: CharacterConfig) => {
+    setConfig(next);
+    void equipCharacter(next);
+  };
 
   // 저장된 config를 불러오기 전에는 기본값이 잠깐 보이지 않도록 렌더를 보류한다.
   if (!isLoaded) {
@@ -168,8 +208,13 @@ export default function CharacterCustomizer({
         <CategoryTabs tabs={CATEGORY_LABELS} selected={selectedLabel} onSelect={setSelectedLabel} />
 
         <View className="-mx-lg flex-1 rounded-t-md border-2 border-b-0 border-primary-600 bg-white p-lg">
-          {colors && <ColorSwatches colors={colors} onSelect={setConfig} />}
-          <ShapeGrid shapes={shapes} onSelect={setConfig} />
+          {colors && <ColorSwatches colors={colors} onSelect={handleSelect} />}
+          <ShapeGrid
+            shapes={shapes}
+            onSelect={handleSelect}
+            lockedIds={lockedIds}
+            onPressLocked={() => showToast('상점에서 구매하면 입을 수 있어요')}
+          />
         </View>
       </View>
     </View>

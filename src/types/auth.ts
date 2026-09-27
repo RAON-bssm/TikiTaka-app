@@ -27,6 +27,14 @@ export interface SignupRequest {
   main_location_id: number;
 }
 
+/**
+ * `GET /api/auth/check-name?user_name=` (인증 불필요). 사용 중이어도 200에 `available: false`로 온다.
+ * 확인과 가입 사이에 선점될 수 있어, true여도 가입의 409는 따로 처리해야 한다.
+ */
+export interface CheckNameData {
+  available: boolean;
+}
+
 export interface ReissueRequest {
   refresh_token: string;
 }
