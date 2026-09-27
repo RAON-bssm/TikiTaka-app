@@ -33,11 +33,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#FFFFFF",
-          "android": {
-            "image": "./assets/images/tikitaka-logo.png",
-            "imageWidth": 76
-          }
+          "backgroundColor": "#FC8253"
         }
       ],
       [
