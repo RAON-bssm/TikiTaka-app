@@ -19,7 +19,7 @@ export type ProductType = (typeof PRODUCT_TYPES)[number];
 export interface Product {
   product_id: number;
   /**
-   * 표시 이름이자 클라이언트 파츠 에셋 id(예: `"bob"`) — 서버와 같게 내려주기로 합의했다.
+   * 표시 이름이자 클라이언트 파츠 에셋 id(예: `"hair-back-bob"`) — 서버와 같게 내려주기로 합의했다.
    * `assets.ts` 레지스트리에 없으면 에러 없이 썸네일만 비므로, 계약이 바뀌면 `toMarketItem`의 `assetId`를 먼저 고칠 것.
    */
   product_name: string;

@@ -3,6 +3,7 @@ import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
 import { DEFAULT_CHARACTER_CONFIG, getPartMeta, type PartMeta } from '@/constants/character/assets';
 import { CATEGORY_DEFS, type ColorOption, type ShapeOption } from '@/constants/character/customize';
+import { toPartId } from '@/constants/character/legacyIds';
 import { CharacterConfig } from '@/constants/character/types';
 import { PRODUCT_TYPE_TO_PART_KEY } from '@/constants/market';
 import { useCharacterConfig } from '@/hooks/character/useCharacterConfig';
@@ -186,7 +187,7 @@ export default function CharacterCustomizer({
   const lockedIds = new Set(
     (products ?? [])
       .filter((product) => PRODUCT_TYPE_TO_PART_KEY[product.product_type] === category.group)
-      .map((product) => product.product_name),
+      .map((product) => toPartId(product.product_name)),
   );
 
   const handleSelect = (next: CharacterConfig) => {

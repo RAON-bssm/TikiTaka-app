@@ -2,6 +2,7 @@ import { PRODUCT_TYPE_TO_PART_KEY } from '@/constants/market';
 import type { EquipRequest, Equipment } from '@/types/equipment';
 import type { InventoryItem } from '@/types/inventory';
 import { PRODUCT_TYPES } from '@/types/product';
+import { toPartId } from './legacyIds';
 import type { CharacterConfig } from './types';
 
 /** 서버는 모양만 알고 색은 모르므로, 착용 슬롯의 모양만 base 위에 덮는다. */
@@ -9,7 +10,7 @@ export function equipmentToConfig(equipment: Equipment, base: CharacterConfig): 
   const next = { ...base };
   for (const type of PRODUCT_TYPES) {
     const item = equipment[type];
-    if (item) next[PRODUCT_TYPE_TO_PART_KEY[type]] = item.product_name;
+    if (item) next[PRODUCT_TYPE_TO_PART_KEY[type]] = toPartId(item.product_name);
   }
   return next;
 }
@@ -25,7 +26,7 @@ export function configToEquipRequest(
   const req: EquipRequest = {};
   for (const item of inventory) {
     if (item.is_active) continue;
-    if (config[PRODUCT_TYPE_TO_PART_KEY[item.type]] === item.product_name) {
+    if (config[PRODUCT_TYPE_TO_PART_KEY[item.type]] === toPartId(item.product_name)) {
       req[item.type] = item.product_id;
     }
   }

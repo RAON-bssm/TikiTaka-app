@@ -137,7 +137,7 @@
 - **COLOR_ASSETS** (`eyes`, `hairBack`, `hairFront`): 모양 × 색상 파츠. `그룹 → 모양 → 색상 → 이미지`. 파일 경로 `assets/character/<그룹 폴더>/<모양>/<색상>.webp`.
 - **TINT_ASSETS** (`hairHighlights`): 모양 없이 색상만으로 고르는 파츠. `그룹 → 색상 → 이미지`. 파일 경로 `assets/character/<그룹 폴더>/<색상>.webp`. (눈 색 `eyesColor`를 따라가는 머리 하이라이트)
 
-> 규칙: **id = 폴더/파일명(확장자 제외).** 그룹 폴더명은 그룹명의 kebab-case입니다(`hairBack` → `hair-back`, `hairHighlights` → `hair-highlights`). `partMeta.ts`의 키도 이 폴더 경로 기준입니다.
+> 규칙: **id = 폴더/파일명(확장자 제외).** id는 종류가 달라도 겹치지 않도록 **`종류-이름`** 형식으로 짓습니다(`hair-back-bob`, `accessory-glasses`, `body-01`). 서버 상품 id와 1:1로 맞추기 위한 규칙입니다. 그룹 폴더명은 그룹명의 kebab-case입니다(`hairBack` → `hair-back`, `hairHighlights` → `hair-highlights`). `partMeta.ts`의 키도 이 폴더 경로 기준입니다.
 > 앞머리·뒷머리는 모양은 독립이지만 색상 파일명(`black`/`blond`/`brown`/`pink`)을 맞춰야 `hairColor` 하나로 앞/뒤가 같은 색으로 렌더됩니다. 색 선택지는 뒷머리 모양 기준으로 만들어지므로, 새 머리 색은 앞·뒤 모든 모양에 같은 파일명으로 넣으세요. 빠진 조합은 에러 없이 해당 레이어만 사라집니다.
 > 같은 이유로 머리 하이라이트 색(`hair-highlights/<색>.webp`)은 눈 색 파일명과 맞춰야 합니다.
 
@@ -159,7 +159,8 @@
 
 ### 7.6 상점 아이템 ↔ 파츠 연결
 
-- 서버와 **`product_name` = 파츠 에셋 id**(예: `"bob"`)로 맞추기로 합의되어 있습니다. `toMarketItem`(`src/constants/market.ts`)이 이 값을 `assetId`로 옮겨 착용·썸네일에 씁니다.
+- 서버와 **`product_name` = 파츠 에셋 id**(예: `"hair-back-bob"`)로 맞추기로 합의되어 있습니다. `toMarketItem`(`src/constants/market.ts`)이 이 값을 `assetId`로 옮겨 착용·썸네일에 씁니다.
+- 서버에 `종류-이름` 이전의 옛 id(`"bob"` 등)가 남아 있을 수 있어, 서버 값과 기기 저장본은 `toPartId`(`src/constants/character/legacyIds.ts`)로 새 id로 바꿔 읽습니다. 서버 시드가 새 id로 바뀌면 이 파일은 지웁니다.
 - 레지스트리에 없는 id가 오면 에러 없이 썸네일만 비어 보입니다. 상품이 추가되면 같은 id의 에셋이 `assets.ts`에 있는지 확인하세요.
 - 서버 `product_type`은 snake_case(`hair_back`)이고, `PRODUCT_TYPE_TO_PART_KEY`로 `CharacterConfig` 키(`hairBack`)로 바꿉니다.
 
