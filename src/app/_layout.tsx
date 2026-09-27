@@ -1,5 +1,6 @@
 import { queryClient } from '@/api/queryClient';
 import AuthGate from '@/components/auth/AuthGate';
+import AppSplash from '@/components/splash/AppSplash';
 import { ToastProvider } from '@/components/ui/Toast';
 import '@/global.css';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -18,6 +19,7 @@ export default function RootLayout() {
               <AuthGate>
                 <Stack screenOptions={{ headerShown: false }} />
               </AuthGate>
+              <AppSplash />
             </ToastProvider>
           </QueryClientProvider>
         </SafeAreaProvider>
