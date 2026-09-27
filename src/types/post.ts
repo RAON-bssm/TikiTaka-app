@@ -81,7 +81,10 @@ export interface UpdatePostRequest {
  */
 export type CreatePostResponse = EmptyResponse;
 
-/** 남의 게시물이면 403. */
+/**
+ * 본문만 바뀐다. 이미지는 수정할 수 없고 AI 점수도 재심사하지 않는다.
+ * 실패: 403 남의 게시물, 404 없는 게시물.
+ */
 export type UpdatePostResponse = EmptyResponse;
 
 /**

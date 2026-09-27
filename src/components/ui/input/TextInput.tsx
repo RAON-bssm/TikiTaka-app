@@ -21,7 +21,7 @@ export default function TextInput({ label, placeholder, value, onChangeText }: P
         onChangeText={onChangeText}
         placeholder={placeholder}
         placeholderTextColor="#9DAABB"
-        className="w-full p-md rounded-sm border border-gray-200 bg-white font-sans text-sm text-gray-800 focus:border-primary-500"
+        className="w-full p-md rounded-sm border border-gray-200 bg-white font-sans text-sm text-gray-800 focus:border-gray-500"
       />
     </View>
   );

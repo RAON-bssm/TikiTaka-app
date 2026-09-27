@@ -38,7 +38,7 @@ export default function Dropdown({ label, placeholder, options, value, onChange 
       <Pressable
         ref={triggerRef}
         onPress={openDropdown}
-        className="flex flex-row items-center justify-between gap-auto w-full p-md rounded-sm border border-gray-200 bg-white text-gray-800 placeholder:text-gray-400 font-sans text-sm focus:outline-none focus:border-primary-500"
+        className="flex flex-row items-center justify-between gap-auto w-full p-md rounded-sm border border-gray-200 bg-white text-gray-800 placeholder:text-gray-400 font-sans text-sm focus:outline-none focus:border-gray-500"
       >
         {selectedValue ? (
           <Typography variant="body2" className="text-gray-800">

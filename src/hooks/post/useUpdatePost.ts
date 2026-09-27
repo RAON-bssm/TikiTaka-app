@@ -10,11 +10,9 @@ export function useUpdatePost() {
   return useMutation({
     mutationFn: ({ postId, req }: { postId: string; req: UpdatePostRequest }) =>
       updatePost(postId, req),
+    // 점수는 재심사하지 않으므로 랭킹·유저 키는 건드리지 않는다.
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: postKeys.all });
-    },
-    onError: (error) => {
-      console.log('error:', error);
     },
   });
 }
