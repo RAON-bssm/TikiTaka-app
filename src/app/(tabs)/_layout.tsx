@@ -8,7 +8,7 @@ export default function TabsLayout() {
       <Tabs.Screen name="index" options={{ title: '홈' }} />
       <Tabs.Screen name="ranking" options={{ title: '랭킹' }} />
       <Tabs.Screen name="camera" options={{ title: '카메라' }} />
-      <Tabs.Screen name="map" options={{ title: '지도' }} />
+      <Tabs.Screen name="map" options={{ title: '지도', lazy: false }} />
       <Tabs.Screen name="market" options={{ title: '상점' }} />
       <Tabs.Screen name="feed" options={{ title: '피드' }} />
     </Tabs>
