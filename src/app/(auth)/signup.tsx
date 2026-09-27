@@ -66,6 +66,10 @@ export default function SignUp() {
       {
         onError: (error) => {
           showToast(getSignupErrorMessage(error));
+          // 중복확인 뒤 다른 사람이 선점한 경우다. 그대로 두면 필드가 계속 "사용 가능"으로 보인다.
+          if (isAxiosError(error) && error.response?.status === 409) {
+            setNameCheck({ name: trimmedName, available: false });
+          }
           // signup token은 메모리에만 있어 앱을 재시작하면 사라진다. 이때 useSignup은 Axios
           // 에러가 아닌 일반 Error를 던져, 걸러내지 않으면 같은 에러만 반복되는 막다른 길이 된다.
           const isExpired = isAxiosError(error) && error.response?.status === 401;

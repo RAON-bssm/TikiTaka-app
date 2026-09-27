@@ -9,6 +9,7 @@ import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
 import { useMyProfile } from '@/hooks/user/useMyProfile';
 import { useUpdateProfile } from '@/hooks/user/useUpdateProfile';
+import { isAxiosError } from 'axios';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Keyboard, Pressable, View } from 'react-native';
@@ -49,7 +50,13 @@ export default function EditProfile() {
           showToast('닉네임을 변경했어요');
           router.back();
         },
-        onError: (error) => showToast(getApiErrorMessage(error, '닉네임 변경에 실패했어요')),
+        onError: (error) => {
+          showToast(getApiErrorMessage(error, '닉네임 변경에 실패했어요'));
+          // 중복확인 뒤 다른 사람이 선점한 경우다. 그대로 두면 필드가 계속 "사용 가능"으로 보인다.
+          if (isAxiosError(error) && error.response?.status === 409) {
+            setNameCheck({ name: nextName, available: false });
+          }
+        },
       },
     );
   };
