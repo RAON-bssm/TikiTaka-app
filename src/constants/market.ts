@@ -1,4 +1,5 @@
 import { DEFAULT_CHARACTER_CONFIG, resolveLayerSource } from '@/constants/character/assets';
+import { toPartId } from '@/constants/character/legacyIds';
 import type { CharacterConfig, LayerDef, PartConfigKey } from '@/constants/character/types';
 import type { Product, ProductType } from '@/types/product';
 
@@ -65,7 +66,7 @@ export function toMarketItem(product: Product): MarketItem {
   };
   // 서버가 product_name을 에셋 id와 동일하게 내려주기로 한 계약에 기댄다.
   // 별도 에셋 필드가 생기면 이 줄만 바꾸면 된다.
-  const assetId = product.product_name;
+  const assetId = toPartId(product.product_name);
   const previewConfig: CharacterConfig = {
     ...DEFAULT_CHARACTER_CONFIG,
     [group]: assetId,
@@ -103,11 +104,11 @@ export interface GotchaPull {
 
 // TODO: 서버 연동 시 아이템 풀/확률은 API 응답으로 대체
 const GOTCHA_ITEM_POOL: GotchaItem[] = [
-  { id: 'clothing01', name: '베이직 티셔츠', part: 'clothing' },
-  { id: 'clothing02', name: '스트라이프 셔츠', part: 'clothing' },
-  { id: 'clothing03', name: '체크 남방', part: 'clothing' },
-  { id: 'clothing04', name: '후드 집업', part: 'clothing' },
-  { id: 'red-glasses', name: '빨간 안경', part: 'accessory' },
+  { id: 'clothing-01', name: '베이직 티셔츠', part: 'clothing' },
+  { id: 'clothing-02', name: '스트라이프 셔츠', part: 'clothing' },
+  { id: 'clothing-03', name: '체크 남방', part: 'clothing' },
+  { id: 'clothing-04', name: '후드 집업', part: 'clothing' },
+  { id: 'accessory-red-glasses', name: '빨간 안경', part: 'accessory' },
 ];
 
 function pullOne(): GotchaPull {

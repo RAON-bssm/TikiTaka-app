@@ -70,6 +70,8 @@ function colorOptions(
 
 export interface CategoryDef {
   label: string;
+  /** 모양을 고르는 파츠. 상점 상품과 맞춰 미보유 파츠를 가릴 때 쓴다. */
+  group: PartConfigKey;
   buildShapes: (config: CharacterConfig) => ShapeOption[];
   /** 색상 축이 있는 파츠(머리·눈)에만 정의한다. */
   buildColors?: (config: CharacterConfig) => ColorOption[];
@@ -78,6 +80,7 @@ export interface CategoryDef {
 export const CATEGORY_DEFS: CategoryDef[] = [
   {
     label: '머리',
+    group: 'hairBack',
     buildShapes: (c) =>
       shapeOptions('hairBack', { group: 'hairBack', color: 'hairColor' }, c.hairBack, (id) => ({
         ...c,
@@ -93,6 +96,7 @@ export const CATEGORY_DEFS: CategoryDef[] = [
   },
   {
     label: '눈',
+    group: 'eyes',
     buildShapes: (c) =>
       shapeOptions('eyes', { group: 'eyes', color: 'eyesColor' }, c.eyes, (id) => ({
         ...c,
@@ -106,11 +110,13 @@ export const CATEGORY_DEFS: CategoryDef[] = [
   },
   {
     label: '입',
+    group: 'mouth',
     buildShapes: (c) =>
       shapeOptions('mouth', { group: 'mouth' }, c.mouth, (id) => ({ ...c, mouth: id })),
   },
   {
     label: '코스튬',
+    group: 'clothing',
     buildShapes: (c) =>
       shapeOptions('clothing', { group: 'clothing' }, c.clothing ?? '', (id) => ({
         ...c,
@@ -119,11 +125,13 @@ export const CATEGORY_DEFS: CategoryDef[] = [
   },
   {
     label: '몸',
+    group: 'body',
     buildShapes: (c) =>
       shapeOptions('body', { group: 'body' }, c.body, (id) => ({ ...c, body: id })),
   },
   {
     label: '악세서리',
+    group: 'accessory',
     buildShapes: (c) =>
       shapeOptions(
         'accessory',

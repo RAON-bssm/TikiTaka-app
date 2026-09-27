@@ -2,239 +2,242 @@
 // 재생성: pnpm generate:part-meta
 
 export const PART_META = {
-  'accessory/glasses': {
+  'accessory/accessory-glasses': {
     bbox: { x: 0.3285, y: 0.5021, width: 0.3736, height: 0.1715 },
     isDark: false,
   },
-  'accessory/plaster': {
+  'accessory/accessory-plaster': {
     bbox: { x: 0.4924, y: 0.6243, width: 0.1583, height: 0.0444 },
     isDark: false,
   },
-  'accessory/red-glasses': {
+  'accessory/accessory-red-glasses': {
     bbox: { x: 0.3326, y: 0.5917, width: 0.3688, height: 0.0576 },
     isDark: false,
   },
-  'accessory/red-glasses-hair-pin': {
+  'accessory/accessory-red-glasses-hair-pin': {
     bbox: { x: 0.3326, y: 0.4896, width: 0.3688, height: 0.1597 },
     isDark: false,
   },
-  'body/body01': { bbox: { x: 0.2736, y: 0.3451, width: 0.4917, height: 0.4972 }, isDark: false },
-  'body/body02': { bbox: { x: 0.2729, y: 0.3451, width: 0.4917, height: 0.4972 }, isDark: false },
-  'clothing/clothing01': {
+  'body/body-01': { bbox: { x: 0.2736, y: 0.3451, width: 0.4917, height: 0.4972 }, isDark: false },
+  'body/body-02': { bbox: { x: 0.2729, y: 0.3451, width: 0.4917, height: 0.4972 }, isDark: false },
+  'clothing/clothing-01': {
     bbox: { x: 0.4375, y: 0.6708, width: 0.1542, height: 0.1153 },
     isDark: false,
   },
-  'clothing/clothing02': {
+  'clothing/clothing-02': {
     bbox: { x: 0.4437, y: 0.6674, width: 0.1396, height: 0.1125 },
     isDark: false,
   },
-  'clothing/clothing03': {
+  'clothing/clothing-03': {
     bbox: { x: 0.4333, y: 0.6708, width: 0.1625, height: 0.1104 },
     isDark: false,
   },
-  'clothing/clothing04': {
+  'clothing/clothing-04': {
     bbox: { x: 0.4333, y: 0.6694, width: 0.1625, height: 0.1618 },
     isDark: false,
   },
-  'clothing/clothing05': {
+  'clothing/clothing-05': {
     bbox: { x: 0.1653, y: 0.1486, width: 0.6847, height: 0.6507 },
     isDark: false,
   },
-  'clothing/clothing06': {
+  'clothing/clothing-06': {
     bbox: { x: 0.1653, y: 0.1486, width: 0.6847, height: 0.6507 },
     isDark: false,
   },
-  'eyes/eyes01/blue': {
+  'eyes/eyes-01/blue': {
     bbox: { x: 0.3326, y: 0.516, width: 0.3681, height: 0.1292 },
     isDark: true,
   },
-  'eyes/eyes01/green': {
+  'eyes/eyes-01/green': {
     bbox: { x: 0.3326, y: 0.516, width: 0.3681, height: 0.1292 },
     isDark: true,
   },
-  'eyes/eyes01/orange': {
+  'eyes/eyes-01/orange': {
     bbox: { x: 0.3326, y: 0.516, width: 0.3681, height: 0.1292 },
     isDark: true,
   },
-  'eyes/eyes01/pink': {
+  'eyes/eyes-01/pink': {
     bbox: { x: 0.3326, y: 0.516, width: 0.3681, height: 0.1292 },
     isDark: true,
   },
-  'eyes/eyes01/sky': { bbox: { x: 0.3326, y: 0.516, width: 0.3681, height: 0.1292 }, isDark: true },
+  'eyes/eyes-01/sky': {
+    bbox: { x: 0.3326, y: 0.516, width: 0.3681, height: 0.1292 },
+    isDark: true,
+  },
   footrest: { bbox: { x: 0, y: 0, width: 1, height: 1 }, isDark: false },
-  'hair-back/bob/black': {
+  'hair-back/hair-back-bob/black': {
     bbox: { x: 0.1826, y: 0.1604, width: 0.6347, height: 0.5458 },
     isDark: true,
   },
-  'hair-back/bob/blond': {
+  'hair-back/hair-back-bob/blond': {
     bbox: { x: 0.1826, y: 0.1604, width: 0.6347, height: 0.5458 },
     isDark: false,
   },
-  'hair-back/bob/brown': {
+  'hair-back/hair-back-bob/brown': {
     bbox: { x: 0.1826, y: 0.1604, width: 0.6347, height: 0.5458 },
     isDark: false,
   },
-  'hair-back/bob/pink': {
+  'hair-back/hair-back-bob/pink': {
     bbox: { x: 0.1826, y: 0.1604, width: 0.6347, height: 0.5458 },
     isDark: false,
   },
-  'hair-back/long/black': {
+  'hair-back/hair-back-long/black': {
     bbox: { x: 0.1826, y: 0.1556, width: 0.6347, height: 0.6889 },
     isDark: true,
   },
-  'hair-back/long/blond': {
+  'hair-back/hair-back-long/blond': {
     bbox: { x: 0.1736, y: 0.1556, width: 0.6347, height: 0.6889 },
     isDark: false,
   },
-  'hair-back/long/brown': {
+  'hair-back/hair-back-long/brown': {
     bbox: { x: 0.1799, y: 0.1556, width: 0.6347, height: 0.6889 },
     isDark: false,
   },
-  'hair-back/long/pink': {
+  'hair-back/hair-back-long/pink': {
     bbox: { x: 0.1799, y: 0.1556, width: 0.6347, height: 0.6889 },
     isDark: false,
   },
-  'hair-back/low-pigtails/black': {
+  'hair-back/hair-back-low-pigtails/black': {
     bbox: { x: 0.1979, y: 0.1583, width: 0.6042, height: 0.5611 },
     isDark: true,
   },
-  'hair-back/low-pigtails/blond': {
+  'hair-back/hair-back-low-pigtails/blond': {
     bbox: { x: 0.1979, y: 0.1583, width: 0.6042, height: 0.5611 },
     isDark: false,
   },
-  'hair-back/low-pigtails/brown': {
+  'hair-back/hair-back-low-pigtails/brown': {
     bbox: { x: 0.1979, y: 0.1583, width: 0.6042, height: 0.5611 },
     isDark: false,
   },
-  'hair-back/low-pigtails/pink': {
+  'hair-back/hair-back-low-pigtails/pink': {
     bbox: { x: 0.1979, y: 0.1583, width: 0.6042, height: 0.5611 },
     isDark: false,
   },
-  'hair-back/low-tail/black': {
+  'hair-back/hair-back-low-tail/black': {
     bbox: { x: 0.1979, y: 0.1583, width: 0.6042, height: 0.5611 },
     isDark: true,
   },
-  'hair-back/low-tail/blond': {
+  'hair-back/hair-back-low-tail/blond': {
     bbox: { x: 0.1979, y: 0.1583, width: 0.6042, height: 0.5611 },
     isDark: false,
   },
-  'hair-back/low-tail/brown': {
+  'hair-back/hair-back-low-tail/brown': {
     bbox: { x: 0.1979, y: 0.1583, width: 0.6042, height: 0.5611 },
     isDark: false,
   },
-  'hair-back/low-tail/pink': {
+  'hair-back/hair-back-low-tail/pink': {
     bbox: { x: 0.1979, y: 0.1583, width: 0.6042, height: 0.5611 },
     isDark: false,
   },
-  'hair-back/puff/black': {
+  'hair-back/hair-back-puff/black': {
     bbox: { x: 0.1979, y: 0.1583, width: 0.6042, height: 0.5215 },
     isDark: true,
   },
-  'hair-back/puff/blond': {
+  'hair-back/hair-back-puff/blond': {
     bbox: { x: 0.1778, y: 0.1604, width: 0.6444, height: 0.5507 },
     isDark: false,
   },
-  'hair-back/puff/brown': {
+  'hair-back/hair-back-puff/brown': {
     bbox: { x: 0.1778, y: 0.1604, width: 0.6444, height: 0.5507 },
     isDark: false,
   },
-  'hair-back/puff/pink': {
+  'hair-back/hair-back-puff/pink': {
     bbox: { x: 0.1778, y: 0.1604, width: 0.6444, height: 0.5507 },
     isDark: false,
   },
-  'hair-back/short/black': {
+  'hair-back/hair-back-short/black': {
     bbox: { x: 0.1778, y: 0.1604, width: 0.6444, height: 0.5507 },
     isDark: true,
   },
-  'hair-back/short/blond': {
+  'hair-back/hair-back-short/blond': {
     bbox: { x: 0.1979, y: 0.1583, width: 0.6042, height: 0.5215 },
     isDark: false,
   },
-  'hair-back/short/brown': {
+  'hair-back/hair-back-short/brown': {
     bbox: { x: 0.1979, y: 0.1583, width: 0.6042, height: 0.5215 },
     isDark: false,
   },
-  'hair-back/short/pink': {
+  'hair-back/hair-back-short/pink': {
     bbox: { x: 0.1979, y: 0.1583, width: 0.6042, height: 0.5215 },
     isDark: false,
   },
-  'hair-back/side-bob/black': {
+  'hair-back/hair-back-side-bob/black': {
     bbox: { x: 0.1771, y: 0.1604, width: 0.6458, height: 0.5507 },
     isDark: true,
   },
-  'hair-back/side-bob/blond': {
+  'hair-back/hair-back-side-bob/blond': {
     bbox: { x: 0.1771, y: 0.1604, width: 0.6458, height: 0.5507 },
     isDark: false,
   },
-  'hair-back/side-bob/brown': {
+  'hair-back/hair-back-side-bob/brown': {
     bbox: { x: 0.1771, y: 0.1604, width: 0.6458, height: 0.5507 },
     isDark: false,
   },
-  'hair-back/side-bob/pink': {
+  'hair-back/hair-back-side-bob/pink': {
     bbox: { x: 0.1771, y: 0.1604, width: 0.6458, height: 0.5507 },
     isDark: false,
   },
-  'hair-back/side-tail/black': {
+  'hair-back/hair-back-side-tail/black': {
     bbox: { x: 0.1993, y: 0.1597, width: 0.7514, height: 0.5229 },
     isDark: true,
   },
-  'hair-back/side-tail/blond': {
+  'hair-back/hair-back-side-tail/blond': {
     bbox: { x: 0.1993, y: 0.1597, width: 0.7514, height: 0.5229 },
     isDark: false,
   },
-  'hair-back/side-tail/brown': {
+  'hair-back/hair-back-side-tail/brown': {
     bbox: { x: 0.1993, y: 0.1597, width: 0.7514, height: 0.5229 },
     isDark: false,
   },
-  'hair-back/side-tail/pink': {
+  'hair-back/hair-back-side-tail/pink': {
     bbox: { x: 0.1993, y: 0.1597, width: 0.7514, height: 0.5229 },
     isDark: false,
   },
-  'hair-back/side-wave/black': {
+  'hair-back/hair-back-side-wave/black': {
     bbox: { x: 0.1771, y: 0.1563, width: 0.6785, height: 0.6639 },
     isDark: true,
   },
-  'hair-back/side-wave/blond': {
+  'hair-back/hair-back-side-wave/blond': {
     bbox: { x: 0.1771, y: 0.1563, width: 0.6785, height: 0.6639 },
     isDark: false,
   },
-  'hair-back/side-wave/brown': {
+  'hair-back/hair-back-side-wave/brown': {
     bbox: { x: 0.1771, y: 0.1563, width: 0.6785, height: 0.6639 },
     isDark: false,
   },
-  'hair-back/side-wave/pink': {
+  'hair-back/hair-back-side-wave/pink': {
     bbox: { x: 0.1771, y: 0.1563, width: 0.6785, height: 0.6639 },
     isDark: false,
   },
-  'hair-back/wave/black': {
+  'hair-back/hair-back-wave/black': {
     bbox: { x: 0.1771, y: 0.1563, width: 0.6458, height: 0.6639 },
     isDark: true,
   },
-  'hair-back/wave/blond': {
+  'hair-back/hair-back-wave/blond': {
     bbox: { x: 0.1771, y: 0.1563, width: 0.6458, height: 0.6639 },
     isDark: false,
   },
-  'hair-back/wave/brown': {
+  'hair-back/hair-back-wave/brown': {
     bbox: { x: 0.1771, y: 0.1563, width: 0.6458, height: 0.6639 },
     isDark: false,
   },
-  'hair-back/wave/pink': {
+  'hair-back/hair-back-wave/pink': {
     bbox: { x: 0.1771, y: 0.1563, width: 0.6458, height: 0.6639 },
     isDark: false,
   },
-  'hair-front/basic/black': {
+  'hair-front/hair-front-basic/black': {
     bbox: { x: 0.2924, y: 0.2264, width: 0.4542, height: 0.4424 },
     isDark: true,
   },
-  'hair-front/basic/blond': {
+  'hair-front/hair-front-basic/blond': {
     bbox: { x: 0.2924, y: 0.2264, width: 0.4542, height: 0.4424 },
     isDark: false,
   },
-  'hair-front/basic/brown': {
+  'hair-front/hair-front-basic/brown': {
     bbox: { x: 0.2924, y: 0.2264, width: 0.4542, height: 0.4424 },
     isDark: false,
   },
-  'hair-front/basic/pink': {
+  'hair-front/hair-front-basic/pink': {
     bbox: { x: 0.2924, y: 0.2264, width: 0.4542, height: 0.4424 },
     isDark: false,
   },
@@ -258,8 +261,8 @@ export const PART_META = {
     bbox: { x: 0.3153, y: 0.3174, width: 0.1861, height: 0.0375 },
     isDark: false,
   },
-  'mouth/mouth01': { bbox: { x: 0.4972, y: 0.6507, width: 0.0382, height: 0.0181 }, isDark: true },
-  'mouth/mouth02': { bbox: { x: 0.5, y: 0.6465, width: 0.0313, height: 0.0174 }, isDark: true },
+  'mouth/mouth-01': { bbox: { x: 0.4972, y: 0.6507, width: 0.0382, height: 0.0181 }, isDark: true },
+  'mouth/mouth-02': { bbox: { x: 0.5, y: 0.6465, width: 0.0313, height: 0.0174 }, isDark: true },
 } as const;
 
 export type PartMetaKey = keyof typeof PART_META;

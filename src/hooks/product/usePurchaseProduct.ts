@@ -15,8 +15,5 @@ export function usePurchaseProduct() {
       queryClient.invalidateQueries({ queryKey: inventoryKeys.all });
       queryClient.invalidateQueries({ queryKey: userKeys.all });
     },
-    onError: (error) => {
-      console.log('error:', error);
-    },
   });
 }

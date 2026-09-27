@@ -15,6 +15,7 @@ import PointBadge from '@/components/ui/PointBadge';
 import { useToast } from '@/components/ui/Toast';
 import { SHOP_CATEGORIES, USER_POINT } from '@/constants/market';
 import { useCharacterConfig } from '@/hooks/character/useCharacterConfig';
+import { useEquipCharacter } from '@/hooks/equipment/useEquipCharacter';
 import { useShop } from '@/hooks/market/useShop';
 import { usePurchaseProduct } from '@/hooks/product/usePurchaseProduct';
 
@@ -32,6 +33,7 @@ export default function MarketScreen() {
   } = useShop();
   const { config, setConfig, isLoaded } = useCharacterConfig();
   const { mutate: purchaseProduct, isPending } = usePurchaseProduct();
+  const equipCharacter = useEquipCharacter();
   const { showToast } = useToast();
   const [purchaseOpen, setPurchaseOpen] = useState(false);
 
@@ -49,7 +51,9 @@ export default function MarketScreen() {
           showToast('구매가 완료됐어요');
           // 구매한 아이템을 바로 착용시킨다. 저장본을 불러오기 전에 저장하면 기본 config로 덮어쓴다.
           if (isLoaded) {
-            setConfig({ ...config, [selectedItem.group]: selectedItem.assetId });
+            const next = { ...config, [selectedItem.group]: selectedItem.assetId };
+            setConfig(next);
+            void equipCharacter(next);
           }
           setPurchaseOpen(false);
         },

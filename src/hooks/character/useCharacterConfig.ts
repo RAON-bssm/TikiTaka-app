@@ -1,8 +1,10 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { getSavedCharacter, saveCharacter } from '@/api/character';
+import { getEquipment } from '@/api/equipment';
 import { characterKeys } from '@/api/queryKeys';
 import { DEFAULT_CHARACTER_CONFIG } from '@/constants/character/assets';
+import { equipmentToConfig } from '@/constants/character/equipment';
 import type { CharacterConfig } from '@/constants/character/types';
 
 /**
@@ -14,8 +16,17 @@ export function useCharacterConfig(fallback: CharacterConfig = DEFAULT_CHARACTER
 
   const { data, isLoading } = useQuery({
     queryKey: characterKeys.config(),
-    queryFn: async () => (await getSavedCharacter()) ?? fallback,
-    // 로컬 저장소가 유일한 출처라 자동 재요청은 불필요하다.
+    queryFn: async () => {
+      const saved = await getSavedCharacter();
+      if (saved) return saved;
+      // 새 기기·재설치처럼 저장본이 없을 때만 서버 착용 상태로 모양을 복원한다. 색은 기본값이다.
+      try {
+        return equipmentToConfig(await getEquipment(), fallback);
+      } catch {
+        return fallback;
+      }
+    },
+    // 로컬 저장본이 기준이라 자동 재요청은 불필요하다.
     staleTime: Infinity,
   });
 
