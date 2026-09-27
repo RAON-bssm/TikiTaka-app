@@ -1,17 +1,18 @@
 import { getApiErrorMessage } from '@/api/error';
+import NicknameField, { getNameCheckError, type NameCheck } from '@/components/auth/NicknameField';
 import BackButton from '@/components/ui/BackButton';
 import Button from '@/components/ui/Button';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Skeleton from '@/components/ui/feedback/Skeleton';
 import Header from '@/components/ui/Header';
-import TextInput from '@/components/ui/input/TextInput';
 import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
 import { useMyProfile } from '@/hooks/user/useMyProfile';
 import { useUpdateProfile } from '@/hooks/user/useUpdateProfile';
+import { isAxiosError } from 'axios';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { View } from 'react-native';
+import { Keyboard, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function EditProfile() {
@@ -22,6 +23,7 @@ export default function EditProfile() {
   // null은 "아직 손대지 않음". 빈 문자열은 null이 아니라 서버 값으로 되돌아가지 않는다.
   const [editedName, setEditedName] = useState<string | null>(null);
   const userName = editedName ?? profile?.user_name ?? '';
+  const [nameCheck, setNameCheck] = useState<NameCheck>();
 
   const handleSubmit = () => {
     if (isPending) return;
@@ -35,6 +37,11 @@ export default function EditProfile() {
       showToast('닉네임이 이전과 같아요');
       return;
     }
+    const nameCheckError = getNameCheckError(nameCheck, nextName);
+    if (nameCheckError) {
+      showToast(nameCheckError);
+      return;
+    }
 
     updateProfile(
       { user_name: nextName },
@@ -43,14 +50,24 @@ export default function EditProfile() {
           showToast('닉네임을 변경했어요');
           router.back();
         },
-        onError: (error) => showToast(getApiErrorMessage(error, '닉네임 변경에 실패했어요')),
+        onError: (error) => {
+          showToast(getApiErrorMessage(error, '닉네임 변경에 실패했어요'));
+          // 중복확인 뒤 다른 사람이 선점한 경우다. 그대로 두면 필드가 계속 "사용 가능"으로 보인다.
+          if (isAxiosError(error) && error.response?.status === 409) {
+            setNameCheck({ name: nextName, available: false });
+          }
+        },
       },
     );
   };
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
-      <View className="flex flex-1 flex-col items-start justify-between gap-4xl p-lg">
+      <Pressable
+        onPress={Keyboard.dismiss}
+        accessible={false}
+        className="flex flex-1 flex-col items-start justify-between gap-4xl p-lg"
+      >
         <View className="flex flex-col items-center gap-2xl w-full">
           <Header />
           <View className="flex flex-col items-start gap-3xl w-full">
@@ -63,18 +80,13 @@ export default function EditProfile() {
             ) : isError || !profile ? (
               <ErrorRetry message="프로필을 불러오지 못했어요." onRetry={refetch} />
             ) : (
-              <View className="flex flex-row items-end gap-sm w-full">
-                <View className="flex-1">
-                  <TextInput
-                    label="닉네임"
-                    placeholder="닉네임을 입력해주세요"
-                    value={userName}
-                    onChangeText={setEditedName}
-                  />
-                </View>
-                {/* TODO: 서버에 닉네임 중복확인 엔드포인트가 없다. 현재는 수정 시 409로만 알 수 있다. */}
-                <Button content="중복확인" />
-              </View>
+              <NicknameField
+                value={userName}
+                onChangeText={setEditedName}
+                check={nameCheck}
+                onCheck={setNameCheck}
+                currentName={profile.user_name}
+              />
             )}
           </View>
         </View>
@@ -88,7 +100,7 @@ export default function EditProfile() {
             />
           )}
         </View>
-      </View>
+      </Pressable>
     </SafeAreaView>
   );
 }

@@ -1,10 +1,10 @@
 import { getSignupToken } from '@/api/token';
+import NicknameField, { getNameCheckError, type NameCheck } from '@/components/auth/NicknameField';
 import BackButton from '@/components/ui/BackButton';
 import Button from '@/components/ui/Button';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Skeleton from '@/components/ui/feedback/Skeleton';
 import RegionSelect from '@/components/ui/input/RegionSelect';
-import TextInput from '@/components/ui/input/TextInput';
 import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
 import { useSignup } from '@/hooks/auth/useSignup';
@@ -41,12 +41,19 @@ export default function SignUp() {
 
   const [userName, setUserName] = useState('');
   const [mainLocationId, setMainLocationId] = useState<number>();
+  const [nameCheck, setNameCheck] = useState<NameCheck>();
+  const trimmedName = userName.trim();
 
   const handleSignUp = () => {
     if (isPending) return;
 
-    if (!userName.trim()) {
+    if (!trimmedName) {
       showToast('닉네임을 입력해주세요');
+      return;
+    }
+    const nameCheckError = getNameCheckError(nameCheck, userName);
+    if (nameCheckError) {
+      showToast(nameCheckError);
       return;
     }
     if (!mainLocationId) {
@@ -55,10 +62,14 @@ export default function SignUp() {
     }
 
     signup(
-      { userName: userName.trim(), mainLocationId },
+      { userName: trimmedName, mainLocationId },
       {
         onError: (error) => {
           showToast(getSignupErrorMessage(error));
+          // 중복확인 뒤 다른 사람이 선점한 경우다. 그대로 두면 필드가 계속 "사용 가능"으로 보인다.
+          if (isAxiosError(error) && error.response?.status === 409) {
+            setNameCheck({ name: trimmedName, available: false });
+          }
           // signup token은 메모리에만 있어 앱을 재시작하면 사라진다. 이때 useSignup은 Axios
           // 에러가 아닌 일반 Error를 던져, 걸러내지 않으면 같은 에러만 반복되는 막다른 길이 된다.
           const isExpired = isAxiosError(error) && error.response?.status === 401;
@@ -78,18 +89,12 @@ export default function SignUp() {
           <Typography variant="display" className="text-gray-800">
             회원 정보 등록
           </Typography>
-          <View className="flex flex-row gap-sm items-end w-full">
-            <View className="flex-1">
-              <TextInput
-                label="닉네임"
-                placeholder="닉네임을 입력해주세요"
-                value={userName}
-                onChangeText={setUserName}
-              />
-            </View>
-            {/* TODO: 서버에 닉네임 중복확인 엔드포인트가 없다. 현재는 가입 시 409로만 알 수 있다. */}
-            <Button content="중복확인" />
-          </View>
+          <NicknameField
+            value={userName}
+            onChangeText={setUserName}
+            check={nameCheck}
+            onCheck={setNameCheck}
+          />
           {isLoading ? (
             <Skeleton className="h-[65px] w-full rounded-sm" />
           ) : isError ? (
