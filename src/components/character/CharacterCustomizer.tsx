@@ -5,7 +5,7 @@ import { DEFAULT_CHARACTER_CONFIG, getPartMeta, type PartMeta } from '@/constant
 import { CATEGORY_DEFS, type ColorOption, type ShapeOption } from '@/constants/character/customize';
 import { toPartId } from '@/constants/character/legacyIds';
 import { CharacterConfig } from '@/constants/character/types';
-import { PRODUCT_TYPE_TO_PART_KEY } from '@/constants/market';
+import { isPartProduct, PRODUCT_TYPE_TO_PART_KEY } from '@/constants/market';
 import { useCharacterConfig } from '@/hooks/character/useCharacterConfig';
 import { useEquipCharacter } from '@/hooks/equipment/useEquipCharacter';
 import { useProducts } from '@/hooks/product/useProducts';
@@ -215,6 +215,7 @@ export default function CharacterCustomizer({
   // 기본 파츠는 상품이 아니라 목록에 없어 잠기지 않는다. 목록을 못 받으면 잠그지 않는다.
   const lockedIds = new Set(
     (products ?? [])
+      .filter(isPartProduct)
       .filter((product) => PRODUCT_TYPE_TO_PART_KEY[product.product_type] === category.group)
       .map((product) => toPartId(product.product_id)),
   );

@@ -1,7 +1,7 @@
 import { DEFAULT_CHARACTER_CONFIG, resolveLayerSource } from '@/constants/character/assets';
 import { toPartId } from '@/constants/character/legacyIds';
 import type { CharacterConfig, LayerDef, PartConfigKey } from '@/constants/character/types';
-import type { Product, ProductType } from '@/types/product';
+import type { GashaponDrawItem, PartProduct, Product, ProductType } from '@/types/product';
 
 export const SHOP_SECTIONS = ['상점', '뽑기'] as const;
 export type ShopSection = (typeof SHOP_SECTIONS)[number];
@@ -52,8 +52,12 @@ export const CATEGORY_TO_PRODUCT_TYPE: Record<ShopCategory, ProductType> = {
   코스튬: 'clothing',
 };
 
+export function isPartProduct(product: Product): product is PartProduct {
+  return product.product_type !== 'gashapon';
+}
+
 /** 그리드 썸네일은 기본 캐릭터에 이 파츠 하나만 얹어 만든다(수정사항 누적 X). */
-export function toMarketItem(product: Product): MarketItem {
+export function toMarketItem(product: PartProduct): MarketItem {
   const group = PRODUCT_TYPE_TO_PART_KEY[product.product_type];
   const layer = Object.values(CATEGORY_PARTS).find((part) => part.group === group)?.layer ?? {
     group,
@@ -78,41 +82,28 @@ export function toMarketItem(product: Product): MarketItem {
 
 // ──────────────────────────── 뽑기 (가챠) ────────────────────────────
 
-export const GOTCHA_COSTS = {
-  single: 500,
-  multi: 2500,
-} as const;
-
-/** id는 캐릭터 파츠 에셋 id와 동일하다. */
-export interface GotchaItem {
-  id: string;
-  name: string;
-  part: 'clothing' | 'accessory';
-}
+/** 서버 `GashaponService`가 이 id로 뽑는 횟수를 정한다. 가격은 상품 목록에서 읽는다. */
+export const GASHAPON_OPTIONS = [
+  { productId: 'gashapon_1set', label: '1회 뽑기' },
+  { productId: 'gashapon_5set', label: '5회 뽑기' },
+] as const;
 
 export interface GotchaPull {
-  item: GotchaItem;
+  name: string;
+  duplicate: boolean;
+  message: string;
   preview: CharacterConfig;
 }
 
-// TODO: 서버 연동 시 아이템 풀/확률은 API 응답으로 대체
-const GOTCHA_ITEM_POOL: GotchaItem[] = [
-  { id: 'clothing-01', name: '베이직 티셔츠', part: 'clothing' },
-  { id: 'clothing-02', name: '스트라이프 셔츠', part: 'clothing' },
-  { id: 'clothing-03', name: '체크 남방', part: 'clothing' },
-  { id: 'clothing-04', name: '후드 집업', part: 'clothing' },
-  { id: 'accessory-red-glasses', name: '빨간 안경', part: 'accessory' },
-];
-
-function pullOne(): GotchaPull {
-  const item = GOTCHA_ITEM_POOL[Math.floor(Math.random() * GOTCHA_ITEM_POOL.length)];
+export function toGotchaPull(item: GashaponDrawItem): GotchaPull {
   return {
-    item,
+    name: item.product_name,
+    duplicate: item.duplicate,
+    message: item.message,
     // TODO: 유저의 실제 캐릭터 config를 받아오면 그걸 기반으로 교체
-    preview: { ...DEFAULT_CHARACTER_CONFIG, [item.part]: item.id },
+    preview: {
+      ...DEFAULT_CHARACTER_CONFIG,
+      [PRODUCT_TYPE_TO_PART_KEY[item.product_type]]: toPartId(item.product_id),
+    },
   };
-}
-
-export function pullGotcha(count: 1 | 5): GotchaPull[] {
-  return Array.from({ length: count }, pullOne);
 }

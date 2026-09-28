@@ -15,6 +15,9 @@ export const PRODUCT_TYPES = [
 ] as const;
 export type ProductType = (typeof PRODUCT_TYPES)[number];
 
+/** 뽑기권도 상품 목록에 섞여 온다. 파츠가 아니라 `PRODUCT_TYPES`에는 넣지 않는다. */
+export type ShopProductType = ProductType | 'gashapon';
+
 /** 이미 보유한 상품은 서버가 걸러서 내려준다. */
 export interface Product {
   /**
@@ -27,9 +30,12 @@ export interface Product {
   price: number;
   /** S3 key인지 완성된 URL인지 서버가 강제하지 않는다 — 시드 데이터로 확인 필요. */
   product_image: string;
-  product_type: ProductType;
+  product_type: ShopProductType;
   product_description?: string;
 }
+
+/** 뽑기권을 걸러 낸 파츠 상품. `isPartProduct`(`src/constants/market.ts`)로 좁힌다. */
+export type PartProduct = Product & { product_type: ProductType };
 
 /** 배열 키가 `products`가 아니라 `product`다. */
 export interface ProductListData {
@@ -40,4 +46,25 @@ export type ProductListResponse = ApiResponse<ProductListData>;
 
 export interface PurchaseProductRequest {
   product_id: string;
+}
+
+/** 뽑기권 상품 id. 서버가 이 id별 뽑는 횟수를 하드코딩해 두고, 가격은 상품 목록의 값을 쓴다. */
+export interface DrawGashaponRequest {
+  product_id: string;
+}
+
+/** 뽑기 풀은 뽑기권을 뺀 모든 활성 상품이라 코스튬·악세서리 외 파츠도 나온다. */
+export interface GashaponDrawItem {
+  product_id: string;
+  product_name: string;
+  product_image: string;
+  product_type: ProductType;
+  /** 이미 보유한 상품이면 true. 인벤토리에 추가되지 않고 포인트 환급도 없다. */
+  duplicate: boolean;
+  message: string;
+}
+
+/** 5회 뽑기면 5개. 같은 요청 안에서 겹친 두 번째부터는 `duplicate`다. */
+export interface GashaponDrawData {
+  results: GashaponDrawItem[];
 }
