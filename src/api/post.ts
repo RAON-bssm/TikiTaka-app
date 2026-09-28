@@ -5,7 +5,7 @@ import type {
   Board,
   BoardListData,
   CreatePostRequest,
-  CreatePostResponse,
+  CreatePostData,
   DeletePostResponse,
   LikePostResponse,
   MyPost,
@@ -58,8 +58,12 @@ export async function getPostDetail(postId: string): Promise<PostDetail> {
   return data.data;
 }
 
-/** 서버가 post_id를 돌려주지 않으므로, 필요하면 목록을 다시 받아야 한다. */
-export async function createPost({ board_id, fileUri, content }: CreatePostRequest): Promise<void> {
+/** 생성된 게시물의 post_id를 돌려준다. */
+export async function createPost({
+  board_id,
+  fileUri,
+  content,
+}: CreatePostRequest): Promise<string> {
   const compressedUri = await compressImageForUpload(fileUri);
   const fileName = compressedUri.split('/').pop() ?? `photo-${Date.now()}.jpg`;
 
@@ -75,9 +79,10 @@ export async function createPost({ board_id, fileUri, content }: CreatePostReque
 
   // Content-Type을 'multipart/form-data'로 박으면 boundary가 빠져 400이 난다.
   // undefined로 기본값(application/json)을 해제해 RN이 boundary 포함 헤더를 만들게 한다.
-  await client.post<CreatePostResponse>(`/api/post`, formData, {
+  const { data } = await client.post<ApiResponse<CreatePostData>>(`/api/post`, formData, {
     headers: { 'Content-Type': undefined },
   });
+  return data.data.post_id;
 }
 
 export async function updatePost(postId: string, req: UpdatePostRequest): Promise<void> {

@@ -43,12 +43,7 @@ export default function Upload() {
       {
         onSuccess: (postId) => {
           showToast('게시물이 등록됐어요');
-          // 서버가 id를 주지 않으면 상세로 갈 수 없어 이전 화면으로 돌아간다.
-          if (postId) {
-            router.replace({ pathname: '/feed/[post_id]', params: { post_id: postId } });
-          } else {
-            router.back();
-          }
+          router.replace({ pathname: '/feed/[post_id]', params: { post_id: postId } });
         },
         onError: (error) =>
           showToast(getApiErrorMessage(error, '업로드에 실패했어요. 다시 시도해주세요.')),

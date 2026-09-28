@@ -108,11 +108,10 @@ export interface UpdatePostRequest {
   content: string;
 }
 
-/**
- * 생성된 post_id를 돌려주지 않는다.
- * 실패: 400 이미지 오류·AI 점수 실패, 404 종료된 라운드·내 동네 아님, 413 용량 초과.
- */
-export type CreatePostResponse = EmptyResponse;
+/** 실패: 400 이미지 오류·AI 점수 실패, 404 종료된 라운드·내 동네 아님, 413 용량 초과. */
+export interface CreatePostData {
+  post_id: string;
+}
 
 /**
  * 본문만 바뀐다. 이미지는 수정할 수 없고 AI 점수도 재심사하지 않는다.
