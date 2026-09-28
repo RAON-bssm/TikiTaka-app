@@ -7,7 +7,7 @@ export async function getEquipment(): Promise<Equipment> {
   return data.data;
 }
 
-/** 본인 여부와 무관하게 조회된다. 없는 user_id는 404가 아니라 500이다. */
+/** 본인 여부와 무관하게 조회된다. 없는 user_id는 404다. */
 export async function getUserEquipment(userId: string): Promise<Equipment> {
   const { data } = await client.get<ApiResponse<Equipment>>(`/api/equipment/${userId}`);
   return data.data;

@@ -49,9 +49,8 @@ export interface PostListData {
 export type PostListResponse = ApiResponse<PostListData>;
 
 /**
- * `GET /api/user/me/posts`(마이페이지 게시물 보관함). 항상 본인 글이라 `user_id`·`user_name`이 없고,
- * `like_count`도 없다(필요하면 상세를 따로 부른다). 라운드를 넘나드는 목록이라 그 글이 속했던
- * 게시판·매치 정보가 붙는다. 삭제된 글은 빠지고 최신순이다.
+ * `GET /api/user/me/posts`(마이페이지 게시물 보관함). 항상 본인 글이라 `user_id`·`user_name`이 없다.
+ * 라운드를 넘나드는 목록이라 그 글이 속했던 게시판·매치 정보가 붙는다. 삭제된 글은 빠지고 최신순이다.
  */
 export interface MyPost {
   post_id: string;
@@ -70,6 +69,8 @@ export interface MyPost {
   match_type: string;
   season: number;
   round: number;
+  like_count: number;
+  liked_by_me: boolean;
 }
 
 export interface MyPostListData {

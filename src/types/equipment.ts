@@ -26,8 +26,7 @@ export type EquipmentResponse = ApiResponse<Equipment>;
 
 /**
  * 넘긴 슬롯만 교체되고 생략한 슬롯은 유지된다 — 이 API로는 벗을 수 없다.
- * 미보유 product_id는 404가 아니라 500(서버 예외 미매핑), 슬롯·상품 타입 불일치 400.
- * 성공 시 바디 `status`는 204지만 HTTP 상태는 200이다.
+ * 실패: 404 미보유 product_id, 400 슬롯·상품 타입 불일치. 성공은 HTTP 204(바디 없음)다.
  */
 export interface EquipRequest {
   body?: string;

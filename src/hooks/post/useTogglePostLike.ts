@@ -25,7 +25,6 @@ export function useTogglePostLike(postId: string) {
     onMutate: async (liked) => {
       await queryClient.cancelQueries({ queryKey: postKeys.all });
       const previousDetail = queryClient.getQueryData<PostDetail>(detailKey);
-      // 내 게시물 목록(`mine`)도 lists() 아래지만 좋아요 필드가 없어 건드리지 않는다.
       const previousLists = queryClient.getQueriesData<Post[] | MyPost[]>({
         queryKey: postKeys.lists(),
       });
@@ -35,9 +34,7 @@ export function useTogglePostLike(postId: string) {
         if (!posts) continue;
         queryClient.setQueryData(
           key,
-          posts.map((post) =>
-            post.post_id === postId && 'liked_by_me' in post ? applyLike(post, liked) : post,
-          ),
+          posts.map((post) => (post.post_id === postId ? applyLike(post, liked) : post)),
         );
       }
       return { previousDetail, previousLists };
