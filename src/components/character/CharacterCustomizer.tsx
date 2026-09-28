@@ -216,7 +216,7 @@ export default function CharacterCustomizer({
   const lockedIds = new Set(
     (products ?? [])
       .filter((product) => PRODUCT_TYPE_TO_PART_KEY[product.product_type] === category.group)
-      .map((product) => toPartId(product.product_name)),
+      .map((product) => toPartId(product.product_id)),
   );
 
   const handleSelect = (next: CharacterConfig) => setDraft(next);

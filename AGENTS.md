@@ -161,7 +161,7 @@
 
 ### 7.6 상점 아이템 ↔ 파츠 연결
 
-- 서버와 **`product_name` = 파츠 에셋 id**(예: `"hair-back-bob"`)로 맞추기로 합의되어 있습니다. `toMarketItem`(`src/constants/market.ts`)이 이 값을 `assetId`로 옮겨 착용·썸네일에 씁니다.
+- 서버와 **`product_id`(문자열) = 파츠 에셋 id**(예: `"hair-back-bob"`)로 맞추기로 합의되어 있습니다. `toMarketItem`(`src/constants/market.ts`)이 이 값을 `assetId`로 옮겨 착용·썸네일에 씁니다. `product_name`은 화면 표시용 한글 이름이라 매핑에 쓰지 않습니다.
 - 서버에 `종류-이름` 이전의 옛 id(`"bob"` 등)가 남아 있을 수 있어, 서버 값과 기기 저장본은 `toPartId`(`src/constants/character/legacyIds.ts`)로 새 id로 바꿔 읽습니다. 서버 시드가 새 id로 바뀌면 이 파일은 지웁니다.
 - 레지스트리에 없는 id가 오면 에러 없이 썸네일만 비어 보입니다. 상품이 추가되면 같은 id의 에셋이 `assets.ts`에 있는지 확인하세요.
 - 서버 `product_type`은 snake_case(`hair_back`)이고, `PRODUCT_TYPE_TO_PART_KEY`로 `CharacterConfig` 키(`hairBack`)로 바꿉니다.

@@ -1,15 +1,16 @@
 import type { ApiResponse } from './api';
 
 export interface EquipmentItem {
-  product_id: number;
+  /** 파츠 에셋 id. (`Product.product_id` 참고) */
+  product_id: string;
   product_name: string;
   product_image: string;
 }
 
 /**
  * `GET /api/equipment`(내 장비)와 `GET /api/equipment/{user_id}`(남의 장비)가 같은 형태다.
- * 착용하지 않은 슬롯은 키가 빠진다. 서버엔 색상 개념이 없어 `CharacterConfig`로 바꾸려면
- * product_id → 파츠 id 매핑이 클라이언트에 있어야 한다.
+ * 착용하지 않은 슬롯은 키가 빠진다. 서버엔 색상 개념이 없어 `CharacterConfig`로 바꾸면
+ * 모양만 product_id(= 파츠 에셋 id)로 복원된다.
  */
 export interface Equipment {
   body?: EquipmentItem;
@@ -29,11 +30,11 @@ export type EquipmentResponse = ApiResponse<Equipment>;
  * 성공 시 바디 `status`는 204지만 HTTP 상태는 200이다.
  */
 export interface EquipRequest {
-  body?: number;
-  accessory?: number;
-  clothing?: number;
-  eyes?: number;
-  hair_front?: number;
-  hair_back?: number;
-  mouth?: number;
+  body?: string;
+  accessory?: string;
+  clothing?: string;
+  eyes?: string;
+  hair_front?: string;
+  hair_back?: string;
+  mouth?: string;
 }

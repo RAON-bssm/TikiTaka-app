@@ -10,7 +10,7 @@ export function equipmentToConfig(equipment: Equipment, base: CharacterConfig): 
   const next = { ...base };
   for (const type of PRODUCT_TYPES) {
     const item = equipment[type];
-    if (item) next[PRODUCT_TYPE_TO_PART_KEY[type]] = toPartId(item.product_name);
+    if (item) next[PRODUCT_TYPE_TO_PART_KEY[type]] = toPartId(item.product_id);
   }
   return next;
 }
@@ -26,7 +26,7 @@ export function configToEquipRequest(
   const req: EquipRequest = {};
   for (const item of inventory) {
     if (item.is_active) continue;
-    if (config[PRODUCT_TYPE_TO_PART_KEY[item.type]] === toPartId(item.product_name)) {
+    if (config[PRODUCT_TYPE_TO_PART_KEY[item.type]] === toPartId(item.product_id)) {
       req[item.type] = item.product_id;
     }
   }

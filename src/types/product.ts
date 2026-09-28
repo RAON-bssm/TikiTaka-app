@@ -17,11 +17,12 @@ export type ProductType = (typeof PRODUCT_TYPES)[number];
 
 /** 이미 보유한 상품은 서버가 걸러서 내려준다. */
 export interface Product {
-  product_id: number;
   /**
-   * 표시 이름이자 클라이언트 파츠 에셋 id(예: `"hair-back-bob"`) — 서버와 같게 내려주기로 합의했다.
+   * 숫자가 아니라 클라이언트 파츠 에셋 id(예: `"hair-back-bob"`)다 — 서버와 같게 내려주기로 합의했다.
    * `assets.ts` 레지스트리에 없으면 에러 없이 썸네일만 비므로, 계약이 바뀌면 `toMarketItem`의 `assetId`를 먼저 고칠 것.
    */
+  product_id: string;
+  /** 화면 표시용 한글 이름(`"빨간 안경"`). 에셋 매핑에 쓰지 말 것. */
   product_name: string;
   price: number;
   /** S3 key인지 완성된 URL인지 서버가 강제하지 않는다 — 시드 데이터로 확인 필요. */
@@ -38,5 +39,5 @@ export interface ProductListData {
 export type ProductListResponse = ApiResponse<ProductListData>;
 
 export interface PurchaseProductRequest {
-  product_id: number;
+  product_id: string;
 }

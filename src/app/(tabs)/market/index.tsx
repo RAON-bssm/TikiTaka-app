@@ -45,7 +45,7 @@ export default function MarketScreen() {
     if (!selectedItem || isPending) return;
 
     purchaseProduct(
-      { product_id: Number(selectedItem.id) },
+      { product_id: selectedItem.id },
       {
         onSuccess: () => {
           showToast('구매가 완료됐어요');

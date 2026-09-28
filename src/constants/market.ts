@@ -11,7 +11,7 @@ export type ShopCategory = (typeof SHOP_CATEGORIES)[number];
 
 /** 서버 `Product`를 화면용으로 다듬은 상점 아이템. */
 export interface MarketItem {
-  /** product_id 문자열화. */
+  /** 서버 product_id. `assetId`와 값은 같지만 서버에 보낼 때는 이 값을 쓴다. */
   id: string;
   group: PartConfigKey;
   /**
@@ -58,16 +58,15 @@ export function toMarketItem(product: Product): MarketItem {
   const layer = Object.values(CATEGORY_PARTS).find((part) => part.group === group)?.layer ?? {
     group,
   };
-  // 서버가 product_name을 에셋 id와 동일하게 내려주기로 한 계약에 기댄다.
-  // 별도 에셋 필드가 생기면 이 줄만 바꾸면 된다.
-  const assetId = toPartId(product.product_name);
+  // 서버가 product_id를 에셋 id와 동일하게 내려주기로 한 계약에 기댄다.
+  const assetId = toPartId(product.product_id);
   const previewConfig: CharacterConfig = {
     ...DEFAULT_CHARACTER_CONFIG,
     [group]: assetId,
   };
 
   return {
-    id: String(product.product_id),
+    id: product.product_id,
     group,
     assetId,
     name: product.product_name,
