@@ -27,6 +27,7 @@ export interface Product {
   /** S3 key인지 완성된 URL인지 서버가 강제하지 않는다 — 시드 데이터로 확인 필요. */
   product_image: string;
   product_type: ProductType;
+  product_description?: string;
 }
 
 /** 배열 키가 `products`가 아니라 `product`다. */

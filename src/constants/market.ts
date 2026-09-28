@@ -20,7 +20,7 @@ export interface MarketItem {
    */
   assetId: string;
   name: string;
-  description: string;
+  description?: string;
   price: number;
   /** 매핑된 에셋이 없으면 undefined. */
   gridSource: number | undefined;
@@ -52,9 +52,6 @@ export const CATEGORY_TO_PRODUCT_TYPE: Record<ShopCategory, ProductType> = {
   코스튬: 'clothing',
 };
 
-// TODO: 서버가 설명 필드를 주지 않아 임시 공통 문구. 필드가 추가되면 대체
-const ITEM_DESCRIPTION = '아이템 간단한 설명 아이템 간단한 설명';
-
 /** 그리드 썸네일은 기본 캐릭터에 이 파츠 하나만 얹어 만든다(수정사항 누적 X). */
 export function toMarketItem(product: Product): MarketItem {
   const group = PRODUCT_TYPE_TO_PART_KEY[product.product_type];
@@ -74,7 +71,7 @@ export function toMarketItem(product: Product): MarketItem {
     group,
     assetId,
     name: product.product_name,
-    description: ITEM_DESCRIPTION,
+    description: product.product_description,
     price: product.price,
     gridSource: resolveLayerSource(previewConfig, layer),
   };
