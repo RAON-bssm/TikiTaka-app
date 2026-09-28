@@ -55,6 +55,8 @@ export default function MyPostList() {
           title={post.content}
           place={post.location}
           timeAgo={formatRelativeTime(post.created_at)}
+          likeCount={post.like_count}
+          liked={post.liked_by_me}
           menuItems={[
             {
               label: '수정하기',
