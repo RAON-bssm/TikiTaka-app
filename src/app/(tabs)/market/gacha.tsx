@@ -4,12 +4,12 @@ import { Image as RNImage, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import Gotcha from '@/components/market/gotcha/Gotcha';
+import MyPointBadge from '@/components/market/MyPointBadge';
 import PullButton from '@/components/market/gotcha/PullButton';
 import ShopTabs from '@/components/market/ShopTabs';
 import Header from '@/components/ui/Header';
-import PointBadge from '@/components/ui/PointBadge';
 import Typography from '@/components/ui/Typography';
-import { GOTCHA_COSTS, pullGotcha, USER_POINT, type GotchaPull } from '@/constants/market';
+import { GOTCHA_COSTS, pullGotcha, type GotchaPull } from '@/constants/market';
 
 const MACHINE = require('@/assets/icons/gotcha.webp');
 const { width, height } = RNImage.resolveAssetSource(MACHINE);
@@ -44,7 +44,7 @@ export default function GachaScreen() {
 
         <View className="w-full flex-row items-center justify-between">
           <ShopTabs />
-          <PointBadge point={USER_POINT} />
+          <MyPointBadge />
         </View>
 
         <View className="flex-1">

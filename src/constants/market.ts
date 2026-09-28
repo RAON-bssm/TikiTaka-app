@@ -52,9 +52,6 @@ export const CATEGORY_TO_PRODUCT_TYPE: Record<ShopCategory, ProductType> = {
   코스튬: 'clothing',
 };
 
-// TODO: 서버 연동 시 내 포인트 조회를 TanStack Query로 대체
-export const USER_POINT = 99999;
-
 // TODO: 서버가 설명 필드를 주지 않아 임시 공통 문구. 필드가 추가되면 대체
 const ITEM_DESCRIPTION = '아이템 간단한 설명 아이템 간단한 설명';
 

@@ -5,7 +5,7 @@ import Dropdown from '@/components/ui/input/Dropdown';
 import TextInput from '@/components/ui/input/TextInput';
 import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
-import { useBoards } from '@/hooks/post/useBoards';
+import { useMyBoard } from '@/hooks/post/useMyBoard';
 import { useUploadPost } from '@/hooks/post/useUploadPost';
 import useImageRatio from '@/hooks/useImageRatio';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -22,10 +22,7 @@ export default function Upload() {
   const { showToast } = useToast();
   const { mutate: uploadPost, isPending } = useUploadPost();
 
-  // TODO: 실제 미션 선택 UI와 연결. 지금은 게시판 목록의 첫 항목(현재 게시판)에 올린다.
-  const { data: boards } = useBoards();
-  const currentBoard = boards?.[0];
-  const boardId = currentBoard?.board_id;
+  const { data: myBoard, isLoading: isBoardLoading } = useMyBoard();
 
   const handleUpload = () => {
     if (isPending) return;
@@ -33,13 +30,17 @@ export default function Upload() {
       showToast('사진을 불러올 수 없어요.');
       return;
     }
-    if (boardId == null) {
+    if (isBoardLoading) {
       showToast('게시판 정보를 불러오는 중이에요.');
+      return;
+    }
+    if (!myBoard) {
+      showToast('지금 참여 중인 매치가 없어 올릴 수 없어요.');
       return;
     }
 
     uploadPost(
-      { fileUri: uri, boardId, content },
+      { fileUri: uri, boardId: myBoard.board_id, content },
       {
         onSuccess: (postId) => {
           showToast('게시물이 등록됐어요');
@@ -65,7 +66,7 @@ export default function Upload() {
         bottomOffset={16}
         keyboardShouldPersistTaps="handled"
       >
-        <Topic title={currentBoard?.mission ?? ''} />
+        <Topic title={myBoard?.mission ?? ''} />
 
         {uri && photoRatio ? (
           <Image
