@@ -301,3 +301,14 @@ export async function getBoards(): Promise<Board[]> {
 - 토큰 없이 부르는 공개 엔드포인트(예: 가입 화면의 `/api/location`)는 `client.ts`의 공개 경로 목록에 추가해 재발급 흐름에서 제외합니다.
 - `signup_token`은 메모리에만 둡니다(만료 10분). SecureStore나 라우터 파라미터로 옮기지 마세요. 파라미터로 넘기면 URL/딥링크에 노출됩니다.
 - 로그아웃 시에는 서버 호출 성공 여부와 상관없이 로컬 토큰, 쿼리 캐시, 카카오 SDK 세션을 모두 정리합니다(`useLogout`).
+
+---
+
+## 12. 지도 (Map)
+
+관련 코드: `src/app/(tabs)/map/index.tsx`, `src/hooks/map/useMapBridge.ts`, `src/types/mapBridge.ts`. 지도 화면은 웹 레포(`TikiTaka-webview`)의 카카오맵 페이지를 WebView로 띄웁니다. 브리지 타입은 웹 레포의 `src/bridge/bridge.ts`와 함께 바꿉니다.
+
+- **지도 탭은 Android에서만 미리 마운트합니다**(`(tabs)/_layout.tsx`의 `lazy: Platform.OS === 'ios'`). 1장 플랫폼 일치 원칙의 예외이며, 화면과 동작은 같고 로드 시점만 다릅니다.
+  - 측정(앱 완전 종료 후 재실행, 탭 진입 → 지도 표시 대기): Android 약 924ms → 약 75ms, iOS 약 736ms → 약 791ms(효과 없음).
+  - 숨겨진 탭은 뷰 계층에서 떼어져 WebView가 보이지 않는 상태가 됩니다. Android(Chromium)는 그리기만 멈추고 JS·네트워크는 계속 돌아 SDK·타일 로드를 미리 끝내지만, iOS(WebKit)는 보이지 않는 페이지의 타이머·`requestAnimationFrame`을 멈춰 로드 체인(SDK → `ready` → `init` → 지도 생성 → 타일)이 진행되지 않는 것으로 보입니다(추정, 단계별 로그로는 미확인).
+  - Android는 지도 탭을 열지 않아도 앱 실행마다 WebView 메모리·네트워크를 쓰고 카카오맵 호출량이 늘어납니다. iOS까지 켜려면 먼저 숨겨진 상태에서 로드가 끝나는지 측정하세요.
