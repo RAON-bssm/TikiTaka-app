@@ -1,18 +1,16 @@
-import FavoriteIcon from '@/assets/icons/favorite.svg';
-import { useState } from 'react';
-import { Pressable, View } from 'react-native';
-import { palette } from '@/constants/colors';
+import { View } from 'react-native';
+import LikeButton from './LikeButton';
 import Typography from '../ui/Typography';
 
 interface Props {
+  postId: string;
   authorName: string;
   title: string;
   likeCount: number;
+  liked: boolean;
 }
 
-export default function PostTitleRow({ authorName, title, likeCount }: Props) {
-  const [liked, setLiked] = useState(false);
-
+export default function PostTitleRow({ postId, authorName, title, likeCount, liked }: Props) {
   return (
     <View className="flex flex-row items-center justify-between">
       <View className="flex flex-row items-center gap-xs">
@@ -26,19 +24,13 @@ export default function PostTitleRow({ authorName, title, likeCount }: Props) {
           {title}
         </Typography>
       </View>
-      <Pressable
-        onPress={() => setLiked((prev) => !prev)}
-        className="flex flex-row items-center gap-xs active:opacity-70"
-      >
-        <FavoriteIcon
-          width={20}
-          height={20}
-          color={liked ? palette.primary[600] : palette.gray[400]}
-        />
-        <Typography variant="body3" className="text-gray-600">
-          {likeCount + (liked ? 1 : 0)}
-        </Typography>
-      </Pressable>
+      <LikeButton
+        postId={postId}
+        likeCount={likeCount}
+        liked={liked}
+        className="flex flex-row items-center"
+        textClassName="text-gray-600"
+      />
     </View>
   );
 }

@@ -59,7 +59,6 @@ export default function PostList({ state, limit }: Props) {
 
   return (
     <View className="flex flex-col gap-md">
-      {/* TODO: 백엔드 Post 모델에 like_count 필드 추가 시 매핑 보강 */}
       {state.posts.slice(0, limit).map((post) => (
         <FeedCard
           key={post.post_id}
@@ -69,7 +68,7 @@ export default function PostList({ state, limit }: Props) {
           title={post.content}
           place={post.location}
           timeAgo={formatRelativeTime(post.created_at)}
-          likeCount={0}
+          likeCount={post.like_count}
           menuItems={
             post.user_id === myInfo?.user_id
               ? [

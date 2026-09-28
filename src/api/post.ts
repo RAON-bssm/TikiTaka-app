@@ -7,6 +7,7 @@ import type {
   CreatePostRequest,
   CreatePostResponse,
   DeletePostResponse,
+  LikePostResponse,
   Post,
   PostDetail,
   PostListData,
@@ -82,4 +83,12 @@ export async function updatePost(postId: string, req: UpdatePostRequest): Promis
 
 export async function deletePost(postId: string): Promise<void> {
   await client.patch<DeletePostResponse>(`/api/post/delete/${postId}`);
+}
+
+export async function likePost(postId: string): Promise<void> {
+  await client.post<LikePostResponse>(`/api/post/${postId}/like`);
+}
+
+export async function unlikePost(postId: string): Promise<void> {
+  await client.delete<LikePostResponse>(`/api/post/${postId}/like`);
 }

@@ -1,10 +1,9 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
 import { ActivityIndicator, Image, Pressable, View } from 'react-native';
 
-import FavoriteIcon from '@/assets/icons/favorite.svg';
 import PlaceIcon from '@/assets/icons/place.svg';
 import Character from '@/components/character/Character';
+import LikeButton from '@/components/feed/LikeButton';
 import UserCharacter from '@/components/character/UserCharacter';
 import MoreMenu, { type MoreMenuItem } from '@/components/ui/MoreMenu';
 import Typography from '@/components/ui/Typography';
@@ -13,7 +12,6 @@ import { palette } from '@/constants/colors';
 import { useViewUrl } from '@/hooks/storage/useViewUrl';
 
 const COLOR_GRAY = palette.gray[400];
-const COLOR_PRIMARY = palette.primary[600];
 
 export interface FeedAuthor {
   name: string;
@@ -30,7 +28,6 @@ interface Props {
   timeAgo: string;
   likeCount: number;
   menuItems?: MoreMenuItem[];
-  onPressLike?: () => void;
 }
 
 export default function FeedCard({
@@ -42,9 +39,7 @@ export default function FeedCard({
   timeAgo,
   likeCount,
   menuItems,
-  onPressLike,
 }: Props) {
-  const [liked, setLiked] = useState(false);
   // imageUrl은 이미지 key라 조회 URL로 변환해야 한다.
   const { uri: resolvedImageUri, isLoading: imageLoading } = useViewUrl(imageUrl);
 
@@ -96,18 +91,12 @@ export default function FeedCard({
           </View>
         </View>
 
-        <Pressable
-          onPress={() => {
-            setLiked((prev) => !prev);
-            onPressLike?.();
-          }}
-          className="items-center justify-center gap-xs active:opacity-70"
-        >
-          <FavoriteIcon width={20} height={20} color={liked ? COLOR_PRIMARY : COLOR_GRAY} />
-          <Typography variant="body3" className="text-gray-700">
-            {likeCount + (liked ? 1 : 0)}
-          </Typography>
-        </Pressable>
+        <LikeButton
+          postId={postId}
+          likeCount={likeCount}
+          className="items-center justify-center"
+          textClassName="text-gray-700"
+        />
       </View>
     </Pressable>
   );

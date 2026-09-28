@@ -74,9 +74,11 @@ export default function PostDetailScreen() {
             </View>
 
             <PostTitleRow
+              postId={post_id}
               authorName={post.user_name}
               title={post.content}
               likeCount={post.like_count}
+              liked={post.liked_by_me}
             />
 
             {scoreRevealed ? (

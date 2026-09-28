@@ -33,6 +33,7 @@ export interface Post {
   user_name: string;
   post_image: string;
   score: number;
+  like_count: number;
   created_at: DateTimeString;
   updated_at: DateTimeString;
   content: string;
@@ -46,7 +47,7 @@ export interface PostListData {
 
 export type PostListResponse = ApiResponse<PostListData>;
 
-/** 없거나 삭제된 글이면 404. 목록용 Post와 달리 post_id가 없다. `like_count`는 좋아요 기능이 없어 서버가 항상 0을 넣는다. */
+/** 없거나 삭제된 글이면 404. 목록용 Post와 달리 post_id가 없고, `liked_by_me`는 상세에만 있다. */
 export interface PostDetail {
   user_id: string;
   user_name: string;
@@ -57,6 +58,7 @@ export interface PostDetail {
   city_name: string;
   location: string;
   like_count: number;
+  liked_by_me: boolean;
   created_at: DateTimeString;
   updated_at: DateTimeString;
 }
@@ -86,6 +88,12 @@ export type CreatePostResponse = EmptyResponse;
  * 실패: 403 남의 게시물, 404 없는 게시물.
  */
 export type UpdatePostResponse = EmptyResponse;
+
+/**
+ * 좋아요 `POST`, 취소 `DELETE /api/post/{postId}/like`. 둘 다 idempotent라 이미 그 상태여도 성공이다.
+ * 좋아요 수는 주지 않아 목록·상세를 다시 받아야 한다. 없거나 삭제된 글이면 404.
+ */
+export type LikePostResponse = EmptyResponse;
 
 /**
  * `PATCH /api/post/delete/{postId}`(DELETE 아님). 소프트 삭제이며 동네·개인 점수를 차감하므로
