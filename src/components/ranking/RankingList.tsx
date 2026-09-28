@@ -1,11 +1,10 @@
 import { View } from 'react-native';
 
-import Character from '@/components/character/Character';
+import UserCharacter from '@/components/character/UserCharacter';
 import RankingEmptyState from '@/components/ranking/RankingEmptyState';
 import Ranking from '@/components/ui/Ranking';
 import { formatLocationName } from '@/constants/location';
 import type { RankingTab } from '@/constants/ranking';
-import { pickRankingCharacter } from '@/constants/ranking';
 import type { LocationRanking, UserRanking } from '@/types/ranking';
 
 interface Props {
@@ -14,7 +13,6 @@ interface Props {
   persons: UserRanking[];
 }
 
-/** 서버가 개인랭킹 아바타를 주지 않아, user_id 시드로 항상 같은 캐릭터를 고른다. */
 export default function RankingList({ tab, districts, persons }: Props) {
   const rows = tab === '동네랭킹' ? districts : persons;
 
@@ -43,7 +41,7 @@ export default function RankingList({ tab, districts, persons }: Props) {
               number={item.user_rank}
               location={item.user_name}
               count={item.user_score}
-              avatar={<Character config={pickRankingCharacter(item.user_id)} size={50} />}
+              avatar={<UserCharacter userId={item.user_id} size={50} />}
             />
           ))}
     </View>

@@ -63,4 +63,5 @@ export const inventoryKeys = {
 export const equipmentKeys = {
   all: ['equipment'] as const,
   current: () => [...equipmentKeys.all, 'current'] as const,
+  user: (userId: string) => [...equipmentKeys.all, 'user', userId] as const,
 };

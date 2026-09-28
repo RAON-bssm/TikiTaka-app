@@ -15,7 +15,6 @@ import PostTitleRow from '@/components/feed/PostTitleRow';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Header from '@/components/ui/Header';
 import { palette } from '@/constants/colors';
-import { pickRankingCharacter } from '@/constants/ranking';
 import { usePostDetail } from '@/hooks/post/usePostDetail';
 import { useMyInfo } from '@/hooks/user/useMyInfo';
 
@@ -51,12 +50,11 @@ export default function PostDetailScreen() {
         ) : isError || !post ? (
           <ErrorRetry onRetry={refetch} />
         ) : (
-          // TODO: 백엔드 Post 모델에 avatar 필드 추가 시 캐릭터 매핑 보강
           <>
             <View className="flex flex-col gap-lg">
               <PostAuthor
                 name={post.user_name}
-                character={pickRankingCharacter(post_id)}
+                userId={post.user_id}
                 place={post.location}
                 createdAt={post.created_at}
                 menuItems={

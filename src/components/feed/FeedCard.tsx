@@ -5,10 +5,10 @@ import { ActivityIndicator, Image, Pressable, View } from 'react-native';
 import FavoriteIcon from '@/assets/icons/favorite.svg';
 import PlaceIcon from '@/assets/icons/place.svg';
 import Character from '@/components/character/Character';
+import UserCharacter from '@/components/character/UserCharacter';
 import MoreMenu, { type MoreMenuItem } from '@/components/ui/MoreMenu';
 import Typography from '@/components/ui/Typography';
 import { DEFAULT_CHARACTER_CONFIG } from '@/constants/character/assets';
-import type { CharacterConfig } from '@/constants/character/types';
 import { palette } from '@/constants/colors';
 import { useViewUrl } from '@/hooks/storage/useViewUrl';
 
@@ -18,7 +18,7 @@ const COLOR_PRIMARY = palette.primary[600];
 export interface FeedAuthor {
   name: string;
   /** 없으면 기본 캐릭터로 렌더한다. */
-  character?: CharacterConfig;
+  userId?: string;
 }
 
 interface Props {
@@ -55,7 +55,11 @@ export default function FeedCard({
     >
       <View className="w-full flex-row items-center justify-between">
         <View className="flex-row items-center gap-sm">
-          <Character config={author.character ?? DEFAULT_CHARACTER_CONFIG} size={40} />
+          {author.userId ? (
+            <UserCharacter userId={author.userId} size={40} />
+          ) : (
+            <Character config={DEFAULT_CHARACTER_CONFIG} size={40} />
+          )}
           <Typography variant="body2" className="text-gray-800">
             {author.name}
           </Typography>
