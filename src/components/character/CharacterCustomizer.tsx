@@ -222,11 +222,17 @@ export default function CharacterCustomizer({
 
   const handleSelect = (next: CharacterConfig) => setDraft(next);
 
-  const save = () => {
-    setConfig(config);
+  const save = async () => {
+    try {
+      await setConfig(config);
+    } catch {
+      showToast('캐릭터를 저장하지 못했어요. 다시 시도해주세요.');
+      return false;
+    }
     void equipCharacter(config);
     setDraft(undefined);
     showToast('캐릭터를 저장했어요');
+    return true;
   };
 
   const leave = () => {
@@ -261,9 +267,9 @@ export default function CharacterCustomizer({
         visible={!!pendingLeave}
         onCancel={() => setPendingLeave(undefined)}
         onDiscard={leave}
-        onSave={() => {
-          save();
-          leave();
+        onSave={async () => {
+          if (await save()) leave();
+          else setPendingLeave(undefined);
         }}
       />
     </View>

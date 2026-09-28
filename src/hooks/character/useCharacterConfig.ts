@@ -30,10 +30,10 @@ export function useCharacterConfig(fallback: CharacterConfig = DEFAULT_CHARACTER
     staleTime: Infinity,
   });
 
-  const setConfig = (next: CharacterConfig) => {
+  // 저장에 성공한 뒤에만 캐시를 바꾼다. 먼저 바꾸면 실패해도 저장된 것처럼 보이고 재시작 때 사라진다.
+  const setConfig = async (next: CharacterConfig) => {
+    await saveCharacter(next);
     queryClient.setQueryData(characterKeys.config(), next);
-    // 저장 실패해도 화면 상태는 유지되도록 fire-and-forget 한다.
-    void saveCharacter(next);
   };
 
   return { config: data ?? fallback, setConfig, isLoaded: !isLoading };

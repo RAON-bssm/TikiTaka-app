@@ -52,8 +52,10 @@ export default function MarketScreen() {
           // 구매한 아이템을 바로 착용시킨다. 저장본을 불러오기 전에 저장하면 기본 config로 덮어쓴다.
           if (isLoaded) {
             const next = { ...config, [selectedItem.group]: selectedItem.assetId };
-            setConfig(next);
-            void equipCharacter(next);
+            setConfig(next).then(
+              () => void equipCharacter(next),
+              () => {},
+            );
           }
           setPurchaseOpen(false);
         },
