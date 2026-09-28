@@ -1,7 +1,6 @@
 import { getApiErrorMessage } from '@/api/error';
 import Topic from '@/components/camera/Topic';
 import Button from '@/components/ui/Button';
-import Dropdown from '@/components/ui/input/Dropdown';
 import TextInput from '@/components/ui/input/TextInput';
 import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
@@ -85,19 +84,12 @@ export default function Upload() {
           </View>
         )}
 
-        <View className="flex flex-col gap-md">
-          <TextInput
-            label="미션 한마디"
-            placeholder="게시물을 표현하는 한마디를 작성해주세요"
-            value={content}
-            onChangeText={setContent}
-          />
-          <Dropdown
-            label="공개 범위"
-            placeholder="공개 범위를 선택해주세요"
-            options={['전체공개', '비공개']}
-          />
-        </View>
+        <TextInput
+          label="미션 한마디"
+          placeholder="게시물을 표현하는 한마디를 작성해주세요"
+          value={content}
+          onChangeText={setContent}
+        />
 
         <Button content={isPending ? '업로드 중...' : '게시물 업로드'} onclick={handleUpload} />
       </KeyboardAwareScrollView>
