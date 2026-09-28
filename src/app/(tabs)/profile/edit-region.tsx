@@ -9,17 +9,39 @@ import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
 import { useLocations } from '@/hooks/location/useLocations';
 import { useMyInfo } from '@/hooks/user/useMyInfo';
-import { useSetSubLocation } from '@/hooks/user/useSetSubLocation';
-import { router } from 'expo-router';
+import { useReserveLocationChange } from '@/hooks/user/useLocationChange';
+import { useMoveCurrentLocation } from '@/hooks/user/useMoveCurrentLocation';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+const COPY = {
+  current: {
+    title: '현재 지역 이동',
+    submit: '이동하기',
+    success: '현재 지역을 옮겼어요',
+    failure: '현재 지역을 옮기지 못했어요',
+  },
+  main: {
+    title: '본진 변경',
+    submit: '예약하기',
+    success: '다음 라운드부터 본진이 바뀌어요',
+    failure: '본진 변경을 예약하지 못했어요',
+  },
+} as const;
+
 export default function EditRegion() {
+  const { mode: modeParam } = useLocalSearchParams<{ mode?: string }>();
+  const mode = modeParam === 'main' ? 'main' : 'current';
+  const copy = COPY[mode];
+
   const { showToast } = useToast();
   const locationsQuery = useLocations();
   const myInfoQuery = useMyInfo();
-  const { mutate: setSubLocation, isPending } = useSetSubLocation();
+  const moveCurrent = useMoveCurrentLocation();
+  const reserveChange = useReserveLocationChange();
+  const { mutate: submit, isPending } = mode === 'main' ? reserveChange : moveCurrent;
 
   const [selectedId, setSelectedId] = useState<number>();
 
@@ -30,9 +52,13 @@ export default function EditRegion() {
     myInfoQuery.refetch();
   };
 
-  // 메인 동네를 고르면 서버가 400으로 거절하므로 애초에 선택지에서 뺀다.
+  // 본진 변경은 지금 본진을 고르면 서버가 400으로 거절하고, 이동은 지금 있는 곳으로 옮겨도 의미가 없어 뺀다.
+  const excludedId =
+    mode === 'main'
+      ? myInfoQuery.data?.main_location.location_id
+      : myInfoQuery.data?.current_location.location_id;
   const options = (locationsQuery.data ?? []).filter(
-    (location) => location.location_id !== myInfoQuery.data?.main_location.location_id,
+    (location) => location.location_id !== excludedId,
   );
 
   const handleSubmit = () => {
@@ -43,12 +69,12 @@ export default function EditRegion() {
       return;
     }
 
-    setSubLocation(selectedId, {
+    submit(selectedId, {
       onSuccess: () => {
-        showToast('동네를 등록했어요');
+        showToast(copy.success);
         router.back();
       },
-      onError: (error) => showToast(getApiErrorMessage(error, '동네 등록에 실패했어요')),
+      onError: (error) => showToast(getApiErrorMessage(error, copy.failure)),
     });
   };
 
@@ -58,7 +84,7 @@ export default function EditRegion() {
         <View className="flex flex-col items-center gap-2xl w-full">
           <Header />
           <View className="flex flex-col items-start gap-3xl w-full">
-            <BackButton title="동네 수정" />
+            <BackButton title={copy.title} />
             <Typography variant="display" className="text-gray-600">
               동네 정보 입력
             </Typography>
@@ -73,7 +99,7 @@ export default function EditRegion() {
         </View>
         <View className="w-full">
           <Button
-            content={isPending ? '등록 중...' : '등록하기'}
+            content={isPending ? '처리 중...' : copy.submit}
             onclick={handleSubmit}
             className={isPending ? 'opacity-50' : ''}
           />

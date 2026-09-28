@@ -16,8 +16,6 @@ import { View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const NO_SUB_LOCATION_TEXT = '동네를 추가해보세요';
-
 export default function ProfileScreen() {
   const [isNeighborhoodSheetOpen, setIsNeighborhoodSheetOpen] = useState(false);
   const { config: character } = useCharacterConfig();
@@ -52,8 +50,9 @@ export default function ProfileScreen() {
               <NavRow
                 title="동네 확인하기"
                 description={
-                  formatLocationName(profile.sub_location_city_name, profile.sub_location_name) ||
-                  NO_SUB_LOCATION_TEXT
+                  profile.at_home
+                    ? '본진에 있어요'
+                    : `지금 ${formatLocationName(profile.current_location_city_name, profile.current_location_name)}에 있어요`
                 }
                 onPress={() => setIsNeighborhoodSheetOpen(true)}
               />
