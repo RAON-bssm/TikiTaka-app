@@ -8,6 +8,7 @@ import Gotcha from '@/components/market/gotcha/Gotcha';
 import MyPointBadge from '@/components/market/MyPointBadge';
 import PullButton from '@/components/market/gotcha/PullButton';
 import ShopTabs from '@/components/market/ShopTabs';
+import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Header from '@/components/ui/Header';
 import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
@@ -26,7 +27,7 @@ export default function GachaScreen() {
 
   const current = results[index];
 
-  const { data: products } = useProducts();
+  const { data: products, isError, refetch } = useProducts();
   const { mutate: draw, isPending } = useDrawGashapon();
   const { showToast } = useToast();
 
@@ -82,17 +83,21 @@ export default function GachaScreen() {
             />
           </View>
 
-          <View className="flex-row justify-center gap-lg pb-2xl">
-            {GASHAPON_OPTIONS.map((option) => (
-              <PullButton
-                key={option.productId}
-                label={option.label}
-                cost={products?.find((product) => product.product_id === option.productId)?.price}
-                disabled={isPending}
-                onPress={() => handlePull(option.productId)}
-              />
-            ))}
-          </View>
+          {isError ? (
+            <ErrorRetry message="가챠 정보를 불러오지 못했어요." onRetry={refetch} />
+          ) : (
+            <View className="flex-row justify-center gap-lg pb-2xl">
+              {GASHAPON_OPTIONS.map((option) => (
+                <PullButton
+                  key={option.productId}
+                  label={option.label}
+                  cost={products?.find((product) => product.product_id === option.productId)?.price}
+                  disabled={isPending}
+                  onPress={() => handlePull(option.productId)}
+                />
+              ))}
+            </View>
+          )}
         </View>
       </View>
 
