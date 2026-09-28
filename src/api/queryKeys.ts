@@ -12,6 +12,8 @@ export const postKeys = {
   all: ['post'] as const,
   lists: () => [...postKeys.all, 'list'] as const,
   list: (boardId: number) => [...postKeys.lists(), boardId] as const,
+  /** `lists()` 아래에 둬야 게시물 삭제 때 목록과 함께 무효화된다. */
+  mine: () => [...postKeys.lists(), 'mine'] as const,
   detail: (postId: string) => [...postKeys.all, 'detail', postId] as const,
 };
 
@@ -63,4 +65,5 @@ export const inventoryKeys = {
 export const equipmentKeys = {
   all: ['equipment'] as const,
   current: () => [...equipmentKeys.all, 'current'] as const,
+  user: (userId: string) => [...equipmentKeys.all, 'user', userId] as const,
 };

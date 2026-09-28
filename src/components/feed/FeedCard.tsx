@@ -1,24 +1,22 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
 import { ActivityIndicator, Image, Pressable, View } from 'react-native';
 
-import FavoriteIcon from '@/assets/icons/favorite.svg';
 import PlaceIcon from '@/assets/icons/place.svg';
 import Character from '@/components/character/Character';
+import LikeButton from '@/components/feed/LikeButton';
+import UserCharacter from '@/components/character/UserCharacter';
 import MoreMenu, { type MoreMenuItem } from '@/components/ui/MoreMenu';
 import Typography from '@/components/ui/Typography';
 import { DEFAULT_CHARACTER_CONFIG } from '@/constants/character/assets';
-import type { CharacterConfig } from '@/constants/character/types';
 import { palette } from '@/constants/colors';
 import { useViewUrl } from '@/hooks/storage/useViewUrl';
 
 const COLOR_GRAY = palette.gray[400];
-const COLOR_PRIMARY = palette.primary[600];
 
 export interface FeedAuthor {
   name: string;
   /** 없으면 기본 캐릭터로 렌더한다. */
-  character?: CharacterConfig;
+  userId?: string;
 }
 
 interface Props {
@@ -28,9 +26,10 @@ interface Props {
   title: string;
   place: string;
   timeAgo: string;
-  likeCount: number;
+  /** 없으면 좋아요 버튼을 숨긴다. (내 게시물 목록은 좋아요 수를 주지 않는다) */
+  likeCount?: number;
+  liked?: boolean;
   menuItems?: MoreMenuItem[];
-  onPressLike?: () => void;
 }
 
 export default function FeedCard({
@@ -41,10 +40,9 @@ export default function FeedCard({
   place,
   timeAgo,
   likeCount,
+  liked,
   menuItems,
-  onPressLike,
 }: Props) {
-  const [liked, setLiked] = useState(false);
   // imageUrl은 이미지 key라 조회 URL로 변환해야 한다.
   const { uri: resolvedImageUri, isLoading: imageLoading } = useViewUrl(imageUrl);
 
@@ -55,7 +53,11 @@ export default function FeedCard({
     >
       <View className="w-full flex-row items-center justify-between">
         <View className="flex-row items-center gap-sm">
-          <Character config={author.character ?? DEFAULT_CHARACTER_CONFIG} size={40} />
+          {author.userId ? (
+            <UserCharacter userId={author.userId} size={40} />
+          ) : (
+            <Character config={DEFAULT_CHARACTER_CONFIG} size={40} />
+          )}
           <Typography variant="body2" className="text-gray-800">
             {author.name}
           </Typography>
@@ -92,18 +94,15 @@ export default function FeedCard({
           </View>
         </View>
 
-        <Pressable
-          onPress={() => {
-            setLiked((prev) => !prev);
-            onPressLike?.();
-          }}
-          className="items-center justify-center gap-xs active:opacity-70"
-        >
-          <FavoriteIcon width={20} height={20} color={liked ? COLOR_PRIMARY : COLOR_GRAY} />
-          <Typography variant="body3" className="text-gray-700">
-            {likeCount + (liked ? 1 : 0)}
-          </Typography>
-        </Pressable>
+        {likeCount !== undefined && (
+          <LikeButton
+            postId={postId}
+            likeCount={likeCount}
+            liked={liked}
+            className="items-center justify-center"
+            textClassName="text-gray-700"
+          />
+        )}
       </View>
     </Pressable>
   );

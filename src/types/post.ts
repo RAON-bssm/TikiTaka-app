@@ -33,6 +33,8 @@ export interface Post {
   user_name: string;
   post_image: string;
   score: number;
+  like_count: number;
+  liked_by_me: boolean;
   created_at: DateTimeString;
   updated_at: DateTimeString;
   content: string;
@@ -46,7 +48,38 @@ export interface PostListData {
 
 export type PostListResponse = ApiResponse<PostListData>;
 
-/** 없거나 삭제된 글이면 404. 목록용 Post와 달리 post_id가 없다. `like_count`는 좋아요 기능이 없어 서버가 항상 0을 넣는다. */
+/**
+ * `GET /api/user/me/posts`(마이페이지 게시물 보관함). 항상 본인 글이라 `user_id`·`user_name`이 없다.
+ * 라운드를 넘나드는 목록이라 그 글이 속했던 게시판·매치 정보가 붙는다. 삭제된 글은 빠지고 최신순이다.
+ */
+export interface MyPost {
+  post_id: string;
+  post_image: string;
+  score: number;
+  created_at: DateTimeString;
+  updated_at: DateTimeString;
+  content: string;
+  city_name: string;
+  location: string;
+  board_id: number;
+  mission: string;
+  team1_name: string;
+  team2_name: string;
+  /** enum 이름이 아니라 한글 설명이 온다. (`'일반 매치'` 등) */
+  match_type: string;
+  season: number;
+  round: number;
+  like_count: number;
+  liked_by_me: boolean;
+}
+
+export interface MyPostListData {
+  post: MyPost[];
+}
+
+export type MyPostListResponse = ApiResponse<MyPostListData>;
+
+/** 없거나 삭제된 글이면 404. 목록용 Post와 달리 post_id가 없다. */
 export interface PostDetail {
   user_id: string;
   user_name: string;
@@ -57,6 +90,7 @@ export interface PostDetail {
   city_name: string;
   location: string;
   like_count: number;
+  liked_by_me: boolean;
   created_at: DateTimeString;
   updated_at: DateTimeString;
 }
@@ -75,17 +109,22 @@ export interface UpdatePostRequest {
   content: string;
 }
 
-/**
- * 생성된 post_id를 돌려주지 않는다.
- * 실패: 400 이미지 오류·AI 점수 실패, 404 종료된 라운드·내 동네 아님, 413 용량 초과.
- */
-export type CreatePostResponse = EmptyResponse;
+/** 실패: 400 이미지 오류·AI 점수 실패, 404 종료된 라운드·내 동네 아님, 413 용량 초과. */
+export interface CreatePostData {
+  post_id: string;
+}
 
 /**
  * 본문만 바뀐다. 이미지는 수정할 수 없고 AI 점수도 재심사하지 않는다.
  * 실패: 403 남의 게시물, 404 없는 게시물.
  */
 export type UpdatePostResponse = EmptyResponse;
+
+/**
+ * 좋아요 `POST`, 취소 `DELETE /api/post/{postId}/like`. 둘 다 idempotent라 이미 그 상태여도 성공이다.
+ * 좋아요 수는 주지 않아 목록·상세를 다시 받아야 한다. 없거나 삭제된 글이면 404.
+ */
+export type LikePostResponse = EmptyResponse;
 
 /**
  * `PATCH /api/post/delete/{postId}`(DELETE 아님). 소프트 삭제이며 동네·개인 점수를 차감하므로

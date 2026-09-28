@@ -37,9 +37,11 @@ export default function PurchaseModal({ visible, item, previewConfig, onClose, o
 
           <PointBadge point={item.price} />
 
-          <Typography variant="body3" className="text-center text-gray-400">
-            {item.description}
-          </Typography>
+          {item.description && (
+            <Typography variant="body3" className="text-center text-gray-400">
+              {item.description}
+            </Typography>
+          )}
 
           <View className="w-full items-center gap-sm">
             <Button content="구매하기" size="sm" className="w-full" onclick={onConfirm} />

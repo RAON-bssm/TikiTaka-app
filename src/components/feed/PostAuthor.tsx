@@ -1,33 +1,24 @@
 import PlaceIcon from '@/assets/icons/place.svg';
-import { DEFAULT_CHARACTER_CONFIG } from '@/constants/character/assets';
-import type { CharacterConfig } from '@/constants/character/types';
 import { palette } from '@/constants/colors';
 import useRelativeTime from '@/hooks/useRelativeTime';
 import { View } from 'react-native';
-import Character from '../character/Character';
+import UserCharacter from '../character/UserCharacter';
 import MoreMenu, { type MoreMenuItem } from '../ui/MoreMenu';
 import Typography from '../ui/Typography';
 
 interface Props {
   name: string;
-  /** 없으면 기본 캐릭터로 렌더한다. */
-  character?: CharacterConfig;
+  userId: string;
   place: string;
   createdAt: string;
   menuItems?: MoreMenuItem[];
 }
 
-export default function PostAuthor({
-  name,
-  character = DEFAULT_CHARACTER_CONFIG,
-  place,
-  createdAt,
-  menuItems,
-}: Props) {
+export default function PostAuthor({ name, userId, place, createdAt, menuItems }: Props) {
   const timeAgo = useRelativeTime(createdAt);
   return (
     <View className="flex flex-row items-center gap-md">
-      <Character config={character} size={56} />
+      <UserCharacter userId={userId} size={56} />
       <View className="flex flex-1 flex-col gap-xs">
         <Typography variant="h3" className="text-gray-800">
           {name}

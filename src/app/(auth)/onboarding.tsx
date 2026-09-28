@@ -27,11 +27,7 @@ export default function Onboarding() {
   const isLast = index === SLIDES.length - 1;
 
   const handleNext = () => {
-    if (isLast) {
-      console.log('온보딩 완료');
-    } else {
-      setIndex(index + 1);
-    }
+    if (!isLast) setIndex(index + 1);
   };
 
   return (

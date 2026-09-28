@@ -6,14 +6,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { getApiErrorMessage } from '@/api/error';
 import FeaturedItem from '@/components/market/FeaturedItem';
 import ItemGrid from '@/components/market/ItemGrid';
+import MyPointBadge from '@/components/market/MyPointBadge';
 import PurchaseModal from '@/components/market/PurchaseModal';
 import ShopTabs from '@/components/market/ShopTabs';
 import CategoryTabs from '@/components/ui/CategoryTabs';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Header from '@/components/ui/Header';
-import PointBadge from '@/components/ui/PointBadge';
 import { useToast } from '@/components/ui/Toast';
-import { SHOP_CATEGORIES, USER_POINT } from '@/constants/market';
+import { SHOP_CATEGORIES } from '@/constants/market';
 import { useCharacterConfig } from '@/hooks/character/useCharacterConfig';
 import { useEquipCharacter } from '@/hooks/equipment/useEquipCharacter';
 import { useShop } from '@/hooks/market/useShop';
@@ -45,15 +45,17 @@ export default function MarketScreen() {
     if (!selectedItem || isPending) return;
 
     purchaseProduct(
-      { product_id: Number(selectedItem.id) },
+      { product_id: selectedItem.id },
       {
         onSuccess: () => {
           showToast('구매가 완료됐어요');
           // 구매한 아이템을 바로 착용시킨다. 저장본을 불러오기 전에 저장하면 기본 config로 덮어쓴다.
           if (isLoaded) {
             const next = { ...config, [selectedItem.group]: selectedItem.assetId };
-            setConfig(next);
-            void equipCharacter(next);
+            setConfig(next).then(
+              () => void equipCharacter(next),
+              () => {},
+            );
           }
           setPurchaseOpen(false);
         },
@@ -71,7 +73,7 @@ export default function MarketScreen() {
 
           <View className="w-full flex-row items-center justify-between">
             <ShopTabs />
-            <PointBadge point={USER_POINT} />
+            <MyPointBadge />
           </View>
 
           <FeaturedItem

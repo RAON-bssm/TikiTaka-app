@@ -25,7 +25,7 @@ export interface UserRanking {
 
 /**
  * `user_ranking`은 상위 100명까지. `my_ranking`은 이번 라운드 게시물이 없으면 키가 빠진다(미참여 ≠ 0점).
- * 남의 착용 정보를 주는 API가 없어 아바타 정보는 없다.
+ * 아바타는 없어 `useUserCharacter`로 행마다 따로 조회한다.
  */
 export interface UserRankingListData {
   updated_at: DateTimeString;

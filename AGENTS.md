@@ -113,6 +113,8 @@
   - config 원본은 **기기 로컬(SecureStore)** 에 저장됩니다(`src/api/character.ts`, `useCharacterConfig`). 서버 착용 API(`/api/equipment`)는 `product_id` 기반이고 색상 개념이 없어 `CharacterConfig`와 1:1로 맞지 않기 때문입니다.
   - 서버에는 **보유 상품의 착용 상태만** 맞춥니다(`useEquipCharacter`, 변환은 `src/constants/character/equipment.ts`). 기본 파츠는 상품이 아니라 보낼 수 없고, 서버 API로는 벗을 수도 없습니다.
   - 로컬 저장본이 없을 때(새 기기·재설치)만 서버 착용 상태로 모양을 복원합니다. 색은 기본값으로 돌아갑니다. 저장 키가 기기 단위라 로그아웃 때 지웁니다.
+  - 다른 유저의 캐릭터(랭킹·게시물)는 `GET /api/equipment/{user_id}`로 모양만 복원하고 색은 기본값입니다(`useUserCharacter`, `UserCharacter`). 본인은 로컬 저장본을 그립니다.
+  - 꾸미기 화면에서 고른 파츠는 **수정하기를 눌러야** 로컬 저장·서버 착용에 반영됩니다. 저장하지 않고 나가면 확인 팝업을 띄웁니다(`usePreventRemove`).
   - 꾸미기 화면은 상점 목록(`GET /api/product`, 보유 상품은 서버가 걸러 줌)에 있는 파츠를 미보유로 잠급니다.
 - **파츠 에셋은 정적으로 등록한다.** React Native/Metro는 동적 경로 `require`를 지원하지 않으므로, 새 파츠 이미지를 추가하면 반드시 `src/constants/character/assets.ts`의 레지스트리에 `id ↔ require(...)`를 직접 매핑해야 합니다. 매핑하지 않은 에셋은 화면에 나타나지 않습니다.
 - **모양(shape)과 색상(color)은 독립 축이다.** 눈·머리처럼 "모양은 유지하고 색만 바꾸는" 파츠는 config에 색상 키(`eyesColor`, `hairColor`)를 따로 둡니다.
@@ -159,7 +161,7 @@
 
 ### 7.6 상점 아이템 ↔ 파츠 연결
 
-- 서버와 **`product_name` = 파츠 에셋 id**(예: `"hair-back-bob"`)로 맞추기로 합의되어 있습니다. `toMarketItem`(`src/constants/market.ts`)이 이 값을 `assetId`로 옮겨 착용·썸네일에 씁니다.
+- 서버와 **`product_id`(문자열) = 파츠 에셋 id**(예: `"hair-back-bob"`)로 맞추기로 합의되어 있습니다. `toMarketItem`(`src/constants/market.ts`)이 이 값을 `assetId`로 옮겨 착용·썸네일에 씁니다. `product_name`은 화면 표시용 한글 이름이라 매핑에 쓰지 않습니다.
 - 서버에 `종류-이름` 이전의 옛 id(`"bob"` 등)가 남아 있을 수 있어, 서버 값과 기기 저장본은 `toPartId`(`src/constants/character/legacyIds.ts`)로 새 id로 바꿔 읽습니다. 서버 시드가 새 id로 바뀌면 이 파일은 지웁니다.
 - 레지스트리에 없는 id가 오면 에러 없이 썸네일만 비어 보입니다. 상품이 추가되면 같은 id의 에셋이 `assets.ts`에 있는지 확인하세요.
 - 서버 `product_type`은 snake_case(`hair_back`)이고, `PRODUCT_TYPE_TO_PART_KEY`로 `CharacterConfig` 키(`hairBack`)로 바꿉니다.

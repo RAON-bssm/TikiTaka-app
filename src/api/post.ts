@@ -5,8 +5,11 @@ import type {
   Board,
   BoardListData,
   CreatePostRequest,
-  CreatePostResponse,
+  CreatePostData,
   DeletePostResponse,
+  LikePostResponse,
+  MyPost,
+  MyPostListData,
   Post,
   PostDetail,
   PostListData,
@@ -28,10 +31,6 @@ async function compressImageForUpload(uri: string): Promise<string> {
     format: SaveFormat.JPEG,
   });
 
-  // [DEBUG] width/height가 0이 아니면 유효한 이미지로 재인코딩된 것.
-  console.log('[upload] source uri:', uri);
-  console.log('[upload] compressed:', result.uri, `${result.width}x${result.height}`);
-
   context.release();
   image.release();
 
@@ -49,13 +48,22 @@ export async function getPosts(boardId: number): Promise<Post[]> {
   return data.data.post;
 }
 
+export async function getMyPosts(): Promise<MyPost[]> {
+  const { data } = await client.get<ApiResponse<MyPostListData>>('/api/user/me/posts');
+  return data.data.post;
+}
+
 export async function getPostDetail(postId: string): Promise<PostDetail> {
   const { data } = await client.get<ApiResponse<PostDetail>>(`/api/post/${postId}`);
   return data.data;
 }
 
-/** 서버가 post_id를 돌려주지 않으므로, 필요하면 목록을 다시 받아야 한다. */
-export async function createPost({ board_id, fileUri, content }: CreatePostRequest): Promise<void> {
+/** 생성된 게시물의 post_id를 돌려준다. */
+export async function createPost({
+  board_id,
+  fileUri,
+  content,
+}: CreatePostRequest): Promise<string> {
   const compressedUri = await compressImageForUpload(fileUri);
   const fileName = compressedUri.split('/').pop() ?? `photo-${Date.now()}.jpg`;
 
@@ -71,9 +79,10 @@ export async function createPost({ board_id, fileUri, content }: CreatePostReque
 
   // Content-Type을 'multipart/form-data'로 박으면 boundary가 빠져 400이 난다.
   // undefined로 기본값(application/json)을 해제해 RN이 boundary 포함 헤더를 만들게 한다.
-  await client.post<CreatePostResponse>(`/api/post`, formData, {
+  const { data } = await client.post<ApiResponse<CreatePostData>>(`/api/post`, formData, {
     headers: { 'Content-Type': undefined },
   });
+  return data.data.post_id;
 }
 
 export async function updatePost(postId: string, req: UpdatePostRequest): Promise<void> {
@@ -82,4 +91,12 @@ export async function updatePost(postId: string, req: UpdatePostRequest): Promis
 
 export async function deletePost(postId: string): Promise<void> {
   await client.patch<DeletePostResponse>(`/api/post/delete/${postId}`);
+}
+
+export async function likePost(postId: string): Promise<void> {
+  await client.post<LikePostResponse>(`/api/post/${postId}/like`);
+}
+
+export async function unlikePost(postId: string): Promise<void> {
+  await client.delete<LikePostResponse>(`/api/post/${postId}/like`);
 }

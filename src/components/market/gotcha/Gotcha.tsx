@@ -54,9 +54,15 @@ export default function Gotcha({ result, progress, onDismiss }: Props) {
           <View className="absolute h-[190px] w-[190px] rounded-full bg-white/70" />
 
           <Animated.View entering={ZoomIn.springify()} className="items-center">
-            <OutlinedItemName name={result.item.name} />
+            <OutlinedItemName name={result.name} />
 
             <Character config={result.preview} size={230} />
+
+            {result.duplicate ? (
+              <Typography variant="body1" className="text-gray-600">
+                {result.message}
+              </Typography>
+            ) : null}
 
             {progress ? (
               <Typography variant="body1" className="text-gray-500">

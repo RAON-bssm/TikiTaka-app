@@ -1,7 +1,6 @@
 import CurrentBattleCard from '@/components/feed/CurrentBattleCard';
 import PostList from '@/components/feed/PostList';
 import Banner from '@/components/ui/banner/Banner';
-import Button from '@/components/ui/Button';
 import Header from '@/components/ui/Header';
 import Typography from '@/components/ui/Typography';
 import { palette } from '@/constants/colors';
@@ -49,10 +48,7 @@ export default function HomeScreen() {
 
         <Banner />
 
-        <View className="flex flex-col gap-sm">
-          <CurrentBattleCard state={battle} />
-          <Button content="바로 참여" />
-        </View>
+        <CurrentBattleCard state={battle} />
 
         <View className="flex flex-col gap-md">
           <View className="flex flex-row justify-between w-full items-center">

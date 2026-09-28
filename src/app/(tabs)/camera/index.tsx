@@ -6,7 +6,7 @@ import MissionTitle from '@/components/camera/MissionTitle';
 import ShutterButton from '@/components/camera/ShutterButton';
 import ZoomControl from '@/components/camera/ZoomControl';
 import useCameraZoom from '@/hooks/camera/useCameraZoom';
-import { useBoards } from '@/hooks/post/useBoards';
+import { useMyBoard } from '@/hooks/post/useMyBoard';
 import { router, useIsFocused } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -28,9 +28,8 @@ export default function CameraScreen() {
   const insets = useSafeAreaInsets();
   const isFocused = useIsFocused();
 
-  // 게시판 목록의 첫 항목이 현재 게시판이다.
-  const { data: boards } = useBoards();
-  const mission = boards?.[0]?.mission ?? '';
+  const { data: myBoard } = useMyBoard();
+  const mission = myBoard?.mission ?? '';
 
   const { hasPermission, requestPermission } = useCameraPermission();
   const [facing, setFacing] = useState<'back' | 'front'>('back');

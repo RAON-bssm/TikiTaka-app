@@ -24,6 +24,8 @@ export interface MatchResult {
   win_team?: string;
   lost_team?: string;
   match_type: MatchType;
+  /** 경기가 속한 라운드의 시작 시각. 같은 라운드의 경기는 모두 같은 값이다. */
+  match_date: DateTimeString;
 }
 
 /** 배열 키가 `matches`가 아니라 `match`다. */

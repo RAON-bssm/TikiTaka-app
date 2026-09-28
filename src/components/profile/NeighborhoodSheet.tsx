@@ -1,11 +1,15 @@
 import { getApiErrorMessage } from '@/api/error';
-import RadioOnIcon from '@/assets/icons/radio-selected.svg';
-import RadioOffIcon from '@/assets/icons/radio.svg';
-import { useCancelLocationSwap, useRequestLocationSwap } from '@/hooks/user/useLocationSwap';
+import ChevronRightIcon from '@/assets/icons/chevron-right.svg';
+import FireIcon from '@/assets/icons/fire.svg';
+import PlaceIcon from '@/assets/icons/place.svg';
+import { palette } from '@/constants/colors';
+import { formatLocationName } from '@/constants/location';
+import { useCancelLocationChange } from '@/hooks/user/useLocationChange';
+import { useMoveCurrentLocation } from '@/hooks/user/useMoveCurrentLocation';
 import { useMyInfo } from '@/hooks/user/useMyInfo';
 import type { UserLocation } from '@/types/location';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Pressable, View } from 'react-native';
 import BottomSheet from '../ui/BottomSheet';
 import Button from '../ui/Button';
@@ -18,30 +22,72 @@ interface Props {
   onClose: () => void;
 }
 
-function formatPlace(location: UserLocation) {
-  return [location.location_city_name, location.location_name].filter(Boolean).join(' ');
+const formatPlace = (location: UserLocation) =>
+  formatLocationName(location.location_city_name, location.location_name);
+
+const StatusBanner = ({ atHome }: { atHome: boolean }) => (
+  <View
+    className={`flex flex-row items-center gap-md rounded-md p-lg ${
+      atHome ? 'bg-secondary-100' : 'bg-primary-100'
+    }`}
+  >
+    {atHome ? (
+      <PlaceIcon width={24} height={24} color={palette.secondary[500]} />
+    ) : (
+      <FireIcon width={24} height={24} color={palette.primary[600]} />
+    )}
+    <View className="flex flex-1 flex-col gap-xs">
+      <Typography variant="h3" className={atHome ? 'text-secondary-500' : 'text-primary-600'}>
+        {atHome ? '본진에서 활동 중이에요' : '지금 원정 중이에요'}
+      </Typography>
+      <Typography variant="body3" className="text-gray-500">
+        {atHome
+          ? '올린 게시물이 동네 점수에도 들어가요.'
+          : '동네 점수는 본진에서 올린 게시물만 쌓여요.'}
+      </Typography>
+    </View>
+  </View>
+);
+
+interface LocationCardProps {
+  label: string;
+  place: string;
+  actionLabel: string;
+  onPress: () => void;
+  children?: ReactNode;
 }
 
-/**
- * 라디오는 지금 메인 동네가 아니라 다음 라운드에 대표할 동네를 가리킨다.
- * 서브를 고르면 교환이 예약되고, 예약 중 메인을 다시 고르면 취소된다.
- */
+const LocationCard = ({ label, place, actionLabel, onPress, children }: LocationCardProps) => (
+  <Pressable
+    onPress={onPress}
+    className="flex flex-col gap-md rounded-md border border-gray-100 bg-white p-lg active:bg-gray-50"
+  >
+    <View className="flex flex-row items-center justify-between">
+      <View className="flex flex-col gap-xs">
+        <Typography variant="body3" className="text-gray-400">
+          {label}
+        </Typography>
+        <Typography variant="h3" className="text-gray-700">
+          {place}
+        </Typography>
+      </View>
+      <View className="flex flex-row items-center">
+        <Typography variant="body2" className="text-gray-500">
+          {actionLabel}
+        </Typography>
+        <ChevronRightIcon width={20} height={20} color={palette.gray[400]} />
+      </View>
+    </View>
+    {children}
+  </Pressable>
+);
+
 export default function NeighborhoodSheet({ visible, onClose }: Props) {
   const router = useRouter();
   const { data: myInfo, isLoading, isError, refetch } = useMyInfo();
-  const { mutate: requestSwap, isPending: isRequesting } = useRequestLocationSwap();
-  const { mutate: cancelSwap, isPending: isCancelling } = useCancelLocationSwap();
+  const { mutate: cancelChange, isPending: isCancelling } = useCancelLocationChange();
+  const { mutate: moveCurrent, isPending: isReturning } = useMoveCurrentLocation();
   const [errorMessage, setErrorMessage] = useState<string>();
-
-  const isSwapping = isRequesting || isCancelling;
-  const isSwapReserved = myInfo?.pending_location_swap ?? false;
-
-  const neighborhoods = myInfo
-    ? [myInfo.main_location, ...(myInfo.sub_location ? [myInfo.sub_location] : [])]
-    : [];
-  const selectedId = isSwapReserved
-    ? myInfo?.sub_location?.location_id
-    : myInfo?.main_location.location_id;
 
   const handleClose = () => {
     setErrorMessage(undefined);
@@ -53,78 +99,83 @@ export default function NeighborhoodSheet({ visible, onClose }: Props) {
     refetch();
   };
 
-  const handleSelect = (locationId: number) => {
-    // 항목이 둘뿐이라 "선택되지 않은 쪽을 누른다 = 예약을 뒤집는다"로 충분하다.
-    if (isSwapping || locationId === selectedId) return;
+  // 이 시트는 RN Modal이고 ToastProvider는 그 아래 트리라 토스트가 가린다. 시트 안에 적는다.
+  const showError = (fallback: string) => (error: unknown) =>
+    setErrorMessage(getApiErrorMessage(error, fallback));
+
+  const handleCancel = () => {
+    if (isCancelling) return;
     setErrorMessage(undefined);
+    cancelChange(undefined, { onError: showError('예약을 취소하지 못했어요.') });
+  };
 
-    // 이 시트는 RN Modal이고 ToastProvider는 그 아래 트리라 토스트가 가린다. 시트 안에 적는다.
-    const options = {
-      onError: (error: unknown) =>
-        setErrorMessage(getApiErrorMessage(error, '동네 변경 예약에 실패했어요.')),
-    };
+  const handleReturnHome = () => {
+    if (isReturning || !myInfo) return;
+    setErrorMessage(undefined);
+    moveCurrent(myInfo.main_location.location_id, {
+      onError: showError('본진으로 돌아가지 못했어요.'),
+    });
+  };
 
-    if (isSwapReserved) {
-      cancelSwap(undefined, options);
-    } else {
-      requestSwap(undefined, options);
-    }
+  // 편집 화면으로 가면 시트가 화면을 덮은 채 남으므로 먼저 닫는다.
+  const openEditor = (mode: 'current' | 'main') => {
+    handleClose();
+    router.push({ pathname: '/profile/edit-region', params: { mode } });
   };
 
   return (
     <BottomSheet visible={visible} onClose={handleClose}>
       <View className="flex flex-col gap-2xl">
-        <View className="flex flex-col gap-md">
-          <Typography variant="h1" className="text-gray-700">
-            내 동네 설정
-          </Typography>
-          <Typography variant="body2" className="text-gray-400">
-            최대 2개의 동네를 선택할 수 있어요.
-          </Typography>
-        </View>
+        <Typography variant="h1" className="text-gray-700">
+          내 동네
+        </Typography>
 
         {isLoading ? (
-          <View className="flex flex-col gap-lg">
-            <Skeleton className="h-6 w-40 rounded-sm" />
-            <Skeleton className="h-6 w-40 rounded-sm" />
+          <View className="flex flex-col gap-md">
+            <Skeleton className="h-[76px] w-full rounded-md" />
+            <Skeleton className="h-[76px] w-full rounded-md" />
+            <Skeleton className="h-[76px] w-full rounded-md" />
           </View>
         ) : isError || !myInfo ? (
           <ErrorRetry message="동네 정보를 불러오지 못했어요." onRetry={handleRetry} />
         ) : (
           <View className="flex flex-col gap-md">
-            <View className="flex flex-col gap-lg">
-              {neighborhoods.map((neighborhood) => {
-                const selected = neighborhood.location_id === selectedId;
-                return (
+            <StatusBanner atHome={myInfo.at_home} />
+
+            <LocationCard
+              label="본진"
+              place={formatPlace(myInfo.main_location)}
+              actionLabel="변경"
+              onPress={() => openEditor('main')}
+            >
+              {myInfo.pending_location && (
+                <View className="flex flex-row items-center justify-between gap-sm rounded-sm bg-gray-50 py-sm pl-md pr-xs">
+                  <Typography variant="caption" className="flex-1 text-gray-600">
+                    다음 라운드부터 {formatPlace(myInfo.pending_location)}
+                  </Typography>
                   <Pressable
-                    key={neighborhood.location_id}
-                    onPress={() => handleSelect(neighborhood.location_id)}
-                    disabled={isSwapping}
-                    accessibilityRole="radio"
-                    accessibilityState={{ selected, disabled: isSwapping }}
-                    className={`flex flex-row items-center gap-xs ${isSwapping ? 'opacity-50' : ''}`}
+                    onPress={handleCancel}
+                    disabled={isCancelling}
+                    hitSlop={8}
+                    className={`rounded-sm px-sm py-xs active:bg-gray-100 ${
+                      isCancelling ? 'opacity-50' : ''
+                    }`}
                   >
-                    {selected ? (
-                      <RadioOnIcon width={24} height={24} />
-                    ) : (
-                      <RadioOffIcon width={24} height={24} />
-                    )}
-                    <Typography
-                      variant="body2"
-                      className={selected ? 'text-primary-600' : 'text-gray-500'}
-                    >
-                      {formatPlace(neighborhood)}
+                    <Typography variant="caption" className="text-primary-600">
+                      예약 취소
                     </Typography>
                   </Pressable>
-                );
-              })}
-            </View>
+                </View>
+              )}
+            </LocationCard>
 
-            {isSwapReserved && (
-              <Typography variant="caption" className="text-gray-400">
-                다음 라운드가 시작되면 대표 동네가 바뀌어요.
-              </Typography>
-            )}
+            <LocationCard
+              label="현재 지역"
+              place={formatPlace(myInfo.current_location)}
+              actionLabel="이동"
+              onPress={() => openEditor('current')}
+            />
+
             {errorMessage && (
               <Typography variant="caption" className="text-primary-600">
                 {errorMessage}
@@ -133,11 +184,13 @@ export default function NeighborhoodSheet({ visible, onClose }: Props) {
           </View>
         )}
 
-        <Button
-          content={myInfo?.sub_location ? '동네 변경' : '동네 추가'}
-          onclick={() => router.push('/profile/edit-region')}
-          className="w-full"
-        />
+        {myInfo && !myInfo.at_home && (
+          <Button
+            content={isReturning ? '돌아가는 중...' : '본진으로 돌아가기'}
+            onclick={handleReturnHome}
+            className={`w-full ${isReturning ? 'opacity-50' : ''}`}
+          />
+        )}
       </View>
     </BottomSheet>
   );

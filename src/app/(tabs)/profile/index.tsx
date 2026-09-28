@@ -1,4 +1,4 @@
-import FeedCard from '@/components/feed/FeedCard';
+import MyPostList from '@/components/profile/MyPostList';
 import NeighborhoodSheet from '@/components/profile/NeighborhoodSheet';
 import ProfileSummarySkeleton from '@/components/profile/ProfileSummarySkeleton';
 import UserProfile from '@/components/profile/UserProfile';
@@ -15,34 +15,6 @@ import { useState } from 'react';
 import { View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-// TODO: 서버 연동 시 TanStack Query로 대체 (내가 올린 게시물)
-const MY_FEEDS = [
-  {
-    id: 1,
-    author: {
-      name: '그만말해인제',
-    },
-    imageUrl: 'https://i.pinimg.com/736x/f8/95/1a/f8951a0f7b8523223d87d0ab42498056.jpg',
-    title: '영도 맛도리 전봇대',
-    place: '부산시 영도구',
-    timeAgo: '3분 전',
-    likeCount: 1,
-  },
-  {
-    id: 2,
-    author: {
-      name: '그만말해인제',
-    },
-    imageUrl: 'https://i.pinimg.com/736x/db/4b/95/db4b954a0e9191b2d38e69b2568f7013.jpg',
-    title: '오늘의 동네 한 컷',
-    place: '부산시 영도구',
-    timeAgo: '1시간 전',
-    likeCount: 12,
-  },
-];
-
-const NO_SUB_LOCATION_TEXT = '동네를 추가해보세요';
 
 export default function ProfileScreen() {
   const [isNeighborhoodSheetOpen, setIsNeighborhoodSheetOpen] = useState(false);
@@ -78,8 +50,9 @@ export default function ProfileScreen() {
               <NavRow
                 title="동네 확인하기"
                 description={
-                  formatLocationName(profile.sub_location_city_name, profile.sub_location_name) ||
-                  NO_SUB_LOCATION_TEXT
+                  profile.at_home
+                    ? '본진에서 활동 중'
+                    : `원정 중 · ${formatLocationName(profile.current_location_city_name, profile.current_location_name)}`
                 }
                 onPress={() => setIsNeighborhoodSheetOpen(true)}
               />
@@ -106,20 +79,7 @@ export default function ProfileScreen() {
           <Typography variant="h2" className="text-gray-700">
             게시물 보관함
           </Typography>
-          <View className="flex flex-col gap-md">
-            {MY_FEEDS.map((feed) => (
-              <FeedCard
-                key={feed.id}
-                postId={String(feed.id)}
-                author={feed.author}
-                imageUrl={feed.imageUrl}
-                title={feed.title}
-                place={feed.place}
-                timeAgo={feed.timeAgo}
-                likeCount={feed.likeCount}
-              />
-            ))}
-          </View>
+          <MyPostList />
         </View>
       </ScrollView>
 

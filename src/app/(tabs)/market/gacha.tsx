@@ -3,13 +3,18 @@ import { useState } from 'react';
 import { Image as RNImage, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { getApiErrorMessage } from '@/api/error';
 import Gotcha from '@/components/market/gotcha/Gotcha';
+import MyPointBadge from '@/components/market/MyPointBadge';
 import PullButton from '@/components/market/gotcha/PullButton';
 import ShopTabs from '@/components/market/ShopTabs';
+import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Header from '@/components/ui/Header';
-import PointBadge from '@/components/ui/PointBadge';
+import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
-import { GOTCHA_COSTS, pullGotcha, USER_POINT, type GotchaPull } from '@/constants/market';
+import { GASHAPON_OPTIONS, toGotchaPull, type GotchaPull } from '@/constants/market';
+import { useDrawGashapon } from '@/hooks/product/useDrawGashapon';
+import { useProducts } from '@/hooks/product/useProducts';
 
 const MACHINE = require('@/assets/icons/gotcha.webp');
 const { width, height } = RNImage.resolveAssetSource(MACHINE);
@@ -22,10 +27,23 @@ export default function GachaScreen() {
 
   const current = results[index];
 
-  const handlePull = (count: 1 | 5) => {
-    // TODO: 포인트 차감 API 응답의 아이템으로 교체하고, 포인트 부족 시 토스트를 띄운다.
-    setResults(pullGotcha(count));
-    setIndex(0);
+  const { data: products, isError, refetch } = useProducts();
+  const { mutate: draw, isPending } = useDrawGashapon();
+  const { showToast } = useToast();
+
+  const handlePull = (productId: string) => {
+    if (isPending) return;
+    draw(
+      { product_id: productId },
+      {
+        onSuccess: (items) => {
+          setResults(items.map(toGotchaPull));
+          setIndex(0);
+        },
+        onError: (error) =>
+          showToast(getApiErrorMessage(error, '뽑기에 실패했어요. 다시 시도해주세요.')),
+      },
+    );
   };
 
   const handleDismiss = () => {
@@ -44,7 +62,7 @@ export default function GachaScreen() {
 
         <View className="w-full flex-row items-center justify-between">
           <ShopTabs />
-          <PointBadge point={USER_POINT} />
+          <MyPointBadge />
         </View>
 
         <View className="flex-1">
@@ -65,10 +83,21 @@ export default function GachaScreen() {
             />
           </View>
 
-          <View className="flex-row justify-center gap-lg pb-2xl">
-            <PullButton label="1회 뽑기" cost={GOTCHA_COSTS.single} onPress={() => handlePull(1)} />
-            <PullButton label="5회 뽑기" cost={GOTCHA_COSTS.multi} onPress={() => handlePull(5)} />
-          </View>
+          {isError ? (
+            <ErrorRetry message="가챠 정보를 불러오지 못했어요." onRetry={refetch} />
+          ) : (
+            <View className="flex-row justify-center gap-lg pb-2xl">
+              {GASHAPON_OPTIONS.map((option) => (
+                <PullButton
+                  key={option.productId}
+                  label={option.label}
+                  cost={products?.find((product) => product.product_id === option.productId)?.price}
+                  disabled={isPending}
+                  onPress={() => handlePull(option.productId)}
+                />
+              ))}
+            </View>
+          )}
         </View>
       </View>
 

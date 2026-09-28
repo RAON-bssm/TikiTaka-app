@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 import {
   CATEGORY_TO_PRODUCT_TYPE,
+  isPartProduct,
   SHOP_CATEGORIES,
   toMarketItem,
   type ShopCategory,
@@ -19,6 +20,7 @@ export function useShop() {
 
   const productType = CATEGORY_TO_PRODUCT_TYPE[category];
   const items = (products ?? [])
+    .filter(isPartProduct)
     .filter((product) => product.product_type === productType)
     .map(toMarketItem);
 

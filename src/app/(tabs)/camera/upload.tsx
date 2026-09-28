@@ -1,11 +1,10 @@
 import { getApiErrorMessage } from '@/api/error';
 import Topic from '@/components/camera/Topic';
 import Button from '@/components/ui/Button';
-import Dropdown from '@/components/ui/input/Dropdown';
 import TextInput from '@/components/ui/input/TextInput';
 import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
-import { useBoards } from '@/hooks/post/useBoards';
+import { useMyBoard } from '@/hooks/post/useMyBoard';
 import { useUploadPost } from '@/hooks/post/useUploadPost';
 import useImageRatio from '@/hooks/useImageRatio';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -22,10 +21,7 @@ export default function Upload() {
   const { showToast } = useToast();
   const { mutate: uploadPost, isPending } = useUploadPost();
 
-  // TODO: 실제 미션 선택 UI와 연결. 지금은 게시판 목록의 첫 항목(현재 게시판)에 올린다.
-  const { data: boards } = useBoards();
-  const currentBoard = boards?.[0];
-  const boardId = currentBoard?.board_id;
+  const { data: myBoard, isLoading: isBoardLoading } = useMyBoard();
 
   const handleUpload = () => {
     if (isPending) return;
@@ -33,22 +29,21 @@ export default function Upload() {
       showToast('사진을 불러올 수 없어요.');
       return;
     }
-    if (boardId == null) {
+    if (isBoardLoading) {
       showToast('게시판 정보를 불러오는 중이에요.');
+      return;
+    }
+    if (!myBoard) {
+      showToast('지금 참여 중인 매치가 없어 올릴 수 없어요.');
       return;
     }
 
     uploadPost(
-      { fileUri: uri, boardId, content },
+      { fileUri: uri, boardId: myBoard.board_id, content },
       {
         onSuccess: (postId) => {
           showToast('게시물이 등록됐어요');
-          // 서버가 id를 주지 않으면 상세로 갈 수 없어 이전 화면으로 돌아간다.
-          if (postId) {
-            router.replace({ pathname: '/feed/[post_id]', params: { post_id: postId } });
-          } else {
-            router.back();
-          }
+          router.replace({ pathname: '/feed/[post_id]', params: { post_id: postId } });
         },
         onError: (error) =>
           showToast(getApiErrorMessage(error, '업로드에 실패했어요. 다시 시도해주세요.')),
@@ -65,7 +60,7 @@ export default function Upload() {
         bottomOffset={16}
         keyboardShouldPersistTaps="handled"
       >
-        <Topic title={currentBoard?.mission ?? ''} />
+        <Topic title={myBoard?.mission ?? ''} />
 
         {uri && photoRatio ? (
           <Image
@@ -84,19 +79,12 @@ export default function Upload() {
           </View>
         )}
 
-        <View className="flex flex-col gap-md">
-          <TextInput
-            label="미션 한마디"
-            placeholder="게시물을 표현하는 한마디를 작성해주세요"
-            value={content}
-            onChangeText={setContent}
-          />
-          <Dropdown
-            label="공개 범위"
-            placeholder="공개 범위를 선택해주세요"
-            options={['전체공개', '비공개']}
-          />
-        </View>
+        <TextInput
+          label="미션 한마디"
+          placeholder="게시물을 표현하는 한마디를 작성해주세요"
+          value={content}
+          onChangeText={setContent}
+        />
 
         <Button content={isPending ? '업로드 중...' : '게시물 업로드'} onclick={handleUpload} />
       </KeyboardAwareScrollView>

@@ -5,19 +5,30 @@ import { DEFAULT_CHARACTER_CONFIG, getPartMeta, type PartMeta } from '@/constant
 import { CATEGORY_DEFS, type ColorOption, type ShapeOption } from '@/constants/character/customize';
 import { toPartId } from '@/constants/character/legacyIds';
 import { CharacterConfig } from '@/constants/character/types';
-import { PRODUCT_TYPE_TO_PART_KEY } from '@/constants/market';
+import { isPartProduct, PRODUCT_TYPE_TO_PART_KEY } from '@/constants/market';
 import { useCharacterConfig } from '@/hooks/character/useCharacterConfig';
 import { useEquipCharacter } from '@/hooks/equipment/useEquipCharacter';
 import { useProducts } from '@/hooks/product/useProducts';
 import { Image } from 'expo-image';
+import { useNavigation } from 'expo-router';
+import { usePreventRemove, type NavigationAction } from 'expo-router/react-navigation';
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import Character from './Character';
+import UnsavedChangesDialog from './UnsavedChangesDialog';
 
 type SelectHandler = (config: CharacterConfig) => void;
 
-const CharacterPreview = ({ config }: { config: CharacterConfig }) => (
+const CharacterPreview = ({
+  config,
+  canSave,
+  onSave,
+}: {
+  config: CharacterConfig;
+  canSave: boolean;
+  onSave: () => void;
+}) => (
   <View className="relative w-full items-center">
     <View className="relative items-center pb-md">
       <Image
@@ -27,7 +38,13 @@ const CharacterPreview = ({ config }: { config: CharacterConfig }) => (
       />
       <Character config={config} size={160} className="-translate-x-[4px] translate-y-[4px]" />
     </View>
-    <Pressable className="absolute bottom-0 right-0 items-center justify-center rounded-sm bg-primary-600/80 p-md">
+    <Pressable
+      onPress={onSave}
+      disabled={!canSave}
+      className={`absolute bottom-0 right-0 items-center justify-center rounded-sm bg-primary-600/80 p-md ${
+        canSave ? 'active:opacity-70' : 'opacity-40'
+      }`}
+    >
       <Typography variant="h4" className="text-gray-50">
         수정하기
       </Typography>
@@ -36,6 +53,12 @@ const CharacterPreview = ({ config }: { config: CharacterConfig }) => (
 );
 
 const CATEGORY_LABELS = CATEGORY_DEFS.map((category) => category.label);
+
+// 벗은 악세서리는 키가 없을 수도, undefined일 수도 있어 키 합집합으로 비교한다.
+function isSameConfig(a: CharacterConfig, b: CharacterConfig): boolean {
+  const keys = new Set([...Object.keys(a), ...Object.keys(b)]) as Set<keyof CharacterConfig>;
+  return [...keys].every((key) => a[key] === b[key]);
+}
 
 const ColorSwatches = ({
   colors,
@@ -173,9 +196,15 @@ export default function CharacterCustomizer({
 }: {
   initialConfig?: CharacterConfig;
 }) {
-  // config는 훅이 기기에 자동 저장하고 진입 시 복원한다.
-  const { config, setConfig, isLoaded } = useCharacterConfig(initialConfig);
+  const { config: savedConfig, setConfig, isLoaded } = useCharacterConfig(initialConfig);
   const equipCharacter = useEquipCharacter();
+  // 고르는 동안은 화면 상태로만 두고, 수정하기를 눌러야 로컬 저장·서버 착용에 반영한다.
+  const [draft, setDraft] = useState<CharacterConfig>();
+  const config = draft ?? savedConfig;
+  const isDirty = !!draft && !isSameConfig(draft, savedConfig);
+  const navigation = useNavigation();
+  const [pendingLeave, setPendingLeave] = useState<NavigationAction>();
+  usePreventRemove(isDirty, ({ data }) => setPendingLeave(data.action));
   const { data: products } = useProducts();
   const { showToast } = useToast();
   const [selectedLabel, setSelectedLabel] = useState(CATEGORY_LABELS[0]);
@@ -186,13 +215,29 @@ export default function CharacterCustomizer({
   // 기본 파츠는 상품이 아니라 목록에 없어 잠기지 않는다. 목록을 못 받으면 잠그지 않는다.
   const lockedIds = new Set(
     (products ?? [])
+      .filter(isPartProduct)
       .filter((product) => PRODUCT_TYPE_TO_PART_KEY[product.product_type] === category.group)
-      .map((product) => toPartId(product.product_name)),
+      .map((product) => toPartId(product.product_id)),
   );
 
-  const handleSelect = (next: CharacterConfig) => {
-    setConfig(next);
-    void equipCharacter(next);
+  const handleSelect = (next: CharacterConfig) => setDraft(next);
+
+  const save = async () => {
+    try {
+      await setConfig(config);
+    } catch {
+      showToast('캐릭터를 저장하지 못했어요. 다시 시도해주세요.');
+      return false;
+    }
+    void equipCharacter(config);
+    setDraft(undefined);
+    showToast('캐릭터를 저장했어요');
+    return true;
+  };
+
+  const leave = () => {
+    if (pendingLeave) navigation.dispatch(pendingLeave);
+    setPendingLeave(undefined);
   };
 
   // 저장된 config를 불러오기 전에는 기본값이 잠깐 보이지 않도록 렌더를 보류한다.
@@ -202,7 +247,7 @@ export default function CharacterCustomizer({
 
   return (
     <View className="flex-1 gap-2xl">
-      <CharacterPreview config={config} />
+      <CharacterPreview config={config} canSave={isDirty} onSave={save} />
 
       <View className="flex-1">
         <CategoryTabs tabs={CATEGORY_LABELS} selected={selectedLabel} onSelect={setSelectedLabel} />
@@ -217,6 +262,16 @@ export default function CharacterCustomizer({
           />
         </View>
       </View>
+
+      <UnsavedChangesDialog
+        visible={!!pendingLeave}
+        onCancel={() => setPendingLeave(undefined)}
+        onDiscard={leave}
+        onSave={async () => {
+          if (await save()) leave();
+          else setPendingLeave(undefined);
+        }}
+      />
     </View>
   );
 }

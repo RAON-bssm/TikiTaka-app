@@ -36,9 +36,11 @@ export default function FeaturedItem({ item, previewConfig, onBuy, onCustomize }
           <Typography variant="h4" className="text-secondary-500">
             {item.name}
           </Typography>
-          <Typography variant="body3" className="text-gray-600">
-            {item.description}
-          </Typography>
+          {item.description && (
+            <Typography variant="body3" className="text-gray-600">
+              {item.description}
+            </Typography>
+          )}
           <Typography variant="h4" className="text-secondary-500">
             {item.price} 포인트
           </Typography>

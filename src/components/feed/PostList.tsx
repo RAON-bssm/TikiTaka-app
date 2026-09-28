@@ -7,7 +7,6 @@ import PostDeleteDialog from '@/components/feed/PostDeleteDialog';
 import PostEditDialog, { type EditingPost } from '@/components/feed/PostEditDialog';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Typography from '@/components/ui/Typography';
-import { pickRankingCharacter } from '@/constants/ranking';
 import type { CurrentBoardPostsState } from '@/hooks/post/useCurrentBoardPosts';
 import { useMyInfo } from '@/hooks/user/useMyInfo';
 import { formatRelativeTime } from '@/hooks/useRelativeTime';
@@ -60,17 +59,17 @@ export default function PostList({ state, limit }: Props) {
 
   return (
     <View className="flex flex-col gap-md">
-      {/* TODO: 백엔드 Post 모델에 like_count·avatar 필드 추가 시 매핑 보강 */}
       {state.posts.slice(0, limit).map((post) => (
         <FeedCard
           key={post.post_id}
           postId={post.post_id}
-          author={{ name: post.user_name, character: pickRankingCharacter(post.post_id) }}
+          author={{ name: post.user_name, userId: post.user_id }}
           imageUrl={post.post_image}
           title={post.content}
           place={post.location}
           timeAgo={formatRelativeTime(post.created_at)}
-          likeCount={0}
+          likeCount={post.like_count}
+          liked={post.liked_by_me}
           menuItems={
             post.user_id === myInfo?.user_id
               ? [
