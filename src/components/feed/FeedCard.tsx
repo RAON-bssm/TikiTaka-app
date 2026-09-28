@@ -28,6 +28,7 @@ interface Props {
   timeAgo: string;
   /** 없으면 좋아요 버튼을 숨긴다. (내 게시물 목록은 좋아요 수를 주지 않는다) */
   likeCount?: number;
+  liked?: boolean;
   menuItems?: MoreMenuItem[];
 }
 
@@ -39,6 +40,7 @@ export default function FeedCard({
   place,
   timeAgo,
   likeCount,
+  liked,
   menuItems,
 }: Props) {
   // imageUrl은 이미지 key라 조회 URL로 변환해야 한다.
@@ -96,6 +98,7 @@ export default function FeedCard({
           <LikeButton
             postId={postId}
             likeCount={likeCount}
+            liked={liked}
             className="items-center justify-center"
             textClassName="text-gray-700"
           />

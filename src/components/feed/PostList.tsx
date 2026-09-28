@@ -69,6 +69,7 @@ export default function PostList({ state, limit }: Props) {
           place={post.location}
           timeAgo={formatRelativeTime(post.created_at)}
           likeCount={post.like_count}
+          liked={post.liked_by_me}
           menuItems={
             post.user_id === myInfo?.user_id
               ? [

@@ -34,6 +34,7 @@ export interface Post {
   post_image: string;
   score: number;
   like_count: number;
+  liked_by_me: boolean;
   created_at: DateTimeString;
   updated_at: DateTimeString;
   content: string;
@@ -77,7 +78,7 @@ export interface MyPostListData {
 
 export type MyPostListResponse = ApiResponse<MyPostListData>;
 
-/** 없거나 삭제된 글이면 404. 목록용 Post와 달리 post_id가 없고, `liked_by_me`는 상세에만 있다. */
+/** 없거나 삭제된 글이면 404. 목록용 Post와 달리 post_id가 없다. */
 export interface PostDetail {
   user_id: string;
   user_name: string;
