@@ -22,7 +22,7 @@
       },
       "predictiveBackGestureEnabled": false,
       "permissions": ["android.permission.CAMERA"],
-      "package": "com.anonymous.TikiTaka"
+      "package": "com.tikitaka.raon"
     },
     "web": {
       "output": "static",
@@ -33,7 +33,8 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#FC8253"
+          "backgroundColor": "#FC8253",
+          "image": "./assets/images/splash/transparent.png"
         }
       ],
       [
