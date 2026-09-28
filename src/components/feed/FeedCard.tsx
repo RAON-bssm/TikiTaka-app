@@ -26,7 +26,8 @@ interface Props {
   title: string;
   place: string;
   timeAgo: string;
-  likeCount: number;
+  /** 없으면 좋아요 버튼을 숨긴다. (내 게시물 목록은 좋아요 수를 주지 않는다) */
+  likeCount?: number;
   menuItems?: MoreMenuItem[];
 }
 
@@ -91,12 +92,14 @@ export default function FeedCard({
           </View>
         </View>
 
-        <LikeButton
-          postId={postId}
-          likeCount={likeCount}
-          className="items-center justify-center"
-          textClassName="text-gray-700"
-        />
+        {likeCount !== undefined && (
+          <LikeButton
+            postId={postId}
+            likeCount={likeCount}
+            className="items-center justify-center"
+            textClassName="text-gray-700"
+          />
+        )}
       </View>
     </Pressable>
   );

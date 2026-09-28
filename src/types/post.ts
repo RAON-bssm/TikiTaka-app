@@ -47,6 +47,36 @@ export interface PostListData {
 
 export type PostListResponse = ApiResponse<PostListData>;
 
+/**
+ * `GET /api/user/me/posts`(마이페이지 게시물 보관함). 항상 본인 글이라 `user_id`·`user_name`이 없고,
+ * `like_count`도 없다(필요하면 상세를 따로 부른다). 라운드를 넘나드는 목록이라 그 글이 속했던
+ * 게시판·매치 정보가 붙는다. 삭제된 글은 빠지고 최신순이다.
+ */
+export interface MyPost {
+  post_id: string;
+  post_image: string;
+  score: number;
+  created_at: DateTimeString;
+  updated_at: DateTimeString;
+  content: string;
+  city_name: string;
+  location: string;
+  board_id: number;
+  mission: string;
+  team1_name: string;
+  team2_name: string;
+  /** enum 이름이 아니라 한글 설명이 온다. (`'일반 매치'` 등) */
+  match_type: string;
+  season: number;
+  round: number;
+}
+
+export interface MyPostListData {
+  post: MyPost[];
+}
+
+export type MyPostListResponse = ApiResponse<MyPostListData>;
+
 /** 없거나 삭제된 글이면 404. 목록용 Post와 달리 post_id가 없고, `liked_by_me`는 상세에만 있다. */
 export interface PostDetail {
   user_id: string;

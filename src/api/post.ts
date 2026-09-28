@@ -8,6 +8,8 @@ import type {
   CreatePostResponse,
   DeletePostResponse,
   LikePostResponse,
+  MyPost,
+  MyPostListData,
   Post,
   PostDetail,
   PostListData,
@@ -47,6 +49,11 @@ export async function getBoards(): Promise<Board[]> {
 // 목록과 상세가 같은 `/api/post/{id}` 경로다. 서버가 숫자면 목록, UUID면 상세로 라우팅한다.
 export async function getPosts(boardId: number): Promise<Post[]> {
   const { data } = await client.get<ApiResponse<PostListData>>(`/api/post/${boardId}`);
+  return data.data.post;
+}
+
+export async function getMyPosts(): Promise<MyPost[]> {
+  const { data } = await client.get<ApiResponse<MyPostListData>>('/api/user/me/posts');
   return data.data.post;
 }
 
