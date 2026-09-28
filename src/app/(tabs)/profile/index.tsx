@@ -51,8 +51,8 @@ export default function ProfileScreen() {
                 title="동네 확인하기"
                 description={
                   profile.at_home
-                    ? '본진에 있어요'
-                    : `지금 ${formatLocationName(profile.current_location_city_name, profile.current_location_name)}에 있어요`
+                    ? '본진에서 활동 중'
+                    : `원정 중 · ${formatLocationName(profile.current_location_city_name, profile.current_location_name)}`
                 }
                 onPress={() => setIsNeighborhoodSheetOpen(true)}
               />

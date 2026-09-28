@@ -22,12 +22,14 @@ const COPY = {
     submit: '이동하기',
     success: '현재 지역을 옮겼어요',
     failure: '현재 지역을 옮기지 못했어요',
+    notice: '지금 있는 동네로 바로 옮겨요. 본진이 아니면 동네 점수는 쌓이지 않아요.',
   },
   main: {
     title: '본진 변경',
     submit: '예약하기',
     success: '다음 라운드부터 본진이 바뀌어요',
     failure: '본진 변경을 예약하지 못했어요',
+    notice: '다음 라운드가 시작되면 바뀌어요. 그 전에는 취소할 수 있어요.',
   },
 } as const;
 
@@ -85,9 +87,14 @@ export default function EditRegion() {
           <Header />
           <View className="flex flex-col items-start gap-3xl w-full">
             <BackButton title={copy.title} />
-            <Typography variant="display" className="text-gray-600">
-              동네 정보 입력
-            </Typography>
+            <View className="flex flex-col gap-sm">
+              <Typography variant="display" className="text-gray-600">
+                동네 정보 입력
+              </Typography>
+              <Typography variant="body2" className="text-gray-400">
+                {copy.notice}
+              </Typography>
+            </View>
             {isLoading ? (
               <Skeleton className="h-[65px] w-full rounded-sm" />
             ) : isError ? (
