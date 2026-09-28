@@ -1,7 +1,6 @@
 import { createPost, getPosts } from '@/api/post';
 import { postKeys, rankingKeys, userKeys } from '@/api/queryKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import axios from 'axios';
 
 interface UploadPostParams {
   fileUri: string;
@@ -24,15 +23,6 @@ export function useUploadPost() {
       queryClient.invalidateQueries({ queryKey: postKeys.all });
       queryClient.invalidateQueries({ queryKey: rankingKeys.all });
       queryClient.invalidateQueries({ queryKey: userKeys.all });
-    },
-    onError: (error) => {
-      // 서버 거부 사유는 error.response.data에 있어 Axios 객체만 찍으면 보이지 않는다.
-      if (axios.isAxiosError(error)) {
-        console.log('upload post error status:', error.response?.status);
-        console.log('upload post error body:', JSON.stringify(error.response?.data));
-      } else {
-        console.log('upload post error:', error);
-      }
     },
   });
 }

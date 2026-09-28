@@ -31,10 +31,6 @@ async function compressImageForUpload(uri: string): Promise<string> {
     format: SaveFormat.JPEG,
   });
 
-  // [DEBUG] width/height가 0이 아니면 유효한 이미지로 재인코딩된 것.
-  console.log('[upload] source uri:', uri);
-  console.log('[upload] compressed:', result.uri, `${result.width}x${result.height}`);
-
   context.release();
   image.release();
 
