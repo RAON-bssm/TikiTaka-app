@@ -59,6 +59,7 @@ export interface GashaponDrawItem {
   product_name: string;
   product_image: string;
   product_type: ProductType;
+  description: string;
   /** 이미 보유한 상품이면 true. 인벤토리에 추가되지 않고 포인트 환급도 없다. */
   duplicate: boolean;
   message: string;
