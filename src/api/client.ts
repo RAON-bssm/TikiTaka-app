@@ -6,7 +6,7 @@ import { clearSignupToken, clearTokens, getAccessToken, getRefreshToken, setToke
 // axios 타입 선언상 `create`가 named export로도 잡히는 false positive라 비활성화한다.
 // eslint-disable-next-line import/no-named-as-default-member
 const client = axios.create({
-  baseURL: process.env.EXPO_PUBLIC_API_URL || 'https://api.example.com',
+  baseURL: process.env.EXPO_PUBLIC_API_URL,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

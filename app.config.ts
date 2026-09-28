@@ -12,7 +12,14 @@ const KAKAO_NATIVE_APP_KEY = process.env.KAKAO_NATIVE_APP_KEY;
  */
 const cleartextHost = (() => {
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
-  if (!apiUrl) return null;
+  // EAS 빌드에 값이 안 들어가면 baseURL이 비어 모든 요청이 실패하는 앱이 나오므로 빌드를 막는다.
+  if (!apiUrl) {
+    throw new Error(
+      'EXPO_PUBLIC_API_URL 환경변수가 없습니다.\n' +
+        '- 로컬: .env 에 EXPO_PUBLIC_API_URL=<백엔드 주소> 추가\n' +
+        '- EAS:  eas env:create --name EXPO_PUBLIC_API_URL --value <주소> --environment production',
+    );
+  }
 
   let url: URL;
   try {
@@ -79,7 +86,15 @@ export default ({ config }: ConfigContext) => {
       },
     },
     plugins: [
-      ...(config.plugins ?? []),
+      // Android도 릴리스 빌드는 평문 HTTP를 막는다(디버그만 허용). 예외 없이 배포하면 스토어 빌드에서만 전 요청이 실패한다.
+      ...(config.plugins ?? []).map((plugin) =>
+        cleartextHost && Array.isArray(plugin) && plugin[0] === 'expo-build-properties'
+          ? [
+              plugin[0],
+              { ...plugin[1], android: { ...plugin[1]?.android, usesCleartextTraffic: true } },
+            ]
+          : plugin,
+      ),
       ['@react-native-seoul/kakao-login', { kakaoAppKey: KAKAO_NATIVE_APP_KEY }],
     ],
   };

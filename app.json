@@ -22,7 +22,7 @@
       },
       "predictiveBackGestureEnabled": false,
       "permissions": ["android.permission.CAMERA"],
-      "package": "com.anonymous.TikiTaka"
+      "package": "com.tikitaka.raon"
     },
     "web": {
       "output": "static",
