@@ -7,7 +7,7 @@ export default function PostDetailSkeleton() {
   return (
     <>
       <View className="flex flex-col gap-lg">
-        <View className="flex flex-row items-center gap-md">
+        <View className="flex flex-row items-center gap-lg">
           <Skeleton className="size-14 rounded-full" />
           <View className="flex flex-col gap-xs">
             <Skeleton className="h-5 w-24 rounded-sm" />
@@ -17,8 +17,8 @@ export default function PostDetailSkeleton() {
         <Skeleton className="h-[320px] w-full rounded-lg" />
       </View>
 
-      <View className="flex-row items-center justify-between">
-        <Skeleton className="h-6 w-48 rounded-sm" />
+      <View className="flex-row items-start gap-md">
+        <Skeleton className="h-5 flex-1 rounded-sm" />
         <Skeleton className="size-6 rounded-sm" />
       </View>
 

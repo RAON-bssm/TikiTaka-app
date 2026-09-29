@@ -17,7 +17,7 @@ interface Props {
 export default function PostAuthor({ name, userId, place, createdAt, menuItems }: Props) {
   const timeAgo = useRelativeTime(createdAt);
   return (
-    <View className="flex flex-row items-center gap-md">
+    <View className="flex flex-row items-center gap-lg">
       <UserCharacter userId={userId} size={56} />
       <View className="flex flex-1 flex-col gap-xs">
         <Typography variant="h3" className="text-gray-800">
@@ -26,14 +26,14 @@ export default function PostAuthor({ name, userId, place, createdAt, menuItems }
         <View className="flex flex-row items-center gap-sm">
           <View className="flex flex-row items-center gap-xs">
             <PlaceIcon width={20} height={20} color={palette.gray[400]} />
-            <Typography variant="body2" className="text-gray-400 text-md">
+            <Typography variant="body3" className="text-gray-400">
               {place}
             </Typography>
           </View>
-          <Typography variant="body2" className="text-gray-400 text-md">
+          <Typography variant="body3" className="text-gray-400">
             ·
           </Typography>
-          <Typography variant="body2" className="text-gray-400 text-md">
+          <Typography variant="body3" className="text-gray-400">
             {timeAgo}
           </Typography>
         </View>

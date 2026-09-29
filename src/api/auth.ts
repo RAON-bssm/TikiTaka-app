@@ -1,4 +1,4 @@
-import type { ApiResponse } from '@/types/api';
+import type { ApiResponse, EmptyResponse } from '@/types/api';
 import type { CheckNameData, LoginData, Provider, SignupRequest, TokenData } from '@/types/auth';
 import client from './client';
 
@@ -28,4 +28,12 @@ export async function checkUserName(userName: string): Promise<boolean> {
 /** access token이 만료됐으면 실패할 수 있으니, 호출부는 결과와 무관하게 로컬 토큰을 비워야 한다. */
 export async function logout(): Promise<void> {
   await client.post<ApiResponse<null>>('/api/auth/logout');
+}
+
+/**
+ * 서버가 닉네임·소셜 식별자를 익명화하고 refresh token을 지운다. 같은 소셜 계정으로 다시 들어오면 새 가입이다.
+ * HTTP 204라 바디가 없다. 로그아웃과 달리 실패하면 계정이 그대로 남으므로 로컬 정리도 하지 않는다.
+ */
+export async function withdraw(): Promise<void> {
+  await client.post<EmptyResponse>('/api/auth/withdraw');
 }

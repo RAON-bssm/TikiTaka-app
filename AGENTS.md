@@ -140,6 +140,8 @@
 - **TINT_ASSETS** (`hairHighlights`): 모양 없이 색상만으로 고르는 파츠. `그룹 → 색상 → 이미지`. 파일 경로 `assets/character/<그룹 폴더>/<색상>.webp`. (눈 색 `eyesColor`를 따라가는 머리 하이라이트)
 
 > 규칙: **id = 폴더/파일명(확장자 제외).** id는 종류가 달라도 겹치지 않도록 **`종류-이름`** 형식으로 짓습니다(`hair-back-bob`, `accessory-glasses`, `body-01`). 서버 상품 id와 1:1로 맞추기 위한 규칙입니다. 그룹 폴더명은 그룹명의 kebab-case입니다(`hairBack` → `hair-back`, `hairHighlights` → `hair-highlights`). `partMeta.ts`의 키도 이 폴더 경로 기준입니다.
+> **색상 id는 서버 색 코드와 같은 영문 대문자**입니다(`BLACK`). 파일명은 소문자(`black.webp`)로 두고 레지스트리 키만 대문자로 적습니다.
+>
 > 앞머리·뒷머리는 모양은 독립이지만 색상 파일명(`black`/`blond`/`brown`/`pink`)을 맞춰야 `hairColor` 하나로 앞/뒤가 같은 색으로 렌더됩니다. 색 선택지는 뒷머리 모양 기준으로 만들어지므로, 새 머리 색은 앞·뒤 모든 모양에 같은 파일명으로 넣으세요. 빠진 조합은 에러 없이 해당 레이어만 사라집니다.
 > 같은 이유로 머리 하이라이트 색(`hair-highlights/<색>.webp`)은 눈 색 파일명과 맞춰야 합니다.
 

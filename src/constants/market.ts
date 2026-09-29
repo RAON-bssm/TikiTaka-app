@@ -74,7 +74,7 @@ export function toMarketItem(product: PartProduct): MarketItem {
     group,
     assetId,
     name: product.product_name,
-    description: product.product_description,
+    description: product.description ?? undefined,
     price: product.price,
     gridSource: resolveLayerSource(previewConfig, layer),
   };
@@ -82,27 +82,28 @@ export function toMarketItem(product: PartProduct): MarketItem {
 
 // ──────────────────────────── 뽑기 (가챠) ────────────────────────────
 
-/** 서버 `GashaponService`가 이 id로 뽑는 횟수를 정한다. 가격은 상품 목록에서 읽는다. */
+/**
+ * 서버 `GashaponService`가 이 id로 뽑는 횟수를 정한다. id는 **하이픈**이다(`gashapon-1set`).
+ * 서버 상품 목록은 뽑기권을 빼고 내려줘서 가격을 못 읽는다 — 그때는 `fallbackCost`를 보여 준다.
+ * 실제 차감액은 DB의 뽑기권 price이므로, DB 값이 바뀌면 여기도 맞춰야 한다.
+ */
 export const GASHAPON_OPTIONS = [
-  { productId: 'gashapon_1set', label: '1회 뽑기' },
-  { productId: 'gashapon_5set', label: '5회 뽑기' },
+  { productId: 'gashapon-1set', label: '1회 뽑기', fallbackCost: 500 },
+  { productId: 'gashapon-5set', label: '5회 뽑기', fallbackCost: 2500 },
 ] as const;
 
 export interface GotchaPull {
   name: string;
   duplicate: boolean;
-  message: string;
   preview: CharacterConfig;
 }
 
-export function toGotchaPull(item: GashaponDrawItem): GotchaPull {
+export function toGotchaPull(item: GashaponDrawItem, base: CharacterConfig): GotchaPull {
   return {
     name: item.product_name,
     duplicate: item.duplicate,
-    message: item.message,
-    // TODO: 유저의 실제 캐릭터 config를 받아오면 그걸 기반으로 교체
     preview: {
-      ...DEFAULT_CHARACTER_CONFIG,
+      ...base,
       [PRODUCT_TYPE_TO_PART_KEY[item.product_type]]: toPartId(item.product_id),
     },
   };

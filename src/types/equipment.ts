@@ -5,12 +5,12 @@ export interface EquipmentItem {
   product_id: string;
   product_name: string;
   product_image: string;
+  color?: string | null;
 }
 
 /**
  * `GET /api/equipment`(내 장비)와 `GET /api/equipment/{user_id}`(남의 장비)가 같은 형태다.
- * 착용하지 않은 슬롯은 키가 빠진다. 서버엔 색상 개념이 없어 `CharacterConfig`로 바꾸면
- * 모양만 product_id(= 파츠 에셋 id)로 복원된다.
+ * 착용하지 않은 슬롯은 키가 빠진다. 모양은 product_id(= 파츠 에셋 id)로, 색은 `hair_color`/`eyes_color`로 복원한다.
  */
 export interface Equipment {
   body?: EquipmentItem;
@@ -20,6 +20,8 @@ export interface Equipment {
   hair_front?: EquipmentItem;
   hair_back?: EquipmentItem;
   mouth?: EquipmentItem;
+  hair_color?: string | null;
+  eyes_color?: string | null;
 }
 
 export type EquipmentResponse = ApiResponse<Equipment>;
@@ -36,4 +38,6 @@ export interface EquipRequest {
   hair_front?: string;
   hair_back?: string;
   mouth?: string;
+  hair_color?: string;
+  eyes_color?: string;
 }

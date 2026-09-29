@@ -13,6 +13,7 @@ import Header from '@/components/ui/Header';
 import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
 import { GASHAPON_OPTIONS, toGotchaPull, type GotchaPull } from '@/constants/market';
+import { useCharacterConfig } from '@/hooks/character/useCharacterConfig';
 import { useDrawGashapon } from '@/hooks/product/useDrawGashapon';
 import { useProducts } from '@/hooks/product/useProducts';
 
@@ -28,16 +29,17 @@ export default function GachaScreen() {
   const current = results[index];
 
   const { data: products, isError, refetch } = useProducts();
+  const { config: myConfig, isLoaded: isCharacterConfigLoaded } = useCharacterConfig();
   const { mutate: draw, isPending } = useDrawGashapon();
   const { showToast } = useToast();
 
   const handlePull = (productId: string) => {
-    if (isPending) return;
+    if (isPending || !isCharacterConfigLoaded) return;
     draw(
       { product_id: productId },
       {
         onSuccess: (items) => {
-          setResults(items.map(toGotchaPull));
+          setResults(items.map((item) => toGotchaPull(item, myConfig)));
           setIndex(0);
         },
         onError: (error) =>
@@ -91,8 +93,11 @@ export default function GachaScreen() {
                 <PullButton
                   key={option.productId}
                   label={option.label}
-                  cost={products?.find((product) => product.product_id === option.productId)?.price}
-                  disabled={isPending}
+                  cost={
+                    products?.find((product) => product.product_id === option.productId)?.price ??
+                    option.fallbackCost
+                  }
+                  disabled={isPending || !isCharacterConfigLoaded}
                   onPress={() => handlePull(option.productId)}
                 />
               ))}

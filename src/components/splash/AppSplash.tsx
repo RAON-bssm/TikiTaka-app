@@ -4,9 +4,11 @@ import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { FadeOut } from 'react-native-reanimated';
 
+import { hasSeenPermissionNotice, markPermissionNoticeSeen } from '@/api/permissionNotice';
 import LogoIcon from '@/assets/images/splash/logo.svg';
 import RingIcon from '@/assets/images/splash/ring.svg';
 import StarIcon from '@/assets/images/splash/star.svg';
+import PermissionNoticeDialog from '@/components/permission/PermissionNoticeDialog';
 import Typography from '@/components/ui/Typography';
 import { palette } from '@/constants/colors';
 import { useAuthStatus } from '@/hooks/auth/useAuthStatus';
@@ -28,13 +30,33 @@ const MIN_VISIBLE_MS = 1500;
 export default function AppSplash() {
   const status = useAuthStatus();
   const [isMinTimeElapsed, setIsMinTimeElapsed] = useState(false);
+  // null = 아직 확인 중. 확인 전에 스플래시를 걷으면 앱 화면이 잠깐 보인 뒤 안내가 떠서, 결과가 나올 때까지 덮어 둔다.
+  const [showPermissionNotice, setShowPermissionNotice] = useState<boolean | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsMinTimeElapsed(true), MIN_VISIBLE_MS);
     return () => clearTimeout(timer);
   }, []);
 
-  if (status !== 'loading' && isMinTimeElapsed) return null;
+  useEffect(() => {
+    hasSeenPermissionNotice()
+      .then((seen) => setShowPermissionNotice(!seen))
+      .catch(() => setShowPermissionNotice(true));
+  }, []);
+
+  const handleConfirmPermissionNotice = () => {
+    setShowPermissionNotice(false);
+    markPermissionNoticeSeen().catch(() => {});
+  };
+
+  if (status !== 'loading' && isMinTimeElapsed && showPermissionNotice !== null) {
+    return (
+      <PermissionNoticeDialog
+        visible={showPermissionNotice}
+        onConfirm={handleConfirmPermissionNotice}
+      />
+    );
+  }
 
   return (
     <Animated.View exiting={FadeOut.duration(300)} style={StyleSheet.absoluteFill}>

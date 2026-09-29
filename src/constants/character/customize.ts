@@ -5,19 +5,18 @@ import type { CharacterConfig, LayerDef, PartConfigKey } from './types';
 
 /** 스와치 표시 색. */
 export const COLOR_HEX: Record<string, string> = {
-  black: '#2D3748',
-  brown: '#9a8d7f',
-  blond: '#eee9c6',
-  green: '#8aed8c',
-  orange: '#FC8253',
-  pink: '#ef89c6',
-  sky: '#e2e9f7',
-  blue: '#4078FF',
+  BLACK: '#2D3748',
+  BROWN: '#9a8d7f',
+  BLOND: '#eee9c6',
+  GREEN: '#8aed8c',
+  ORANGE: '#FC8253',
+  PINK: '#ef89c6',
+  SKY: '#e2e9f7',
+  BLUE: '#4078FF',
 };
 
-/** 같은 색 id라도 머리는 톤이 달라(pink 등) 덮어쓴다. 없는 색은 COLOR_HEX로 폴백. */
 export const HAIR_COLOR_HEX: Record<string, string> = {
-  pink: '#f9d7e4',
+  PINK: '#f9d7e4',
 };
 
 function resolveHex(id: string, override?: Record<string, string>): string {

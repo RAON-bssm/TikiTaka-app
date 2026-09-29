@@ -8,10 +8,11 @@ import { CharacterConfig } from '@/constants/character/types';
 import { isPartProduct, PRODUCT_TYPE_TO_PART_KEY } from '@/constants/market';
 import { useCharacterConfig } from '@/hooks/character/useCharacterConfig';
 import { useEquipCharacter } from '@/hooks/equipment/useEquipCharacter';
+import { useLeaveGuard } from '@/hooks/navigation/useLeaveGuard';
 import { useProducts } from '@/hooks/product/useProducts';
 import { Image } from 'expo-image';
 import { useNavigation } from 'expo-router';
-import { usePreventRemove, type NavigationAction } from 'expo-router/react-navigation';
+import { usePreventRemove } from 'expo-router/react-navigation';
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -203,8 +204,14 @@ export default function CharacterCustomizer({
   const config = draft ?? savedConfig;
   const isDirty = !!draft && !isSameConfig(draft, savedConfig);
   const navigation = useNavigation();
-  const [pendingLeave, setPendingLeave] = useState<NavigationAction>();
-  usePreventRemove(isDirty, ({ data }) => setPendingLeave(data.action));
+  // 확인 뒤 이어 갈 이동. useState에 함수를 바로 넘기면 updater로 실행되므로 `() => fn`으로 감싸 넣는다.
+  const [pendingLeave, setPendingLeave] = useState<() => void>();
+  // 뒤로 가기처럼 화면이 제거되는 이동
+  usePreventRemove(isDirty, ({ data }) =>
+    setPendingLeave(() => () => navigation.dispatch(data.action)),
+  );
+  // 앱바·헤더(로고·프로필)처럼 이 화면을 남겨 둔 채 떠나는 이동
+  useLeaveGuard(isDirty, (proceed) => setPendingLeave(() => proceed));
   const { data: products } = useProducts();
   const { showToast } = useToast();
   const [selectedLabel, setSelectedLabel] = useState(CATEGORY_LABELS[0]);
@@ -236,7 +243,7 @@ export default function CharacterCustomizer({
   };
 
   const leave = () => {
-    if (pendingLeave) navigation.dispatch(pendingLeave);
+    pendingLeave?.();
     setPendingLeave(undefined);
   };
 
@@ -266,7 +273,11 @@ export default function CharacterCustomizer({
       <UnsavedChangesDialog
         visible={!!pendingLeave}
         onCancel={() => setPendingLeave(undefined)}
-        onDiscard={leave}
+        onDiscard={() => {
+          // 탭 전환은 이 화면이 뒤에 남으므로, 돌아왔을 때 버린 변경이 다시 보이지 않게 비운다.
+          setDraft(undefined);
+          leave();
+        }}
         onSave={async () => {
           if (await save()) leave();
           else setPendingLeave(undefined);

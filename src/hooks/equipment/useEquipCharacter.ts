@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { equipItems } from '@/api/equipment';
 import { getInventory } from '@/api/inventory';
 import { equipmentKeys, inventoryKeys } from '@/api/queryKeys';
-import { configToEquipRequest } from '@/constants/character/equipment';
+import { configToColorRequest, configToEquipRequest } from '@/constants/character/equipment';
 import type { CharacterConfig } from '@/constants/character/types';
 
 /**
@@ -21,6 +21,9 @@ export function useEquipCharacter() {
   });
 
   return async (config: CharacterConfig) => {
+    // 색은 착용과 따로 보낸다. 서버에 없는 색이면 요청 전체가 400이라, 같이 보내면 착용까지 막힌다.
+    mutate(configToColorRequest(config));
+
     try {
       const inventory = await queryClient.fetchQuery({
         queryKey: inventoryKeys.list(),

@@ -61,10 +61,10 @@ export default function ProfileScreen() {
           {/* 화면 이동일 뿐이라 프로필 요청 결과와 무관하게 항상 보여준다. */}
           <View className="flex flex-row gap-md w-full">
             <Button
-              content="프로필 수정"
+              content="내 설정"
               variant="light"
               className="flex-1"
-              onclick={() => router.push('/profile/edit')}
+              onclick={() => router.push('/profile/settings')}
             />
             <Button
               content="캐릭터 꾸미기"

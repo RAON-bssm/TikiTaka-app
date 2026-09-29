@@ -3,7 +3,6 @@ import * as SecureStore from 'expo-secure-store';
 import { toPartId } from '@/constants/character/legacyIds';
 import type { CharacterConfig } from '@/constants/character/types';
 
-// 서버가 색상을 저장하지 못해 config 원본은 기기에 둔다. 서버엔 보유 상품의 착용 상태만 맞춘다.
 const CHARACTER_CONFIG_KEY = 'characterConfig';
 
 /** 없거나 손상된 값이면 null(→ 기본값 사용). */
@@ -21,6 +20,8 @@ export async function getSavedCharacter(): Promise<CharacterConfig | null> {
       hairFront: toPartId(config.hairFront),
       clothing: config.clothing && toPartId(config.clothing),
       accessory: config.accessory && toPartId(config.accessory),
+      hairColor: config.hairColor.toUpperCase(),
+      eyesColor: config.eyesColor.toUpperCase(),
     };
   } catch {
     return null;

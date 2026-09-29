@@ -19,7 +19,6 @@ export function useCharacterConfig(fallback: CharacterConfig = DEFAULT_CHARACTER
     queryFn: async () => {
       const saved = await getSavedCharacter();
       if (saved) return saved;
-      // 새 기기·재설치처럼 저장본이 없을 때만 서버 착용 상태로 모양을 복원한다. 색은 기본값이다.
       try {
         return equipmentToConfig(await getEquipment(), fallback);
       } catch {
