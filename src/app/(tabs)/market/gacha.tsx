@@ -91,7 +91,10 @@ export default function GachaScreen() {
                 <PullButton
                   key={option.productId}
                   label={option.label}
-                  cost={products?.find((product) => product.product_id === option.productId)?.price}
+                  cost={
+                    products?.find((product) => product.product_id === option.productId)?.price ??
+                    option.fallbackCost
+                  }
                   disabled={isPending}
                   onPress={() => handlePull(option.productId)}
                 />
