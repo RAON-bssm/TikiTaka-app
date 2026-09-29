@@ -1,7 +1,5 @@
-import { useEffect, useState } from 'react';
 import { Modal, View } from 'react-native';
 
-import { hasSeenPermissionNotice, markPermissionNoticeSeen } from '@/api/permissionNotice';
 import CameraIcon from '@/assets/icons/app-var/camera.svg';
 import Button from '@/components/ui/Button';
 import Typography from '@/components/ui/Typography';
@@ -11,20 +9,15 @@ import { palette } from '@/constants/colors';
  * 정보통신망법 제22조의2: 권한을 요청하기 전에 어떤 권한을 왜 쓰는지 먼저 알려야 한다(원스토어 심사 항목).
  * 설치 후 처음 한 번만 띄우고, 실제 권한 요청은 카메라 화면에 들어갈 때 한다.
  */
-export default function PermissionNoticeDialog() {
-  const [visible, setVisible] = useState(false);
+interface PermissionNoticeDialogProps {
+  visible: boolean;
+  onConfirm: () => void;
+}
 
-  useEffect(() => {
-    hasSeenPermissionNotice()
-      .then((seen) => setVisible(!seen))
-      .catch(() => setVisible(true));
-  }, []);
-
-  const handleConfirm = () => {
-    setVisible(false);
-    markPermissionNoticeSeen().catch(() => {});
-  };
-
+export default function PermissionNoticeDialog({
+  visible,
+  onConfirm,
+}: PermissionNoticeDialogProps) {
   return (
     <Modal visible={visible} transparent animationType="fade" statusBarTranslucent>
       <View className="flex-1 items-center justify-center bg-black/40">
@@ -57,7 +50,7 @@ export default function PermissionNoticeDialog() {
             수 있어요.
           </Typography>
 
-          <Button content="확인" onclick={handleConfirm} />
+          <Button content="확인" onclick={onConfirm} />
         </View>
       </View>
     </Modal>
