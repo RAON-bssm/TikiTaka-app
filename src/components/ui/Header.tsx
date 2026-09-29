@@ -1,19 +1,20 @@
 import { router } from 'expo-router';
+import { useState } from 'react';
 import { Image, Pressable, View } from 'react-native';
 
 import NotificationsIcon from '@/assets/icons/header/notifications.svg';
 import ProfileImageIcon from '@/assets/icons/header/ProfileImage.svg';
 import VectorIcon from '@/assets/icons/header/Vector.svg';
 import LogoImage from '@/assets/icons/logo.webp';
+import LogoutDialog from '@/components/auth/LogoutDialog';
 import { palette } from '@/constants/colors';
-import { useLogout } from '@/hooks/auth/useLogout';
 import { guardedNavigate } from '@/hooks/navigation/useLeaveGuard';
 import MoreMenu from './MoreMenu';
 
 const COLOR_ICON = palette.gray[400];
 
 const Header = () => {
-  const logout = useLogout();
+  const [isLogoutOpen, setIsLogoutOpen] = useState(false);
 
   return (
     <View className="w-full flex-row items-center justify-between">
@@ -32,7 +33,7 @@ const Header = () => {
         <MoreMenu
           icon={VectorIcon}
           iconColor={COLOR_ICON}
-          items={[{ label: '로그아웃', destructive: true, onPress: () => logout.mutate() }]}
+          items={[{ label: '로그아웃', destructive: true, onPress: () => setIsLogoutOpen(true) }]}
         />
 
         <Pressable
@@ -42,6 +43,8 @@ const Header = () => {
           <ProfileImageIcon width={32} height={32} />
         </Pressable>
       </View>
+
+      <LogoutDialog visible={isLogoutOpen} onClose={() => setIsLogoutOpen(false)} />
     </View>
   );
 };

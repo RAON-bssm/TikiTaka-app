@@ -3,17 +3,17 @@ import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import LogoutDialog from '@/components/auth/LogoutDialog';
 import WithdrawDialog from '@/components/auth/WithdrawDialog';
 import BackButton from '@/components/ui/BackButton';
 import Header from '@/components/ui/Header';
 import NavRow from '@/components/ui/NavRow';
 import Typography from '@/components/ui/Typography';
-import { useLogout } from '@/hooks/auth/useLogout';
 import { useMyProfile } from '@/hooks/user/useMyProfile';
 
 export default function SettingsScreen() {
-  const logout = useLogout();
   const { data: profile } = useMyProfile();
+  const [isLogoutOpen, setIsLogoutOpen] = useState(false);
   const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
 
   return (
@@ -24,7 +24,7 @@ export default function SettingsScreen() {
 
         <View className="gap-md">
           <NavRow title="프로필 수정" onPress={() => router.push('/profile/edit')} />
-          <NavRow title="로그아웃" onPress={() => logout.mutate()} />
+          <NavRow title="로그아웃" onPress={() => setIsLogoutOpen(true)} />
         </View>
 
         {profile ? (
@@ -39,6 +39,8 @@ export default function SettingsScreen() {
           </Pressable>
         ) : null}
       </View>
+
+      <LogoutDialog visible={isLogoutOpen} onClose={() => setIsLogoutOpen(false)} />
 
       {profile ? (
         <WithdrawDialog
