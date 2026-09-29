@@ -48,7 +48,6 @@ export default function Gotcha({ result, progress, onDismiss }: Props) {
     >
       <Pressable className="flex-1 items-center justify-center bg-gray-400/50" onPress={onDismiss}>
         <View className="items-center justify-center">
-          {/* 반투명 원 3겹으로 라디얼 글로우를 흉내 낸다 */}
           <View className="absolute h-[340px] w-[340px] rounded-full bg-white/30" />
           <View className="absolute h-[260px] w-[260px] rounded-full bg-white/50" />
           <View className="absolute h-[190px] w-[190px] rounded-full bg-white/70" />
@@ -56,13 +55,17 @@ export default function Gotcha({ result, progress, onDismiss }: Props) {
           <Animated.View entering={ZoomIn.springify()} className="items-center">
             <OutlinedItemName name={result.name} />
 
-            <Character config={result.preview} size={230} />
-
-            {result.duplicate ? (
-              <Typography variant="body1" className="text-gray-600">
-                {result.message}
-              </Typography>
-            ) : null}
+            <View>
+              <Character config={result.preview} size={230} />
+              {result.duplicate ? null : (
+                <Animated.View
+                  entering={ZoomIn.delay(250).springify()}
+                  className="absolute right-lg top-lg rounded-full bg-primary-600 px-md py-xs"
+                >
+                  <Text className="font-title text-md text-white">NEW</Text>
+                </Animated.View>
+              )}
+            </View>
 
             {progress ? (
               <Typography variant="body1" className="text-gray-500">

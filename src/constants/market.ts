@@ -95,7 +95,6 @@ export const GASHAPON_OPTIONS = [
 export interface GotchaPull {
   name: string;
   duplicate: boolean;
-  message: string;
   preview: CharacterConfig;
 }
 
@@ -103,7 +102,6 @@ export function toGotchaPull(item: GashaponDrawItem, base: CharacterConfig): Got
   return {
     name: item.product_name,
     duplicate: item.duplicate,
-    message: item.message,
     preview: {
       ...base,
       [PRODUCT_TYPE_TO_PART_KEY[item.product_type]]: toPartId(item.product_id),
