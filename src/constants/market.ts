@@ -99,14 +99,13 @@ export interface GotchaPull {
   preview: CharacterConfig;
 }
 
-export function toGotchaPull(item: GashaponDrawItem): GotchaPull {
+export function toGotchaPull(item: GashaponDrawItem, base: CharacterConfig): GotchaPull {
   return {
     name: item.product_name,
     duplicate: item.duplicate,
     message: item.message,
-    // TODO: 유저의 실제 캐릭터 config를 받아오면 그걸 기반으로 교체
     preview: {
-      ...DEFAULT_CHARACTER_CONFIG,
+      ...base,
       [PRODUCT_TYPE_TO_PART_KEY[item.product_type]]: toPartId(item.product_id),
     },
   };

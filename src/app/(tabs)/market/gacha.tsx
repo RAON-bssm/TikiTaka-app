@@ -13,6 +13,7 @@ import Header from '@/components/ui/Header';
 import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
 import { GASHAPON_OPTIONS, toGotchaPull, type GotchaPull } from '@/constants/market';
+import { useCharacterConfig } from '@/hooks/character/useCharacterConfig';
 import { useDrawGashapon } from '@/hooks/product/useDrawGashapon';
 import { useProducts } from '@/hooks/product/useProducts';
 
@@ -28,6 +29,7 @@ export default function GachaScreen() {
   const current = results[index];
 
   const { data: products, isError, refetch } = useProducts();
+  const { config: myConfig } = useCharacterConfig();
   const { mutate: draw, isPending } = useDrawGashapon();
   const { showToast } = useToast();
 
@@ -37,7 +39,7 @@ export default function GachaScreen() {
       { product_id: productId },
       {
         onSuccess: (items) => {
-          setResults(items.map(toGotchaPull));
+          setResults(items.map((item) => toGotchaPull(item, myConfig)));
           setIndex(0);
         },
         onError: (error) =>
