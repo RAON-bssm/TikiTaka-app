@@ -29,12 +29,12 @@ export default function GachaScreen() {
   const current = results[index];
 
   const { data: products, isError, refetch } = useProducts();
-  const { config: myConfig } = useCharacterConfig();
+  const { config: myConfig, isLoaded: isCharacterConfigLoaded } = useCharacterConfig();
   const { mutate: draw, isPending } = useDrawGashapon();
   const { showToast } = useToast();
 
   const handlePull = (productId: string) => {
-    if (isPending) return;
+    if (isPending || !isCharacterConfigLoaded) return;
     draw(
       { product_id: productId },
       {
@@ -97,7 +97,7 @@ export default function GachaScreen() {
                     products?.find((product) => product.product_id === option.productId)?.price ??
                     option.fallbackCost
                   }
-                  disabled={isPending}
+                  disabled={isPending || !isCharacterConfigLoaded}
                   onPress={() => handlePull(option.productId)}
                 />
               ))}
