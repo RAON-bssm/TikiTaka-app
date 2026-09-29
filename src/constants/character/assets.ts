@@ -11,7 +11,7 @@ import {
 } from './types';
 
 // Metro는 동적 경로 require를 지원하지 않아 에셋을 여기에 직접 매핑한다. 매핑하지 않은 에셋은 안 보인다.
-// id = 폴더/파일명(확장자 제외). 앞/뒤 머리는 hairColor 하나로 칠해지므로 색상 키를 맞춰야 한다.
+// id = 폴더/파일명(확장자 제외). 단 **색상 id만 서버 색 코드와 같은 대문자**다(파일명은 소문자, `black.webp` → `BLACK`).
 // 에셋 추가 후 `pnpm generate:part-meta`로 partMeta.ts를 재생성한다.
 
 /** `assets/character/<그룹>/<모양>.webp` */
@@ -44,81 +44,81 @@ const SIMPLE_ASSETS: Record<SimpleGroup, Record<string, number>> = {
 const COLOR_ASSETS: Record<ColorGroup, Record<string, Record<string, number>>> = {
   eyes: {
     'eyes-01': {
-      green: require('@/assets/character/eyes/eyes-01/green.webp'),
-      orange: require('@/assets/character/eyes/eyes-01/orange.webp'),
-      pink: require('@/assets/character/eyes/eyes-01/pink.webp'),
-      sky: require('@/assets/character/eyes/eyes-01/sky.webp'),
-      blue: require('@/assets/character/eyes/eyes-01/blue.webp'),
+      GREEN: require('@/assets/character/eyes/eyes-01/green.webp'),
+      ORANGE: require('@/assets/character/eyes/eyes-01/orange.webp'),
+      PINK: require('@/assets/character/eyes/eyes-01/pink.webp'),
+      SKY: require('@/assets/character/eyes/eyes-01/sky.webp'),
+      BLUE: require('@/assets/character/eyes/eyes-01/blue.webp'),
     },
   },
   hairBack: {
     'hair-back-bob': {
-      black: require('@/assets/character/hair-back/hair-back-bob/black.webp'),
-      blond: require('@/assets/character/hair-back/hair-back-bob/blond.webp'),
-      brown: require('@/assets/character/hair-back/hair-back-bob/brown.webp'),
-      pink: require('@/assets/character/hair-back/hair-back-bob/pink.webp'),
+      BLACK: require('@/assets/character/hair-back/hair-back-bob/black.webp'),
+      BLOND: require('@/assets/character/hair-back/hair-back-bob/blond.webp'),
+      BROWN: require('@/assets/character/hair-back/hair-back-bob/brown.webp'),
+      PINK: require('@/assets/character/hair-back/hair-back-bob/pink.webp'),
     },
     'hair-back-long': {
-      black: require('@/assets/character/hair-back/hair-back-long/black.webp'),
-      blond: require('@/assets/character/hair-back/hair-back-long/blond.webp'),
-      brown: require('@/assets/character/hair-back/hair-back-long/brown.webp'),
-      pink: require('@/assets/character/hair-back/hair-back-long/pink.webp'),
+      BLACK: require('@/assets/character/hair-back/hair-back-long/black.webp'),
+      BLOND: require('@/assets/character/hair-back/hair-back-long/blond.webp'),
+      BROWN: require('@/assets/character/hair-back/hair-back-long/brown.webp'),
+      PINK: require('@/assets/character/hair-back/hair-back-long/pink.webp'),
     },
     'hair-back-puff': {
-      black: require('@/assets/character/hair-back/hair-back-puff/black.webp'),
-      blond: require('@/assets/character/hair-back/hair-back-puff/blond.webp'),
-      brown: require('@/assets/character/hair-back/hair-back-puff/brown.webp'),
-      pink: require('@/assets/character/hair-back/hair-back-puff/pink.webp'),
+      BLACK: require('@/assets/character/hair-back/hair-back-puff/black.webp'),
+      BLOND: require('@/assets/character/hair-back/hair-back-puff/blond.webp'),
+      BROWN: require('@/assets/character/hair-back/hair-back-puff/brown.webp'),
+      PINK: require('@/assets/character/hair-back/hair-back-puff/pink.webp'),
     },
     'hair-back-short': {
-      black: require('@/assets/character/hair-back/hair-back-short/black.webp'),
-      blond: require('@/assets/character/hair-back/hair-back-short/blond.webp'),
-      brown: require('@/assets/character/hair-back/hair-back-short/brown.webp'),
-      pink: require('@/assets/character/hair-back/hair-back-short/pink.webp'),
+      BLACK: require('@/assets/character/hair-back/hair-back-short/black.webp'),
+      BLOND: require('@/assets/character/hair-back/hair-back-short/blond.webp'),
+      BROWN: require('@/assets/character/hair-back/hair-back-short/brown.webp'),
+      PINK: require('@/assets/character/hair-back/hair-back-short/pink.webp'),
     },
     'hair-back-side-bob': {
-      black: require('@/assets/character/hair-back/hair-back-side-bob/black.webp'),
-      blond: require('@/assets/character/hair-back/hair-back-side-bob/blond.webp'),
-      brown: require('@/assets/character/hair-back/hair-back-side-bob/brown.webp'),
-      pink: require('@/assets/character/hair-back/hair-back-side-bob/pink.webp'),
+      BLACK: require('@/assets/character/hair-back/hair-back-side-bob/black.webp'),
+      BLOND: require('@/assets/character/hair-back/hair-back-side-bob/blond.webp'),
+      BROWN: require('@/assets/character/hair-back/hair-back-side-bob/brown.webp'),
+      PINK: require('@/assets/character/hair-back/hair-back-side-bob/pink.webp'),
     },
     'hair-back-side-tail': {
-      black: require('@/assets/character/hair-back/hair-back-side-tail/black.webp'),
-      blond: require('@/assets/character/hair-back/hair-back-side-tail/blond.webp'),
-      brown: require('@/assets/character/hair-back/hair-back-side-tail/brown.webp'),
-      pink: require('@/assets/character/hair-back/hair-back-side-tail/pink.webp'),
+      BLACK: require('@/assets/character/hair-back/hair-back-side-tail/black.webp'),
+      BLOND: require('@/assets/character/hair-back/hair-back-side-tail/blond.webp'),
+      BROWN: require('@/assets/character/hair-back/hair-back-side-tail/brown.webp'),
+      PINK: require('@/assets/character/hair-back/hair-back-side-tail/pink.webp'),
     },
     'hair-back-low-tail': {
-      black: require('@/assets/character/hair-back/hair-back-low-tail/black.webp'),
-      blond: require('@/assets/character/hair-back/hair-back-low-tail/blond.webp'),
-      brown: require('@/assets/character/hair-back/hair-back-low-tail/brown.webp'),
-      pink: require('@/assets/character/hair-back/hair-back-low-tail/pink.webp'),
+      BLACK: require('@/assets/character/hair-back/hair-back-low-tail/black.webp'),
+      BLOND: require('@/assets/character/hair-back/hair-back-low-tail/blond.webp'),
+      BROWN: require('@/assets/character/hair-back/hair-back-low-tail/brown.webp'),
+      PINK: require('@/assets/character/hair-back/hair-back-low-tail/pink.webp'),
     },
     'hair-back-low-pigtails': {
-      black: require('@/assets/character/hair-back/hair-back-low-pigtails/black.webp'),
-      blond: require('@/assets/character/hair-back/hair-back-low-pigtails/blond.webp'),
-      brown: require('@/assets/character/hair-back/hair-back-low-pigtails/brown.webp'),
-      pink: require('@/assets/character/hair-back/hair-back-low-pigtails/pink.webp'),
+      BLACK: require('@/assets/character/hair-back/hair-back-low-pigtails/black.webp'),
+      BLOND: require('@/assets/character/hair-back/hair-back-low-pigtails/blond.webp'),
+      BROWN: require('@/assets/character/hair-back/hair-back-low-pigtails/brown.webp'),
+      PINK: require('@/assets/character/hair-back/hair-back-low-pigtails/pink.webp'),
     },
     'hair-back-side-wave': {
-      black: require('@/assets/character/hair-back/hair-back-side-wave/black.webp'),
-      blond: require('@/assets/character/hair-back/hair-back-side-wave/blond.webp'),
-      brown: require('@/assets/character/hair-back/hair-back-side-wave/brown.webp'),
-      pink: require('@/assets/character/hair-back/hair-back-side-wave/pink.webp'),
+      BLACK: require('@/assets/character/hair-back/hair-back-side-wave/black.webp'),
+      BLOND: require('@/assets/character/hair-back/hair-back-side-wave/blond.webp'),
+      BROWN: require('@/assets/character/hair-back/hair-back-side-wave/brown.webp'),
+      PINK: require('@/assets/character/hair-back/hair-back-side-wave/pink.webp'),
     },
     'hair-back-wave': {
-      black: require('@/assets/character/hair-back/hair-back-wave/black.webp'),
-      blond: require('@/assets/character/hair-back/hair-back-wave/blond.webp'),
-      brown: require('@/assets/character/hair-back/hair-back-wave/brown.webp'),
-      pink: require('@/assets/character/hair-back/hair-back-wave/pink.webp'),
+      BLACK: require('@/assets/character/hair-back/hair-back-wave/black.webp'),
+      BLOND: require('@/assets/character/hair-back/hair-back-wave/blond.webp'),
+      BROWN: require('@/assets/character/hair-back/hair-back-wave/brown.webp'),
+      PINK: require('@/assets/character/hair-back/hair-back-wave/pink.webp'),
     },
   },
   hairFront: {
     'hair-front-basic': {
-      black: require('@/assets/character/hair-front/hair-front-basic/black.webp'),
-      blond: require('@/assets/character/hair-front/hair-front-basic/blond.webp'),
-      brown: require('@/assets/character/hair-front/hair-front-basic/brown.webp'),
-      pink: require('@/assets/character/hair-front/hair-front-basic/pink.webp'),
+      BLACK: require('@/assets/character/hair-front/hair-front-basic/black.webp'),
+      BLOND: require('@/assets/character/hair-front/hair-front-basic/blond.webp'),
+      BROWN: require('@/assets/character/hair-front/hair-front-basic/brown.webp'),
+      PINK: require('@/assets/character/hair-front/hair-front-basic/pink.webp'),
     },
   },
 };
@@ -126,11 +126,11 @@ const COLOR_ASSETS: Record<ColorGroup, Record<string, Record<string, number>>> =
 /** `assets/character/<그룹>/<색상>.webp` (모양 없음) */
 const TINT_ASSETS: Record<TintGroup, Record<string, number>> = {
   hairHighlights: {
-    green: require('@/assets/character/hair-highlights/green.webp'),
-    orange: require('@/assets/character/hair-highlights/orange.webp'),
-    pink: require('@/assets/character/hair-highlights/pink.webp'),
-    sky: require('@/assets/character/hair-highlights/sky.webp'),
-    blue: require('@/assets/character/hair-highlights/blue.webp'),
+    GREEN: require('@/assets/character/hair-highlights/green.webp'),
+    ORANGE: require('@/assets/character/hair-highlights/orange.webp'),
+    PINK: require('@/assets/character/hair-highlights/pink.webp'),
+    SKY: require('@/assets/character/hair-highlights/sky.webp'),
+    BLUE: require('@/assets/character/hair-highlights/blue.webp'),
   },
 };
 
@@ -171,11 +171,11 @@ export function getColorOptions(part: ColorablePart, shapeId: string): string[] 
 export const DEFAULT_CHARACTER_CONFIG: CharacterConfig = {
   body: 'body-02',
   eyes: 'eyes-01',
-  eyesColor: 'orange',
+  eyesColor: 'ORANGE',
   mouth: 'mouth-01',
   hairBack: 'hair-back-long',
   hairFront: 'hair-front-basic',
-  hairColor: 'black',
+  hairColor: 'BLACK',
   clothing: 'clothing-01', // 코스튬은 항상 착용 상태 — 벗을 수 없다
 };
 
@@ -203,14 +203,14 @@ function buildSourceMetaMap(): Map<number, PartMeta> {
   for (const [group, shapes] of Object.entries(COLOR_ASSETS)) {
     for (const [shape, colors] of Object.entries(shapes)) {
       for (const [color, source] of Object.entries(colors)) {
-        register(source, `${toKebab(group)}/${shape}/${color}`);
+        register(source, `${toKebab(group)}/${shape}/${color.toLowerCase()}`);
       }
     }
   }
 
   for (const [group, colors] of Object.entries(TINT_ASSETS)) {
     for (const [color, source] of Object.entries(colors)) {
-      register(source, `${toKebab(group)}/${color}`);
+      register(source, `${toKebab(group)}/${color.toLowerCase()}`);
     }
   }
 

@@ -9,8 +9,8 @@ import { useCharacterConfig } from '@/hooks/character/useCharacterConfig';
 import { useMyInfo } from '@/hooks/user/useMyInfo';
 
 /**
- * 다른 유저의 착용 상태로 캐릭터를 만든다. 서버엔 색이 없어 남의 캐릭터는 색이 기본값이다.
- * 본인은 색까지 있는 로컬 저장본을 그려야 내 화면(프로필 등)과 모습이 같다.
+ * 다른 유저의 착용 상태(모양·색)로 캐릭터를 만든다. 색을 한 번도 올리지 않은 유저는 기본 색이다.
+ * 본인은 로컬 저장본을 그려야 내 화면(프로필 등)과 모습이 같다(서버 반영 전이어도).
  * 로딩·실패 중에는 기본 캐릭터를 그린다.
  */
 export function useUserCharacter(userId: string): CharacterConfig {

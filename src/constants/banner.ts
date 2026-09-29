@@ -28,11 +28,11 @@ export const BANNER_SLIDES: BannerSlide[] = [
     character: {
       body: 'body-02',
       eyes: 'eyes-01',
-      eyesColor: 'orange',
+      eyesColor: 'ORANGE',
       mouth: 'mouth-01',
       hairBack: 'hair-back-long',
       hairFront: 'hair-front-basic',
-      hairColor: 'black',
+      hairColor: 'BLACK',
       clothing: 'clothing-01',
     },
   },
