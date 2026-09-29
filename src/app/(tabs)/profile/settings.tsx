@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import * as WebBrowser from 'expo-web-browser';
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -9,6 +10,7 @@ import BackButton from '@/components/ui/BackButton';
 import Header from '@/components/ui/Header';
 import NavRow from '@/components/ui/NavRow';
 import Typography from '@/components/ui/Typography';
+import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from '@/constants/legal';
 import { useMyProfile } from '@/hooks/user/useMyProfile';
 
 export default function SettingsScreen() {
@@ -24,6 +26,14 @@ export default function SettingsScreen() {
 
         <View className="gap-md">
           <NavRow title="프로필 수정" onPress={() => router.push('/profile/edit')} />
+          <NavRow
+            title="개인정보처리방침"
+            onPress={() => WebBrowser.openBrowserAsync(PRIVACY_POLICY_URL)}
+          />
+          <NavRow
+            title="이용약관"
+            onPress={() => WebBrowser.openBrowserAsync(TERMS_OF_SERVICE_URL)}
+          />
           <NavRow title="로그아웃" onPress={() => setIsLogoutOpen(true)} />
         </View>
 
