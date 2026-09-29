@@ -1,35 +1,26 @@
 import { View } from 'react-native';
-import LikeButton from './LikeButton';
 import Typography from '../ui/Typography';
+import LikeButton from './LikeButton';
 
 interface Props {
   postId: string;
-  authorName: string;
   title: string;
   likeCount: number;
   liked: boolean;
 }
 
-export default function PostTitleRow({ postId, authorName, title, likeCount, liked }: Props) {
+export default function PostTitleRow({ postId, title, likeCount, liked }: Props) {
   return (
-    <View className="flex flex-row items-center justify-between">
-      <View className="flex flex-row items-center gap-xs">
-        <Typography variant="h3" className="text-gray-800">
-          {authorName}
-        </Typography>
-        <Typography variant="h3" className="text-gray-600">
-          ·
-        </Typography>
-        <Typography variant="body2" className="text-gray-600">
-          {title}
-        </Typography>
-      </View>
+    <View className="flex flex-row items-start gap-md">
+      <Typography variant="body2" className="flex-1 text-gray-800">
+        {title}
+      </Typography>
       <LikeButton
         postId={postId}
         likeCount={likeCount}
         liked={liked}
         className="flex flex-row items-center"
-        textClassName="text-gray-600"
+        textClassName="text-gray-700"
       />
     </View>
   );

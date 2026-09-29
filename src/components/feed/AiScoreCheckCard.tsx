@@ -39,14 +39,14 @@ export default function AiScoreCheckCard({ onCheck }: Props) {
   const numberStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
   return (
-    <View className="relative overflow-hidden rounded-md p-lg">
+    <View className="relative overflow-hidden rounded-md p-2xl">
       <LinearGradient
         colors={GRADIENT_COLORS}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
         style={StyleSheet.absoluteFill}
       />
-      <View className="items-center justify-center p-2xl">
+      <View className="items-center justify-center">
         <View className="items-center gap-sm">
           <Animated.View style={numberStyle}>
             <Typography variant="display" className="text-primary-600 text-5xl font-bold">
