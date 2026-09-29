@@ -17,9 +17,12 @@ export function useClearSession() {
   return async () => {
     await clearProviderSession();
     await clearTokens();
-    await clearSavedCharacter();
-    clearSignupToken();
-    queryClient.clear();
-    router.replace('/(auth)/login');
+    try {
+      await clearSavedCharacter();
+    } finally {
+      clearSignupToken();
+      queryClient.clear();
+      router.replace('/(auth)/login');
+    }
   };
 }
