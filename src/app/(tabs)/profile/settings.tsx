@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import LogoutDialog from '@/components/auth/LogoutDialog';
@@ -20,7 +21,11 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
-      <View className="flex flex-1 flex-col gap-2xl px-xl pt-lg">
+      <ScrollView
+        className="flex-1"
+        contentContainerClassName="grow flex-col gap-2xl px-xl pt-lg"
+        showsVerticalScrollIndicator={false}
+      >
         <Header />
         <BackButton title="내 설정" />
 
@@ -48,7 +53,7 @@ export default function SettingsScreen() {
             </Typography>
           </Pressable>
         ) : null}
-      </View>
+      </ScrollView>
 
       <LogoutDialog visible={isLogoutOpen} onClose={() => setIsLogoutOpen(false)} />
 
