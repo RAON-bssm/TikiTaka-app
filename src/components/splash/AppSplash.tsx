@@ -7,6 +7,7 @@ import Animated, { FadeOut } from 'react-native-reanimated';
 import LogoIcon from '@/assets/images/splash/logo.svg';
 import RingIcon from '@/assets/images/splash/ring.svg';
 import StarIcon from '@/assets/images/splash/star.svg';
+import PermissionNoticeDialog from '@/components/permission/PermissionNoticeDialog';
 import Typography from '@/components/ui/Typography';
 import { palette } from '@/constants/colors';
 import { useAuthStatus } from '@/hooks/auth/useAuthStatus';
@@ -34,7 +35,7 @@ export default function AppSplash() {
     return () => clearTimeout(timer);
   }, []);
 
-  if (status !== 'loading' && isMinTimeElapsed) return null;
+  if (status !== 'loading' && isMinTimeElapsed) return <PermissionNoticeDialog />;
 
   return (
     <Animated.View exiting={FadeOut.duration(300)} style={StyleSheet.absoluteFill}>
