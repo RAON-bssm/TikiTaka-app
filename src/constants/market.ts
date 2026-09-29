@@ -74,7 +74,7 @@ export function toMarketItem(product: PartProduct): MarketItem {
     group,
     assetId,
     name: product.product_name,
-    description: product.product_description,
+    description: product.description ?? undefined,
     price: product.price,
     gridSource: resolveLayerSource(previewConfig, layer),
   };

@@ -31,13 +31,12 @@ export interface Product {
   /** S3 key인지 완성된 URL인지 서버가 강제하지 않는다 — 시드 데이터로 확인 필요. */
   product_image: string;
   product_type: ShopProductType;
-  product_description?: string;
+  description?: string | null;
 }
 
 /** 뽑기권을 걸러 낸 파츠 상품. `isPartProduct`(`src/constants/market.ts`)로 좁힌다. */
 export type PartProduct = Product & { product_type: ProductType };
 
-/** 배열 키가 `products`가 아니라 `product`다. */
 export interface ProductListData {
   product: Product[];
 }
