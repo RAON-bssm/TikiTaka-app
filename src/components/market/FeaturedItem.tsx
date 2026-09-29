@@ -26,12 +26,12 @@ export default function FeaturedItem({ item, previewConfig, onBuy, onCustomize }
   }
 
   return (
-    <View className="w-full flex-row items-center justify-between">
+    <View className="w-full flex-row items-center gap-lg">
       <View className="w-[110px] items-center">
         <Character config={previewConfig} size={110} />
       </View>
 
-      <View className="w-[150px] gap-md">
+      <View className="flex-1 gap-md">
         <View className="gap-md rounded-md bg-secondary-100 p-md">
           <Typography variant="h4" className="text-secondary-500">
             {item.name}
