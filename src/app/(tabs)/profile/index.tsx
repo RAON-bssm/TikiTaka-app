@@ -1,3 +1,4 @@
+import WithdrawDialog from '@/components/auth/WithdrawDialog';
 import MyPostList from '@/components/profile/MyPostList';
 import NeighborhoodSheet from '@/components/profile/NeighborhoodSheet';
 import ProfileSummarySkeleton from '@/components/profile/ProfileSummarySkeleton';
@@ -12,12 +13,13 @@ import { useCharacterConfig } from '@/hooks/character/useCharacterConfig';
 import { useMyProfile } from '@/hooks/user/useMyProfile';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ProfileScreen() {
   const [isNeighborhoodSheetOpen, setIsNeighborhoodSheetOpen] = useState(false);
+  const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
   const { config: character } = useCharacterConfig();
   const { data: profile, isLoading, isError, refetch } = useMyProfile();
 
@@ -80,6 +82,19 @@ export default function ProfileScreen() {
             게시물 보관함
           </Typography>
           <MyPostList />
+
+          {/* 실수로 누르지 않도록 눈에 덜 띄게 맨 아래 두고, 팝업에서 닉네임을 한 번 더 입력받는다 */}
+          {profile ? (
+            <Pressable
+              onPress={() => setIsWithdrawOpen(true)}
+              hitSlop={8}
+              className="items-center py-lg active:opacity-70"
+            >
+              <Typography variant="caption" className="text-gray-400 underline">
+                회원 탈퇴
+              </Typography>
+            </Pressable>
+          ) : null}
         </View>
       </ScrollView>
 
@@ -87,6 +102,14 @@ export default function ProfileScreen() {
         visible={isNeighborhoodSheetOpen}
         onClose={() => setIsNeighborhoodSheetOpen(false)}
       />
+
+      {profile ? (
+        <WithdrawDialog
+          visible={isWithdrawOpen}
+          userName={profile.user_name}
+          onClose={() => setIsWithdrawOpen(false)}
+        />
+      ) : null}
     </SafeAreaView>
   );
 }
