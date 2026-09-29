@@ -1,3 +1,4 @@
+import { useIsFocused } from 'expo-router';
 import { useEffect } from 'react';
 
 type LeaveGuard = (proceed: () => void) => void;
@@ -10,13 +11,15 @@ let activeGuard: LeaveGuard | null = null;
  * 이동을 일으키는 쪽(앱바·헤더)이 `guardedNavigate`로 감싸 먼저 물어본다.
  */
 export function useLeaveGuard(enabled: boolean, onAttempt: LeaveGuard) {
+  const isFocused = useIsFocused();
+
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled || !isFocused) return;
     activeGuard = onAttempt;
     return () => {
       if (activeGuard === onAttempt) activeGuard = null;
     };
-  }, [enabled, onAttempt]);
+  }, [enabled, isFocused, onAttempt]);
 }
 
 /** 막는 화면이 없으면 바로 이동하고, 있으면 그 화면에 확인을 맡긴다. */
