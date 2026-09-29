@@ -7,6 +7,7 @@ import VectorIcon from '@/assets/icons/header/Vector.svg';
 import LogoImage from '@/assets/icons/logo.webp';
 import { palette } from '@/constants/colors';
 import { useLogout } from '@/hooks/auth/useLogout';
+import { guardedNavigate } from '@/hooks/navigation/useLeaveGuard';
 import MoreMenu from './MoreMenu';
 
 const COLOR_ICON = palette.gray[400];
@@ -16,7 +17,10 @@ const Header = () => {
 
   return (
     <View className="w-full flex-row items-center justify-between">
-      <Pressable onPress={() => router.push('/(tabs)')} className="active:opacity-70">
+      <Pressable
+        onPress={() => guardedNavigate(() => router.push('/(tabs)'))}
+        className="active:opacity-70"
+      >
         <Image source={LogoImage} className="h-8 w-[124px]" resizeMode="contain" />
       </Pressable>
 
@@ -31,7 +35,10 @@ const Header = () => {
           items={[{ label: '로그아웃', destructive: true, onPress: () => logout.mutate() }]}
         />
 
-        <Pressable onPress={() => router.push('/(tabs)/profile')} className="active:opacity-70">
+        <Pressable
+          onPress={() => guardedNavigate(() => router.push('/(tabs)/profile'))}
+          className="active:opacity-70"
+        >
           <ProfileImageIcon width={32} height={32} />
         </Pressable>
       </View>

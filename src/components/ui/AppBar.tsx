@@ -11,6 +11,7 @@ import MapIcon from '@/assets/icons/app-var/map.svg';
 import MarketIcon from '@/assets/icons/app-var/market.svg';
 import RankingIcon from '@/assets/icons/app-var/ranking.svg';
 import { palette } from '@/constants/colors';
+import { guardedNavigate } from '@/hooks/navigation/useLeaveGuard';
 import Typography from './Typography';
 
 type TabConfig = {
@@ -62,7 +63,7 @@ export default function AppBar({ state, navigation }: BottomTabBarProps) {
           });
 
           if (!focused && !event.defaultPrevented) {
-            navigation.navigate(route.name);
+            guardedNavigate(() => navigation.navigate(route.name));
           }
         };
 
