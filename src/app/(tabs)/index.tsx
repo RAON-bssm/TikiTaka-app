@@ -1,10 +1,12 @@
 import CurrentBattleCard from '@/components/feed/CurrentBattleCard';
 import PostList from '@/components/feed/PostList';
+import MatchResultModal from '@/components/match/MatchResultModal';
 import Banner from '@/components/ui/banner/Banner';
 import Header from '@/components/ui/Header';
 import Typography from '@/components/ui/Typography';
 import { palette } from '@/constants/colors';
 import { useCurrentBattle } from '@/hooks/match/useCurrentBattle';
+import { useMatchResultPopup } from '@/hooks/match/useMatchResultPopup';
 import { useCurrentBoardPosts } from '@/hooks/post/useCurrentBoardPosts';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -18,6 +20,7 @@ export default function HomeScreen() {
   const router = useRouter();
   const battle = useCurrentBattle();
   const posts = useCurrentBoardPosts();
+  const matchResultPopup = useMatchResultPopup();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleRefresh = async () => {
@@ -64,6 +67,18 @@ export default function HomeScreen() {
           <PostList state={posts} limit={PREVIEW_COUNT} />
         </View>
       </ScrollView>
+
+      {matchResultPopup.stage && (
+        <MatchResultModal
+          visible={matchResultPopup.visible}
+          stage={matchResultPopup.stage}
+          onClose={matchResultPopup.dismiss}
+          onConfirm={() => {
+            matchResultPopup.dismiss();
+            router.push('/ranking');
+          }}
+        />
+      )}
     </SafeAreaView>
   );
 }
