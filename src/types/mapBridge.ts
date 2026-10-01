@@ -55,7 +55,13 @@ export type ToWeb =
   /** 답을 기다리는 동안 '…' 말풍선. showBubble이 오면 교체되고, hideBubble로 지운다 */
   | { v: 1; type: 'showTyping'; characterId: string }
   | { v: 1; type: 'hideBubble'; characterId: string }
-  | { v: 1; type: 'focusCharacter'; characterId: string }
+  /**
+   * 대화 시작. 이 캐릭터로 확대하고 clearFocus가 올 때까지 멈춘다.
+   * bottomInsetPx: WebView 아래 끝에서 RN 패널이 가리는 높이(CSS px)
+   */
+  | { v: 1; type: 'focusCharacter'; characterId: string; bottomInsetPx?: number }
+  /** 대화 종료. 멈춤을 풀어 다시 돌아다니게 한다 */
+  | { v: 1; type: 'clearFocus' }
   | { v: 1; type: 'setStickers'; stickers: PlacedSticker[]; stickerUrls: Record<string, string> }
   | { v: 1; type: 'setEditMode'; enabled: boolean };
 

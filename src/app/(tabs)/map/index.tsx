@@ -1,6 +1,7 @@
 import { isAxiosError } from 'axios';
-import { useState } from 'react';
-import { View } from 'react-native';
+import { useIsFocused } from 'expo-router';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
+import { BackHandler, View } from 'react-native';
 import WebView from 'react-native-webview';
 
 import { getApiErrorMessage } from '@/api/error';
@@ -45,9 +46,12 @@ export default function MapScreen() {
 
   const { showToast } = useToast();
   const chatbots = useChatbots();
-  const { mutate: sendChat, isPending, variables } = useSendChat();
+  const { mutateAsync: sendChat } = useSendChat();
+  const isFocused = useIsFocused();
   const [chatbotId, setChatbotId] = useState<string>();
   const [replies, setReplies] = useState<Record<string, string>>({});
+  const [pendingIds, setPendingIds] = useState<ReadonlySet<string>>(new Set());
+  const panelHeight = useRef<number>(undefined);
 
   // 챗봇 외형은 서버에 없어 기본 모양으로 그린다. 캐릭터 id = chatbot_id라 탭 이벤트로 바로 대화한다.
   const characters: MapCharacter[] =
@@ -62,32 +66,72 @@ export default function MapScreen() {
   const { webViewRef, status, onMessage, fail, reload, sendToMap } = useMapBridge({
     neighborhood,
     characters,
+    // 패널이 열린 채 다른 캐릭터를 탭하면 패널이 새로 마운트되며 그 캐릭터로 포커스를 옮긴다.
+    // 이전 캐릭터의 멈춤은 웹이 풀어 주므로 clearFocus는 보내지 않는다.
     onCharacterTap: setChatbotId,
+    onMapLoaded: () => {
+      // 웹이 스스로 다시 로드되면 패널은 그대로라 다시 마운트되지 않으므로 여기서 포커스를 다시 맞춘다.
+      // status가 loaded가 아니었다면 패널이 지금 새로 마운트되며 포커스를 보낸다.
+      if (status === 'loaded' && chatbotId) focus(chatbotId);
+    },
   });
 
-  const handleSend = (message: string) => {
+  // 웹은 결과를 알려 주지 않는다. 숨겨졌거나 표시 상한 밖인 캐릭터면 조용히 무시된다.
+  const focus = (characterId: string) =>
+    sendToMap({ type: 'focusCharacter', characterId, bottomInsetPx: panelHeight.current });
+
+  // 패널이 닫히는 모든 경로가 여기를 거쳐야 한다. 하나라도 빠지면 그 캐릭터가 계속 멈춰 있다.
+  const closeChat = () => {
+    setChatbotId(undefined);
+    sendToMap({ type: 'clearFocus' });
+  };
+
+  const closeOnLeave = useEffectEvent(() => closeChat());
+  const closeOnBack = useEffectEvent(() => {
+    closeChat();
+    return true;
+  });
+
+  // 다른 탭으로 가면 패널을 닫는다(포커스를 잃을 때 cleanup이 돈다).
+  useEffect(() => {
+    if (!isFocused) return;
+    return () => closeOnLeave();
+  }, [isFocused]);
+
+  useEffect(() => {
+    if (!isFocused || !chatbotId) return;
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => closeOnBack());
+    return () => subscription.remove();
+  }, [isFocused, chatbotId]);
+
+  // 응답 처리는 패널이 아니라 이 화면에 둔다. 답을 기다리다 패널을 닫아도 말풍선을 끝까지 정리해야 한다.
+  // mutate의 호출별 콜백은 마지막 호출에만 실행돼, 여러 챗봇에 동시에 물으면 앞선 '…'가 60초 남는다. 그래서 mutateAsync를 쓴다.
+  const handleSend = async (message: string) => {
     if (!chatbotId) return;
     const characterId = chatbotId;
 
     sendToMap({ type: 'showTyping', characterId });
-    sendChat(
-      { chatbotId: characterId, message },
-      {
-        onSuccess: ({ reply }) => {
-          setReplies((prev) => ({ ...prev, [characterId]: reply }));
-          sendToMap({
-            type: 'showBubble',
-            characterId,
-            text: reply,
-            durationMs: replyDurationMs(reply),
-          });
-        },
-        onError: (error) => {
-          sendToMap({ type: 'hideBubble', characterId });
-          showToast(getChatErrorMessage(error));
-        },
-      },
-    );
+    setPendingIds((prev) => new Set(prev).add(characterId));
+    try {
+      const { reply } = await sendChat({ chatbotId: characterId, message });
+      setReplies((prev) => ({ ...prev, [characterId]: reply }));
+      // 그 사이 패널을 닫았어도 답은 지도 말풍선으로 보여 준다.
+      sendToMap({
+        type: 'showBubble',
+        characterId,
+        text: reply,
+        durationMs: replyDurationMs(reply),
+      });
+    } catch (error) {
+      sendToMap({ type: 'hideBubble', characterId });
+      showToast(getChatErrorMessage(error));
+    } finally {
+      setPendingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(characterId);
+        return next;
+      });
+    }
   };
 
   if (!MAP_WEB_URL) {
@@ -141,9 +185,15 @@ export default function MapScreen() {
           key={chatbot.chatbot_id}
           name={chatbot.name}
           reply={replies[chatbot.chatbot_id]}
-          isPending={isPending && variables?.chatbotId === chatbot.chatbot_id}
-          onSend={handleSend}
-          onClose={() => setChatbotId(undefined)}
+          isPending={pendingIds.has(chatbot.chatbot_id)}
+          onSend={(message) => void handleSend(message)}
+          onClose={closeChat}
+          onFirstLayout={(height) => {
+            // 패널은 WebView 아래 끝에 붙어 있고 바텀바는 WebView 밖(아래)에 있어,
+            // 패널 높이가 곧 WebView에서 가려지는 높이다. 바텀바가 safe area 여백을 맡아 따로 더하지 않는다.
+            panelHeight.current = height;
+            focus(chatbot.chatbot_id);
+          }}
         />
       )}
     </View>

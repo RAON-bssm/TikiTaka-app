@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Pressable, TextInput, View } from 'react-native';
+import { useRef, useState } from 'react';
+import { Pressable, TextInput, View, type LayoutChangeEvent } from 'react-native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 
 import CloseIcon from '@/assets/icons/close.svg';
@@ -13,14 +13,30 @@ interface Props {
   isPending: boolean;
   onSend: (message: string) => void;
   onClose: () => void;
+  /** 처음 그려졌을 때 한 번만 높이를 알린다. 키보드나 답 길이로 커질 때마다 알리면 지도가 계속 움직인다. */
+  onFirstLayout?: (height: number) => void;
 }
 
 /**
  * 지도를 가리지 않도록 Modal이 아니라 화면 위에 겹쳐 띄운다.
  * Modal로 띄우면 말풍선 연출이 딤에 가리고, 실패 토스트도 모달 아래에 깔린다.
  */
-export default function ChatPanel({ name, reply, isPending, onSend, onClose }: Props) {
+export default function ChatPanel({
+  name,
+  reply,
+  isPending,
+  onSend,
+  onClose,
+  onFirstLayout,
+}: Props) {
   const [message, setMessage] = useState('');
+  const measured = useRef(false);
+
+  const handleLayout = (event: LayoutChangeEvent) => {
+    if (measured.current) return;
+    measured.current = true;
+    onFirstLayout?.(Math.ceil(event.nativeEvent.layout.height));
+  };
 
   const trimmed = message.trim();
   const canSend = !isPending && trimmed !== '';
@@ -38,7 +54,10 @@ export default function ChatPanel({ name, reply, isPending, onSend, onClose }: P
       pointerEvents="box-none"
       style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}
     >
-      <View className="gap-md rounded-t-xl bg-white px-xl pb-lg pt-lg shadow-md">
+      <View
+        onLayout={handleLayout}
+        className="gap-md rounded-t-xl bg-white px-xl pb-lg pt-lg shadow-md"
+      >
         <View className="flex-row items-center justify-between">
           <Typography variant="h3" className="text-gray-800">
             {name}
