@@ -1,14 +1,36 @@
+import { isAxiosError } from 'axios';
+import { useState } from 'react';
 import { View } from 'react-native';
 import WebView from 'react-native-webview';
 
+import { getApiErrorMessage } from '@/api/error';
+import ChatPanel from '@/components/chat/ChatPanel';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Skeleton from '@/components/ui/feedback/Skeleton';
+import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
+import { DEFAULT_CHARACTER_CONFIG } from '@/constants/character/assets';
+import { useChatbots } from '@/hooks/chat/useChatbots';
+import { useSendChat } from '@/hooks/chat/useSendChat';
 import { useMapBridge } from '@/hooks/map/useMapBridge';
 import { useMyInfo } from '@/hooks/user/useMyInfo';
-import type { Neighborhood } from '@/types/mapBridge';
+import type { MapCharacter, Neighborhood } from '@/types/mapBridge';
 
 const MAP_WEB_URL = process.env.EXPO_PUBLIC_MAP_WEB_URL;
+
+const replyDurationMs = (text: string) => Math.min(15_000, Math.max(4_000, text.length * 150));
+
+function getChatErrorMessage(error: unknown) {
+  if (isAxiosError(error)) {
+    if (error.code === 'ECONNABORTED' || error.response?.status === 504) {
+      return '챗봇 답변이 늦어지고 있어요.';
+    }
+    if (error.response?.status === 404) return '대화할 수 없는 챗봇이에요.';
+    if (error.response?.status === 503)
+      return '챗봇이 지금 대답할 수 없어요. 잠시 후 다시 시도해주세요.';
+  }
+  return getApiErrorMessage(error);
+}
 
 export default function MapScreen() {
   const myInfo = useMyInfo();
@@ -21,7 +43,52 @@ export default function MapScreen() {
       }
     : null;
 
-  const { webViewRef, status, onMessage, fail, reload } = useMapBridge({ neighborhood });
+  const { showToast } = useToast();
+  const chatbots = useChatbots();
+  const { mutate: sendChat, isPending, variables } = useSendChat();
+  const [chatbotId, setChatbotId] = useState<string>();
+  const [replies, setReplies] = useState<Record<string, string>>({});
+
+  // 챗봇 외형은 서버에 없어 기본 모양으로 그린다. 캐릭터 id = chatbot_id라 탭 이벤트로 바로 대화한다.
+  const characters: MapCharacter[] =
+    chatbots.data?.map((chatbot) => ({
+      id: chatbot.chatbot_id,
+      name: chatbot.name,
+      config: DEFAULT_CHARACTER_CONFIG,
+      kind: 'npc',
+    })) ?? [];
+  const chatbot = chatbots.data?.find((item) => item.chatbot_id === chatbotId);
+
+  const { webViewRef, status, onMessage, fail, reload, sendToMap } = useMapBridge({
+    neighborhood,
+    characters,
+    onCharacterTap: setChatbotId,
+  });
+
+  const handleSend = (message: string) => {
+    if (!chatbotId) return;
+    const characterId = chatbotId;
+
+    sendToMap({ type: 'showTyping', characterId });
+    sendChat(
+      { chatbotId: characterId, message },
+      {
+        onSuccess: ({ reply }) => {
+          setReplies((prev) => ({ ...prev, [characterId]: reply }));
+          sendToMap({
+            type: 'showBubble',
+            characterId,
+            text: reply,
+            durationMs: replyDurationMs(reply),
+          });
+        },
+        onError: (error) => {
+          sendToMap({ type: 'hideBubble', characterId });
+          showToast(getChatErrorMessage(error));
+        },
+      },
+    );
+  };
 
   if (!MAP_WEB_URL) {
     return (
@@ -67,6 +134,17 @@ export default function MapScreen() {
         </View>
       ) : (
         status === 'loading' && <Skeleton className="absolute inset-0" />
+      )}
+
+      {status === 'loaded' && chatbot && (
+        <ChatPanel
+          key={chatbot.chatbot_id}
+          name={chatbot.name}
+          reply={replies[chatbot.chatbot_id]}
+          isPending={isPending && variables?.chatbotId === chatbot.chatbot_id}
+          onSend={handleSend}
+          onClose={() => setChatbotId(undefined)}
+        />
       )}
     </View>
   );

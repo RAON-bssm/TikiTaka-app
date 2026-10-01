@@ -56,6 +56,11 @@ export function useMapBridge({
     sentLocationId.current = neighborhood.locationId;
   }, [neighborhood, characters, partUrls]);
 
+  useEffect(() => {
+    if (!isReady.current || sentLocationId.current === null || characters.length === 0) return;
+    post(webViewRef.current, { type: 'upsertCharacters', characters });
+  }, [characters]);
+
   const onMessage = (event: WebViewMessageEvent) => {
     const message = parseMessage(event.nativeEvent.data);
     if (!message) return;
@@ -84,6 +89,12 @@ export function useMapBridge({
     }
   };
 
+  /** `ready` 전이면 버린다. 말풍선 같은 연출은 놓쳐도 되고, 쌓아 두면 다시 로드된 지도에 철 지난 연출이 뜬다. */
+  const sendToMap = (message: DistributiveOmit<ToWeb, 'v'>) => {
+    if (!isReady.current) return;
+    post(webViewRef.current, message);
+  };
+
   /** WebView 자체의 로드 실패(네트워크·HTTP 에러) */
   const fail = () => setStatus('error');
 
@@ -95,7 +106,7 @@ export function useMapBridge({
     webViewRef.current?.reload();
   };
 
-  return { webViewRef, status, onMessage, fail, reload };
+  return { webViewRef, status, onMessage, fail, reload, sendToMap };
 }
 
 function post(webView: WebView | null, message: DistributiveOmit<ToWeb, 'v'>) {

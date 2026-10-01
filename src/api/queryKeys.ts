@@ -62,6 +62,11 @@ export const inventoryKeys = {
   list: () => [...inventoryKeys.all, 'list'] as const,
 };
 
+export const chatKeys = {
+  all: ['chat'] as const,
+  chatbots: () => [...chatKeys.all, 'chatbots'] as const,
+};
+
 export const equipmentKeys = {
   all: ['equipment'] as const,
   current: () => [...equipmentKeys.all, 'current'] as const,

@@ -52,6 +52,9 @@ export type ToWeb =
   | { v: 1; type: 'setNeighborhood'; neighborhood: Neighborhood; characters: MapCharacter[] }
   | { v: 1; type: 'upsertCharacters'; characters: MapCharacter[]; partUrls?: PartUrlMap }
   | { v: 1; type: 'showBubble'; characterId: string; text: string; durationMs?: number }
+  /** 답을 기다리는 동안 '…' 말풍선. showBubble이 오면 교체되고, hideBubble로 지운다 */
+  | { v: 1; type: 'showTyping'; characterId: string }
+  | { v: 1; type: 'hideBubble'; characterId: string }
   | { v: 1; type: 'focusCharacter'; characterId: string }
   | { v: 1; type: 'setStickers'; stickers: PlacedSticker[]; stickerUrls: Record<string, string> }
   | { v: 1; type: 'setEditMode'; enabled: boolean };
