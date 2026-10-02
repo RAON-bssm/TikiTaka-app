@@ -52,6 +52,8 @@ export default function MapScreen() {
   const [replies, setReplies] = useState<Record<string, string>>({});
   const [pendingIds, setPendingIds] = useState<ReadonlySet<string>>(new Set());
   const panelHeight = useRef<number>(undefined);
+  /** 답이 늦게 왔을 때 그 챗봇과 아직 대화 중인지 판단한다. state는 응답 시점의 클로저에서 옛 값이라 ref로 둔다. */
+  const openChatbotId = useRef<string>(undefined);
 
   // 챗봇 외형은 서버에 없어 기본 모양으로 그린다. 캐릭터 id = chatbot_id라 탭 이벤트로 바로 대화한다.
   const characters: MapCharacter[] =
@@ -66,9 +68,10 @@ export default function MapScreen() {
   const { webViewRef, status, onMessage, fail, reload, sendToMap } = useMapBridge({
     neighborhood,
     characters,
-    // 패널이 열린 채 다른 캐릭터를 탭하면 패널이 새로 마운트되며 그 캐릭터로 포커스를 옮긴다.
-    // 이전 캐릭터의 멈춤은 웹이 풀어 주므로 clearFocus는 보내지 않는다.
-    onCharacterTap: setChatbotId,
+    onCharacterTap: (characterId) => openChat(characterId),
+    onMapTap: () => {
+      if (openChatbotId.current) closeChat();
+    },
     onMapLoaded: () => {
       // 웹이 스스로 다시 로드되면 패널은 그대로라 다시 마운트되지 않으므로 여기서 포커스를 다시 맞춘다.
       // status가 loaded가 아니었다면 패널이 지금 새로 마운트되며 포커스를 보낸다.
@@ -80,8 +83,22 @@ export default function MapScreen() {
   const focus = (characterId: string) =>
     sendToMap({ type: 'focusCharacter', characterId, bottomInsetPx: panelHeight.current });
 
-  // 패널이 닫히는 모든 경로가 여기를 거쳐야 한다. 하나라도 빠지면 그 캐릭터가 계속 멈춰 있다.
+  // 패널이 열린 채 다른 캐릭터를 탭하면 패널이 새로 마운트되며 그 캐릭터로 포커스를 옮긴다.
+  // 이전 캐릭터의 멈춤은 웹이 풀어 주므로 clearFocus는 보내지 않지만, 남겨 둔 말풍선은 지운다.
+  const openChat = (characterId: string) => {
+    const previous = openChatbotId.current;
+    if (previous && previous !== characterId) {
+      sendToMap({ type: 'hideBubble', characterId: previous });
+    }
+    openChatbotId.current = characterId;
+    setChatbotId(characterId);
+  };
+
+  // 패널이 닫히는 모든 경로가 여기를 거쳐야 한다. 하나라도 빠지면 그 캐릭터가 계속 멈춰 있고 말풍선도 남는다.
   const closeChat = () => {
+    const previous = openChatbotId.current;
+    if (previous) sendToMap({ type: 'hideBubble', characterId: previous });
+    openChatbotId.current = undefined;
     setChatbotId(undefined);
     sendToMap({ type: 'clearFocus' });
   };
@@ -115,12 +132,14 @@ export default function MapScreen() {
     try {
       const { reply } = await sendChat({ chatbotId: characterId, message });
       setReplies((prev) => ({ ...prev, [characterId]: reply }));
-      // 그 사이 패널을 닫았어도 답은 지도 말풍선으로 보여 준다.
+      // 대화 중이면 다음 입력(showTyping이 교체)이나 패널을 닫을 때까지 남긴다.
+      // 그 사이 패널을 닫았으면 지울 사람이 없으므로 잠깐만 보여 준다.
+      const isOpen = openChatbotId.current === characterId;
       sendToMap({
         type: 'showBubble',
         characterId,
         text: reply,
-        durationMs: replyDurationMs(reply),
+        ...(isOpen ? { persistent: true } : { durationMs: replyDurationMs(reply) }),
       });
     } catch (error) {
       sendToMap({ type: 'hideBubble', characterId });

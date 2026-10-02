@@ -51,7 +51,15 @@ export type ToWeb =
     }
   | { v: 1; type: 'setNeighborhood'; neighborhood: Neighborhood; characters: MapCharacter[] }
   | { v: 1; type: 'upsertCharacters'; characters: MapCharacter[]; partUrls?: PartUrlMap }
-  | { v: 1; type: 'showBubble'; characterId: string; text: string; durationMs?: number }
+  /** persistent: true면 durationMs를 무시하고 hideBubble이나 다음 말풍선이 올 때까지 남긴다 */
+  | {
+      v: 1;
+      type: 'showBubble';
+      characterId: string;
+      text: string;
+      durationMs?: number;
+      persistent?: boolean;
+    }
   /** 답을 기다리는 동안 '…' 말풍선. showBubble이 오면 교체되고, hideBubble로 지운다 */
   | { v: 1; type: 'showTyping'; characterId: string }
   | { v: 1; type: 'hideBubble'; characterId: string }
@@ -71,6 +79,8 @@ export type ToRN =
   | { v: 1; type: 'ready' }
   | { v: 1; type: 'mapLoaded' }
   | { v: 1; type: 'characterTap'; characterId: string }
+  /** 캐릭터가 아닌 빈 지도를 탭함(드래그·핀치 제외) */
+  | { v: 1; type: 'mapTap' }
   | { v: 1; type: 'mapError'; code: MapErrorCode; message?: string }
   /** 개발용 */
   | { v: 1; type: 'log'; level: 'info' | 'warn' | 'error'; message: string }
