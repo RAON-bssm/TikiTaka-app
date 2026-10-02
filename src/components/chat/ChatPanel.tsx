@@ -1,14 +1,18 @@
 import { useRef, useState } from 'react';
 import { Pressable, TextInput, View, type LayoutChangeEvent } from 'react-native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import ArrowUpIcon from '@/assets/icons/arrow-up.svg';
+import ChevronLeftIcon from '@/assets/icons/chevron-left.svg';
+import Typography from '@/components/ui/Typography';
 import { palette } from '@/constants/colors';
 
 interface Props {
   name: string;
   isPending: boolean;
   onSend: (message: string) => void;
+  onClose: () => void;
   /**
    * 처음 그려졌을 때 한 번만, WebView 아래 끝에서 가려지는 높이(아래 여백 포함)를 알린다.
    * 키보드나 입력으로 커질 때마다 알리면 지도가 계속 움직인다.
@@ -18,10 +22,11 @@ interface Props {
 
 /**
  * 지도를 가리지 않도록 Modal이 아니라 지도 위에 입력 바만 띄운다. 답은 지도 말풍선으로만 보여 준다.
- * 닫기 버튼이 없다. 빈 지도 탭(mapTap)·뒤로가기·탭 이동으로 닫는다.
+ * 상단 '<' 버튼 말고도 빈 지도 탭(mapTap)·뒤로가기·탭 이동으로 닫힌다.
  * Modal로 띄우면 말풍선 연출이 딤에 가리고, 실패 토스트도 모달 아래에 깔린다.
  */
-export default function ChatPanel({ name, isPending, onSend, onFirstLayout }: Props) {
+export default function ChatPanel({ name, isPending, onSend, onClose, onFirstLayout }: Props) {
+  const insets = useSafeAreaInsets();
   const [message, setMessage] = useState('');
   const measured = useRef(false);
 
@@ -43,35 +48,57 @@ export default function ChatPanel({ name, isPending, onSend, onFirstLayout }: Pr
   // 서드파티 컴포넌트라 NativeWind className이 적용되지 않아 style을 쓴다.
   // box-none: 바 양옆·아래 여백의 터치는 지도로 넘긴다.
   return (
-    <KeyboardAvoidingView
-      behavior="padding"
-      pointerEvents="box-none"
-      style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}
-    >
-      <View onLayout={handleLayout} pointerEvents="box-none" className="px-lg pb-lg">
-        <View className="flex-row items-center gap-sm rounded-full bg-white py-xs pl-lg pr-xs shadow-md">
-          <TextInput
-            value={message}
-            onChangeText={setMessage}
-            onSubmitEditing={handleSend}
-            editable={!isPending}
-            returnKeyType="send"
-            placeholder={isPending ? '답을 기다리는 중이에요...' : `${name}에게 물어보기`}
-            placeholderTextColor={palette.gray[400]}
-            className="flex-1 py-sm font-sans text-sm text-gray-800"
-          />
-          <Pressable
-            onPress={handleSend}
-            disabled={!canSend}
-            accessibilityLabel="보내기"
-            className={`h-[36px] w-[36px] items-center justify-center rounded-full ${
-              canSend ? 'bg-primary-600 active:bg-primary-700' : 'bg-gray-200'
-            }`}
-          >
-            <ArrowUpIcon width={20} height={20} color="white" />
-          </Pressable>
-        </View>
+    <>
+      {/* 지도는 상태바 영역까지 채우므로 safe area만큼 내린다. */}
+      <View
+        pointerEvents="box-none"
+        className="absolute left-0 right-0 top-0 px-lg"
+        style={{ paddingTop: insets.top + 12 }}
+      >
+        <Pressable
+          onPress={onClose}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel={`${name}와의 대화 나가기`}
+          className="flex-row items-center gap-sm self-start rounded-full bg-white py-sm pl-sm pr-lg shadow-md active:opacity-70"
+        >
+          <ChevronLeftIcon width={24} height={24} color={palette.gray[500]} />
+          <Typography variant="h3" className="text-gray-800">
+            {name}
+          </Typography>
+        </Pressable>
       </View>
-    </KeyboardAvoidingView>
+
+      <KeyboardAvoidingView
+        behavior="padding"
+        pointerEvents="box-none"
+        style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}
+      >
+        <View onLayout={handleLayout} pointerEvents="box-none" className="px-lg pb-lg">
+          <View className="flex-row items-center gap-sm rounded-full bg-white py-xs pl-lg pr-xs shadow-md">
+            <TextInput
+              value={message}
+              onChangeText={setMessage}
+              onSubmitEditing={handleSend}
+              editable={!isPending}
+              returnKeyType="send"
+              placeholder={isPending ? '답을 기다리는 중이에요...' : `${name}에게 물어보기`}
+              placeholderTextColor={palette.gray[400]}
+              className="flex-1 py-sm font-sans text-sm text-gray-800"
+            />
+            <Pressable
+              onPress={handleSend}
+              disabled={!canSend}
+              accessibilityLabel="보내기"
+              className={`h-[36px] w-[36px] items-center justify-center rounded-full ${
+                canSend ? 'bg-primary-600 active:bg-primary-700' : 'bg-gray-200'
+              }`}
+            >
+              <ArrowUpIcon width={20} height={20} color="white" />
+            </Pressable>
+          </View>
+        </View>
+      </KeyboardAvoidingView>
+    </>
   );
 }

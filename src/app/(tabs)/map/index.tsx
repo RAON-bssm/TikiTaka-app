@@ -203,6 +203,7 @@ export default function MapScreen() {
           name={chatbot.name}
           isPending={pendingIds.has(chatbot.chatbot_id)}
           onSend={(message) => void handleSend(message)}
+          onClose={closeChat}
           onFirstLayout={(height) => {
             // 패널은 WebView 아래 끝에 붙어 있고 바텀바는 WebView 밖(아래)에 있어,
             // 패널 높이가 곧 WebView에서 가려지는 높이다. 바텀바가 safe area 여백을 맡아 따로 더하지 않는다.
