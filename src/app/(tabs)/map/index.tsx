@@ -49,7 +49,6 @@ export default function MapScreen() {
   const { mutateAsync: sendChat } = useSendChat();
   const isFocused = useIsFocused();
   const [chatbotId, setChatbotId] = useState<string>();
-  const [replies, setReplies] = useState<Record<string, string>>({});
   const [pendingIds, setPendingIds] = useState<ReadonlySet<string>>(new Set());
   const panelHeight = useRef<number>(undefined);
   /** 답이 늦게 왔을 때 그 챗봇과 아직 대화 중인지 판단한다. state는 응답 시점의 클로저에서 옛 값이라 ref로 둔다. */
@@ -131,7 +130,6 @@ export default function MapScreen() {
     setPendingIds((prev) => new Set(prev).add(characterId));
     try {
       const { reply } = await sendChat({ chatbotId: characterId, message });
-      setReplies((prev) => ({ ...prev, [characterId]: reply }));
       // 대화 중이면 다음 입력(showTyping이 교체)이나 패널을 닫을 때까지 남긴다.
       // 그 사이 패널을 닫았으면 지울 사람이 없으므로 잠깐만 보여 준다.
       const isOpen = openChatbotId.current === characterId;
@@ -203,10 +201,8 @@ export default function MapScreen() {
         <ChatPanel
           key={chatbot.chatbot_id}
           name={chatbot.name}
-          reply={replies[chatbot.chatbot_id]}
           isPending={pendingIds.has(chatbot.chatbot_id)}
           onSend={(message) => void handleSend(message)}
-          onClose={closeChat}
           onFirstLayout={(height) => {
             // 패널은 WebView 아래 끝에 붙어 있고 바텀바는 WebView 밖(아래)에 있어,
             // 패널 높이가 곧 WebView에서 가려지는 높이다. 바텀바가 safe area 여백을 맡아 따로 더하지 않는다.
