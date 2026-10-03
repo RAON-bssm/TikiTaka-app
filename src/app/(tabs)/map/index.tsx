@@ -12,6 +12,7 @@ import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
 import { DEFAULT_CHARACTER_CONFIG } from '@/constants/character/assets';
 import { useChatbots } from '@/hooks/chat/useChatbots';
+import { useChatHistory } from '@/hooks/chat/useChatHistory';
 import { useSendChat } from '@/hooks/chat/useSendChat';
 import { useMapBridge } from '@/hooks/map/useMapBridge';
 import { useMyInfo } from '@/hooks/user/useMyInfo';
@@ -49,7 +50,8 @@ export default function MapScreen() {
   const { mutateAsync: sendChat } = useSendChat();
   const isFocused = useIsFocused();
   const [chatbotId, setChatbotId] = useState<string>();
-  const [pendingIds, setPendingIds] = useState<ReadonlySet<string>>(new Set());
+  /** 챗봇 id → 답을 기다리는 질문 */
+  const [pendingMessages, setPendingMessages] = useState<Record<string, string>>({});
   const panelHeight = useRef<number>(undefined);
   /** 답이 늦게 왔을 때 그 챗봇과 아직 대화 중인지 판단한다. state는 응답 시점의 클로저에서 옛 값이라 ref로 둔다. */
   const openChatbotId = useRef<string>(undefined);
@@ -63,6 +65,7 @@ export default function MapScreen() {
       kind: 'npc',
     })) ?? [];
   const chatbot = chatbots.data?.find((item) => item.chatbot_id === chatbotId);
+  const history = useChatHistory(chatbotId);
 
   const { webViewRef, status, onMessage, fail, reload, sendToMap } = useMapBridge({
     neighborhood,
@@ -127,7 +130,7 @@ export default function MapScreen() {
     const characterId = chatbotId;
 
     sendToMap({ type: 'showTyping', characterId });
-    setPendingIds((prev) => new Set(prev).add(characterId));
+    setPendingMessages((prev) => ({ ...prev, [characterId]: message }));
     try {
       const { reply } = await sendChat({ chatbotId: characterId, message });
       // 대화 중이면 다음 입력(showTyping이 교체)이나 패널을 닫을 때까지 남긴다.
@@ -143,10 +146,9 @@ export default function MapScreen() {
       sendToMap({ type: 'hideBubble', characterId });
       showToast(getChatErrorMessage(error));
     } finally {
-      setPendingIds((prev) => {
-        const next = new Set(prev);
-        next.delete(characterId);
-        return next;
+      setPendingMessages((prev) => {
+        const { [characterId]: _, ...rest } = prev;
+        return rest;
       });
     }
   };
@@ -201,7 +203,8 @@ export default function MapScreen() {
         <ChatPanel
           key={chatbot.chatbot_id}
           name={chatbot.name}
-          isPending={pendingIds.has(chatbot.chatbot_id)}
+          messages={history.data ?? []}
+          pendingMessage={pendingMessages[chatbot.chatbot_id]}
           onSend={(message) => void handleSend(message)}
           onClose={closeChat}
           onFirstLayout={(height) => {

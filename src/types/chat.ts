@@ -33,3 +33,20 @@ export interface ChatReply {
   sources: unknown[];
   created_at: DateTimeString;
 }
+
+export interface ChatMessage {
+  message_id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  sources?: unknown[];
+  created_at: DateTimeString;
+}
+
+/** messages는 오래된 것부터 최신 순이다. */
+export interface ChatHistoryData {
+  chatbot_id: string;
+  messages: ChatMessage[];
+  /** 다음 페이지 커서. 더 없으면 키가 빠진다. */
+  next_before?: DateTimeString;
+  has_more: boolean;
+}
