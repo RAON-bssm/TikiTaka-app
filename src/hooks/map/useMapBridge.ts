@@ -21,6 +21,10 @@ interface Options {
   characters?: MapCharacter[];
   partUrls?: PartUrlMap;
   onCharacterTap?: (characterId: string) => void;
+  onMapTap?: () => void;
+  onMapMoveStart?: () => void;
+  /** 웹이 다시 로드되면 지도 상태가 초기화되므로, 지도가 다시 그려진 이 시점에 포커스 등을 다시 보낸다. */
+  onMapLoaded?: () => void;
 }
 
 /**
@@ -32,6 +36,9 @@ export function useMapBridge({
   characters = [],
   partUrls = {},
   onCharacterTap,
+  onMapTap,
+  onMapMoveStart,
+  onMapLoaded,
 }: Options) {
   const webViewRef = useRef<WebView>(null);
   const isReady = useRef(false);
@@ -56,6 +63,11 @@ export function useMapBridge({
     sentLocationId.current = neighborhood.locationId;
   }, [neighborhood, characters, partUrls]);
 
+  useEffect(() => {
+    if (!isReady.current || sentLocationId.current === null || characters.length === 0) return;
+    post(webViewRef.current, { type: 'upsertCharacters', characters });
+  }, [characters]);
+
   const onMessage = (event: WebViewMessageEvent) => {
     const message = parseMessage(event.nativeEvent.data);
     if (!message) return;
@@ -68,6 +80,7 @@ export function useMapBridge({
         break;
       case 'mapLoaded':
         setStatus('loaded');
+        onMapLoaded?.();
         break;
       case 'mapError':
         if (__DEV__) console.warn('[map]', message.code, message.message);
@@ -76,12 +89,24 @@ export function useMapBridge({
       case 'characterTap':
         onCharacterTap?.(message.characterId);
         break;
+      case 'mapTap':
+        onMapTap?.();
+        break;
+      case 'mapMoveStart':
+        onMapMoveStart?.();
+        break;
       case 'log':
         if (__DEV__) console[message.level]('[map]', message.message);
         break;
       default:
         break;
     }
+  };
+
+  /** `ready` 전이면 버린다. 말풍선 같은 연출은 놓쳐도 되고, 쌓아 두면 다시 로드된 지도에 철 지난 연출이 뜬다. */
+  const sendToMap = (message: DistributiveOmit<ToWeb, 'v'>) => {
+    if (!isReady.current) return;
+    post(webViewRef.current, message);
   };
 
   /** WebView 자체의 로드 실패(네트워크·HTTP 에러) */
@@ -95,7 +120,7 @@ export function useMapBridge({
     webViewRef.current?.reload();
   };
 
-  return { webViewRef, status, onMessage, fail, reload };
+  return { webViewRef, status, onMessage, fail, reload, sendToMap };
 }
 
 function post(webView: WebView | null, message: DistributiveOmit<ToWeb, 'v'>) {
