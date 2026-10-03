@@ -74,6 +74,9 @@ export default function MapScreen() {
     onMapTap: () => {
       if (openChatbotId.current) closeChat();
     },
+    onMapMoveStart: () => {
+      if (openChatbotId.current) closeChat();
+    },
     onMapLoaded: () => {
       // 웹이 스스로 다시 로드되면 패널은 그대로라 다시 마운트되지 않으므로 여기서 포커스를 다시 맞춘다.
       // status가 loaded가 아니었다면 패널이 지금 새로 마운트되며 포커스를 보낸다.

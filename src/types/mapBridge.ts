@@ -81,6 +81,8 @@ export type ToRN =
   | { v: 1; type: 'characterTap'; characterId: string }
   /** 캐릭터가 아닌 빈 지도를 탭함(드래그·핀치 제외) */
   | { v: 1; type: 'mapTap' }
+  /** 사용자가 드래그·핀치로 지도를 움직이기 시작함. focusCharacter 확대처럼 웹이 스스로 움직일 때는 보내지 않는다 */
+  | { v: 1; type: 'mapMoveStart' }
   | { v: 1; type: 'mapError'; code: MapErrorCode; message?: string }
   /** 개발용 */
   | { v: 1; type: 'log'; level: 'info' | 'warn' | 'error'; message: string }

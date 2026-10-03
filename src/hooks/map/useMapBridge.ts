@@ -22,6 +22,7 @@ interface Options {
   partUrls?: PartUrlMap;
   onCharacterTap?: (characterId: string) => void;
   onMapTap?: () => void;
+  onMapMoveStart?: () => void;
   /** 웹이 다시 로드되면 지도 상태가 초기화되므로, 지도가 다시 그려진 이 시점에 포커스 등을 다시 보낸다. */
   onMapLoaded?: () => void;
 }
@@ -36,6 +37,7 @@ export function useMapBridge({
   partUrls = {},
   onCharacterTap,
   onMapTap,
+  onMapMoveStart,
   onMapLoaded,
 }: Options) {
   const webViewRef = useRef<WebView>(null);
@@ -89,6 +91,9 @@ export function useMapBridge({
         break;
       case 'mapTap':
         onMapTap?.();
+        break;
+      case 'mapMoveStart':
+        onMapMoveStart?.();
         break;
       case 'log':
         if (__DEV__) console[message.level]('[map]', message.message);
