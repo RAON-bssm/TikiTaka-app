@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ArrowUpIcon from '@/assets/icons/arrow-up.svg';
 import ChevronLeftIcon from '@/assets/icons/chevron-left.svg';
 import Typography from '@/components/ui/Typography';
+import TypingDots from './TypingDots';
 import { palette } from '@/constants/colors';
 import type { ChatMessage } from '@/types/chat';
 
@@ -82,12 +83,18 @@ export default function ChatPanel({
         </BackPill>
 
         {visible.map((item) => (
-          <Bubble key={item.message_id} role={item.role} text={item.content} />
+          <Bubble key={item.message_id} role={item.role}>
+            {item.content}
+          </Bubble>
         ))}
         {isPending && (
           <>
-            <Bubble role="user" text={pendingMessage} />
-            <Bubble role="assistant" text="···" muted />
+            <Bubble role="user" sending>
+              {pendingMessage}
+            </Bubble>
+            <Bubble role="assistant">
+              <TypingDots />
+            </Bubble>
           </>
         )}
       </View>
@@ -98,7 +105,7 @@ export default function ChatPanel({
         style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}
       >
         <View onLayout={handleLayout} pointerEvents="box-none" className="px-lg pb-lg">
-          <View className="flex-row items-center gap-sm rounded-full bg-white py-xs pl-lg pr-xs shadow-md">
+          <View className="flex-row items-center gap-sm rounded-full border border-gray-100 bg-white py-xs pl-lg pr-xs">
             <TextInput
               value={message}
               onChangeText={setMessage}
@@ -128,25 +135,35 @@ export default function ChatPanel({
 
 interface BubbleProps {
   role: ChatMessage['role'];
-  text: string;
-  muted?: boolean;
+  /** 문자열이면 글자로, 아니면(대기 점 등) 그대로 그린다. */
+  children: ReactNode;
+  /** 아직 서버에 닿지 않은 질문 */
+  sending?: boolean;
 }
 
-const Bubble = ({ role, text, muted }: BubbleProps) => {
+// 지도 위에 바로 올라가 그림자 대신 얇은 테두리로 배경과 구분한다.
+// 꼬리 쪽 모서리만 덜 둥글게 해 누가 한 말인지 보이게 한다.
+const Bubble = ({ role, children, sending }: BubbleProps) => {
   const isUser = role === 'user';
   return (
     <View
-      className={`max-w-[80%] rounded-xl px-md py-sm shadow-md ${
-        isUser ? 'self-end rounded-br-xs bg-primary-600' : 'self-start rounded-bl-xs bg-white'
-      }`}
+      className={`max-w-[80%] rounded-lg px-md py-sm ${
+        isUser
+          ? 'self-end rounded-br-xs bg-primary-600'
+          : 'self-start rounded-bl-xs border border-gray-100 bg-white'
+      } ${sending ? 'opacity-60' : ''}`}
     >
-      <Typography
-        variant="body2"
-        numberOfLines={MAX_LINES[role]}
-        className={isUser ? 'text-white' : muted ? 'text-gray-400' : 'text-gray-800'}
-      >
-        {text}
-      </Typography>
+      {typeof children === 'string' ? (
+        <Typography
+          variant="body3"
+          numberOfLines={MAX_LINES[role]}
+          className={isUser ? 'text-white' : 'text-gray-800'}
+        >
+          {children}
+        </Typography>
+      ) : (
+        children
+      )}
     </View>
   );
 };
@@ -171,7 +188,7 @@ const BackPill = ({ label, onPress, children }: BackPillProps) => {
       accessibilityRole="button"
       accessibilityLabel={label}
       // 글래스는 누름 효과를 isInteractive가 맡는다.
-      className={`self-start ${glass ? '' : 'rounded-full bg-white shadow-md active:opacity-70'}`}
+      className={`self-start ${glass ? '' : 'rounded-full border border-gray-100 bg-white active:opacity-70'}`}
     >
       {glass ? (
         // 서드파티 컴포넌트라 NativeWind className이 적용되지 않아 style을 쓴다.
