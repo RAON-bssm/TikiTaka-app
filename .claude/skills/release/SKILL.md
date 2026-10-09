@@ -24,4 +24,4 @@ description: 스토어 릴리즈·핫픽스·버전 올리기·EAS 빌드 작업
 - 앱 버전은 `app.json`의 `version`을 직접 올립니다.
 - 빌드 번호(`versionCode`·`buildNumber`)는 EAS가 원격으로 관리하고 자동으로 올립니다(`eas.json`의 `appVersionSource: remote`, `autoIncrement`). `app.json`의 값은 손대지 마세요. (hook이 차단합니다)
 - EAS 빌드는 `eas.json` 각 프로필의 `EXPO_USE_PNPM=1`을 반드시 유지합니다. (hook이 차단합니다)
-- `@expo/ui`, `expo-glass-effect`, 카카오 로그인은 Expo Go에서 동작하지 않으므로 테스트는 dev client 빌드로 합니다.
+- `expo-glass-effect`, 카카오 로그인은 Expo Go에서 동작하지 않으므로 테스트는 dev client 빌드로 합니다.
