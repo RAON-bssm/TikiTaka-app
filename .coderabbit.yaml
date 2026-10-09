@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
 
 # CodeRabbit 설정 — TikiTaka-app
-# 프로젝트 규약은 AGENTS.md 를 따릅니다. 아래 path_instructions 는 그 규약을 리뷰에 반영하기 위한 요약입니다.
+# 프로젝트 규약은 AGENTS.md 와 .claude/rules/ 를 따릅니다. 아래 path_instructions 는 그 규약을 리뷰에 반영하기 위한 요약입니다.
 
 language: ko-KR # 리뷰/요약을 한국어로 작성
 
@@ -31,7 +31,7 @@ reviews:
     - '!.expo/**'
     - '!expo-env.d.ts'
 
-  # 경로별 리뷰 지침 (AGENTS.md 규약 기반)
+  # 경로별 리뷰 지침 (.claude/rules/ 규약 기반)
   path_instructions:
     - path: '**/*.{ts,tsx}'
       instructions: |
@@ -87,6 +87,10 @@ chat:
   auto_reply: true
 
 knowledge_base:
+  code_guidelines:
+    enabled: true
+    filePatterns: # 기본 패턴(CLAUDE.md 등)에 더해 주제별 규칙도 리뷰에 반영
+      - '.claude/rules/**/*.md'
   learnings:
     scope: auto
   issues:
