@@ -89,8 +89,23 @@ chat:
 knowledge_base:
   code_guidelines:
     enabled: true
-    filePatterns: # 기본 패턴(CLAUDE.md 등)에 더해 주제별 규칙도 리뷰에 반영
-      - '.claude/rules/**/*.md'
+    # 기본 패턴(CLAUDE.md 등)에 더해 주제별 규칙도 리뷰에 반영한다.
+    # applyTo는 각 규칙 파일 frontmatter의 `paths`와 맞춘다(쉼표 구분이라 `{a,b}` 글롭은 풀어 쓴다).
+    filePatterns:
+      - files: '.claude/rules/platform.md, .claude/rules/structure.md'
+        applyTo: '**'
+      - files: '.claude/rules/code-style.md'
+        applyTo: 'src/**/*.ts, src/**/*.tsx, src/**/*.js'
+      - files: '.claude/rules/design-system.md'
+        applyTo: 'src/app/**, src/components/**, tailwind.config.js, src/constants/colors.js'
+      - files: '.claude/rules/api.md'
+        applyTo: 'src/api/**, src/hooks/**, src/types/**, src/app/**'
+      - files: '.claude/rules/auth.md'
+        applyTo: 'src/api/token.ts, src/api/client.ts, src/api/refresh.ts, src/api/auth.ts, src/components/auth/**, src/hooks/auth/**, src/app/(auth)/**'
+      - files: '.claude/rules/character.md'
+        applyTo: 'src/constants/character/**, src/components/character/**, src/hooks/character/**, src/hooks/equipment/**, src/api/character.ts, src/api/equipment.ts, src/constants/market.ts, src/app/(tabs)/profile/character.tsx'
+      - files: '.claude/rules/map.md'
+        applyTo: 'src/app/(tabs)/map/**, src/app/(tabs)/_layout.tsx, src/hooks/map/**, src/types/mapBridge.ts'
   learnings:
     scope: auto
   issues:
