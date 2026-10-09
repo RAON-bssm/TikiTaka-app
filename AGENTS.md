@@ -25,29 +25,11 @@
 - **스타일링:** **NativeWind v4** (`nativewind@^4.2.5`, React Native용 Tailwind CSS v3 호환 버전)
 - **데이터 페칭 및 상태 관리:** **TanStack Query** (`@tanstack/react-query@^5.101.0`) & **Axios** (`axios@^1.17.0`)
 
-### 핵심 패키지 버전 (package.json 기준)
+### 네이티브 의존성 주의 (버전은 `package.json` 참고)
 
-> 패키지를 업그레이드한 경우, 아래 표도 함께 최신화해 주세요. 전체 의존성 목록은 `package.json` 참고.
-
-| 패키지                            | 버전       | 비고                                               |
-| --------------------------------- | ---------- | -------------------------------------------------- |
-| `expo`                            | `~56.0.11` |                                                    |
-| `expo-router`                     | `~56.2.10` |                                                    |
-| `react`                           | `19.2.3`   |                                                    |
-| `react-native`                    | `0.85.3`   |                                                    |
-| `react-native-web`                | `~0.21.0`  |                                                    |
-| `typescript`                      | `~6.0.3`   |                                                    |
-| `nativewind`                      | `^4.2.5`   |                                                    |
-| `tailwindcss`                     | `^3.4.19`  |                                                    |
-| `@tanstack/react-query`           | `^5.101.0` |                                                    |
-| `axios`                           | `^1.17.0`  |                                                    |
-| `eslint`                          | `^9.39.4`  |                                                    |
-| `prettier`                        | `^3.8.4`   |                                                    |
-| `@expo/ui`                        | `~56.0.17` | Expo Go 미지원, dev client 필요                    |
-| `expo-glass-effect`               | `~56.0.4`  | Expo Go 미지원, dev client 필요                    |
-| `@react-native-seoul/kakao-login` | `^6.0.4`   | 카카오 로그인. Expo Go 미지원, dev client 필요     |
-| `expo-build-properties`           | `~56.0.26` | 카카오 SDK Maven 저장소 선언용(Android). 위와 세트 |
-| `react-native-webview`            | `13.16.1`  | 지도 탭(카카오맵 웹을 WebView로 표시)              |
+- `@expo/ui`, `expo-glass-effect`, `@react-native-seoul/kakao-login`은 Expo Go 미지원, dev client 필요.
+- `expo-build-properties`는 카카오 SDK Maven 저장소 선언용(Android)으로 카카오 로그인과 세트.
+- `react-native-webview`는 지도 탭(카카오맵 웹을 WebView로 표시)에 사용.
 
 ---
 
