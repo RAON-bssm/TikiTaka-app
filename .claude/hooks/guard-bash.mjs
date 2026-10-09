@@ -32,7 +32,30 @@ const NPM_WRITE_SUBCOMMANDS = new Set([
   'start',
   'test',
 ]);
+// 값을 따로 받는 npm 전역 옵션. `npm --prefix . install`처럼 서브커맨드 앞에 오면 값까지 건너뛴다.
+const NPM_VALUE_OPTIONS = new Set([
+  '--prefix',
+  '-C',
+  '--registry',
+  '--cache',
+  '--userconfig',
+  '--globalconfig',
+  '--workspace',
+  '-w',
+  '--loglevel',
+  '--location',
+  '--tag',
+  '--omit',
+  '--include',
+]);
 const ALWAYS_BLOCKED = new Set(['yarn', 'bun', 'bunx', 'npx']);
+
+function npmSubcommand(args) {
+  for (let i = 0; i < args.length; i++) {
+    if (!args[i].startsWith('-')) return args[i];
+    if (NPM_VALUE_OPTIONS.has(args[i])) i++;
+  }
+}
 
 function block(reason) {
   process.stderr.write(reason);
@@ -50,7 +73,10 @@ for (const raw of segments) {
   }
   if (!words.length) continue;
   const bin = path.basename(words[0]);
-  if (ALWAYS_BLOCKED.has(bin) || (bin === 'npm' && NPM_WRITE_SUBCOMMANDS.has(words[1]))) {
+  if (
+    ALWAYS_BLOCKED.has(bin) ||
+    (bin === 'npm' && NPM_WRITE_SUBCOMMANDS.has(npmSubcommand(words.slice(1))))
+  ) {
     block(
       `이 프로젝트는 pnpm만 사용합니다. \`${bin}\` 대신 pnpm을 쓰세요 ` +
         '(설치: `pnpm expo install <패키지>`, 스크립트: `pnpm <script>`, 일회성 실행: `pnpm dlx`/`pnpm exec`).',
