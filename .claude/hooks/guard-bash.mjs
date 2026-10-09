@@ -49,6 +49,9 @@ const NPM_VALUE_OPTIONS = new Set([
   '--include',
 ]);
 const ALWAYS_BLOCKED = new Set(['yarn', 'bun', 'bunx', 'npx']);
+const CONFIG_WRITE_ACTIONS = new Set(['set', 'delete', 'rm', 'edit', 'fix']);
+const NPMRC_REASON =
+  '.npmrc는 수정·삭제할 수 없습니다. `node-linker=hoisted`가 빠지면 네이티브 오토링크가 깨집니다.';
 
 function npmSubcommand(args) {
   for (let i = 0; i < args.length; i++) {
@@ -82,13 +85,22 @@ for (const raw of segments) {
         '(설치: `pnpm expo install <패키지>`, 스크립트: `pnpm <script>`, 일회성 실행: `pnpm dlx`/`pnpm exec`).',
     );
   }
+  // `npm config delete node-linker`처럼 파일명 없이도 .npmrc를 고치는 설정 쓰기 명령을 막는다.
+  if (bin === 'npm' || bin === 'pnpm') {
+    const args = words.slice(1).filter((w) => !w.startsWith('-'));
+    const configAt = args.findIndex((w) => w === 'config' || w === 'c');
+    if (
+      (configAt !== -1 && CONFIG_WRITE_ACTIONS.has(args[configAt + 1])) ||
+      (bin === 'npm' && npmSubcommand(words.slice(1)) === 'set')
+    ) {
+      block(NPMRC_REASON);
+    }
+  }
 }
 
 if (
   /\.npmrc/.test(command) &&
   /(>|\brm\b|\bmv\b|\bcp\b|\btee\b|\btruncate\b|\bsed\b[^|;&]*\s-i)/.test(command)
 ) {
-  block(
-    '.npmrc는 수정·삭제할 수 없습니다. `node-linker=hoisted`가 빠지면 네이티브 오토링크가 깨집니다.',
-  );
+  block(NPMRC_REASON);
 }
