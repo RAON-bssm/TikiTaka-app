@@ -33,4 +33,4 @@ paths:
 ## NativeWind `safelist` 주의
 
 - 클래스를 **동적으로 조합**하면(변수로 클래스명을 만들 때) `content` 글롭에 문자열이 그대로 나타나지 않아 빌드에서 제거됩니다. 그런 클래스는 `safelist`에 등록하세요. `Typography`의 클래스가 `safelist`에 있는 이유입니다.
-- `content` 글롭은 `src/app/`과 `src/components/`만 스캔합니다. `src/constants/`나 `src/hooks/`에 클래스 문자열을 두면 빌드에 포함되지 않으니, 컴포넌트 쪽에 두거나 `safelist`에 등록하세요.
+- `content` 글롭은 `src/app/`, `src/components/`, `src/features/`만 스캔합니다(`src/features/`는 설정에만 있고 현재 쓰지 않습니다). `src/constants/`나 `src/hooks/`에 클래스 문자열을 두면 빌드에 포함되지 않으니, 컴포넌트 쪽에 두거나 `safelist`에 등록하세요.
