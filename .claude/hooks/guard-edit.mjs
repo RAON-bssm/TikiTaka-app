@@ -46,8 +46,26 @@ if (tool === 'MultiEdit') {
 if (after === null) process.exit(0);
 
 if (rel === 'eas.json') {
-  const count = (text) => (text.match(/"EXPO_USE_PNPM"\s*:\s*"1"/g) ?? []).length;
-  if (count(after) < count(before)) {
+  // 편집 전에 `EXPO_USE_PNPM`이 있던 빌드 프로필마다 값이 그대로인지 비교한다.
+  const pnpmByProfile = (text) => {
+    const { build = {} } = JSON.parse(text);
+    return Object.fromEntries(
+      Object.entries(build).map(([name, profile]) => [name, profile?.env?.EXPO_USE_PNPM]),
+    );
+  };
+  let changed;
+  try {
+    const prev = pnpmByProfile(before);
+    const next = pnpmByProfile(after);
+    changed = Object.keys(prev).some(
+      (name) => prev[name] !== undefined && next[name] !== prev[name],
+    );
+  } catch {
+    // JSON이 깨진 중간 상태면 전체 개수로만 비교한다.
+    const count = (text) => (text.match(/"EXPO_USE_PNPM"\s*:\s*"1"/g) ?? []).length;
+    changed = count(after) < count(before);
+  }
+  if (changed) {
     block(
       'eas.json 빌드 프로필의 `EXPO_USE_PNPM=1`은 제거할 수 없습니다. EAS 빌드가 pnpm으로 설치해야 합니다.',
     );
