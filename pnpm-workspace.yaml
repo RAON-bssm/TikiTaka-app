@@ -1,0 +1,2 @@
+patchedDependencies:
+  react-native-vision-camera: patches/react-native-vision-camera.patch

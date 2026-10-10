@@ -1,0 +1,89 @@
+diff --git a/android/src/main/java/com/margelo/nitro/camera/hybrids/outputs/HybridPhotoOutput.kt b/android/src/main/java/com/margelo/nitro/camera/hybrids/outputs/HybridPhotoOutput.kt
+index f3bdfe38c3d77191ab07a507ac93e58477392586..40be611052c87e782043a05eb3949eab50645ebb 100644
+--- a/android/src/main/java/com/margelo/nitro/camera/hybrids/outputs/HybridPhotoOutput.kt
++++ b/android/src/main/java/com/margelo/nitro/camera/hybrids/outputs/HybridPhotoOutput.kt
+@@ -54,7 +54,7 @@ class HybridPhotoOutput(
+ 
+   private val coroutineScope = CoroutineScope(Dispatchers.Default)
+   private var imageCapture: ImageCapture? = null
+-  private val shutterSound = MediaActionSound()
++  private val shutterSound = QuietShutterSound()
+   override var mirrorMode: MirrorMode = MirrorMode.AUTO
+ 
+   init {
+diff --git a/android/src/main/java/com/margelo/nitro/camera/hybrids/outputs/QuietShutterSound.kt b/android/src/main/java/com/margelo/nitro/camera/hybrids/outputs/QuietShutterSound.kt
+new file mode 100644
+index 0000000000000000000000000000000000000000..25068325c4919af93105705ba10a306d2080f809
+--- /dev/null
++++ b/android/src/main/java/com/margelo/nitro/camera/hybrids/outputs/QuietShutterSound.kt
+@@ -0,0 +1,70 @@
++package com.margelo.nitro.camera.hybrids.outputs
++
++import android.media.AudioAttributes
++import android.media.MediaActionSound
++import android.media.SoundPool
++import android.util.Log
++import java.io.File
++
++/**
++ * [TikiTaka patch] Plays the same system shutter sound as [MediaActionSound], with the same
++ * audibility-enforced attributes (so it still plays in silent mode where the region requires it),
++ * but at a lower volume. On devices where the shutter sound is enforced (e.g. Korean models),
++ * [MediaActionSound] plays at a fixed full volume that is much louder than the stock camera app.
++ *
++ * Falls back to [MediaActionSound] if the sound file can't be found or hasn't loaded yet.
++ */
++internal class QuietShutterSound {
++  companion object {
++    private const val TAG = "QuietShutterSound"
++
++    // Linear amplitude (0..1). Compare against the stock camera app on a Korean device and adjust.
++    private const val SHUTTER_VOLUME = 0.4f
++
++    // Same lookup as MediaActionSound.
++    private val SOUND_DIRS = listOf("/product/media/audio/ui/", "/system/media/audio/ui/")
++    private const val SHUTTER_FILE = "camera_click.ogg"
++  }
++
++  private val fallback = MediaActionSound()
++  private val soundPool =
++    SoundPool
++      .Builder()
++      .setMaxStreams(1)
++      .setAudioAttributes(
++        AudioAttributes
++          .Builder()
++          .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
++          .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
++          .setFlags(AudioAttributes.FLAG_AUDIBILITY_ENFORCED)
++          .build(),
++      ).build()
++
++  @Volatile private var soundId = 0
++
++  @Volatile private var isLoaded = false
++
++  fun load(soundName: Int) {
++    fallback.load(soundName)
++    if (soundName != MediaActionSound.SHUTTER_CLICK) return
++
++    val file = SOUND_DIRS.map { File(it, SHUTTER_FILE) }.firstOrNull { it.canRead() }
++    if (file == null) {
++      Log.w(TAG, "$SHUTTER_FILE not found, falling back to MediaActionSound")
++      return
++    }
++    // Only one sound is ever loaded into this pool, so any successful load is ours.
++    soundPool.setOnLoadCompleteListener { _, _, status ->
++      isLoaded = status == 0
++    }
++    soundId = soundPool.load(file.path, 1)
++  }
++
++  fun play(soundName: Int) {
++    if (soundName == MediaActionSound.SHUTTER_CLICK && isLoaded) {
++      soundPool.play(soundId, SHUTTER_VOLUME, SHUTTER_VOLUME, 1, 0, 1f)
++    } else {
++      fallback.play(soundName)
++    }
++  }
++}
