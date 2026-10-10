@@ -1,12 +1,12 @@
 import { Image } from 'expo-image';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Image as RNImage, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { getApiErrorMessage } from '@/api/error';
 import Gotcha from '@/components/market/gotcha/Gotcha';
-import MyPointBadge from '@/components/market/MyPointBadge';
 import PullButton from '@/components/market/gotcha/PullButton';
+import MyPointBadge from '@/components/market/MyPointBadge';
 import ShopTabs from '@/components/market/ShopTabs';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Header from '@/components/ui/Header';
@@ -33,8 +33,11 @@ export default function GachaScreen() {
   const { mutate: draw, isPending } = useDrawGashapon();
   const { showToast } = useToast();
 
+  const pullingRef = useRef(false);
+
   const handlePull = (productId: string) => {
-    if (isPending || !isCharacterConfigLoaded) return;
+    if (pullingRef.current || isPending || !isCharacterConfigLoaded) return;
+    pullingRef.current = true;
     draw(
       { product_id: productId },
       {
@@ -44,6 +47,9 @@ export default function GachaScreen() {
         },
         onError: (error) =>
           showToast(getApiErrorMessage(error, '뽑기에 실패했어요. 다시 시도해주세요.')),
+        onSettled: () => {
+          pullingRef.current = false;
+        },
       },
     );
   };
