@@ -49,10 +49,9 @@ export default function Upload() {
           router.dismissAll();
           router.replace({ pathname: '/feed/[post_id]', params: { post_id: postId } });
         },
-        onError: (error) =>
-          showToast(getApiErrorMessage(error, '업로드에 실패했어요. 다시 시도해주세요.')),
-        onSettled: () => {
+        onError: (error) => {
           uploadingRef.current = false;
+          showToast(getApiErrorMessage(error, '업로드에 실패했어요. 다시 시도해주세요.'));
         },
       },
     );
