@@ -169,9 +169,9 @@ const ShapeGrid = ({
               onPress={() => (locked ? onPressLocked() : onSelect(shape.next))}
               style={{ width: itemSize, height: itemSize }}
               // 밝은 파츠만 어두운 배경에 올린다. 메타가 없으면 밝은 배경으로 폴백
-              className={`items-center justify-center overflow-hidden rounded-lg ${
+              className={`items-center justify-center overflow-hidden rounded-lg border-2 ${
                 meta?.isDark === false ? 'bg-gray-700' : 'bg-gray-100'
-              } ${shape.active ? 'border-2 border-primary-600' : ''}`}
+              } ${shape.active ? 'border-primary-600' : 'border-transparent'}`}
             >
               {shape.source != null && (
                 <View className={`h-full w-full ${locked ? 'opacity-30' : ''}`}>
