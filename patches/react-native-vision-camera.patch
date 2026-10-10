@@ -13,10 +13,10 @@ index f3bdfe38c3d77191ab07a507ac93e58477392586..40be611052c87e782043a05eb3949eab
    init {
 diff --git a/android/src/main/java/com/margelo/nitro/camera/hybrids/outputs/QuietShutterSound.kt b/android/src/main/java/com/margelo/nitro/camera/hybrids/outputs/QuietShutterSound.kt
 new file mode 100644
-index 0000000000000000000000000000000000000000..25068325c4919af93105705ba10a306d2080f809
+index 0000000000000000000000000000000000000000..3470c7376a9562a23d5b78d2dbacec5c1ba2fdfe
 --- /dev/null
 +++ b/android/src/main/java/com/margelo/nitro/camera/hybrids/outputs/QuietShutterSound.kt
-@@ -0,0 +1,70 @@
+@@ -0,0 +1,71 @@
 +package com.margelo.nitro.camera.hybrids.outputs
 +
 +import android.media.AudioAttributes
@@ -81,9 +81,10 @@ index 0000000000000000000000000000000000000000..25068325c4919af93105705ba10a306d
 +
 +  fun play(soundName: Int) {
 +    if (soundName == MediaActionSound.SHUTTER_CLICK && isLoaded) {
-+      soundPool.play(soundId, SHUTTER_VOLUME, SHUTTER_VOLUME, 1, 0, 1f)
-+    } else {
-+      fallback.play(soundName)
++      // play() returns 0 when it fails, so the shutter sound must still come from the fallback.
++      val streamId = soundPool.play(soundId, SHUTTER_VOLUME, SHUTTER_VOLUME, 1, 0, 1f)
++      if (streamId != 0) return
 +    }
++    fallback.play(soundName)
 +  }
 +}
