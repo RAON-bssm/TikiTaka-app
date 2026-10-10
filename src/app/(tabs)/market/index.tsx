@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -41,8 +41,11 @@ export default function MarketScreen() {
     ? { ...config, [selectedItem.group]: selectedItem.assetId }
     : config;
 
+  const purchasingRef = useRef(false);
+
   const handleConfirmPurchase = () => {
-    if (!selectedItem || isPending) return;
+    if (!selectedItem || purchasingRef.current || isPending) return;
+    purchasingRef.current = true;
 
     purchaseProduct(
       { product_id: selectedItem.id },
@@ -61,6 +64,9 @@ export default function MarketScreen() {
         },
         onError: (error) =>
           showToast(getApiErrorMessage(error, '구매에 실패했어요. 다시 시도해주세요.')),
+        onSettled: () => {
+          purchasingRef.current = false;
+        },
       },
     );
   };

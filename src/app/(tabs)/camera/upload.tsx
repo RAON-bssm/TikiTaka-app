@@ -8,7 +8,7 @@ import { useMyBoard } from '@/hooks/post/useMyBoard';
 import { useUploadPost } from '@/hooks/post/useUploadPost';
 import useImageRatio from '@/hooks/useImageRatio';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Image, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -23,8 +23,10 @@ export default function Upload() {
 
   const { data: myBoard, isLoading: isBoardLoading } = useMyBoard();
 
+  const uploadingRef = useRef(false);
+
   const handleUpload = () => {
-    if (isPending) return;
+    if (uploadingRef.current || isPending) return;
     if (!uri) {
       showToast('사진을 불러올 수 없어요.');
       return;
@@ -38,15 +40,19 @@ export default function Upload() {
       return;
     }
 
+    uploadingRef.current = true;
     uploadPost(
       { fileUri: uri, boardId: myBoard.board_id, content },
       {
         onSuccess: (postId) => {
           showToast('게시물이 등록됐어요');
+          router.dismissAll();
           router.replace({ pathname: '/feed/[post_id]', params: { post_id: postId } });
         },
-        onError: (error) =>
-          showToast(getApiErrorMessage(error, '업로드에 실패했어요. 다시 시도해주세요.')),
+        onError: (error) => {
+          uploadingRef.current = false;
+          showToast(getApiErrorMessage(error, '업로드에 실패했어요. 다시 시도해주세요.'));
+        },
       },
     );
   };
