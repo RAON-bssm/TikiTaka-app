@@ -73,8 +73,8 @@ export default function FeedCard({
         )}
       </View>
 
-      <View className="w-full flex-row items-center justify-between">
-        <View className="gap-xs">
+      <View className="w-full flex-row items-center justify-between gap-md">
+        <View className="flex-1 gap-xs">
           <Typography variant="h3" className="text-gray-800">
             {title}
           </Typography>
