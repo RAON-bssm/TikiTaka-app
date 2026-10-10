@@ -11,6 +11,7 @@ import Skeleton from '@/components/ui/feedback/Skeleton';
 import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
 import { DEFAULT_CHARACTER_CONFIG } from '@/constants/character/assets';
+import { equipmentToConfig } from '@/constants/character/equipment';
 import { useChatbots } from '@/hooks/chat/useChatbots';
 import { useChatHistory } from '@/hooks/chat/useChatHistory';
 import { useSendChat } from '@/hooks/chat/useSendChat';
@@ -56,12 +57,11 @@ export default function MapScreen() {
   /** 답이 늦게 왔을 때 그 챗봇과 아직 대화 중인지 판단한다. state는 응답 시점의 클로저에서 옛 값이라 ref로 둔다. */
   const openChatbotId = useRef<string>(undefined);
 
-  // 챗봇 외형은 서버에 없어 기본 모양으로 그린다. 캐릭터 id = chatbot_id라 탭 이벤트로 바로 대화한다.
   const characters: MapCharacter[] =
     chatbots.data?.map((chatbot) => ({
       id: chatbot.chatbot_id,
       name: chatbot.name,
-      config: DEFAULT_CHARACTER_CONFIG,
+      config: equipmentToConfig(chatbot.equipment, DEFAULT_CHARACTER_CONFIG),
       kind: 'npc',
     })) ?? [];
   const chatbot = chatbots.data?.find((item) => item.chatbot_id === chatbotId);
