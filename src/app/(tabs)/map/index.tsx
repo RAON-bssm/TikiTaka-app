@@ -61,7 +61,9 @@ export default function MapScreen() {
     chatbots.data?.map((chatbot) => ({
       id: chatbot.chatbot_id,
       name: chatbot.name,
-      config: equipmentToConfig(chatbot.equipment, DEFAULT_CHARACTER_CONFIG),
+      config: chatbot.equipment
+        ? equipmentToConfig(chatbot.equipment, DEFAULT_CHARACTER_CONFIG)
+        : DEFAULT_CHARACTER_CONFIG,
       kind: 'npc',
     })) ?? [];
   const chatbot = chatbots.data?.find((item) => item.chatbot_id === chatbotId);
