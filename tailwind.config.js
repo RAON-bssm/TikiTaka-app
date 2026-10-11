@@ -36,6 +36,7 @@ module.exports = {
         primary: palette.primary,
         secondary: palette.secondary,
         kakao: palette.kakao,
+        apple: palette.apple,
       },
       spacing: {
         xs: '4px',

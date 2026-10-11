@@ -1,4 +1,5 @@
 import { login as kakaoLogin, logout as kakaoLogout } from '@react-native-seoul/kakao-login';
+import * as AppleAuthentication from 'expo-apple-authentication';
 
 import type { Provider } from '@/types/auth';
 
@@ -18,6 +19,9 @@ const isUserCancelled = (error: unknown) =>
  * 앱에 들어가는 네이티브 앱 키는 URL 스킴에도 노출되는 공개값이고, client secret은 번들에 없다.
  */
 export async function getProviderAccessToken(provider: Provider): Promise<string | null> {
+  if (provider === 'APPLE') {
+    return getAppleIdentityToken();
+  }
   if (provider !== 'KAKAO') {
     // 서버 enum에는 GOOGLE도 있지만 앱에는 아직 구글 SDK를 붙이지 않았다.
     throw new Error(`${provider} 로그인은 아직 연결되지 않았습니다.`);
@@ -33,6 +37,28 @@ export async function getProviderAccessToken(provider: Provider): Promise<string
     throw error;
   }
 }
+
+/**
+ * scope를 요청하지 않는다. 서버는 토큰의 sub만 식별자로 쓰고, 이메일은 "이메일 숨기기" 때문에 쓰지 않는다.
+ * 취소는 code 'ERR_REQUEST_CANCELED'로 구분된다.
+ */
+async function getAppleIdentityToken(): Promise<string | null> {
+  try {
+    const credential = await AppleAuthentication.signInAsync();
+    if (!credential.identityToken) {
+      throw new Error('Apple 로그인 응답에 identityToken이 없습니다.');
+    }
+    return credential.identityToken;
+  } catch (error) {
+    if (isCodedError(error) && error.code === 'ERR_REQUEST_CANCELED') {
+      return null;
+    }
+    throw error;
+  }
+}
+
+const isCodedError = (error: unknown): error is { code: string } =>
+  typeof error === 'object' && error !== null && 'code' in error;
 
 /**
  * 로그아웃 시 함께 호출한다. 안 하면 다음 로그인이 계정 선택 없이 직전 계정으로 들어간다.
