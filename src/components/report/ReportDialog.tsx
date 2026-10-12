@@ -93,10 +93,13 @@ const ReportForm = ({ target, onClose }: { target: ReportTarget; onClose: () => 
 
   return (
     <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
-      <Pressable className="flex-1 items-center justify-center bg-black/40" onPress={handleClose}>
+      <Pressable
+        className="flex-1 items-center justify-center bg-black/40 px-xl"
+        onPress={handleClose}
+      >
         <Pressable
           onPress={() => {}}
-          className="w-[300px] gap-2xl rounded-xl bg-white px-xl pb-xl pt-2xl"
+          className="w-full max-w-[400px] gap-2xl rounded-xl bg-white px-xl pb-xl pt-2xl"
         >
           <View className="items-center gap-sm">
             <Typography variant="h2" className="text-gray-800">
