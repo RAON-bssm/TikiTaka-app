@@ -63,6 +63,7 @@ const isCodedError = (error: unknown): error is { code: string } =>
 /**
  * 로그아웃 시 함께 호출한다. 안 하면 다음 로그인이 계정 선택 없이 직전 계정으로 들어간다.
  * 실패는 무시한다 — 로그아웃 자체가 막히는 쪽이 더 나쁘다.
+ * Apple은 SDK에 로그아웃이 없고, 매번 시스템 시트로 다시 확인받기 때문에 지울 세션도 없다.
  */
 export async function clearProviderSession(): Promise<void> {
   try {

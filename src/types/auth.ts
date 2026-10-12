@@ -5,7 +5,7 @@ export type Provider = 'KAKAO' | 'GOOGLE' | 'APPLE';
 
 /**
  * 인가 코드가 아니라 소셜에서 이미 발급받은 access token을 보낸다.
- * APPLE은 access token이 없어 identityToken(JWT)을 넣는다. 서버가 Apple 공개키로 서명을 검증한다.
+ * APPLE은 access token이 없어 identityToken(JWT)을 넣는다. 서버는 서명을 검증하지 않고 sub만 꺼내 쓴다.
  */
 export interface LoginRequest {
   provider_access_token: string;
