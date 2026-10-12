@@ -135,6 +135,8 @@ const ReportForm = ({
                 <Pressable
                   key={item}
                   onPress={() => setReason(item)}
+                  accessibilityRole="radio"
+                  accessibilityState={{ checked: selected }}
                   className="flex-row items-center gap-sm py-sm"
                 >
                   <View
