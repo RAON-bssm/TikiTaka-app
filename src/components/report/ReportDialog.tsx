@@ -27,20 +27,33 @@ interface Props {
 }
 
 export default function ReportDialog({ target, onClose }: Props) {
+  const { mutate: reportPost, isPending: isPostPending } = useReportPost();
+  const { mutate: reportUser, isPending: isUserPending } = useReportUser();
+  const isPending = isPostPending || isUserPending;
+
+  const handleClose = () => {
+    if (isPending) return;
+    onClose();
+  };
+
   return (
     <Modal
       visible={!!target}
       transparent
       animationType="fade"
       statusBarTranslucent
-      onRequestClose={onClose}
+      onRequestClose={handleClose}
     >
       {/* 열 때마다 선택한 사유와 입력값을 비우려고 key로 폼을 새로 마운트한다. */}
       {target && (
         <ReportForm
           key={target.type === 'post' ? target.postId : target.userId}
           target={target}
-          onClose={onClose}
+          isPending={isPending}
+          reportPost={reportPost}
+          reportUser={reportUser}
+          onClose={handleClose}
+          onSuccess={onClose}
         />
       )}
     </Modal>
@@ -50,11 +63,24 @@ export default function ReportDialog({ target, onClose }: Props) {
 const isUserReportReason = (reason: ReportReason): reason is UserReportReason =>
   reason !== 'FAKE_MISSION';
 
-const ReportForm = ({ target, onClose }: { target: ReportTarget; onClose: () => void }) => {
+interface FormProps {
+  target: ReportTarget;
+  isPending: boolean;
+  reportPost: ReturnType<typeof useReportPost>['mutate'];
+  reportUser: ReturnType<typeof useReportUser>['mutate'];
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+const ReportForm = ({
+  target,
+  isPending,
+  reportPost,
+  reportUser,
+  onClose,
+  onSuccess,
+}: FormProps) => {
   const { showToast } = useToast();
-  const { mutate: reportPost, isPending: isPostPending } = useReportPost();
-  const { mutate: reportUser, isPending: isUserPending } = useReportUser();
-  const isPending = isPostPending || isUserPending;
 
   const [reason, setReason] = useState<ReportReason>();
   const [detail, setDetail] = useState('');
@@ -66,18 +92,13 @@ const ReportForm = ({ target, onClose }: { target: ReportTarget; onClose: () => 
   const isDetailRequired = reason === 'OTHER';
   const canSubmit = !isPending && !!reason && (!isDetailRequired || trimmedDetail !== '');
 
-  const handleClose = () => {
-    if (isPending) return;
-    onClose();
-  };
-
   const handleSubmit = () => {
     if (!canSubmit || !reason) return;
 
     setErrorMessage(undefined);
     const options = {
       onSuccess: () => {
-        onClose();
+        onSuccess();
         showToast('신고가 접수되었어요');
       },
       onError: (error: unknown) => setErrorMessage(getApiErrorMessage(error, '신고하지 못했어요')),
@@ -93,10 +114,7 @@ const ReportForm = ({ target, onClose }: { target: ReportTarget; onClose: () => 
 
   return (
     <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
-      <Pressable
-        className="flex-1 items-center justify-center bg-black/40 px-xl"
-        onPress={handleClose}
-      >
+      <Pressable className="flex-1 items-center justify-center bg-black/40 px-xl" onPress={onClose}>
         <Pressable
           onPress={() => {}}
           className="w-full max-w-[400px] gap-2xl rounded-xl bg-white px-xl pb-xl pt-2xl"
@@ -161,7 +179,7 @@ const ReportForm = ({ target, onClose }: { target: ReportTarget; onClose: () => 
           </View>
 
           <View className="flex-row gap-sm">
-            <Button content="취소" variant="light" className="flex-1" onclick={handleClose} />
+            <Button content="취소" variant="light" className="flex-1" onclick={onClose} />
             <Button
               content={isPending ? '신고 중...' : '신고하기'}
               className={`flex-1 ${canSubmit ? '' : 'opacity-50'}`}
