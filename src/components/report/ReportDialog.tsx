@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Modal, Pressable, TextInput, View } from 'react-native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 
@@ -86,6 +86,7 @@ const ReportForm = ({
   const [detail, setDetail] = useState('');
   // 토스트는 모달 아래에 깔려 보이지 않으므로 실패 사유는 창 안에 띄운다.
   const [errorMessage, setErrorMessage] = useState<string>();
+  const submittingRef = useRef(false);
 
   const reasons = target.type === 'post' ? POST_REPORT_REASONS : USER_REPORT_REASONS;
   const trimmedDetail = detail.trim();
@@ -93,15 +94,19 @@ const ReportForm = ({
   const canSubmit = !isPending && !!reason && (!isDetailRequired || trimmedDetail !== '');
 
   const handleSubmit = () => {
-    if (!canSubmit || !reason) return;
+    if (submittingRef.current || !canSubmit || !reason) return;
 
+    submittingRef.current = true;
     setErrorMessage(undefined);
     const options = {
       onSuccess: () => {
         onSuccess();
         showToast('신고가 접수되었어요');
       },
-      onError: (error: unknown) => setErrorMessage(getApiErrorMessage(error, '신고하지 못했어요')),
+      onError: (error: unknown) => {
+        submittingRef.current = false;
+        setErrorMessage(getApiErrorMessage(error, '신고하지 못했어요'));
+      },
     };
     const detailField = trimmedDetail ? { detail: trimmedDetail } : {};
 
@@ -109,6 +114,8 @@ const ReportForm = ({
       reportPost({ postId: target.postId, req: { reason, ...detailField } }, options);
     } else if (isUserReportReason(reason)) {
       reportUser({ userId: target.userId, req: { reason, ...detailField } }, options);
+    } else {
+      submittingRef.current = false;
     }
   };
 
