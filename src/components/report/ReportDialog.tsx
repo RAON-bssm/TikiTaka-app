@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
-import { Modal, Pressable, TextInput, View } from 'react-native';
+import { Modal, Pressable, ScrollView, TextInput, View } from 'react-native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { getApiErrorMessage } from '@/api/error';
 import Button from '@/components/ui/Button';
@@ -81,6 +82,7 @@ const ReportForm = ({
   onSuccess,
 }: FormProps) => {
   const { showToast } = useToast();
+  const insets = useSafeAreaInsets();
 
   const [reason, setReason] = useState<ReportReason>();
   const [detail, setDetail] = useState('');
@@ -121,80 +123,91 @@ const ReportForm = ({
 
   return (
     <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
-      <Pressable className="flex-1 items-center justify-center bg-black/40 px-xl" onPress={onClose}>
+      <Pressable
+        className="flex-1 items-center justify-center bg-black/40 px-xl"
+        style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
+        onPress={onClose}
+      >
         <Pressable
           onPress={() => {}}
-          className="w-full max-w-[400px] gap-2xl rounded-xl bg-white px-xl pb-xl pt-2xl"
+          className="max-h-full w-full max-w-[400px] rounded-xl bg-white"
         >
-          <View className="items-center gap-sm">
-            <Typography variant="h2" className="text-gray-800">
-              {target.type === 'post' ? '게시글 신고' : `${target.userName}님 신고`}
-            </Typography>
-            <Typography variant="body2" className="text-center text-gray-500">
-              신고 사유를 골라주세요.
-            </Typography>
-          </View>
-
-          <View className="gap-xs">
-            {reasons.map((item) => {
-              const selected = item === reason;
-              return (
-                <Pressable
-                  key={item}
-                  onPress={() => setReason(item)}
-                  accessibilityRole="radio"
-                  accessibilityState={{ checked: selected }}
-                  className="flex-row items-center gap-sm py-sm"
-                >
-                  <View
-                    className={`h-[20px] w-[20px] items-center justify-center rounded-full border-2 ${
-                      selected ? 'border-primary-600' : 'border-gray-300'
-                    }`}
-                  >
-                    {selected && <View className="h-[10px] w-[10px] rounded-full bg-primary-600" />}
-                  </View>
-                  <Typography
-                    variant="body2"
-                    className={selected ? 'text-gray-800' : 'text-gray-600'}
-                  >
-                    {REPORT_REASON_LABEL[item]}
-                  </Typography>
-                </Pressable>
-              );
-            })}
-          </View>
-
-          <View className="gap-xs">
-            <TextInput
-              value={detail}
-              onChangeText={setDetail}
-              multiline
-              maxLength={REPORT_DETAIL_MAX_LENGTH}
-              textAlignVertical="top"
-              placeholder={
-                isDetailRequired ? '신고 사유를 적어주세요' : '자세한 내용을 적어주세요 (선택)'
-              }
-              placeholderTextColor={palette.gray[400]}
-              className="h-[88px] w-full rounded-sm border border-gray-200 bg-white p-md font-sans text-sm text-gray-800 focus:border-gray-300"
-            />
-            <View className="flex-row justify-between gap-sm">
-              <Typography variant="caption" className="flex-1 text-primary-600">
-                {errorMessage ?? ''}
+          <ScrollView
+            keyboardShouldPersistTaps="handled"
+            contentContainerClassName="gap-2xl px-xl pb-xl pt-2xl"
+          >
+            <View className="items-center gap-sm">
+              <Typography variant="h2" className="text-gray-800">
+                {target.type === 'post' ? '게시글 신고' : `${target.userName}님 신고`}
               </Typography>
-              <Typography variant="caption" className="text-gray-400">
-                {detail.length}/{REPORT_DETAIL_MAX_LENGTH}
+              <Typography variant="body2" className="text-center text-gray-500">
+                신고 사유를 골라주세요.
               </Typography>
             </View>
-          </View>
 
-          <View className="flex-row gap-sm">
-            <Button content="취소" variant="light" className="flex-1" onclick={onClose} />
-            <Button
-              content={isPending ? '신고 중...' : '신고하기'}
-              className={`flex-1 ${canSubmit ? '' : 'opacity-50'}`}
-              onclick={handleSubmit}
-            />
-          </View>
+            <View className="gap-xs">
+              {reasons.map((item) => {
+                const selected = item === reason;
+                return (
+                  <Pressable
+                    key={item}
+                    onPress={() => setReason(item)}
+                    accessibilityRole="radio"
+                    accessibilityState={{ checked: selected }}
+                    className="flex-row items-center gap-sm py-sm"
+                  >
+                    <View
+                      className={`h-[20px] w-[20px] items-center justify-center rounded-full border-2 ${
+                        selected ? 'border-primary-600' : 'border-gray-300'
+                      }`}
+                    >
+                      {selected && (
+                        <View className="h-[10px] w-[10px] rounded-full bg-primary-600" />
+                      )}
+                    </View>
+                    <Typography
+                      variant="body2"
+                      className={selected ? 'text-gray-800' : 'text-gray-600'}
+                    >
+                      {REPORT_REASON_LABEL[item]}
+                    </Typography>
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            <View className="gap-xs">
+              <TextInput
+                value={detail}
+                onChangeText={setDetail}
+                multiline
+                maxLength={REPORT_DETAIL_MAX_LENGTH}
+                textAlignVertical="top"
+                placeholder={
+                  isDetailRequired ? '신고 사유를 적어주세요' : '자세한 내용을 적어주세요 (선택)'
+                }
+                placeholderTextColor={palette.gray[400]}
+                className="h-[88px] w-full rounded-sm border border-gray-200 bg-white p-md font-sans text-sm text-gray-800 focus:border-gray-300"
+              />
+              <View className="flex-row justify-between gap-sm">
+                <Typography variant="caption" className="flex-1 text-primary-600">
+                  {errorMessage ?? ''}
+                </Typography>
+                <Typography variant="caption" className="text-gray-400">
+                  {detail.length}/{REPORT_DETAIL_MAX_LENGTH}
+                </Typography>
+              </View>
+            </View>
+
+            <View className="flex-row gap-sm">
+              <Button content="취소" variant="light" className="flex-1" onclick={onClose} />
+              <Button
+                content={isPending ? '신고 중...' : '신고하기'}
+                className={`flex-1 ${canSubmit ? '' : 'opacity-50'}`}
+                onclick={handleSubmit}
+              />
+            </View>
+          </ScrollView>
         </Pressable>
       </Pressable>
     </KeyboardAvoidingView>
