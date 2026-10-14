@@ -1,8 +1,10 @@
 import type { DateTimeString } from './api';
+import type { Equipment } from './equipment';
 
 export interface Chatbot {
   chatbot_id: string;
   name: string;
+  equipment?: Equipment;
   description?: string;
   /** URL이 아니라 S3 key */
   profile_image?: string;
