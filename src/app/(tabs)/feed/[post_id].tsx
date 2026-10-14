@@ -7,11 +7,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import AiScoreCard from '@/components/feed/AiScoreCard';
 import AiScoreCheckCard from '@/components/feed/AiScoreCheckCard';
 import PostAuthor from '@/components/feed/PostAuthor';
-import PostDetailSkeleton from '@/components/feed/PostDetailSkeleton';
-import PostImage from '@/components/feed/PostImage';
 import PostDeleteDialog from '@/components/feed/PostDeleteDialog';
+import PostDetailSkeleton from '@/components/feed/PostDetailSkeleton';
 import PostEditDialog from '@/components/feed/PostEditDialog';
+import PostImage from '@/components/feed/PostImage';
 import PostTitleRow from '@/components/feed/PostTitleRow';
+import ReportDialog, { type ReportTarget } from '@/components/report/ReportDialog';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Header from '@/components/ui/Header';
 import { palette } from '@/constants/colors';
@@ -24,6 +25,7 @@ export default function PostDetailScreen() {
   const { data: myInfo } = useMyInfo();
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [reportTarget, setReportTarget] = useState<ReportTarget>();
 
   // 점수·코멘트는 확인을 눌러야 공개한다.
   const [scoreRevealed, setScoreRevealed] = useState(false);
@@ -58,16 +60,34 @@ export default function PostDetailScreen() {
                 place={post.location}
                 createdAt={post.created_at}
                 menuItems={
-                  post.user_id === myInfo?.user_id
-                    ? [
-                        { label: '수정하기', onPress: () => setIsEditOpen(true) },
-                        {
-                          label: '삭제하기',
-                          destructive: true,
-                          onPress: () => setIsDeleteOpen(true),
-                        },
-                      ]
-                    : undefined
+                  !myInfo
+                    ? undefined
+                    : post.user_id === myInfo.user_id
+                      ? [
+                          { label: '수정하기', onPress: () => setIsEditOpen(true) },
+                          {
+                            label: '삭제하기',
+                            destructive: true,
+                            onPress: () => setIsDeleteOpen(true),
+                          },
+                        ]
+                      : [
+                          {
+                            label: '게시글 신고하기',
+                            destructive: true,
+                            onPress: () => setReportTarget({ type: 'post', postId: post_id }),
+                          },
+                          {
+                            label: '작성자 신고하기',
+                            destructive: true,
+                            onPress: () =>
+                              setReportTarget({
+                                type: 'user',
+                                userId: post.user_id,
+                                userName: post.user_name,
+                              }),
+                          },
+                        ]
                 }
               />
               <PostImage uri={post.post_image} />
@@ -97,6 +117,7 @@ export default function PostDetailScreen() {
         onClose={() => setIsDeleteOpen(false)}
         onDeleted={() => router.back()}
       />
+      <ReportDialog target={reportTarget} onClose={() => setReportTarget(undefined)} />
     </SafeAreaView>
   );
 }
