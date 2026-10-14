@@ -18,10 +18,11 @@ const SIGNING_CONFIG = `
         }`;
 
 // 키가 없을 때 debug 키로 조용히 서명되면 그 APK가 그대로 스토어에 올라갈 수 있어, release 빌드만 막는다.
+// EAS 빌드는 `eas credentials`에 올린 같은 업로드 키로 EAS가 직접 서명하므로 검사하지 않는다.
 const MISSING_KEY_GUARD = `
 gradle.taskGraph.whenReady { graph ->
     def isRelease = graph.allTasks.any { it.name ==~ /(assemble|bundle|package)Release/ }
-    if (isRelease && !findProperty('TIKITAKA_UPLOAD_STORE_FILE')) {
+    if (isRelease && !findProperty('TIKITAKA_UPLOAD_STORE_FILE') && !System.getenv('EAS_BUILD')) {
         throw new GradleException('업로드 키가 없습니다. ~/.gradle/gradle.properties 에 TIKITAKA_UPLOAD_* 값을 설정하세요.')
     }
 }
