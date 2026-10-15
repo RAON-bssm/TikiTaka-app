@@ -47,6 +47,12 @@ const kakao = {
   pressed: '#EED500',
 };
 
-const palette = { gray, primary, secondary, kakao };
+// Apple 로그인 버튼 브랜드색. Apple HIG상 버튼 배경은 검정·흰색만 허용된다.
+const apple = {
+  DEFAULT: '#000000',
+  pressed: '#333333',
+};
 
-module.exports = { palette, gray, primary, secondary, kakao };
+const palette = { gray, primary, secondary, kakao, apple };
+
+module.exports = { palette, gray, primary, secondary, kakao, apple };

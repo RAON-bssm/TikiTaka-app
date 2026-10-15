@@ -1,9 +1,12 @@
 import type { EmptyResponse } from './api';
 
 /** 서버 enum 변환(`@PathVariable`)이라 대소문자까지 같아야 한다. 소문자면 400. */
-export type Provider = 'KAKAO' | 'GOOGLE';
+export type Provider = 'KAKAO' | 'GOOGLE' | 'APPLE';
 
-/** 인가 코드가 아니라 소셜에서 이미 발급받은 access token을 보낸다. */
+/**
+ * 인가 코드가 아니라 소셜에서 이미 발급받은 access token을 보낸다.
+ * APPLE은 access token이 없어 identityToken(JWT)을 넣는다. 서버는 서명을 검증하지 않고 sub만 꺼내 쓴다.
+ */
 export interface LoginRequest {
   provider_access_token: string;
 }
@@ -43,6 +46,11 @@ export interface ReissueRequest {
 export interface TokenData {
   access_token: string;
   refresh_token: string;
+}
+
+/** Apple 계정만 보낸다. 서버가 이 코드로 Apple 토큰을 revoke한다(5분 안에 1회용). */
+export interface WithdrawRequest {
+  authorization_code?: string;
 }
 
 /** 서버는 refresh 토큰만 지우므로, access token은 호출부가 로컬에서 비워야 한다. */

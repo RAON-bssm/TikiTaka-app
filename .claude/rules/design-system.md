@@ -17,6 +17,7 @@ paths:
 - **`gray`** 50~800: 중립색. **순백은 `gray` 스케일에 없으므로 `bg-white`/`text-white`/`border-white`를 사용한다.**
 - **`primary`** 대표색 `primary-600`(주황): 브랜드 강조·CTA. **`secondary`** 대표색 `secondary-500`(파랑): 보조 강조.
 - **`kakao`**, `kakao-pressed`: 카카오 로그인 버튼 전용 브랜드색. 다른 용도로 쓰지 마세요.
+- **`apple`**, `apple-pressed`: Apple 로그인 버튼 전용 브랜드색. 다른 용도로 쓰지 마세요.
 - SVG `color`처럼 className이 아니라 JS 값으로 색이 필요하면 `palette`(`@/constants/colors`)를 import 합니다. hex 리터럴을 직접 쓰지 마세요.
 
 ## 간격 · 반경
