@@ -48,5 +48,10 @@ export interface TokenData {
   refresh_token: string;
 }
 
+/** Apple 계정만 보낸다. 서버가 이 코드로 Apple 토큰을 revoke한다(5분 안에 1회용). */
+export interface WithdrawRequest {
+  authorization_code?: string;
+}
+
 /** 서버는 refresh 토큰만 지우므로, access token은 호출부가 로컬에서 비워야 한다. */
 export type LogoutResponse = EmptyResponse;

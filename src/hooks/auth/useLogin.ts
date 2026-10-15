@@ -2,7 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import { router } from 'expo-router';
 
 import { login } from '@/api/auth';
-import { setSignupToken, setTokens } from '@/api/token';
+import { setLoginProvider, setSignupToken, setTokens } from '@/api/token';
 import type { LoginData, Provider } from '@/types/auth';
 
 /**
@@ -17,7 +17,9 @@ export function useLogin() {
       provider: Provider;
       providerAccessToken: string;
     }) => login(provider, providerAccessToken),
-    onSuccess: async (data: LoginData) => {
+    onSuccess: async (data: LoginData, { provider }) => {
+      await setLoginProvider(provider);
+
       if (data.status === 'SIGNUP_REQUIRED') {
         if (!data.signup_token) {
           throw new Error('회원가입 토큰이 응답에 없습니다.');

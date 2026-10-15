@@ -40,15 +40,34 @@ export async function getProviderAccessToken(provider: Provider): Promise<string
 
 /**
  * scope를 요청하지 않는다. 서버는 토큰의 sub만 식별자로 쓰고, 이메일은 "이메일 숨기기" 때문에 쓰지 않는다.
- * 취소는 code 'ERR_REQUEST_CANCELED'로 구분된다.
  */
 async function getAppleIdentityToken(): Promise<string | null> {
+  const credential = await signInWithApple();
+  if (!credential) return null;
+  if (!credential.identityToken) {
+    throw new Error('Apple 로그인 응답에 identityToken이 없습니다.');
+  }
+  return credential.identityToken;
+}
+
+/**
+ * 탈퇴 시 서버가 Apple 토큰을 revoke하려면 authorization code가 필요하다(Apple 가이드라인상 필수).
+ * 코드는 5분 안에 한 번만 쓸 수 있어 로그인 때 받아둔 것을 재사용하지 못하고, 탈퇴 직전에 다시 받는다.
+ * 반환: string = 코드, null = 사용자가 취소, throw = 그 외 실패.
+ */
+export async function getAppleAuthorizationCode(): Promise<string | null> {
+  const credential = await signInWithApple();
+  if (!credential) return null;
+  if (!credential.authorizationCode) {
+    throw new Error('Apple 로그인 응답에 authorizationCode가 없습니다.');
+  }
+  return credential.authorizationCode;
+}
+
+/** 취소는 code 'ERR_REQUEST_CANCELED'로 구분되어 null로 돌려준다. */
+async function signInWithApple(): Promise<AppleAuthentication.AppleAuthenticationCredential | null> {
   try {
-    const credential = await AppleAuthentication.signInAsync();
-    if (!credential.identityToken) {
-      throw new Error('Apple 로그인 응답에 identityToken이 없습니다.');
-    }
-    return credential.identityToken;
+    return await AppleAuthentication.signInAsync();
   } catch (error) {
     if (isCodedError(error) && error.code === 'ERR_REQUEST_CANCELED') {
       return null;

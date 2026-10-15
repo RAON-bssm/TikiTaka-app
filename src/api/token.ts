@@ -1,7 +1,10 @@
 import * as SecureStore from 'expo-secure-store';
 
+import type { Provider } from '@/types/auth';
+
 const ACCESS_KEY = 'accessToken';
 const REFRESH_KEY = 'refreshToken';
+const PROVIDER_KEY = 'loginProvider';
 
 export const getAccessToken = () => SecureStore.getItemAsync(ACCESS_KEY);
 export const getRefreshToken = () => SecureStore.getItemAsync(REFRESH_KEY);
@@ -51,8 +54,19 @@ export async function setTokens(accessToken: string, refreshToken: string) {
 export async function clearTokens() {
   await SecureStore.deleteItemAsync(ACCESS_KEY);
   await SecureStore.deleteItemAsync(REFRESH_KEY);
+  await SecureStore.deleteItemAsync(PROVIDER_KEY);
   setAuthStatus('unauthenticated');
 }
+
+/**
+ * 어떤 소셜로 로그인했는지. 서버 프로필에 없어 기기에 둔다. 탈퇴 시 Apple 재인증 여부를 가르는 데 쓴다.
+ * 이 값을 저장하기 전에 로그인한 세션은 null이다.
+ */
+export const getLoginProvider = () =>
+  SecureStore.getItemAsync(PROVIDER_KEY) as Promise<Provider | null>;
+
+export const setLoginProvider = (provider: Provider) =>
+  SecureStore.setItemAsync(PROVIDER_KEY, provider);
 
 /**
  * 회원가입 토큰은 메모리에만 둔다. 만료가 10분이라 재시작 후 쓸 일이 없고,
