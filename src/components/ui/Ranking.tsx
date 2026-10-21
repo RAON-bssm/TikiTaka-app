@@ -1,4 +1,4 @@
-import type { FC, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { View } from 'react-native';
 
 import PlaceIcon from '@/assets/icons/place.svg';
@@ -17,7 +17,14 @@ type RankingProps = {
   menuItems?: MoreMenuItem[];
 };
 
-const Ranking: FC<RankingProps> = ({ number, location, count, avatar, address, menuItems }) => {
+export default function Ranking({
+  number,
+  location,
+  count,
+  avatar,
+  address,
+  menuItems,
+}: RankingProps) {
   return (
     <View className="w-full flex-row items-center justify-between gap-md px-md py-xl">
       <Typography variant="body1" className={number <= 3 ? 'text-primary-600' : 'text-gray-500'}>
@@ -47,6 +54,4 @@ const Ranking: FC<RankingProps> = ({ number, location, count, avatar, address, m
       {menuItems?.length ? <MoreMenu items={menuItems} /> : null}
     </View>
   );
-};
-
-export default Ranking;
+}
