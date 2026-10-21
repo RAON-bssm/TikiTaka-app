@@ -11,10 +11,11 @@ export function useEulaConsent() {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    AsyncStorage.getItem(EULA_CONSENT_KEY).then((value) => {
-      setHasAgreed(value === 'true');
-      setIsLoaded(true);
-    });
+    AsyncStorage.getItem(EULA_CONSENT_KEY)
+      .then((value) => setHasAgreed(value === 'true'))
+      // 조회 실패를 "미동의"로 처리해도 로그인 화면에서 바로 다시 동의할 수 있어 막히지 않는다.
+      .catch(() => setHasAgreed(false))
+      .finally(() => setIsLoaded(true));
   }, []);
 
   const markAgreed = () => {
