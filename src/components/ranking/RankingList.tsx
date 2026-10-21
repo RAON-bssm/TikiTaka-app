@@ -49,7 +49,7 @@ export default function RankingList({ tab, districts, persons }: Props) {
               count={item.user_score}
               avatar={<UserCharacter userId={item.user_id} size={50} />}
               menuItems={
-                item.user_id === myInfo?.user_id
+                !myInfo || item.user_id === myInfo.user_id
                   ? undefined
                   : [
                       {
