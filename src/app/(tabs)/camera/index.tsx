@@ -31,7 +31,7 @@ export default function CameraScreen() {
   const { data: myBoard } = useMyBoard();
   const mission = myBoard?.mission ?? '';
 
-  const { hasPermission, requestPermission } = useCameraPermission();
+  const { hasPermission, canRequestPermission, requestPermission } = useCameraPermission();
   const [facing, setFacing] = useState<'back' | 'front'>('back');
   const device = useCameraDevice(facing, LENS_FILTER);
 
@@ -54,7 +54,12 @@ export default function CameraScreen() {
   };
 
   if (!hasPermission) {
-    return <CameraPermissionRequest onRequestPermission={requestPermission} />;
+    return (
+      <CameraPermissionRequest
+        canRequestPermission={canRequestPermission}
+        onRequestPermission={requestPermission}
+      />
+    );
   }
 
   if (device == null) {

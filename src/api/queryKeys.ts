@@ -68,6 +68,11 @@ export const chatKeys = {
   history: (chatbotId: string) => [...chatKeys.all, 'history', chatbotId] as const,
 };
 
+export const blockKeys = {
+  all: ['block'] as const,
+  list: () => [...blockKeys.all, 'list'] as const,
+};
+
 export const equipmentKeys = {
   all: ['equipment'] as const,
   current: () => [...equipmentKeys.all, 'current'] as const,

@@ -2,8 +2,10 @@ import { getProviderAccessToken } from '@/api/social';
 import AppleIcon from '@/assets/icons/apple.svg';
 import KakaoIcon from '@/assets/icons/kakao.svg';
 import LogoImage from '@/assets/icons/logo.webp';
+import EulaConsent from '@/components/auth/EulaConsent';
 import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
+import { useEulaConsent } from '@/hooks/auth/useEulaConsent';
 import { useLogin } from '@/hooks/auth/useLogin';
 import type { Provider } from '@/types/auth';
 import * as AppleAuthentication from 'expo-apple-authentication';
@@ -14,6 +16,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 export default function Login() {
   const { showToast } = useToast();
   const { mutate: login, isPending } = useLogin();
+  const { hasAgreed, markAgreed } = useEulaConsent();
 
   // 소셜 로그인 창이 떠 있는 동안의 상태. isPending은 서버 요청 구간만 덮기 때문에,
   // 이게 없으면 카카오톡으로 넘어가는 찰나에 버튼을 또 눌러 로그인 창이 두 번 뜬다.
@@ -29,7 +32,7 @@ export default function Login() {
   }, []);
 
   const handleSocialLogin = async (provider: Provider) => {
-    if (isBusy) return;
+    if (isBusy || !hasAgreed) return;
 
     let providerAccessToken: string | null;
     setIsProviderPending(true);
@@ -68,30 +71,34 @@ export default function Login() {
 
         <View style={{ flex: 3 }} />
 
-        <View className="flex flex-col gap-sm mb-2xl">
-          <Pressable
-            onPress={() => handleSocialLogin('KAKAO')}
-            disabled={isBusy}
-            className="flex-row items-center justify-center gap-sm rounded-md bg-kakao py-md active:bg-kakao-pressed disabled:opacity-50"
-          >
-            <KakaoIcon width={24} height={24} />
-            <Typography variant="h3" className="text-gray-700">
-              카카오로 계속하기
-            </Typography>
-          </Pressable>
+        <View className="flex flex-col gap-lg mb-2xl">
+          <EulaConsent checked={hasAgreed} onToggle={() => !hasAgreed && markAgreed()} />
 
-          {isAppleAvailable && (
+          <View className="flex flex-col gap-sm">
             <Pressable
-              onPress={() => handleSocialLogin('APPLE')}
-              disabled={isBusy}
-              className="flex-row items-center justify-center gap-sm rounded-md bg-apple py-md active:bg-apple-pressed disabled:opacity-50"
+              onPress={() => handleSocialLogin('KAKAO')}
+              disabled={isBusy || !hasAgreed}
+              className="flex-row items-center justify-center gap-sm rounded-md bg-kakao py-md active:bg-kakao-pressed disabled:opacity-50"
             >
-              <AppleIcon width={24} height={24} />
-              <Typography variant="h3" className="text-white">
-                Apple로 계속하기
+              <KakaoIcon width={24} height={24} />
+              <Typography variant="h3" className="text-gray-700">
+                카카오로 계속하기
               </Typography>
             </Pressable>
-          )}
+
+            {isAppleAvailable && (
+              <Pressable
+                onPress={() => handleSocialLogin('APPLE')}
+                disabled={isBusy || !hasAgreed}
+                className="flex-row items-center justify-center gap-sm rounded-md bg-apple py-md active:bg-apple-pressed disabled:opacity-50"
+              >
+                <AppleIcon width={24} height={24} />
+                <Typography variant="h3" className="text-white">
+                  Apple로 계속하기
+                </Typography>
+              </Pressable>
+            )}
+          </View>
         </View>
       </View>
     </SafeAreaView>

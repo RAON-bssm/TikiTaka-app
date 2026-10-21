@@ -31,6 +31,7 @@ export default function SettingsScreen() {
 
         <View className="gap-md">
           <NavRow title="프로필 수정" onPress={() => router.push('/profile/edit')} />
+          <NavRow title="차단 목록" onPress={() => router.push('/profile/blocked-users')} />
           <NavRow
             title="개인정보처리방침"
             onPress={() => WebBrowser.openBrowserAsync(PRIVACY_POLICY_URL)}

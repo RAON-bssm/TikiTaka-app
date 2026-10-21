@@ -1,10 +1,13 @@
+import { useState } from 'react';
 import { View } from 'react-native';
 
+import BlockUserDialog from '@/components/block/BlockUserDialog';
 import UserCharacter from '@/components/character/UserCharacter';
 import RankingEmptyState from '@/components/ranking/RankingEmptyState';
 import Ranking from '@/components/ui/Ranking';
 import { formatLocationName } from '@/constants/location';
 import type { RankingTab } from '@/constants/ranking';
+import { useMyInfo } from '@/hooks/user/useMyInfo';
 import type { LocationRanking, UserRanking } from '@/types/ranking';
 
 interface Props {
@@ -14,6 +17,9 @@ interface Props {
 }
 
 export default function RankingList({ tab, districts, persons }: Props) {
+  const { data: myInfo } = useMyInfo();
+  const [blockTarget, setBlockTarget] = useState<{ userId: string; userName: string }>();
+
   const rows = tab === '동네랭킹' ? districts : persons;
 
   if (rows.length === 0) {
@@ -42,8 +48,22 @@ export default function RankingList({ tab, districts, persons }: Props) {
               location={item.user_name}
               count={item.user_score}
               avatar={<UserCharacter userId={item.user_id} size={50} />}
+              menuItems={
+                item.user_id === myInfo?.user_id
+                  ? undefined
+                  : [
+                      {
+                        label: '차단하기',
+                        destructive: true,
+                        onPress: () =>
+                          setBlockTarget({ userId: item.user_id, userName: item.user_name }),
+                      },
+                    ]
+              }
             />
           ))}
+
+      <BlockUserDialog target={blockTarget} onClose={() => setBlockTarget(undefined)} />
     </View>
   );
 }

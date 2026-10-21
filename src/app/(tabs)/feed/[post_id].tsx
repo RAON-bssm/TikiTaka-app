@@ -4,6 +4,7 @@ import { RefreshControl, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import BlockUserDialog from '@/components/block/BlockUserDialog';
 import AiScoreCard from '@/components/feed/AiScoreCard';
 import AiScoreCheckCard from '@/components/feed/AiScoreCheckCard';
 import PostAuthor from '@/components/feed/PostAuthor';
@@ -26,6 +27,7 @@ export default function PostDetailScreen() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [reportTarget, setReportTarget] = useState<ReportTarget>();
+  const [blockTarget, setBlockTarget] = useState<{ userId: string; userName: string }>();
 
   // 점수·코멘트는 확인을 눌러야 공개한다.
   const [scoreRevealed, setScoreRevealed] = useState(false);
@@ -87,6 +89,12 @@ export default function PostDetailScreen() {
                                 userName: post.user_name,
                               }),
                           },
+                          {
+                            label: '작성자 차단하기',
+                            destructive: true,
+                            onPress: () =>
+                              setBlockTarget({ userId: post.user_id, userName: post.user_name }),
+                          },
                         ]
                 }
               />
@@ -118,6 +126,11 @@ export default function PostDetailScreen() {
         onDeleted={() => router.back()}
       />
       <ReportDialog target={reportTarget} onClose={() => setReportTarget(undefined)} />
+      <BlockUserDialog
+        target={blockTarget}
+        onClose={() => setBlockTarget(undefined)}
+        onBlocked={() => router.back()}
+      />
     </SafeAreaView>
   );
 }
