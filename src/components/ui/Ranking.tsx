@@ -1,8 +1,9 @@
-import type { FC, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { View } from 'react-native';
 
 import PlaceIcon from '@/assets/icons/place.svg';
 import { palette } from '@/constants/colors';
+import MoreMenu, { type MoreMenuItem } from './MoreMenu';
 import Typography from './Typography';
 
 const COLOR_GRAY = palette.gray[500];
@@ -13,9 +14,17 @@ type RankingProps = {
   count: number;
   avatar?: ReactNode;
   address?: string;
+  menuItems?: MoreMenuItem[];
 };
 
-const Ranking: FC<RankingProps> = ({ number, location, count, avatar, address }) => {
+export default function Ranking({
+  number,
+  location,
+  count,
+  avatar,
+  address,
+  menuItems,
+}: RankingProps) {
   return (
     <View className="w-full flex-row items-center justify-between gap-md px-md py-xl">
       <Typography variant="body1" className={number <= 3 ? 'text-primary-600' : 'text-gray-500'}>
@@ -41,8 +50,8 @@ const Ranking: FC<RankingProps> = ({ number, location, count, avatar, address })
       <Typography variant="body1" className="text-primary-600">
         {count}점
       </Typography>
+
+      {menuItems?.length ? <MoreMenu items={menuItems} /> : null}
     </View>
   );
-};
-
-export default Ranking;
+}
