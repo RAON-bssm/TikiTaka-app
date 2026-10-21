@@ -16,7 +16,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 export default function Login() {
   const { showToast } = useToast();
   const { mutate: login, isPending } = useLogin();
-  const { hasAgreed, markAgreed } = useEulaConsent();
+  const { hasAgreed, isLoaded: isEulaLoaded, markAgreed } = useEulaConsent();
 
   // 소셜 로그인 창이 떠 있는 동안의 상태. isPending은 서버 요청 구간만 덮기 때문에,
   // 이게 없으면 카카오톡으로 넘어가는 찰나에 버튼을 또 눌러 로그인 창이 두 번 뜬다.
@@ -32,7 +32,7 @@ export default function Login() {
   }, []);
 
   const handleSocialLogin = async (provider: Provider) => {
-    if (isBusy || !hasAgreed) return;
+    if (isBusy || !isEulaLoaded || !hasAgreed) return;
 
     let providerAccessToken: string | null;
     setIsProviderPending(true);
@@ -72,12 +72,15 @@ export default function Login() {
         <View style={{ flex: 3 }} />
 
         <View className="flex flex-col gap-lg mb-2xl">
-          <EulaConsent checked={hasAgreed} onToggle={() => !hasAgreed && markAgreed()} />
+          <EulaConsent
+            checked={hasAgreed}
+            onToggle={() => isEulaLoaded && !hasAgreed && markAgreed()}
+          />
 
           <View className="flex flex-col gap-sm">
             <Pressable
               onPress={() => handleSocialLogin('KAKAO')}
-              disabled={isBusy || !hasAgreed}
+              disabled={isBusy || !isEulaLoaded || !hasAgreed}
               className="flex-row items-center justify-center gap-sm rounded-md bg-kakao py-md active:bg-kakao-pressed disabled:opacity-50"
             >
               <KakaoIcon width={24} height={24} />
@@ -89,7 +92,7 @@ export default function Login() {
             {isAppleAvailable && (
               <Pressable
                 onPress={() => handleSocialLogin('APPLE')}
-                disabled={isBusy || !hasAgreed}
+                disabled={isBusy || !isEulaLoaded || !hasAgreed}
                 className="flex-row items-center justify-center gap-sm rounded-md bg-apple py-md active:bg-apple-pressed disabled:opacity-50"
               >
                 <AppleIcon width={24} height={24} />
