@@ -8,7 +8,7 @@
     "scheme": "tikitaka",
     "userInterfaceStyle": "light",
     "ios": {
-      "icon": "./assets/images/tikitaka-bg-white.png",
+      "icon": "./assets/images/tikitaka.icon",
       "bundleIdentifier": "com.tikitaka.raon",
       "usesAppleSignIn": true,
       "config": {
