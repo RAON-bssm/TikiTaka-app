@@ -1,7 +1,11 @@
 import ChevronDownIcon from '@/assets/icons/chevron-down.svg';
 import { useRef, useState } from 'react';
-import { Modal, Pressable, View } from 'react-native';
+import { Modal, Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
 import Typography from '../Typography';
+
+const LIST_GAP = 4;
+const LIST_MAX_HEIGHT = 280;
+const SCREEN_MARGIN = 48;
 
 interface Props {
   label?: string;
@@ -16,6 +20,14 @@ export default function Dropdown({ label, placeholder, options, value, onChange 
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [triggerLayout, setTriggerLayout] = useState({ x: 0, y: 0, width: 0, height: 0 });
   const triggerRef = useRef<View>(null);
+  const { height: windowHeight } = useWindowDimensions();
+
+  // 선택지가 많으면 화면 밖으로 넘치므로, 남은 공간이 더 넓은 쪽으로 펼치고 그 안에서 스크롤한다.
+  const triggerBottom = triggerLayout.y + triggerLayout.height + LIST_GAP;
+  const spaceBelow = windowHeight - triggerBottom - SCREEN_MARGIN;
+  const spaceAbove = triggerLayout.y - LIST_GAP - SCREEN_MARGIN;
+  const opensUp = spaceBelow < LIST_MAX_HEIGHT && spaceAbove > spaceBelow;
+  const listMaxHeight = Math.min(LIST_MAX_HEIGHT, opensUp ? spaceAbove : spaceBelow);
 
   const onSelectOption = (option: string) => {
     setSelectedValue(option);
@@ -63,14 +75,20 @@ export default function Dropdown({ label, placeholder, options, value, onChange 
           style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }}
         />
 
-        <View
+        <ScrollView
           style={{
             position: 'absolute',
-            top: triggerLayout.y + triggerLayout.height + 4,
+            ...(opensUp
+              ? { bottom: windowHeight - triggerLayout.y + LIST_GAP }
+              : { top: triggerBottom }),
             left: triggerLayout.x,
             width: triggerLayout.width,
+            maxHeight: listMaxHeight,
           }}
-          className="flex flex-col gap-sm bg-white rounded-sm border border-gray-200 p-sm"
+          className="bg-white rounded-sm border border-gray-200"
+          contentContainerClassName="flex flex-col gap-sm p-sm"
+          bounces={false}
+          keyboardShouldPersistTaps="handled"
         >
           {options.map((option, idx) => (
             <Pressable
@@ -83,7 +101,7 @@ export default function Dropdown({ label, placeholder, options, value, onChange 
               </Typography>
             </Pressable>
           ))}
-        </View>
+        </ScrollView>
       </Modal>
     </View>
   );
