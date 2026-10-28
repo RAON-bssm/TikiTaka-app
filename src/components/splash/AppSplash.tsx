@@ -2,7 +2,15 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Animated, { FadeOut } from 'react-native-reanimated';
+import Animated, {
+  Easing,
+  FadeOut,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { hasSeenPermissionNotice, markPermissionNoticeSeen } from '@/api/permissionNotice';
 import LogoIcon from '@/assets/images/splash/logo.svg';
@@ -21,7 +29,56 @@ const GRADIENT_COLORS = [
 const GRADIENT_LOCATIONS = [0, 0.5, 1] as const;
 
 // 토큰 확인은 대개 순식간이라, 최소 시간이 없으면 스플래시가 깜빡이고 사라진다.
+// 등장 모션(1.5초)이 끝까지 보이는 길이이기도 하다.
 const MIN_VISIBLE_MS = 1500;
+
+const EASE_IN_OUT = Easing.bezier(0.5, 0, 0.5, 1);
+const EASE_BACK = Easing.bezier(0.7, -0.4, 0.4, 1.4);
+const EASE_POP = Easing.bezier(0.45, 1.45, 0.8, 1);
+
+const RING_RISE_PX = 149;
+const RING_ENTER_MS = 600;
+const STAR_RISE_PX = 100;
+const STAR_DELAY_MS = 200;
+const STAR_ENTER_MS = 600;
+const LOGO_FADE_MS = 640;
+const LOGO_WIGGLE_DEG = 4;
+const LOGO_WIGGLE_STEP_MS = 160;
+const LOGO_WIGGLE_SWINGS = 7;
+const LOGO_SETTLE_MS = 80;
+const CHAR_STAGGER_MS = 50;
+const CHAR_POP_MS = 500;
+
+const TAGLINE = '여러분들의 동네 리그에 참여해보세요!';
+let taglineOrder = 0;
+const TAGLINE_CHARS = Array.from(TAGLINE, (char) => ({
+  char,
+  order: char === ' ' ? null : taglineOrder++,
+}));
+
+const PopChar = ({ char, order }: { char: string; order: number }) => {
+  const progress = useSharedValue(0);
+
+  useEffect(() => {
+    progress.value = withDelay(
+      order * CHAR_STAGGER_MS,
+      withTiming(1, { duration: CHAR_POP_MS, easing: EASE_POP }),
+    );
+  }, [progress, order]);
+
+  const style = useAnimatedStyle(() => ({
+    opacity: progress.value,
+    transform: [{ scale: progress.value }],
+  }));
+
+  return (
+    <Animated.View style={style}>
+      <Typography variant="h3" className="text-white">
+        {char}
+      </Typography>
+    </Animated.View>
+  );
+};
 
 /**
  * 네이티브 스플래시는 그라디언트·배치를 못 그려서, 같은 배경색의 네이티브 스플래시 위에 이어 띄운다.
@@ -43,6 +100,47 @@ export default function AppSplash() {
       .then((seen) => setShowPermissionNotice(!seen))
       .catch(() => setShowPermissionNotice(true));
   }, []);
+
+  const ringOpacity = useSharedValue(0);
+  const ringY = useSharedValue(RING_RISE_PX);
+  const starOpacity = useSharedValue(0);
+  const starY = useSharedValue(STAR_RISE_PX);
+  const logoOpacity = useSharedValue(0);
+  const logoRotate = useSharedValue(0);
+
+  useEffect(() => {
+    ringOpacity.value = withTiming(1, { duration: RING_ENTER_MS, easing: EASE_IN_OUT });
+    ringY.value = withTiming(0, { duration: RING_ENTER_MS, easing: EASE_BACK });
+
+    const starEnter = { duration: STAR_ENTER_MS, easing: EASE_BACK };
+    starOpacity.value = withDelay(STAR_DELAY_MS, withTiming(1, starEnter));
+    starY.value = withDelay(STAR_DELAY_MS, withTiming(0, starEnter));
+
+    logoOpacity.value = withTiming(1, { duration: LOGO_FADE_MS, easing: EASE_BACK });
+    const swings = Array.from({ length: LOGO_WIGGLE_SWINGS }, (_, i) =>
+      withTiming(i % 2 === 0 ? -LOGO_WIGGLE_DEG : LOGO_WIGGLE_DEG, {
+        duration: LOGO_WIGGLE_STEP_MS,
+        easing: EASE_IN_OUT,
+      }),
+    );
+    logoRotate.value = withSequence(
+      ...swings,
+      withTiming(0, { duration: LOGO_SETTLE_MS, easing: Easing.out(Easing.ease) }),
+    );
+  }, [ringOpacity, ringY, starOpacity, starY, logoOpacity, logoRotate]);
+
+  const ringStyle = useAnimatedStyle(() => ({
+    opacity: ringOpacity.value,
+    transform: [{ translateY: ringY.value }],
+  }));
+  const starStyle = useAnimatedStyle(() => ({
+    opacity: starOpacity.value,
+    transform: [{ translateY: starY.value }],
+  }));
+  const logoStyle = useAnimatedStyle(() => ({
+    opacity: logoOpacity.value,
+    transform: [{ rotate: `${logoRotate.value}deg` }],
+  }));
 
   const handleConfirmPermissionNotice = () => {
     setShowPermissionNotice(false);
@@ -67,24 +165,34 @@ export default function AppSplash() {
         style={StyleSheet.absoluteFill}
       />
 
-      <View className="absolute" style={{ top: '8.8%', left: '-7.2%' }}>
+      <Animated.View className="absolute" style={[{ top: '8.8%', left: '-7.2%' }, ringStyle]}>
         <RingIcon width={189} height={198.934} />
-      </View>
+      </Animated.View>
 
-      <View
+      <Animated.View
         className="absolute items-center justify-center"
-        style={{ right: -72, bottom: 0, width: 254, height: 281 }}
+        style={[{ right: -72, bottom: 0, width: 254, height: 281 }, starStyle]}
       >
         <View style={{ transform: [{ rotate: '-24.2deg' }] }}>
           <StarIcon width={186.203} height={220.32} />
         </View>
-      </View>
+      </Animated.View>
 
       <View className="absolute inset-x-0 items-center gap-xl" style={{ top: '28%' }}>
-        <LogoIcon width={250} height={52} />
-        <Typography variant="h3" className="text-white">
-          여러분들의 동네 리그에 참여해보세요!
-        </Typography>
+        <Animated.View style={logoStyle}>
+          <LogoIcon width={250} height={52} />
+        </Animated.View>
+        <View className="flex-row" accessible accessibilityLabel={TAGLINE}>
+          {TAGLINE_CHARS.map(({ char, order }, i) =>
+            order === null ? (
+              <Typography key={i} variant="h3">
+                {char}
+              </Typography>
+            ) : (
+              <PopChar key={i} char={char} order={order} />
+            ),
+          )}
+        </View>
       </View>
     </Animated.View>
   );
