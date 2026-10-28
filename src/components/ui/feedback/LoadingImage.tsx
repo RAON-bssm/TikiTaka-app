@@ -25,6 +25,8 @@ export default function LoadingImage({ uri, className = '' }: Props) {
       {uri ? (
         <Image
           source={{ uri }}
+          // 기본 동작은 새 URL을 받는 동안 이전 이미지를 남겨 두는데, 이미지가 스켈레톤 위에 있어 스켈레톤을 가린다.
+          recyclingKey={uri}
           contentFit="cover"
           transition={reduceMotion ? 0 : FADE_MS}
           onLoad={() => setLoadedUri(uri)}
