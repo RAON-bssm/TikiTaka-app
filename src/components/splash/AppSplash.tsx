@@ -179,11 +179,15 @@ export default function AppSplash() {
         </View>
       </Animated.View>
 
-      <View className="absolute inset-x-0 items-center gap-xl" style={{ top: '28%' }}>
+      <View className="absolute inset-x-0 items-center gap-xl px-xl" style={{ top: '28%' }}>
         <Animated.View style={logoStyle}>
           <LogoIcon width={250} height={52} />
         </Animated.View>
-        <View className="flex-row" accessible accessibilityLabel={TAGLINE}>
+        <View
+          className="max-w-full flex-row flex-wrap justify-center"
+          accessible
+          accessibilityLabel={TAGLINE}
+        >
           {TAGLINE_CHARS.map(({ char, order }, i) =>
             order === null ? (
               <Typography key={i} variant="h3">
