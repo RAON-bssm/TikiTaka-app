@@ -1,0 +1,18 @@
+<svg width="400" height="600" viewBox="0 0 400 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<clipPath id="gachaDomeClip"><circle cx="199.5" cy="185" r="152.5"/></clipPath>
+<linearGradient id="gachaCapTop" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#C9644A"/><stop offset="1" stop-color="#D4744E"/></linearGradient>
+<linearGradient id="gachaCapBottom" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#CFD0D5"/><stop offset="1" stop-color="#C8CDD4"/></linearGradient>
+</defs>
+<g clip-path="url(#gachaDomeClip)">
+<g transform="translate(238 205) rotate(-38)"><path d="M-45 0A45 45 0 0 1 45 0Z" fill="url(#gachaCapTop)"/><path d="M-45 0A45 45 0 0 0 45 0Z" fill="url(#gachaCapBottom)"/></g>
+<g transform="translate(292 224) rotate(130)"><path d="M-45 0A45 45 0 0 1 45 0Z" fill="url(#gachaCapTop)"/><path d="M-45 0A45 45 0 0 0 45 0Z" fill="url(#gachaCapBottom)"/></g>
+<g transform="translate(116 228) rotate(0)"><path d="M-45 0A45 45 0 0 1 45 0Z" fill="url(#gachaCapTop)"/><path d="M-45 0A45 45 0 0 0 45 0Z" fill="url(#gachaCapBottom)"/></g>
+<g transform="translate(180 224) rotate(42)"><path d="M-45 0A45 45 0 0 1 45 0Z" fill="url(#gachaCapTop)"/><path d="M-45 0A45 45 0 0 0 45 0Z" fill="url(#gachaCapBottom)"/></g>
+<g transform="translate(298 290) rotate(-15)"><path d="M-45 0A45 45 0 0 1 45 0Z" fill="url(#gachaCapTop)"/><path d="M-45 0A45 45 0 0 0 45 0Z" fill="url(#gachaCapBottom)"/></g>
+<g transform="translate(238 284) rotate(48)"><path d="M-45 0A45 45 0 0 1 45 0Z" fill="url(#gachaCapTop)"/><path d="M-45 0A45 45 0 0 0 45 0Z" fill="url(#gachaCapBottom)"/></g>
+<g transform="translate(162 300) rotate(0)"><path d="M-45 0A45 45 0 0 1 45 0Z" fill="url(#gachaCapTop)"/><path d="M-45 0A45 45 0 0 0 45 0Z" fill="url(#gachaCapBottom)"/></g>
+</g>
+</svg>

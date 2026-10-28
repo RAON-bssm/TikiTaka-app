@@ -1,0 +1,5 @@
+<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs><radialGradient id="gachaPopTop" cx="0.5" cy="1" r="1">
+<stop offset="0" stop-color="#FA895C"/><stop offset="1" stop-color="#EF7758"/></radialGradient></defs>
+<path d="M0 50A50 50 0 0 1 100 50Z" fill="url(#gachaPopTop)"/>
+</svg>
