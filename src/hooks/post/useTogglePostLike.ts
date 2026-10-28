@@ -20,6 +20,11 @@ export function useTogglePostLike(postId: string) {
   const detailKey = postKeys.detail(postId);
   const scopeId = `post-like-${postId}`;
 
+  const hasLaterInScope = () =>
+    queryClient
+      .getMutationCache()
+      .findAll({ status: 'pending', predicate: (m) => m.options.scope?.id === scopeId }).length > 1;
+
   return useMutation({
     scope: { id: scopeId },
     mutationFn: (liked: boolean) => (liked ? likePost(postId) : unlikePost(postId)),
@@ -43,16 +48,15 @@ export function useTogglePostLike(postId: string) {
     onError: (_error, _liked, context) => {
       if (!context) return;
       // 같은 scope의 뒤 요청도 onMutate는 즉시 돌아 캐시가 이미 마지막 목표 상태다. 되돌리면 그걸 덮어쓴다.
-      // onError 시점엔 자기 자신도 아직 pending이라 1개 초과면 뒤 요청이 있는 것이다.
-      const pendingInScope = queryClient
-        .getMutationCache()
-        .findAll({ status: 'pending', predicate: (m) => m.options.scope?.id === scopeId });
-      if (pendingInScope.length > 1) return;
+      if (hasLaterInScope()) return;
       if (context.previousDetail) queryClient.setQueryData(detailKey, context.previousDetail);
       for (const [key, posts] of context.previousLists) {
         queryClient.setQueryData(key, posts);
       }
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: postKeys.all }),
+    onSettled: () => {
+      if (hasLaterInScope()) return;
+      return queryClient.invalidateQueries({ queryKey: postKeys.all });
+    },
   });
 }

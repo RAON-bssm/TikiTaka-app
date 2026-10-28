@@ -22,12 +22,22 @@ import { useMyInfo } from '@/hooks/user/useMyInfo';
 
 export default function PostDetailScreen() {
   const { post_id } = useLocalSearchParams<{ post_id: string }>();
-  const { data: post, isLoading, isError, refetch, isRefetching } = usePostDetail(post_id);
+  const { data: post, isLoading, isError, refetch } = usePostDetail(post_id);
   const { data: myInfo } = useMyInfo();
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [reportTarget, setReportTarget] = useState<ReportTarget>();
   const [blockTarget, setBlockTarget] = useState<{ userId: string; userName: string }>();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await refetch();
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   // 점수·코멘트는 확인을 눌러야 공개한다.
   const [scoreRevealed, setScoreRevealed] = useState(false);
@@ -40,8 +50,8 @@ export default function PostDetailScreen() {
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
-            refreshing={isRefetching}
-            onRefresh={refetch}
+            refreshing={isRefreshing}
+            onRefresh={() => void handleRefresh()}
             tintColor={palette.primary[600]}
             colors={[palette.primary[600]]}
           />
