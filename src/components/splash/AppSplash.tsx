@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
-  FadeOut,
+  FadeOutUp,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
@@ -155,7 +155,10 @@ export default function AppSplash() {
   }
 
   return (
-    <Animated.View exiting={FadeOut.duration(300)} style={StyleSheet.absoluteFill}>
+    <Animated.View
+      exiting={FadeOutUp.duration(400).easing(Easing.in(Easing.quad))}
+      style={StyleSheet.absoluteFill}
+    >
       <StatusBar style="light" />
       <LinearGradient
         colors={GRADIENT_COLORS}
