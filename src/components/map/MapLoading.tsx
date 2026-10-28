@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
   FadeOut,
@@ -10,6 +10,7 @@ import Animated, {
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
+import Svg, { Defs, Path, Pattern, Rect } from 'react-native-svg';
 
 import Character from '@/components/character/Character';
 import TypingDots from '@/components/chat/TypingDots';
@@ -25,6 +26,7 @@ const TAKEOFF = 0.15;
 const LANDING = 0.85;
 const SQUASH = 0.9;
 const STRETCH = 1.06;
+const GRID_PX = 32;
 const BUBBLE_SHADOW = `0px 4px 16px ${palette.gray[800]}1F`;
 
 export default function MapLoading() {
@@ -61,6 +63,20 @@ export default function MapLoading() {
       exiting={FadeOut.duration(300)}
       className="absolute inset-0 items-center justify-center bg-gray-50"
     >
+      <Svg style={StyleSheet.absoluteFill}>
+        <Defs>
+          <Pattern id="grid" width={GRID_PX} height={GRID_PX} patternUnits="userSpaceOnUse">
+            <Path
+              d={`M ${GRID_PX} 0 L 0 0 0 ${GRID_PX}`}
+              fill="none"
+              stroke={palette.primary[300]}
+              strokeWidth={1}
+            />
+          </Pattern>
+        </Defs>
+        <Rect width="100%" height="100%" fill="url(#grid)" />
+      </Svg>
+
       <View className="items-center gap-3xl">
         <View className="items-center">
           <View
@@ -75,15 +91,20 @@ export default function MapLoading() {
           <View className="-mt-xs h-[12px] w-[12px] rotate-45 bg-white" />
         </View>
 
-        <Animated.View
-          style={[
-            { width: CHARACTER_SIZE, height: CHARACTER_SIZE, transformOrigin: 'bottom' },
-            characterStyle,
-          ]}
-        >
-          {isLoaded && <Character config={config} size={CHARACTER_SIZE} />}
-        </Animated.View>
-        <Animated.View className="h-[12px] w-[96px] rounded-full bg-gray-300" style={shadowStyle} />
+        <View className="items-center">
+          <Animated.View
+            style={[
+              { width: CHARACTER_SIZE, height: CHARACTER_SIZE, transformOrigin: 'bottom' },
+              characterStyle,
+            ]}
+          >
+            {isLoaded && <Character config={config} size={CHARACTER_SIZE} />}
+          </Animated.View>
+          <Animated.View
+            className="h-[12px] w-[96px] rounded-full bg-gray-300"
+            style={shadowStyle}
+          />
+        </View>
       </View>
     </Animated.View>
   );
