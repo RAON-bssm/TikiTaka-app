@@ -42,10 +42,10 @@ const STAR_RISE_PX = 100;
 const STAR_DELAY_MS = 200;
 const STAR_ENTER_MS = 600;
 const LOGO_FADE_MS = 640;
-const LOGO_WIGGLE_DEG = 4;
-const LOGO_WIGGLE_STEP_MS = 160;
-const LOGO_WIGGLE_SWINGS = 7;
-const LOGO_SETTLE_MS = 80;
+// 같은 폭으로 계속 흔들면 기계적으로 보여서, 처음에 크게 튕기고 점점 잦아들게 했다(감쇠 진동).
+// 반주기를 일정하게 둬야 진자처럼 자연스럽다. 첫 구간은 정지 상태에서 출발하므로 절반 길이로 잡는다.
+const LOGO_WIGGLE_PEAKS_DEG = [-6, 4.5, -3, 1.8, -0.8, 0];
+const LOGO_WIGGLE_HALF_PERIOD_MS = 200;
 const CHAR_STAGGER_MS = 50;
 const CHAR_POP_MS = 500;
 
@@ -117,16 +117,14 @@ export default function AppSplash() {
     starY.value = withDelay(STAR_DELAY_MS, withTiming(0, starEnter));
 
     logoOpacity.value = withTiming(1, { duration: LOGO_FADE_MS, easing: EASE_BACK });
-    const swings = Array.from({ length: LOGO_WIGGLE_SWINGS }, (_, i) =>
-      withTiming(i % 2 === 0 ? -LOGO_WIGGLE_DEG : LOGO_WIGGLE_DEG, {
-        duration: LOGO_WIGGLE_STEP_MS,
-        easing: EASE_IN_OUT,
+    const lastPeak = LOGO_WIGGLE_PEAKS_DEG.length - 1;
+    const swings = LOGO_WIGGLE_PEAKS_DEG.map((deg, i) =>
+      withTiming(deg, {
+        duration: i === 0 ? LOGO_WIGGLE_HALF_PERIOD_MS / 2 : LOGO_WIGGLE_HALF_PERIOD_MS,
+        easing: i === 0 || i === lastPeak ? Easing.out(Easing.sin) : EASE_IN_OUT,
       }),
     );
-    logoRotate.value = withSequence(
-      ...swings,
-      withTiming(0, { duration: LOGO_SETTLE_MS, easing: Easing.out(Easing.ease) }),
-    );
+    logoRotate.value = withSequence(...swings);
   }, [ringOpacity, ringY, starOpacity, starY, logoOpacity, logoRotate]);
 
   const ringStyle = useAnimatedStyle(() => ({
