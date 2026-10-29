@@ -386,15 +386,7 @@ export default function usePhotoEditor({
       zoom.set(clamp(zoom.get() * event.scaleChange, 1, Math.max(MAX_ZOOM, zoom.get())));
     });
 
-  const twoFingerRotation = Gesture.Rotation()
-    .onBegin(interaction.begin)
-    .onFinalize(interaction.end)
-    .onChange((event) => {
-      if (drag.get().active) return;
-      tilt.set(clamp(tilt.get() + (event.rotationChange * 180) / Math.PI, -MAX_TILT, MAX_TILT));
-    });
-
-  const gesture = Gesture.Simultaneous(pan, pinch, twoFingerRotation);
+  const gesture = Gesture.Simultaneous(pan, pinch);
 
   const baseScale = image && area ? coverScale(area, image, 0) : 0;
   const baseSize = image
