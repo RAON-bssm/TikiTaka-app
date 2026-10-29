@@ -232,6 +232,12 @@ export default function EditPhotoScreen() {
                   </Animated.View>
                 </View>
               </>
+            ) : editor.loadFailed ? (
+              <View className="flex-1 items-center justify-center">
+                <Typography variant="body1" className="text-gray-500">
+                  사진을 불러올 수 없어요.
+                </Typography>
+              </View>
             ) : null}
           </View>
         </GestureDetector>

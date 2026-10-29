@@ -3,6 +3,7 @@ import CameraNotFound from '@/components/camera/CameraNotFound';
 import CameraPermissionRequest from '@/components/camera/CameraPermissionRequest';
 import FlipButton from '@/components/camera/FlipButton';
 import MissionTitle from '@/components/camera/MissionTitle';
+import { useToast } from '@/components/ui/Toast';
 import ShutterButton from '@/components/camera/ShutterButton';
 import ZoomControl from '@/components/camera/ZoomControl';
 import useCameraZoom from '@/hooks/camera/useCameraZoom';
@@ -52,6 +53,7 @@ async function cropToPreview(uri: string, previewAspect: number): Promise<string
 export default function CameraScreen() {
   const insets = useSafeAreaInsets();
   const isFocused = useIsFocused();
+  const { showToast } = useToast();
 
   const { data: myBoard } = useMyBoard();
   const mission = myBoard?.mission ?? '';
@@ -92,6 +94,8 @@ export default function CameraScreen() {
         pathname: '/camera/edit',
         params: { uri: previewAspect ? await cropToPreview(uri, previewAspect) : uri },
       });
+    } catch {
+      showToast('사진을 찍지 못했어요. 다시 시도해주세요.');
     } finally {
       capturingRef.current = false;
     }

@@ -112,6 +112,7 @@ export default function usePhotoEditor({
   interaction: Interaction;
 }) {
   const [imageSize, setImageSize] = useState<Size & { uri: string }>();
+  const [failedUri, setFailedUri] = useState<string>();
   const [isEdited, setIsEdited] = useState(false);
 
   const imageW = useSharedValue(0);
@@ -151,9 +152,15 @@ export default function usePhotoEditor({
   useEffect(() => {
     if (!uri) return;
     let active = true;
-    Image.getSize(uri, (width, height) => {
-      if (active && width && height) setImageSize({ uri, width, height });
-    });
+    Image.getSize(
+      uri,
+      (width, height) => {
+        if (active && width && height) setImageSize({ uri, width, height });
+      },
+      () => {
+        if (active) setFailedUri(uri);
+      },
+    );
     return () => {
       active = false;
     };
@@ -469,6 +476,7 @@ export default function usePhotoEditor({
 
   return {
     isReady: !!image && !!frame,
+    loadFailed: !uri || failedUri === uri,
     isEdited,
     baseSize,
     imageStyle,
