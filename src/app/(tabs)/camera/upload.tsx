@@ -9,7 +9,7 @@ import { useUploadPost } from '@/hooks/post/useUploadPost';
 import useImageRatio from '@/hooks/useImageRatio';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useRef, useState } from 'react';
-import { Image, View } from 'react-native';
+import { Image, Keyboard, Pressable, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -61,38 +61,46 @@ export default function Upload() {
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
       <KeyboardAwareScrollView
         className="flex-1"
-        contentContainerClassName="flex flex-col gap-2xl px-xl py-2xl"
+        contentContainerClassName="grow"
         showsVerticalScrollIndicator={false}
         bottomOffset={16}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
       >
-        <Topic title={myBoard?.mission ?? ''} />
+        <Pressable
+          onPress={Keyboard.dismiss}
+          accessible={false}
+          className="grow flex flex-col gap-2xl px-xl py-2xl"
+        >
+          <Topic title={myBoard?.mission ?? ''} />
 
-        {uri && photoRatio ? (
-          <Image
-            source={{ uri }}
-            resizeMode="cover"
-            className="w-full overflow-hidden rounded-md bg-gray-100"
-            style={{ aspectRatio: photoRatio }}
+          {uri && photoRatio ? (
+            <Image
+              source={{ uri }}
+              resizeMode="cover"
+              className="w-full overflow-hidden rounded-md bg-gray-100"
+              style={{ aspectRatio: photoRatio }}
+            />
+          ) : uri ? (
+            <View className="h-[232px] w-full overflow-hidden rounded-md bg-gray-100" />
+          ) : (
+            <View className="h-[232px] w-full items-center justify-center overflow-hidden rounded-md bg-gray-100">
+              <Typography variant="body1" className="text-gray-500">
+                사진을 불러올 수 없어요.
+              </Typography>
+            </View>
+          )}
+
+          <TextInput
+            label="미션 한마디"
+            placeholder="게시물을 표현하는 한마디를 작성해주세요"
+            value={content}
+            onChangeText={setContent}
+            returnKeyType="done"
           />
-        ) : uri ? (
-          <View className="h-[232px] w-full overflow-hidden rounded-md bg-gray-100" />
-        ) : (
-          <View className="h-[232px] w-full items-center justify-center overflow-hidden rounded-md bg-gray-100">
-            <Typography variant="body1" className="text-gray-500">
-              사진을 불러올 수 없어요.
-            </Typography>
-          </View>
-        )}
 
-        <TextInput
-          label="미션 한마디"
-          placeholder="게시물을 표현하는 한마디를 작성해주세요"
-          value={content}
-          onChangeText={setContent}
-        />
-
-        <Button content={isPending ? '업로드 중...' : '게시물 업로드'} onclick={handleUpload} />
+          <Button content={isPending ? '업로드 중...' : '게시물 업로드'} onclick={handleUpload} />
+        </Pressable>
       </KeyboardAwareScrollView>
     </SafeAreaView>
   );
