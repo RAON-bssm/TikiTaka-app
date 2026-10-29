@@ -1,7 +1,14 @@
-import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
+import axios, { isAxiosError, type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 
 import { reissue } from './refresh';
-import { clearSignupToken, clearTokens, getAccessToken, getRefreshToken, setTokens } from './token';
+import {
+  clearSignupToken,
+  clearTokens,
+  getAccessToken,
+  getRefreshToken,
+  isAccessTokenExpired,
+  setTokens,
+} from './token';
 
 // axios 타입 선언상 `create`가 named export로도 잡히는 false positive라 비활성화한다.
 // eslint-disable-next-line import/no-named-as-default-member
@@ -52,9 +59,30 @@ function refreshAccessToken(): Promise<string> {
   return refreshPromise;
 }
 
+const isTransientError = (error: unknown) =>
+  isAxiosError(error) && (error.response === undefined || error.response.status >= 500);
+
+/** 재발급에 실패하면 세션 종료. 토큰을 비우면 AuthGate가 로그인 화면으로 보낸다(화면 전환 책임은 AuthGate에만). */
+async function refreshOrEndSession(): Promise<string> {
+  try {
+    return await refreshAccessToken();
+  } catch (refreshError) {
+    // 일시적 실패에 토큰을 지우면 불안정한 네트워크에서 앱을 열기만 해도 로그아웃된다.
+    if (isTransientError(refreshError)) {
+      throw refreshError;
+    }
+    await clearTokens();
+    clearSignupToken();
+    throw refreshError;
+  }
+}
+
 client.interceptors.request.use(
   async (config) => {
-    const token = await getAccessToken();
+    let token = await getAccessToken();
+    if (token && isAccessTokenExpired(token) && !isPublicPath(config.url)) {
+      token = await refreshOrEndSession();
+    }
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -85,15 +113,7 @@ client.interceptors.response.use(
 
     originalRequest._retry = true;
 
-    let accessToken: string;
-    try {
-      accessToken = await refreshAccessToken();
-    } catch (refreshError) {
-      // 세션 종료. 토큰을 비우면 AuthGate가 로그인 화면으로 보낸다(화면 전환 책임은 AuthGate에만).
-      await clearTokens();
-      clearSignupToken();
-      return Promise.reject(refreshError);
-    }
+    const accessToken = await refreshOrEndSession();
     originalRequest.headers.Authorization = `Bearer ${accessToken}`;
     return client(originalRequest);
   },

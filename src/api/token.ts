@@ -9,6 +9,20 @@ const PROVIDER_KEY = 'loginProvider';
 export const getAccessToken = () => SecureStore.getItemAsync(ACCESS_KEY);
 export const getRefreshToken = () => SecureStore.getItemAsync(REFRESH_KEY);
 
+// 기기와 서버 시계가 어긋나거나 요청이 가는 사이 만료되는 경우를 덮는다.
+const EXPIRY_MARGIN_MS = 30 * 1000;
+
+/** JWT `exp`로 판단한다. 해석할 수 없으면 만료되지 않은 것으로 보고 서버 응답(401/403)에 맡긴다. */
+export function isAccessTokenExpired(token: string): boolean {
+  try {
+    const payload = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    const { exp } = JSON.parse(atob(payload)) as { exp?: unknown };
+    return typeof exp === 'number' && exp * 1000 - EXPIRY_MARGIN_MS <= Date.now();
+  } catch {
+    return false;
+  }
+}
+
 /** 'loading'은 앱 시작 직후 저장된 토큰을 아직 읽지 못한 상태. */
 export type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated';
 

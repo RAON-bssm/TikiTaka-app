@@ -1,7 +1,9 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { router, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
+import { clearSavedCharacter } from '@/api/character';
 import { loadAuthStatus } from '@/api/token';
 import { useAuthStatus } from '@/hooks/auth/useAuthStatus';
 
@@ -13,10 +15,22 @@ SplashScreen.preventAutoHideAsync().catch(() => {});
 export default function AuthGate({ children }: { children: React.ReactNode }) {
   const status = useAuthStatus();
   const segments = useSegments();
+  const queryClient = useQueryClient();
+  const prevStatus = useRef(status);
 
   useEffect(() => {
     loadAuthStatus();
   }, []);
+
+  // 재발급 실패로 인터셉터가 세션을 끝내면 useClearSession을 거치지 않는다.
+  // 그때도 다른 계정으로 다시 로그인했을 때 이전 계정의 캐시·캐릭터가 보이지 않게 여기서 비운다.
+  useEffect(() => {
+    if (prevStatus.current === 'authenticated' && status === 'unauthenticated') {
+      queryClient.clear();
+      clearSavedCharacter().catch(() => {});
+    }
+    prevStatus.current = status;
+  }, [status, queryClient]);
 
   useEffect(() => {
     if (status === 'loading') return;
