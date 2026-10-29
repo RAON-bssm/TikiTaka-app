@@ -1,36 +1,59 @@
-import { palette } from '@/constants/colors';
-import { useEffect } from 'react';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useEffect, useState } from 'react';
+import { StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 import Animated, {
   Easing,
-  interpolateColor,
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
+  withDelay,
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
+
+import { palette } from '@/constants/colors';
 
 interface Props {
   /** 크기·모양. 예: "h-5 w-24 rounded-full" */
   className?: string;
 }
 
-const COLOR_FROM = palette.gray[100];
-const COLOR_TO = palette.gray[200];
+const HIGHLIGHT = palette.gray[50];
+const SHIMMER_COLORS = [`${HIGHLIGHT}00`, HIGHLIGHT, `${HIGHLIGHT}00`] as const;
+const SWEEP_MS = 1100;
+const REST_MS = 400;
 
 export default function Skeleton({ className = '' }: Props) {
-  const progress = useSharedValue(0);
+  const reduceMotion = useReducedMotion();
+  const [width, setWidth] = useState(0);
+  const sweep = useSharedValue(0);
 
   useEffect(() => {
-    progress.value = withRepeat(
-      withTiming(1, { duration: 800, easing: Easing.inOut(Easing.ease) }),
+    if (reduceMotion || width === 0) return;
+    sweep.value = withRepeat(
+      withDelay(REST_MS, withTiming(1, { duration: SWEEP_MS, easing: Easing.inOut(Easing.ease) })),
       -1,
-      true,
     );
-  }, [progress]);
+  }, [sweep, width, reduceMotion]);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    backgroundColor: interpolateColor(progress.value, [0, 1], [COLOR_FROM, COLOR_TO]),
+  const bandStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: (sweep.value * 2 - 1) * width }],
   }));
 
-  return <Animated.View style={animatedStyle} className={className} />;
+  const handleLayout = (event: LayoutChangeEvent) => setWidth(event.nativeEvent.layout.width);
+
+  return (
+    <View onLayout={handleLayout} className={`overflow-hidden bg-gray-100 ${className}`}>
+      {width > 0 && !reduceMotion ? (
+        <Animated.View style={[StyleSheet.absoluteFill, bandStyle]}>
+          <LinearGradient
+            colors={SHIMMER_COLORS}
+            start={{ x: 0, y: 0.5 }}
+            end={{ x: 1, y: 0.5 }}
+            style={StyleSheet.absoluteFill}
+          />
+        </Animated.View>
+      ) : null}
+    </View>
+  );
 }

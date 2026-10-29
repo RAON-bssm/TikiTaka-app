@@ -1,9 +1,14 @@
-import { Image } from 'expo-image';
 import { useRef, useState } from 'react';
-import { Image as RNImage, View } from 'react-native';
+import { View } from 'react-native';
+import { useReducedMotion } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { getApiErrorMessage } from '@/api/error';
+import CapsuleReveal from '@/components/market/gotcha/CapsuleReveal';
+import GachaMachine, {
+  MACHINE_ASPECT_RATIO,
+  MACHINE_EXIT,
+} from '@/components/market/gotcha/GachaMachine';
 import Gotcha from '@/components/market/gotcha/Gotcha';
 import PullButton from '@/components/market/gotcha/PullButton';
 import MyPointBadge from '@/components/market/MyPointBadge';
@@ -16,10 +21,6 @@ import { GASHAPON_OPTIONS, toGotchaPull, type GotchaPull } from '@/constants/mar
 import { useCharacterConfig } from '@/hooks/character/useCharacterConfig';
 import { useDrawGashapon } from '@/hooks/product/useDrawGashapon';
 import { useProducts } from '@/hooks/product/useProducts';
-
-const MACHINE = require('@/assets/icons/gotcha.webp');
-const { width, height } = RNImage.resolveAssetSource(MACHINE);
-const MACHINE_ASPECT_RATIO = width / height;
 
 export default function GachaScreen() {
   // 뽑기 결과 큐. 탭할 때마다 하나씩 소비한다.
@@ -34,24 +35,56 @@ export default function GachaScreen() {
   const { showToast } = useToast();
 
   const pullingRef = useRef(false);
+  const machineRef = useRef<View>(null);
+  const reduceMotion = useReducedMotion();
+  // cranking: 손잡이를 돌리며 응답을 기다림 → revealing: 캡슐이 나와 열리길 기다림 → 결과(results) 표시
+  const [phase, setPhase] = useState<'idle' | 'cranking' | 'revealing'>('idle');
+  /** 응답은 왔지만 연출이 끝나지 않아 아직 보여 주지 않은 결과 */
+  const [pendingResults, setPendingResults] = useState<GotchaPull[] | null>(null);
+  const [revealFrom, setRevealFrom] = useState<{ x: number; y: number } | null>(null);
+
+  const showResults = (pulls: GotchaPull[]) => {
+    setResults(pulls);
+    setIndex(0);
+  };
 
   const handlePull = (productId: string) => {
-    if (pullingRef.current || isPending || !isCharacterConfigLoaded) return;
+    if (pullingRef.current || isPending || !isCharacterConfigLoaded || phase !== 'idle') return;
     pullingRef.current = true;
+    if (!reduceMotion) setPhase('cranking');
     draw(
       { product_id: productId },
       {
         onSuccess: (items) => {
-          setResults(items.map((item) => toGotchaPull(item, myConfig)));
-          setIndex(0);
+          const pulls = items.map((item) => toGotchaPull(item, myConfig));
+          if (reduceMotion) showResults(pulls);
+          else setPendingResults(pulls);
         },
-        onError: (error) =>
-          showToast(getApiErrorMessage(error, '뽑기에 실패했어요. 다시 시도해주세요.')),
+        onError: (error) => {
+          setPhase('idle');
+          showToast(getApiErrorMessage(error, '뽑기에 실패했어요. 다시 시도해주세요.'));
+        },
         onSettled: () => {
           pullingRef.current = false;
         },
       },
     );
+  };
+
+  // 응답이 빨라도 손잡이가 한 바퀴는 돌고, 늦으면 올 때까지 계속 돈다.
+  const handleTurnEnd = () => {
+    if (!pendingResults) return;
+    setPhase('revealing');
+    machineRef.current?.measureInWindow((x, y, width, height) =>
+      setRevealFrom({ x: x + width * MACHINE_EXIT.x, y: y + height * MACHINE_EXIT.y }),
+    );
+  };
+
+  const handleOpened = () => {
+    if (pendingResults) showResults(pendingResults);
+    setPendingResults(null);
+    setRevealFrom(null);
+    setPhase('idle');
   };
 
   const handleDismiss = () => {
@@ -84,11 +117,14 @@ export default function GachaScreen() {
           </View>
 
           <View className="flex-1 items-center justify-center">
-            <Image
-              source={MACHINE}
-              contentFit="contain"
+            {/* Android가 이 View를 최적화로 없애면 measureInWindow 콜백이 오지 않아 캡슐 연출에서 멈춘다. */}
+            <View
+              ref={machineRef}
+              collapsable={false}
               style={{ width: '70%', aspectRatio: MACHINE_ASPECT_RATIO }}
-            />
+            >
+              <GachaMachine cranking={phase === 'cranking'} onTurnEnd={handleTurnEnd} />
+            </View>
           </View>
 
           {isError ? (
@@ -103,7 +139,7 @@ export default function GachaScreen() {
                     products?.find((product) => product.product_id === option.productId)?.price ??
                     option.fallbackCost
                   }
-                  disabled={isPending || !isCharacterConfigLoaded}
+                  disabled={isPending || !isCharacterConfigLoaded || phase !== 'idle'}
                   onPress={() => handlePull(option.productId)}
                 />
               ))}
@@ -111,6 +147,10 @@ export default function GachaScreen() {
           )}
         </View>
       </View>
+
+      {phase === 'revealing' && revealFrom ? (
+        <CapsuleReveal from={revealFrom} onOpened={handleOpened} />
+      ) : null}
 
       {current ? (
         <Gotcha

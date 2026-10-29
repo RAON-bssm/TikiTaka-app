@@ -1,6 +1,4 @@
-import { ActivityIndicator, Image, View } from 'react-native';
-
-import { palette } from '@/constants/colors';
+import LoadingImage from '@/components/ui/feedback/LoadingImage';
 import { useViewUrl } from '@/hooks/storage/useViewUrl';
 
 interface Props {
@@ -11,22 +9,10 @@ interface Props {
 export default function PostImage({ uri }: Props) {
   const { uri: resolvedUri, isLoading } = useViewUrl(uri);
 
-  if (!resolvedUri || isLoading) {
-    return (
-      <View
-        style={{ width: '100%', height: 320 }}
-        className="items-center justify-center rounded-lg bg-gray-100"
-      >
-        <ActivityIndicator color={palette.primary[600]} />
-      </View>
-    );
-  }
-
   return (
-    <Image
-      source={{ uri: resolvedUri }}
-      style={{ width: '100%', height: 320 }}
-      className="rounded-lg bg-gray-100"
+    <LoadingImage
+      uri={isLoading ? undefined : (resolvedUri ?? undefined)}
+      className="h-[320px] w-full rounded-lg"
     />
   );
 }

@@ -1,5 +1,18 @@
+import { useEffect } from 'react';
 import { Pressable, Text, View } from 'react-native';
-import Animated, { FadeIn, ZoomIn } from 'react-native-reanimated';
+import Animated, {
+  BounceIn,
+  Easing,
+  FadeIn,
+  FadeInDown,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withDelay,
+  withRepeat,
+  withTiming,
+  ZoomIn,
+} from 'react-native-reanimated';
 
 import Character from '@/components/character/Character';
 import Typography from '@/components/ui/Typography';
@@ -16,7 +29,7 @@ const OUTLINE_OFFSETS = [
 /** 밝은 글로우 위에서도 이름이 보이도록 외곽선을 두른다. */
 function OutlinedItemName({ name }: { name: string }) {
   return (
-    <View className="z-10 -mb-sm">
+    <View className="z-10 mb-sm">
       {OUTLINE_OFFSETS.map((offset, i) => (
         <Text
           key={i}
@@ -32,6 +45,44 @@ function OutlinedItemName({ name }: { name: string }) {
   );
 }
 
+const GLOW_RINGS = [
+  { className: 'h-[340px] w-[340px] bg-white/30', pulse: 0.06 },
+  { className: 'h-[260px] w-[260px] bg-white/50', pulse: 0.04 },
+  { className: 'h-[190px] w-[190px] bg-white/70', pulse: 0.02 },
+] as const;
+const RING_STAGGER_MS = 80;
+const PULSE_MS = 1200;
+const CHARACTER_ENTER_MS = 600;
+const FLOAT_PX = 6;
+const FLOAT_MS = 1400;
+
+const GlowRing = ({ index, ring }: { index: number; ring: (typeof GLOW_RINGS)[number] }) => {
+  const progress = useSharedValue(0);
+  const reduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (reduceMotion) return;
+    progress.value = withRepeat(
+      withTiming(1, { duration: PULSE_MS, easing: Easing.inOut(Easing.sin) }),
+      -1,
+      true,
+    );
+  }, [progress, reduceMotion]);
+
+  const style = useAnimatedStyle(() => ({
+    transform: [{ scale: 1 + progress.value * ring.pulse }],
+  }));
+
+  return (
+    <Animated.View
+      entering={ZoomIn.delay(index * RING_STAGGER_MS).springify()}
+      className="absolute"
+    >
+      <Animated.View style={style} className={`rounded-full ${ring.className}`} />
+    </Animated.View>
+  );
+};
+
 interface Props {
   result: GotchaPull;
   /** 5회 뽑기 진행 표시. 1회 뽑기면 생략. */
@@ -41,38 +92,59 @@ interface Props {
 }
 
 export default function Gotcha({ result, progress, onDismiss }: Props) {
+  const float = useSharedValue(0);
+  const reduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (reduceMotion) return;
+    float.value = withDelay(
+      CHARACTER_ENTER_MS,
+      withRepeat(withTiming(1, { duration: FLOAT_MS, easing: Easing.inOut(Easing.sin) }), -1, true),
+    );
+  }, [float, reduceMotion]);
+
+  const floatStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: -float.value * FLOAT_PX }],
+  }));
+
   return (
     <Animated.View
       entering={FadeIn.duration(200)}
       style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
     >
       <Pressable className="flex-1 items-center justify-center bg-gray-400/50" onPress={onDismiss}>
-        <View className="items-center justify-center">
-          <View className="absolute h-[340px] w-[340px] rounded-full bg-white/30" />
-          <View className="absolute h-[260px] w-[260px] rounded-full bg-white/50" />
-          <View className="absolute h-[190px] w-[190px] rounded-full bg-white/70" />
+        <View key={progress?.current ?? 0} className="items-center justify-center">
+          {GLOW_RINGS.map((ring, i) => (
+            <GlowRing key={i} index={i} ring={ring} />
+          ))}
 
-          <Animated.View entering={ZoomIn.springify()} className="items-center">
-            <OutlinedItemName name={result.name} />
+          <View className="items-center">
+            <Animated.View entering={FadeInDown.delay(250).springify()}>
+              <OutlinedItemName name={result.name} />
+            </Animated.View>
 
-            <View>
-              <Character config={result.preview} size={230} />
-              {result.duplicate ? null : (
-                <Animated.View
-                  entering={ZoomIn.delay(250).springify()}
-                  className="absolute right-lg top-lg rounded-full bg-primary-600 px-md py-xs"
-                >
-                  <Text className="font-title text-md text-white">NEW</Text>
-                </Animated.View>
-              )}
-            </View>
+            <Animated.View entering={BounceIn.duration(CHARACTER_ENTER_MS)}>
+              <Animated.View style={floatStyle}>
+                <Character config={result.preview} size={230} />
+                {result.duplicate ? null : (
+                  <Animated.View
+                    entering={ZoomIn.delay(CHARACTER_ENTER_MS).springify()}
+                    className="absolute right-lg top-lg rounded-full bg-primary-600 px-md py-xs"
+                  >
+                    <Text className="font-title text-md text-white">NEW</Text>
+                  </Animated.View>
+                )}
+              </Animated.View>
+            </Animated.View>
 
             {progress ? (
-              <Typography variant="body1" className="text-gray-500">
-                {progress.current} / {progress.total}
-              </Typography>
+              <Animated.View entering={FadeIn.delay(350)}>
+                <Typography variant="body1" className="text-gray-500">
+                  {progress.current} / {progress.total}
+                </Typography>
+              </Animated.View>
             ) : null}
-          </Animated.View>
+          </View>
         </View>
       </Pressable>
     </Animated.View>
