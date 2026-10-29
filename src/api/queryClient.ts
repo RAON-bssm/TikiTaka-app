@@ -3,7 +3,7 @@ import { isAxiosError } from 'axios';
 
 // `refetchOnWindowFocus`는 RN에서 AppState를 focusManager에 연결해야 동작하므로 아직 두지 않았다.
 
-/** 개별 훅에서 덮어쓴다. (`useViewUrl` 9분, `useCharacterConfig` Infinity) */
+/** 개별 훅에서 덮어쓴다. (`useViewUrl` 9분, `useUserCharacter` 10분, `useCharacterConfig` Infinity) */
 const DEFAULT_STALE_TIME = 60 * 1000;
 
 /** 첫 요청 제외. */
