@@ -48,16 +48,23 @@ export default function MoreMenu({
 
   const close = () => setAnchor(undefined);
 
-  // 화면 아래쪽 버튼에서 아래로 열면 메뉴가 화면 밖으로 잘려, 공간이 모자라면 위로 연다.
+  // 화면 아래쪽 버튼에서 아래로 열면 메뉴가 화면 밖으로 잘려, 아래 공간이 모자라고 위가 더 넓으면 위로 연다.
+  // 어느 쪽도 모자라면 안전 영역 안으로 밀어 넣는다.
   // 높이를 재기 전 첫 프레임은 투명하게 두어 위치가 튀는 게 보이지 않게 한다.
-  const opensUpward =
-    anchor !== undefined &&
-    menuHeight !== undefined &&
-    anchor.triggerBottom + MENU_GAP + menuHeight > windowHeight - insets.bottom;
+  const safeTop = insets.top;
+  const safeBottom = windowHeight - insets.bottom;
   const position = anchor && {
-    top: opensUpward
-      ? anchor.triggerTop - MENU_GAP - (menuHeight ?? 0)
-      : anchor.triggerBottom + MENU_GAP,
+    top: (() => {
+      const below = anchor.triggerBottom + MENU_GAP;
+      if (menuHeight === undefined) return below;
+      const spaceBelow = safeBottom - below;
+      const spaceAbove = anchor.triggerTop - MENU_GAP - safeTop;
+      const top =
+        menuHeight > spaceBelow && spaceAbove > spaceBelow
+          ? anchor.triggerTop - MENU_GAP - menuHeight
+          : below;
+      return Math.max(safeTop, Math.min(top, safeBottom - menuHeight));
+    })(),
     right: anchor.right,
     opacity: menuHeight === undefined ? 0 : 1,
   };
