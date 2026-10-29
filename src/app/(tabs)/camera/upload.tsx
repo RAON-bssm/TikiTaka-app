@@ -47,7 +47,10 @@ export default function Upload() {
         onSuccess: (postId) => {
           showToast('게시물이 등록됐어요');
           router.dismissAll();
-          router.replace({ pathname: '/feed/[post_id]', params: { post_id: postId } });
+          router.replace({
+            pathname: '/feed/[post_id]',
+            params: { post_id: postId, from: 'upload' },
+          });
         },
         onError: (error) => {
           uploadingRef.current = false;
