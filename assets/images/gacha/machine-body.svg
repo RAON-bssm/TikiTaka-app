@@ -1,0 +1,16 @@
+<svg width="400" height="600" viewBox="0 0 400 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<radialGradient id="gachaBodyH" cx="0.5" cy="0.55" r="0.55">
+<stop offset="0" stop-color="#FBB797"/><stop offset="0.6" stop-color="#FA9A6C"/>
+<stop offset="1" stop-color="#FA8C5D"/></radialGradient>
+<radialGradient id="gachaBodyR" cx="0.5" cy="0.62" r="0.62">
+<stop offset="0" stop-color="#FBB797"/><stop offset="0.55" stop-color="#FA9E70"/>
+<stop offset="1" stop-color="#FA8C5D"/></radialGradient>
+</defs>
+<path d="M154 42V25A17 17 0 0 1 171 8H229A17 17 0 0 1 246 25V42Z" fill="url(#gachaBodyH)"/>
+<path d="M109 68V56A18 18 0 0 1 127 38H272A18 18 0 0 1 290 56V68Z" fill="url(#gachaBodyH)"/>
+<path d="M94 345V330A17 17 0 0 1 111 313H289A17 17 0 0 1 306 330V345Z" fill="url(#gachaBodyH)"/>
+<path d="M56 551V359A16 16 0 0 1 72 343H328A16 16 0 0 1 344 359V551Z" fill="url(#gachaBodyR)"/>
+<path d="M139.5 549V506A60 60 0 0 1 259.5 506V549Z" fill="#592F20"/>
+<path d="M40 592V563A14 14 0 0 1 54 549H346A14 14 0 0 1 360 563V592Z" fill="url(#gachaBodyH)"/>
+</svg>

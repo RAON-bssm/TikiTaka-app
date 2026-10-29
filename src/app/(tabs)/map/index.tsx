@@ -6,8 +6,8 @@ import WebView from 'react-native-webview';
 
 import { getApiErrorMessage } from '@/api/error';
 import ChatPanel from '@/components/chat/ChatPanel';
+import MapLoading from '@/components/map/MapLoading';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
-import Skeleton from '@/components/ui/feedback/Skeleton';
 import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
 import { DEFAULT_CHARACTER_CONFIG } from '@/constants/character/assets';
@@ -201,7 +201,7 @@ export default function MapScreen() {
           <ErrorRetry message="지도를 불러오지 못했어요." onRetry={onRetry} />
         </View>
       ) : (
-        status === 'loading' && <Skeleton className="absolute inset-0" />
+        status === 'loading' && <MapLoading />
       )}
 
       {status === 'loaded' && chatbot && (

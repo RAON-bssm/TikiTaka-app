@@ -1,10 +1,11 @@
 import { router } from 'expo-router';
-import { ActivityIndicator, Image, Pressable, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 import PlaceIcon from '@/assets/icons/place.svg';
 import Character from '@/components/character/Character';
 import LikeButton from '@/components/feed/LikeButton';
 import UserCharacter from '@/components/character/UserCharacter';
+import LoadingImage from '@/components/ui/feedback/LoadingImage';
 import MoreMenu, { type MoreMenuItem } from '@/components/ui/MoreMenu';
 import Typography from '@/components/ui/Typography';
 import { DEFAULT_CHARACTER_CONFIG } from '@/constants/character/assets';
@@ -65,13 +66,10 @@ export default function FeedCard({
         {menuItems?.length ? <MoreMenu items={menuItems} /> : null}
       </View>
 
-      <View className="h-[225px] w-full items-center justify-center overflow-hidden rounded-lg bg-gray-400">
-        {resolvedImageUri && !imageLoading ? (
-          <Image source={{ uri: resolvedImageUri }} resizeMode="cover" className="h-full w-full" />
-        ) : (
-          <ActivityIndicator color={palette.gray[100]} />
-        )}
-      </View>
+      <LoadingImage
+        uri={imageLoading ? undefined : resolvedImageUri}
+        className="h-[225px] w-full rounded-lg"
+      />
 
       <View className="w-full flex-row items-center justify-between gap-md">
         <View className="flex-1 gap-xs">
