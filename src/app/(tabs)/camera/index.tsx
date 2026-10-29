@@ -89,7 +89,7 @@ export default function CameraScreen() {
       if (!photo) return;
       const uri = `file://${photo.filePath}`;
       router.push({
-        pathname: '/camera/upload',
+        pathname: '/camera/edit',
         params: { uri: previewAspect ? await cropToPreview(uri, previewAspect) : uri },
       });
     } finally {
