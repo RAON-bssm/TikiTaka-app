@@ -1,4 +1,4 @@
-import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
+import axios, { isAxiosError, type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 
 import { reissue } from './refresh';
 import {
@@ -59,11 +59,18 @@ function refreshAccessToken(): Promise<string> {
   return refreshPromise;
 }
 
+const isTransientError = (error: unknown) =>
+  isAxiosError(error) && (error.response === undefined || error.response.status >= 500);
+
 /** 재발급에 실패하면 세션 종료. 토큰을 비우면 AuthGate가 로그인 화면으로 보낸다(화면 전환 책임은 AuthGate에만). */
 async function refreshOrEndSession(): Promise<string> {
   try {
     return await refreshAccessToken();
   } catch (refreshError) {
+    // 일시적 실패에 토큰을 지우면 불안정한 네트워크에서 앱을 열기만 해도 로그아웃된다.
+    if (isTransientError(refreshError)) {
+      throw refreshError;
+    }
     await clearTokens();
     clearSignupToken();
     throw refreshError;
