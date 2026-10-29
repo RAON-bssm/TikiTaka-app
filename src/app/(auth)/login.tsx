@@ -1,6 +1,6 @@
 import { getProviderAccessToken } from '@/api/social';
 import AppleIcon from '@/assets/icons/apple.svg';
-import KakaoIcon from '@/assets/icons/kakao.svg';
+import KakaoImage from '@/assets/icons/kakao.webp';
 import LogoImage from '@/assets/icons/logo.webp';
 import EulaConsent from '@/components/auth/EulaConsent';
 import { useToast } from '@/components/ui/Toast';
@@ -83,7 +83,8 @@ export default function Login() {
               disabled={isBusy || !isEulaLoaded || !hasAgreed}
               className="flex-row items-center justify-center gap-sm rounded-md bg-kakao py-md active:bg-kakao-pressed disabled:opacity-50"
             >
-              <KakaoIcon width={24} height={24} />
+              {/* 원래 PNG를 통째로 품은 500KB대 SVG라 JS 번들에 그대로 들어가, 3배 해상도 webp로 바꿨다. */}
+              <Image source={KakaoImage} style={{ width: 24, height: 22 }} resizeMode="contain" />
               <Typography variant="h3" className="text-gray-700">
                 카카오로 계속하기
               </Typography>
