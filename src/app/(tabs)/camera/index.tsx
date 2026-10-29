@@ -7,13 +7,15 @@ import ShutterButton from '@/components/camera/ShutterButton';
 import ZoomControl from '@/components/camera/ZoomControl';
 import useCameraZoom from '@/hooks/camera/useCameraZoom';
 import { useMyBoard } from '@/hooks/post/useMyBoard';
+import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import { router, useIsFocused } from 'expo-router';
-import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { useRef, useState } from 'react';
+import { type LayoutChangeEvent, StyleSheet, View } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Camera,
+  type CameraRef,
   type DeviceFilter,
   useCameraDevice,
   useCameraPermission,
@@ -23,6 +25,29 @@ import {
 const LENS_FILTER: DeviceFilter = {
   physicalDevices: ['ultra-wide-angle', 'wide-angle', 'telephoto'],
 };
+
+async function cropToPreview(uri: string, previewAspect: number): Promise<string> {
+  const context = ImageManipulator.manipulate(uri);
+  const original = await context.renderAsync();
+  const { width, height } = original;
+  original.release();
+
+  const cropWidth = Math.min(width, Math.round(height * previewAspect));
+  const cropHeight = Math.min(height, Math.round(width / previewAspect));
+  context.crop({
+    originX: Math.round((width - cropWidth) / 2),
+    originY: Math.round((height - cropHeight) / 2),
+    width: cropWidth,
+    height: cropHeight,
+  });
+  const cropped = await context.renderAsync();
+  const result = await cropped.saveAsync({ compress: 1, format: SaveFormat.JPEG });
+
+  cropped.release();
+  context.release();
+
+  return result.uri;
+}
 
 export default function CameraScreen() {
   const insets = useSafeAreaInsets();
@@ -39,17 +64,36 @@ export default function CameraScreen() {
 
   const { zoom, selectedZoom, levels, handleSelectZoom, pinch } = useCameraZoom(device);
 
+  const cameraRef = useRef<CameraRef>(null);
+  const [previewAspect, setPreviewAspect] = useState<number>();
+  const capturingRef = useRef(false);
+
+  const handleStarted = () => {
+    void cameraRef.current?.controller?.setZoom(zoom.get());
+  };
+
+  const handleLayout = (event: LayoutChangeEvent) => {
+    const { width, height } = event.nativeEvent.layout;
+    if (width && height) setPreviewAspect(width / height);
+  };
+
   const handleFlip = () => {
     setFacing((prev) => (prev === 'back' ? 'front' : 'back'));
   };
 
   const handleCapture = async () => {
-    const photo = await photoOutput.capturePhotoToFile({}, {});
-    if (photo) {
+    if (capturingRef.current) return;
+    capturingRef.current = true;
+    try {
+      const photo = await photoOutput.capturePhotoToFile({}, {});
+      if (!photo) return;
+      const uri = `file://${photo.filePath}`;
       router.push({
         pathname: '/camera/upload',
-        params: { uri: `file://${photo.filePath}` },
+        params: { uri: previewAspect ? await cropToPreview(uri, previewAspect) : uri },
       });
+    } finally {
+      capturingRef.current = false;
     }
   };
 
@@ -70,7 +114,10 @@ export default function CameraScreen() {
     <View className="flex-1 bg-black">
       <GestureDetector gesture={pinch}>
         <Camera
+          ref={cameraRef}
           style={StyleSheet.absoluteFill}
+          onLayout={handleLayout}
+          onStarted={handleStarted}
           device={device}
           isActive={isFocused}
           outputs={[photoOutput]}
