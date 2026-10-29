@@ -3,9 +3,9 @@ import CameraNotFound from '@/components/camera/CameraNotFound';
 import CameraPermissionRequest from '@/components/camera/CameraPermissionRequest';
 import FlipButton from '@/components/camera/FlipButton';
 import MissionTitle from '@/components/camera/MissionTitle';
-import { useToast } from '@/components/ui/Toast';
 import ShutterButton from '@/components/camera/ShutterButton';
 import ZoomControl from '@/components/camera/ZoomControl';
+import { useToast } from '@/components/ui/Toast';
 import useCameraZoom from '@/hooks/camera/useCameraZoom';
 import { useMyBoard } from '@/hooks/post/useMyBoard';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
@@ -90,10 +90,10 @@ export default function CameraScreen() {
       const photo = await photoOutput.capturePhotoToFile({}, {});
       if (!photo) return;
       const uri = `file://${photo.filePath}`;
-      router.push({
-        pathname: '/camera/edit',
-        params: { uri: previewAspect ? await cropToPreview(uri, previewAspect) : uri },
-      });
+      const editUri = previewAspect
+        ? await cropToPreview(uri, previewAspect).catch(() => uri)
+        : uri;
+      router.push({ pathname: '/camera/edit', params: { uri: editUri } });
     } catch {
       showToast('사진을 찍지 못했어요. 다시 시도해주세요.');
     } finally {
