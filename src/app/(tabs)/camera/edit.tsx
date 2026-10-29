@@ -96,7 +96,7 @@ export default function EditPhotoScreen() {
   const frame = bounds && fitFrame(bounds, ratio.value);
 
   const interaction = useInteraction();
-  const editor = usePhotoEditor({ uri, area: bounds, frame, interaction });
+  const editor = usePhotoEditor({ uri, canvas: area, area: bounds, frame, interaction });
 
   const areaWidth = area?.width ?? 0;
   const areaHeight = area?.height ?? 0;
@@ -108,20 +108,32 @@ export default function EditPhotoScreen() {
       [MASK_OPACITY_IDLE, MASK_OPACITY_ACTIVE],
     ),
   }));
-  const maskTopStyle = useAnimatedStyle(() => ({
-    height: (areaHeight - editor.frameH.get()) / 2,
-  }));
+  const frameTop = () => {
+    'worklet';
+    return areaHeight / 2 + editor.frameCY.get() - editor.frameH.get() / 2;
+  };
+  const frameLeft = () => {
+    'worklet';
+    return areaWidth / 2 + editor.frameCX.get() - editor.frameW.get() / 2;
+  };
+
+  const maskTopStyle = useAnimatedStyle(() => ({ height: frameTop() }));
   const maskBottomStyle = useAnimatedStyle(() => ({
-    height: (areaHeight - editor.frameH.get()) / 2,
+    height: areaHeight - frameTop() - editor.frameH.get(),
   }));
-  const maskSideStyle = useAnimatedStyle(() => ({
-    top: (areaHeight - editor.frameH.get()) / 2,
-    width: (areaWidth - editor.frameW.get()) / 2,
+  const maskLeftStyle = useAnimatedStyle(() => ({
+    top: frameTop(),
+    width: frameLeft(),
+    height: editor.frameH.get(),
+  }));
+  const maskRightStyle = useAnimatedStyle(() => ({
+    top: frameTop(),
+    width: areaWidth - frameLeft() - editor.frameW.get(),
     height: editor.frameH.get(),
   }));
   const frameStyle = useAnimatedStyle(() => ({
-    top: (areaHeight - editor.frameH.get()) / 2,
-    left: (areaWidth - editor.frameW.get()) / 2,
+    top: frameTop(),
+    left: frameLeft(),
     width: editor.frameW.get(),
     height: editor.frameH.get(),
   }));
@@ -189,8 +201,8 @@ export default function EditPhotoScreen() {
                       style={maskBottomStyle}
                       className="absolute bottom-0 left-0 right-0 bg-white"
                     />
-                    <Animated.View style={maskSideStyle} className="absolute left-0 bg-white" />
-                    <Animated.View style={maskSideStyle} className="absolute right-0 bg-white" />
+                    <Animated.View style={maskLeftStyle} className="absolute left-0 bg-white" />
+                    <Animated.View style={maskRightStyle} className="absolute right-0 bg-white" />
                   </Animated.View>
 
                   <Animated.View
