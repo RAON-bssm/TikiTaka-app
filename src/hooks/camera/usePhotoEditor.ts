@@ -11,7 +11,10 @@ import {
   withTiming,
 } from 'react-native-reanimated';
 
+/** 첫 항목이 기본값이다. */
 export const CROP_RATIOS = [
+  // 모서리로 가로·세로를 따로 조절한다. 처음에는 사진 원본 비율로 시작한다.
+  { label: '자유', value: null },
   { label: '3:4', value: 3 / 4 },
   { label: '1:1', value: 1 },
   { label: '4:3', value: 4 / 3 },
@@ -53,6 +56,13 @@ const coverScale = (frame: Size, image: Size, radians: number) => {
   );
 };
 
+const fitFrame = (bounds: Size, aspect: number): Size => {
+  'worklet';
+  return bounds.width / bounds.height > aspect
+    ? { width: bounds.height * aspect, height: bounds.height }
+    : { width: bounds.width, height: bounds.width / aspect };
+};
+
 // worklet 안의 화살표 함수는 React Compiler가 밖으로 끌어올려(_temp) worklet이 아니게 되므로 모듈에 둔다.
 const settleTo = (value: number) => {
   'worklet';
@@ -91,13 +101,14 @@ export default function usePhotoEditor({
   uri,
   canvas,
   area,
-  frame,
+  ratio,
   interaction,
 }: {
   uri: string | undefined;
   canvas: Size | undefined;
   area: Size | undefined;
-  frame: Size | undefined;
+  /** null이면 자유 비율. */
+  ratio: number | null;
   interaction: Interaction;
 }) {
   const [imageSize, setImageSize] = useState<Size & { uri: string }>();
@@ -115,8 +126,10 @@ export default function usePhotoEditor({
   const boundsH = useSharedValue(0);
   const canvasW = useSharedValue(0);
   const canvasH = useSharedValue(0);
+  const isFree = useSharedValue(false);
   const drag = useSharedValue({
     active: false,
+    free: false,
     directionX: 1,
     directionY: 1,
     width: 0,
@@ -152,6 +165,13 @@ export default function usePhotoEditor({
     imageW.set(image?.width ?? 0);
     imageH.set(image?.height ?? 0);
   }, [image?.width, image?.height, imageW, imageH]);
+
+  const aspect = ratio ?? (image ? image.width / image.height : undefined);
+  const frame = area && aspect ? fitFrame(area, aspect) : undefined;
+
+  useEffect(() => {
+    isFree.set(ratio === null);
+  }, [ratio, isFree]);
 
   const frameWidth = frame?.width;
   const frameHeight = frame?.height;
@@ -220,7 +240,10 @@ export default function usePhotoEditor({
       Math.abs(tilt.get()) >= 0.5 ||
       zoom.get() > 1.01 ||
       Math.abs(offsetX.get()) > 1 ||
-      Math.abs(offsetY.get()) > 1,
+      Math.abs(offsetY.get()) > 1 ||
+      (fullH.get() > 0 &&
+        frameH.get() > 0 &&
+        Math.abs(frameW.get() / frameH.get() - fullW.get() / fullH.get()) > 0.01),
     (current, previous) => {
       if (current !== previous) runOnJS(setIsEdited)(current);
     },
@@ -240,6 +263,7 @@ export default function usePhotoEditor({
     const sin = Math.sin(angle());
     drag.set({
       active: true,
+      free: isFree.get(),
       directionX,
       directionY,
       width,
@@ -256,24 +280,31 @@ export default function usePhotoEditor({
   const updateCornerDrag = (translationX: number, translationY: number) => {
     'worklet';
     const start = drag.get();
-    const ratio = start.width / start.height;
     const roomX = boundsW.get() / 2 - start.directionX * start.anchorX;
     const roomY = boundsH.get() / 2 - start.directionY * start.anchorY;
-    const maxWidth = Math.min(roomX, roomY * ratio, start.width * start.zoom);
-    // 너무 작게 줄이면 다시 펼칠 때 MAX_ZOOM을 넘어, 그만큼은 못 줄이게 한다.
-    const minWidth = Math.max(
-      ratio >= 1 ? MIN_FRAME_SIDE * ratio : MIN_FRAME_SIDE,
-      (start.width * start.zoom) / MAX_ZOOM,
-    );
-    const width = clamp(
-      Math.max(
-        start.width + start.directionX * translationX,
-        (start.height + start.directionY * translationY) * ratio,
-      ),
-      Math.min(minWidth, maxWidth),
-      maxWidth,
-    );
-    const height = width / ratio;
+    let width: number;
+    let height: number;
+    if (start.free) {
+      width = clamp(start.width + start.directionX * translationX, MIN_FRAME_SIDE, roomX);
+      height = clamp(start.height + start.directionY * translationY, MIN_FRAME_SIDE, roomY);
+    } else {
+      const ratio = start.width / start.height;
+      const maxWidth = Math.min(roomX, roomY * ratio, start.width * start.zoom);
+      // 너무 작게 줄이면 다시 펼칠 때 MAX_ZOOM을 넘어, 그만큼은 못 줄이게 한다.
+      const minWidth = Math.max(
+        ratio >= 1 ? MIN_FRAME_SIDE * ratio : MIN_FRAME_SIDE,
+        (start.width * start.zoom) / MAX_ZOOM,
+      );
+      width = clamp(
+        Math.max(
+          start.width + start.directionX * translationX,
+          (start.height + start.directionY * translationY) * ratio,
+        ),
+        Math.min(minWidth, maxWidth),
+        maxWidth,
+      );
+      height = width / ratio;
+    }
     const centerX = start.anchorX + (start.directionX * width) / 2;
     const centerY = start.anchorY + (start.directionY * height) / 2;
 
@@ -281,7 +312,14 @@ export default function usePhotoEditor({
     frameH.set(height);
     frameCX.set(centerX);
     frameCY.set(centerY);
-    zoom.set((start.zoom * start.width) / width);
+    // 사진의 화면 배율을 끌기 시작할 때 그대로 두려면 zoom = 시작 배율 / 새 프레임을 덮는 최소 배율.
+    // 자유 비율에서 사진보다 크게 늘리면 1 아래로 내려가므로, 그때는 사진이 같이 커진다.
+    const cover = coverScale(
+      { width, height },
+      { width: imageW.get(), height: imageH.get() },
+      angle(),
+    );
+    zoom.set(Math.max(1, start.scale / cover));
 
     const cos = Math.cos(angle());
     const sin = Math.sin(angle());
@@ -295,8 +333,12 @@ export default function usePhotoEditor({
   const endCornerDrag = () => {
     'worklet';
     drag.set({ ...drag.get(), active: false });
-    frameW.set(settleTo(fullW.get()));
-    frameH.set(settleTo(fullH.get()));
+    const settled = fitFrame(
+      { width: boundsW.get(), height: boundsH.get() },
+      frameW.get() / frameH.get(),
+    );
+    frameW.set(settleTo(settled.width));
+    frameH.set(settleTo(settled.height));
     frameCX.set(settleTo(0));
     frameCY.set(settleTo(0));
   };
@@ -340,7 +382,8 @@ export default function usePhotoEditor({
     .onFinalize(interaction.end)
     .onChange((event) => {
       if (drag.get().active) return;
-      zoom.set(clamp(zoom.get() * event.scaleChange, 1, MAX_ZOOM));
+      // 모서리로 작게 잘라 MAX_ZOOM을 넘은 상태라면 그 배율에서 갑자기 줄어들지 않게 한다.
+      zoom.set(clamp(zoom.get() * event.scaleChange, 1, Math.max(MAX_ZOOM, zoom.get())));
     });
 
   const twoFingerRotation = Gesture.Rotation()

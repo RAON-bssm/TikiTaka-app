@@ -31,6 +31,7 @@ const RATIO_ICON_CLASS: Record<CropRatio['label'], string> = {
   '3:4': 'h-[16px] w-[12px]',
   '1:1': 'h-[14px] w-[14px]',
   '4:3': 'h-[12px] w-[16px]',
+  자유: 'h-[14px] w-[14px] border-dashed',
 };
 
 const CORNER_OFFSET = -CORNER_WIDTH / 2;
@@ -75,11 +76,6 @@ const CORNER_STYLES: ViewStyle[] = [
   },
 ];
 
-const fitFrame = (bounds: Size, ratio: number): Size =>
-  bounds.width / bounds.height > ratio
-    ? { width: bounds.height * ratio, height: bounds.height }
-    : { width: bounds.width, height: bounds.width / ratio };
-
 export default function EditPhotoScreen() {
   const { uri } = useLocalSearchParams<{ uri?: string }>();
   const insets = useSafeAreaInsets();
@@ -93,10 +89,15 @@ export default function EditPhotoScreen() {
     width: area.width - FRAME_MARGIN * 2,
     height: area.height - FRAME_MARGIN * 2,
   };
-  const frame = bounds && fitFrame(bounds, ratio.value);
 
   const interaction = useInteraction();
-  const editor = usePhotoEditor({ uri, canvas: area, area: bounds, frame, interaction });
+  const editor = usePhotoEditor({
+    uri,
+    canvas: area,
+    area: bounds,
+    ratio: ratio.value,
+    interaction,
+  });
 
   const areaWidth = area?.width ?? 0;
   const areaHeight = area?.height ?? 0;
