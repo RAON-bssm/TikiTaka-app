@@ -5,7 +5,7 @@ import TextInput from '@/components/ui/input/TextInput';
 import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
 import { useMyBoard } from '@/hooks/post/useMyBoard';
-import { useUploadPost } from '@/hooks/post/useUploadPost';
+import { UploadConfirmationFailedError, useUploadPost } from '@/hooks/post/useUploadPost';
 import useImageRatio from '@/hooks/useImageRatio';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useRef, useState } from 'react';
@@ -24,8 +24,14 @@ export default function Upload() {
   const { data: myBoard, isLoading: isBoardLoading } = useMyBoard();
 
   const uploadingRef = useRef(false);
+  // 등록 여부 확인(getMyPosts)까지 실패해 진짜 상태를 모르는 경우, 중복 게시물을 막기 위해 재업로드를 금지한다.
+  const uploadBlockedRef = useRef(false);
 
   const handleUpload = () => {
+    if (uploadBlockedRef.current) {
+      showToast('등록 여부를 확인하지 못했어요. 보관함에서 확인해주세요.');
+      return;
+    }
     if (uploadingRef.current || isPending) return;
     if (!uri) {
       showToast('사진을 불러올 수 없어요.');
@@ -50,6 +56,11 @@ export default function Upload() {
           router.replace({ pathname: '/feed/[post_id]', params: { post_id: postId } });
         },
         onError: (error) => {
+          if (error instanceof UploadConfirmationFailedError) {
+            uploadBlockedRef.current = true;
+            showToast('등록 여부를 확인하지 못했어요. 보관함에서 확인해주세요.');
+            return;
+          }
           uploadingRef.current = false;
           showToast(getApiErrorMessage(error, '업로드에 실패했어요. 다시 시도해주세요.'));
         },
