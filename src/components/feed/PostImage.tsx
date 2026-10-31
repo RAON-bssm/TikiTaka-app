@@ -12,6 +12,7 @@ export default function PostImage({ uri }: Props) {
   return (
     <LoadingImage
       uri={isLoading ? undefined : (resolvedUri ?? undefined)}
+      cacheKey={uri}
       className="h-[320px] w-full rounded-lg"
     />
   );

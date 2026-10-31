@@ -9,6 +9,7 @@ interface Props {
   /** 입력값을 그대로 비교해야 할 때(닉네임 확인 등) 자동 대문자·자동 수정을 끈다. */
   autoCapitalize?: TextInputProps['autoCapitalize'];
   autoCorrect?: boolean;
+  returnKeyType?: TextInputProps['returnKeyType'];
 }
 
 export default function TextInput({
@@ -18,6 +19,7 @@ export default function TextInput({
   onChangeText,
   autoCapitalize,
   autoCorrect,
+  returnKeyType,
 }: Props) {
   return (
     <View className="flex flex-col gap-xs w-full">
@@ -32,6 +34,7 @@ export default function TextInput({
         placeholder={placeholder}
         autoCapitalize={autoCapitalize}
         autoCorrect={autoCorrect}
+        returnKeyType={returnKeyType}
         placeholderTextColor="#9DAABB"
         className="w-full p-md rounded-sm border border-gray-200 bg-white font-sans text-sm text-gray-800 focus:border-primary-500"
       />
