@@ -21,7 +21,7 @@ export default function BackButton({ link, title }: Props) {
   };
   return (
     <View className="flex flex-row items-center gap-sm">
-      <Pressable onPress={onPress}>
+      <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel="뒤로 가기">
         <ChevronLeftIcon width={24} height={24} color="#6E7D94" />
       </Pressable>
       <Typography variant="h3" className="text-gray-500">
