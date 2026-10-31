@@ -31,6 +31,8 @@ interface Props {
   likeCount?: number;
   liked?: boolean;
   menuItems?: MoreMenuItem[];
+  /** 심사 상태처럼 카드 위쪽에 짧게 붙일 표시. */
+  badge?: string;
 }
 
 export default function FeedCard({
@@ -43,6 +45,7 @@ export default function FeedCard({
   likeCount,
   liked,
   menuItems,
+  badge,
 }: Props) {
   // imageUrl은 이미지 key라 조회 URL로 변환해야 한다.
   const { uri: resolvedImageUri, isLoading: imageLoading } = useViewUrl(imageUrl);
@@ -63,7 +66,16 @@ export default function FeedCard({
             {author.name}
           </Typography>
         </View>
-        {menuItems?.length ? <MoreMenu items={menuItems} /> : null}
+        <View className="flex-row items-center gap-sm">
+          {badge ? (
+            <View className="rounded-full bg-primary-100 px-md py-xs">
+              <Typography variant="caption" className="text-primary-600">
+                {badge}
+              </Typography>
+            </View>
+          ) : null}
+          {menuItems?.length ? <MoreMenu items={menuItems} /> : null}
+        </View>
       </View>
 
       <LoadingImage

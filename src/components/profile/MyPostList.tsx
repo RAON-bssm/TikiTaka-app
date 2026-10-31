@@ -7,6 +7,7 @@ import PostDeleteDialog from '@/components/feed/PostDeleteDialog';
 import PostEditDialog, { type EditingPost } from '@/components/feed/PostEditDialog';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Typography from '@/components/ui/Typography';
+import { POST_REVIEW_NOTICE } from '@/constants/post';
 import { useMyPosts } from '@/hooks/post/useMyPosts';
 import { formatRelativeTime } from '@/hooks/useRelativeTime';
 import { useMyInfo } from '@/hooks/user/useMyInfo';
@@ -55,13 +56,19 @@ export default function MyPostList() {
           title={post.content}
           place={post.location}
           timeAgo={formatRelativeTime(post.created_at)}
-          likeCount={post.like_count}
+          // 심사가 끝나지 않은 글은 좋아요가 404, 수정이 409라 숨기고 점수 대신 상태를 붙인다.
+          likeCount={post.status === 'DONE' ? post.like_count : undefined}
           liked={post.liked_by_me}
+          badge={post.status === 'DONE' ? undefined : POST_REVIEW_NOTICE[post.status].label}
           menuItems={[
-            {
-              label: '수정하기',
-              onPress: () => setEditingPost({ postId: post.post_id, content: post.content }),
-            },
+            ...(post.status === 'DONE'
+              ? [
+                  {
+                    label: '수정하기',
+                    onPress: () => setEditingPost({ postId: post.post_id, content: post.content }),
+                  },
+                ]
+              : []),
             {
               label: '삭제하기',
               destructive: true,
