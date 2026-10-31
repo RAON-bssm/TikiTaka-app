@@ -1,10 +1,13 @@
 import type { PostStatus } from '@/types/post';
 
+interface PostReviewNotice {
+  label: string;
+  title: string;
+  description: string;
+}
+
 /** 심사가 끝나지 않았거나 통과하지 못한 글에 점수 대신 보여줄 안내. `label`은 목록 배지, 나머지는 상세 카드에 쓴다. */
-export const POST_REVIEW_NOTICE: Record<
-  Exclude<PostStatus, 'DONE'>,
-  { label: string; title: string; description: string }
-> = {
+const POST_REVIEW_NOTICE: Record<Exclude<PostStatus, 'DONE'>, PostReviewNotice> = {
   PENDING: {
     label: '심사 중',
     title: 'AI 심사 중',
@@ -26,3 +29,16 @@ export const POST_REVIEW_NOTICE: Record<
     description: '시즌이 종료되어 점수가 반영되지 않았어요.',
   },
 };
+
+const UNKNOWN_REVIEW_NOTICE: PostReviewNotice = {
+  label: '확인 불가',
+  title: '심사 상태 확인 불가',
+  description: '심사 상태를 확인하지 못했어요. 잠시 후 다시 확인해주세요.',
+};
+
+export function getPostReviewNotice(status: PostStatus): PostReviewNotice {
+  return (
+    (POST_REVIEW_NOTICE as Partial<Record<string, PostReviewNotice>>)[status] ??
+    UNKNOWN_REVIEW_NOTICE
+  );
+}

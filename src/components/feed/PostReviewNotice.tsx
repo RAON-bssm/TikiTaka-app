@@ -2,16 +2,16 @@ import { View } from 'react-native';
 
 import InfoIcon from '@/assets/icons/info.svg';
 import Typography from '@/components/ui/Typography';
-import { POST_REVIEW_NOTICE } from '@/constants/post';
+import { getPostReviewNotice } from '@/constants/post';
 import { palette } from '@/constants/colors';
 import type { PostStatus } from '@/types/post';
 
 interface Props {
-  status: Exclude<PostStatus, 'DONE'>;
+  status: PostStatus;
 }
 
 export default function PostReviewNotice({ status }: Props) {
-  const { title, description } = POST_REVIEW_NOTICE[status];
+  const { title, description } = getPostReviewNotice(status);
 
   return (
     <View className="flex-row items-start gap-md rounded-md border border-gray-100 bg-white p-lg">
