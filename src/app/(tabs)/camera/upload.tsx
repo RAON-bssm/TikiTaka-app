@@ -50,8 +50,12 @@ export default function Upload() {
     uploadPost(
       { fileUri: uri, boardId: myBoard.board_id, content },
       {
-        onSuccess: (postId) => {
-          showToast('게시물이 등록됐어요');
+        onSuccess: ({ postId, status }) => {
+          showToast(
+            status === 'PENDING'
+              ? '게시물이 등록됐어요. AI 심사 후 점수가 반영돼요'
+              : '게시물이 등록됐어요',
+          );
           router.dismissAll();
           router.replace({ pathname: '/feed/[post_id]', params: { post_id: postId } });
         },

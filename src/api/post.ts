@@ -13,6 +13,7 @@ import type {
   Post,
   PostDetail,
   PostListData,
+  PostStatus,
   UpdatePostRequest,
   UpdatePostResponse,
 } from '@/types/post';
@@ -21,6 +22,8 @@ import client from './client';
 // 원본 카메라 사진(수 MB)은 서버가 413으로 거부할 수 있어 축소·재압축해서 올린다.
 const UPLOAD_IMAGE_MAX_WIDTH = 1440;
 const UPLOAD_IMAGE_COMPRESS = 0.7;
+// 심사를 기다리지 않아도 사진 전송과 S3 업로드 시간은 남아, 느린 망에서는 기본 10초를 넘긴다.
+const CREATE_POST_TIMEOUT_MS = 30 * 1000;
 
 async function compressImageForUpload(uri: string): Promise<string> {
   const context = ImageManipulator.manipulate(uri);
@@ -58,12 +61,11 @@ export async function getPostDetail(postId: string): Promise<PostDetail> {
   return data.data;
 }
 
-/** 생성된 게시물의 post_id를 돌려준다. */
 export async function createPost({
   board_id,
   fileUri,
   content,
-}: CreatePostRequest): Promise<string> {
+}: CreatePostRequest): Promise<{ postId: string; status: PostStatus }> {
   const compressedUri = await compressImageForUpload(fileUri);
   const fileName = compressedUri.split('/').pop() ?? `photo-${Date.now()}.jpg`;
 
@@ -81,8 +83,9 @@ export async function createPost({
   // undefined로 기본값(application/json)을 해제해 RN이 boundary 포함 헤더를 만들게 한다.
   const { data } = await client.post<ApiResponse<CreatePostData>>(`/api/post`, formData, {
     headers: { 'Content-Type': undefined },
+    timeout: CREATE_POST_TIMEOUT_MS,
   });
-  return data.data.post_id;
+  return { postId: data.data.post_id, status: data.data.status };
 }
 
 export async function updatePost(postId: string, req: UpdatePostRequest): Promise<void> {
