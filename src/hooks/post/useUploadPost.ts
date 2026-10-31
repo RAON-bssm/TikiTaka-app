@@ -1,6 +1,6 @@
 import { createPost, getMyPosts } from '@/api/post';
 import { postKeys } from '@/api/queryKeys';
-import { invalidateReviewResult } from '@/hooks/post/invalidateReviewResult';
+import { invalidateScoreQueries } from '@/hooks/post/invalidateScoreQueries';
 import type { MyPost } from '@/types/post';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
@@ -64,8 +64,8 @@ export function useUploadPost() {
     },
     onSuccess: ({ status }) => {
       queryClient.invalidateQueries({ queryKey: postKeys.all });
-      // 동기 심사면 등록과 함께 동네·개인 점수와 포인트가 바뀐다. 비동기면 심사가 끝날 때 바뀐다(`invalidateReviewResult`).
-      if (status === 'DONE') invalidateReviewResult(queryClient);
+      // 동기 심사면 등록과 함께 동네·개인 점수와 포인트가 바뀐다. 비동기면 심사가 끝날 때 바뀌어 `useMyPosts`가 갱신한다.
+      if (status === 'DONE') invalidateScoreQueries(queryClient);
     },
   });
 }

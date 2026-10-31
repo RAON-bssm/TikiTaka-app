@@ -1,8 +1,8 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { hashKey, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { getMyPosts } from '@/api/post';
 import { postKeys } from '@/api/queryKeys';
-import { invalidateReviewResult } from '@/hooks/post/invalidateReviewResult';
+import { invalidateScoreQueries } from '@/hooks/post/invalidateScoreQueries';
 import useAppIsActive from '@/hooks/useAppIsActive';
 import type { MyPost } from '@/types/post';
 
@@ -29,11 +29,11 @@ export function useMyPosts() {
         (post) => pendingIds.has(post.post_id) && post.status !== 'PENDING',
       );
       if (reviewed.some((post) => post.status === 'DONE')) {
-        invalidateReviewResult(queryClient);
+        invalidateScoreQueries(queryClient);
         // 지금 받는 중인 이 목록(`mine`)까지 무효화하면 요청이 취소·재시작되며 같은 비교를 반복한다.
         queryClient.invalidateQueries({
           queryKey: postKeys.lists(),
-          predicate: (query) => query.queryKey[2] !== 'mine',
+          predicate: (query) => query.queryHash !== hashKey(postKeys.mine()),
         });
       }
       for (const post of reviewed) {
