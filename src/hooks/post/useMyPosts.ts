@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { getMyPosts } from '@/api/post';
 import { postKeys } from '@/api/queryKeys';
-import { invalidateReviewResult } from '@/hooks/post/usePostDetail';
+import { invalidateReviewResult } from '@/hooks/post/invalidateReviewResult';
 import useAppIsActive from '@/hooks/useAppIsActive';
 import type { MyPost } from '@/types/post';
 

@@ -1,6 +1,6 @@
 import { createPost, getMyPosts } from '@/api/post';
 import { postKeys } from '@/api/queryKeys';
-import { invalidateReviewResult } from '@/hooks/post/usePostDetail';
+import { invalidateReviewResult } from '@/hooks/post/invalidateReviewResult';
 import type { MyPost } from '@/types/post';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
