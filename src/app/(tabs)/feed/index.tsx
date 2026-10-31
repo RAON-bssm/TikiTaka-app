@@ -1,12 +1,11 @@
 import CurrentBattleCard from '@/components/feed/CurrentBattleCard';
-import PostList from '@/components/feed/PostList';
+import { PostFlatList } from '@/components/feed/PostList';
 import Header from '@/components/ui/Header';
 import { palette } from '@/constants/colors';
 import { useCurrentBattle } from '@/hooks/match/useCurrentBattle';
 import { useCurrentBoardPosts } from '@/hooks/post/useCurrentBoardPosts';
 import { useState } from 'react';
-import { RefreshControl } from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
+import { RefreshControl, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function FeedScreen() {
@@ -26,10 +25,14 @@ export default function FeedScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
-      <ScrollView
-        className="flex-1"
-        contentContainerClassName="gap-2xl px-xl pt-lg"
-        showsVerticalScrollIndicator={false}
+      <PostFlatList
+        state={posts}
+        header={
+          <View className="gap-2xl">
+            <Header />
+            <CurrentBattleCard state={battle} />
+          </View>
+        }
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
@@ -38,11 +41,7 @@ export default function FeedScreen() {
             colors={[palette.primary[600]]}
           />
         }
-      >
-        <Header />
-        <CurrentBattleCard state={battle} />
-        <PostList state={posts} />
-      </ScrollView>
+      />
     </SafeAreaView>
   );
 }

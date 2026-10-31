@@ -35,12 +35,11 @@ const TAB_CONFIG: Record<string, TabConfig> = {
 export default function AppBar({ state, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
 
-  // 카메라 스택의 index에서만 바텀바를 숨긴다. 하위 화면은 nested 라우트 이름이 잡혀 다시 노출된다.
   const focusedRoute = state.routes[state.index];
   const nestedRouteName = getFocusedRouteNameFromRoute(focusedRoute);
   if (
     focusedRoute?.name === 'camera' &&
-    (nestedRouteName === undefined || nestedRouteName === 'index')
+    (nestedRouteName === undefined || nestedRouteName === 'index' || nestedRouteName === 'edit')
   ) {
     return null;
   }

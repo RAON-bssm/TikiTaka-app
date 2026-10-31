@@ -68,6 +68,7 @@ export default function FeedCard({
 
       <LoadingImage
         uri={imageLoading ? undefined : resolvedImageUri}
+        cacheKey={imageUrl}
         className="h-[225px] w-full rounded-lg"
       />
 

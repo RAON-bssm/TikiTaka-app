@@ -12,13 +12,16 @@ export default function BackButton({ link, title }: Props) {
   const onPress = () => {
     if (link) {
       router.push(link);
-    } else {
+    } else if (router.canGoBack()) {
       router.back();
+    } else {
+      // 탭을 새로 열며 바로 들어온 화면은 스택에 이전 화면이 없어 back이 아무 일도 하지 않는다.
+      router.replace('/');
     }
   };
   return (
     <View className="flex flex-row items-center gap-sm">
-      <Pressable onPress={onPress}>
+      <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel="뒤로 가기">
         <ChevronLeftIcon width={24} height={24} color="#6E7D94" />
       </Pressable>
       <Typography variant="h3" className="text-gray-500">

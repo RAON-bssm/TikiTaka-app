@@ -1,5 +1,6 @@
-import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { router, useLocalSearchParams, useNavigation } from 'expo-router';
+import { CommonActions } from 'expo-router/build/react-navigation/routers';
+import { useEffect, useState } from 'react';
 import { RefreshControl, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -14,6 +15,7 @@ import PostEditDialog from '@/components/feed/PostEditDialog';
 import PostImage from '@/components/feed/PostImage';
 import PostTitleRow from '@/components/feed/PostTitleRow';
 import ReportDialog, { type ReportTarget } from '@/components/report/ReportDialog';
+import BackButton from '@/components/ui/BackButton';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Header from '@/components/ui/Header';
 import { palette } from '@/constants/colors';
@@ -21,7 +23,8 @@ import { usePostDetail } from '@/hooks/post/usePostDetail';
 import { useMyInfo } from '@/hooks/user/useMyInfo';
 
 export default function PostDetailScreen() {
-  const { post_id } = useLocalSearchParams<{ post_id: string }>();
+  const { post_id, from } = useLocalSearchParams<{ post_id: string; from?: 'upload' }>();
+  const navigation = useNavigation();
   const { data: post, isLoading, isError, refetch } = usePostDetail(post_id);
   const { data: myInfo } = useMyInfo();
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -29,6 +32,15 @@ export default function PostDetailScreen() {
   const [reportTarget, setReportTarget] = useState<ReportTarget>();
   const [blockTarget, setBlockTarget] = useState<{ userId: string; userName: string }>();
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  useEffect(() => {
+    if (from !== 'upload') return;
+    const state = navigation.getState();
+    if (!state || state.index !== 0) return;
+    navigation.dispatch(
+      CommonActions.reset({ ...state, index: 1, routes: [{ name: 'index' }, state.routes[0]] }),
+    );
+  }, [from, navigation]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -39,8 +51,10 @@ export default function PostDetailScreen() {
     }
   };
 
-  // 점수·코멘트는 확인을 눌러야 공개한다.
-  const [scoreRevealed, setScoreRevealed] = useState(false);
+  // 점수·코멘트는 확인을 눌러야 공개한다. 업로드 후 이동이 이 화면을 재사용하면 이전 게시물의
+  // 공개 상태가 남으므로, boolean이 아니라 공개한 게시물 id로 기억한다.
+  const [revealedPostId, setRevealedPostId] = useState<string>();
+  const scoreRevealed = revealedPostId === post_id;
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
@@ -58,6 +72,7 @@ export default function PostDetailScreen() {
         }
       >
         <Header />
+        <BackButton title="게시물" />
 
         {isLoading ? (
           <PostDetailSkeleton />
@@ -121,7 +136,7 @@ export default function PostDetailScreen() {
             {scoreRevealed ? (
               <AiScoreCard score={post.score} comment={post.ai_review} />
             ) : (
-              <AiScoreCheckCard onCheck={() => setScoreRevealed(true)} />
+              <AiScoreCheckCard onCheck={() => setRevealedPostId(post_id)} />
             )}
           </>
         )}
