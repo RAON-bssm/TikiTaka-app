@@ -7,11 +7,18 @@ import Typography from '@/components/ui/Typography';
 import { useMyBoard } from '@/hooks/post/useMyBoard';
 import { UploadConfirmationFailedError, useUploadPost } from '@/hooks/post/useUploadPost';
 import useImageRatio from '@/hooks/useImageRatio';
+import type { PostStatus } from '@/types/post';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useRef, useState } from 'react';
 import { Image, Keyboard, Pressable, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+const UPLOAD_SUCCESS_MESSAGE: Partial<Record<PostStatus, string>> = {
+  DONE: '게시물이 등록됐어요',
+  PENDING: '게시물이 등록됐어요. AI 심사 후 점수가 반영돼요',
+};
+const UPLOAD_UNSCORED_MESSAGE = '게시물이 등록됐지만 점수가 반영되지 않았어요';
 
 export default function Upload() {
   const { uri } = useLocalSearchParams<{ uri?: string }>();
@@ -51,11 +58,7 @@ export default function Upload() {
       { fileUri: uri, boardId: myBoard.board_id, content },
       {
         onSuccess: ({ postId, status }) => {
-          showToast(
-            status === 'PENDING'
-              ? '게시물이 등록됐어요. AI 심사 후 점수가 반영돼요'
-              : '게시물이 등록됐어요',
-          );
+          showToast(UPLOAD_SUCCESS_MESSAGE[status] ?? UPLOAD_UNSCORED_MESSAGE);
           router.dismissAll();
           router.replace({
             pathname: '/feed/[post_id]',
