@@ -3,10 +3,18 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getMyPosts } from '@/api/post';
 import { postKeys } from '@/api/queryKeys';
 import { invalidateReviewResult } from '@/hooks/post/usePostDetail';
+import useAppIsActive from '@/hooks/useAppIsActive';
 import type { MyPost } from '@/types/post';
 
+const REVIEW_POLL_INTERVAL_MS = 30 * 1000;
+
+/**
+ * 심사 결과로 바뀌는 점수·포인트·랭킹은 이 목록에서 PENDING이 끝난 글을 발견할 때 갱신된다.
+ * 그래서 심사 중인 글이 있으면, 앱이 앞에 있는 동안 이 목록을 주기적으로 다시 받는다.
+ */
 export function useMyPosts() {
   const queryClient = useQueryClient();
+  const isAppActive = useAppIsActive();
 
   return useQuery({
     queryKey: postKeys.mine(),
@@ -34,5 +42,9 @@ export function useMyPosts() {
 
       return posts;
     },
+    refetchInterval: (query) =>
+      isAppActive && query.state.data?.some((post) => post.status === 'PENDING')
+        ? REVIEW_POLL_INTERVAL_MS
+        : false,
   });
 }
