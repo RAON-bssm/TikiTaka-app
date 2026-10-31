@@ -1,5 +1,6 @@
 import { createPost, getMyPosts } from '@/api/post';
-import { postKeys, rankingKeys, userKeys } from '@/api/queryKeys';
+import { postKeys } from '@/api/queryKeys';
+import { invalidateScoreQueries } from '@/hooks/post/invalidateScoreQueries';
 import type { MyPost } from '@/types/post';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
@@ -58,14 +59,13 @@ export function useUploadPost() {
 
         // 확인 결과 실제로 등록 안 됨 → 원래 에러로 재시도를 허용한다.
         if (!matched) throw error;
-        return matched.post_id;
+        return { postId: matched.post_id, status: matched.status };
       }
     },
-    onSuccess: () => {
-      // 게시물 작성·삭제는 서버에서 동네·개인 점수를 바꾸므로 랭킹·유저 키도 함께 무효화한다.
+    onSuccess: ({ status }) => {
       queryClient.invalidateQueries({ queryKey: postKeys.all });
-      queryClient.invalidateQueries({ queryKey: rankingKeys.all });
-      queryClient.invalidateQueries({ queryKey: userKeys.all });
+      // 동기 심사면 등록과 함께 동네·개인 점수와 포인트가 바뀐다. 비동기면 심사가 끝날 때 바뀌어 `useMyPosts`가 갱신한다.
+      if (status === 'DONE') invalidateScoreQueries(queryClient);
     },
   });
 }
