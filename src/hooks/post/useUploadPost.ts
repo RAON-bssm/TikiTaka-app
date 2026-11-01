@@ -1,6 +1,7 @@
 import { createPost, getMyPosts } from '@/api/post';
 import { postKeys } from '@/api/queryKeys';
 import { invalidateScoreQueries } from '@/hooks/post/invalidateScoreQueries';
+import { trackPendingUpload } from '@/hooks/post/useMyPosts';
 import type { MyPost } from '@/types/post';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
@@ -62,7 +63,8 @@ export function useUploadPost() {
         return { postId: matched.post_id, status: matched.status };
       }
     },
-    onSuccess: ({ status }) => {
+    onSuccess: ({ postId, status }) => {
+      if (status === 'PENDING') trackPendingUpload(postId);
       queryClient.invalidateQueries({ queryKey: postKeys.all });
       // 동기 심사면 등록과 함께 동네·개인 점수와 포인트가 바뀐다. 비동기면 심사가 끝날 때 바뀌어 `useMyPosts`가 갱신한다.
       if (status === 'DONE') invalidateScoreQueries(queryClient);
