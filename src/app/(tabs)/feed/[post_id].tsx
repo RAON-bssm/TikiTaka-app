@@ -13,6 +13,7 @@ import PostDeleteDialog from '@/components/feed/PostDeleteDialog';
 import PostDetailSkeleton from '@/components/feed/PostDetailSkeleton';
 import PostEditDialog from '@/components/feed/PostEditDialog';
 import PostImage from '@/components/feed/PostImage';
+import PostReviewNotice from '@/components/feed/PostReviewNotice';
 import PostTitleRow from '@/components/feed/PostTitleRow';
 import ReportDialog, { type ReportTarget } from '@/components/report/ReportDialog';
 import BackButton from '@/components/ui/BackButton';
@@ -91,7 +92,10 @@ export default function PostDetailScreen() {
                     ? undefined
                     : post.user_id === myInfo.user_id
                       ? [
-                          { label: '수정하기', onPress: () => setIsEditOpen(true) },
+                          // 심사 중인 글은 수정이 409이고, 심사를 못 통과한 글은 고쳐도 다시 심사되지 않는다.
+                          ...(post.status === 'DONE'
+                            ? [{ label: '수정하기', onPress: () => setIsEditOpen(true) }]
+                            : []),
                           {
                             label: '삭제하기',
                             destructive: true,
@@ -129,12 +133,14 @@ export default function PostDetailScreen() {
             <PostTitleRow
               postId={post_id}
               title={post.content}
-              likeCount={post.like_count}
+              likeCount={post.status === 'DONE' ? post.like_count : undefined}
               liked={post.liked_by_me}
             />
 
-            {scoreRevealed ? (
-              <AiScoreCard score={post.score} comment={post.ai_review} />
+            {post.status !== 'DONE' ? (
+              <PostReviewNotice status={post.status} />
+            ) : scoreRevealed ? (
+              <AiScoreCard score={post.score ?? 0} comment={post.ai_review ?? ''} />
             ) : (
               <AiScoreCheckCard onCheck={() => setRevealedPostId(post_id)} />
             )}

@@ -2,8 +2,11 @@ import { Tabs } from 'expo-router';
 import { Platform } from 'react-native';
 
 import AppBar from '@/components/ui/AppBar';
+import { useMyPosts } from '@/hooks/post/useMyPosts';
 
 export default function TabsLayout() {
+  useMyPosts();
+
   return (
     <Tabs tabBar={(props) => <AppBar {...props} />} screenOptions={{ headerShown: false }}>
       <Tabs.Screen name="index" options={{ title: '홈' }} />
