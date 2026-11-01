@@ -9,6 +9,16 @@ import type { MyPost } from '@/types/post';
 const REVIEW_POLL_INTERVAL_MS = 30 * 1000;
 
 /**
+ * 방금 올린 글은 이전 목록 캐시에 없어서, 다시 받은 첫 목록에서 이미 심사가 끝나 있으면 완료 전환을 놓친다.
+ * 업로드 응답이 `PENDING`이면 여기에 담아 두고, 목록에 처음 나타날 때 PENDING이었던 글로 취급한다.
+ */
+const uploadedPendingIds = new Set<string>();
+
+export function trackPendingUpload(postId: string) {
+  uploadedPendingIds.add(postId);
+}
+
+/**
  * 심사 결과로 바뀌는 점수·포인트·랭킹은 이 목록에서 PENDING이 끝난 글을 발견할 때 갱신된다.
  * 그래서 심사 중인 글이 있으면, 앱이 앞에 있는 동안 이 목록을 주기적으로 다시 받는다.
  */
@@ -25,6 +35,9 @@ export function useMyPosts() {
       const pendingIds = new Set(
         previous?.filter((post) => post.status === 'PENDING').map((post) => post.post_id),
       );
+      for (const post of posts) {
+        if (uploadedPendingIds.delete(post.post_id)) pendingIds.add(post.post_id);
+      }
       const reviewed = posts.filter(
         (post) => pendingIds.has(post.post_id) && post.status !== 'PENDING',
       );
