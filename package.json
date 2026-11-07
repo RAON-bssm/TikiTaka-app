@@ -20,6 +20,7 @@
     "expo-image-manipulator": "~56.0.26",
     "expo-linear-gradient": "~56.0.4",
     "expo-linking": "~56.0.19",
+    "expo-location": "~56.0.26",
     "expo-router": "~56.2.22",
     "expo-secure-store": "~56.0.4",
     "expo-splash-screen": "~56.0.16",
@@ -73,7 +74,8 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "prepare": "husky",
-    "generate:part-meta": "node scripts/generate-part-meta.mjs"
+    "generate:part-meta": "node scripts/generate-part-meta.mjs",
+    "generate:territory-dongs": "node scripts/generate-territory-dongs.mjs"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

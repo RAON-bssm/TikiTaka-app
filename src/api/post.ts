@@ -1,5 +1,3 @@
-import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
-
 import type { ApiResponse } from '@/types/api';
 import type {
   Board,
@@ -18,27 +16,10 @@ import type {
   UpdatePostResponse,
 } from '@/types/post';
 import client from './client';
+import { compressImageForUpload } from './uploadImage';
 
-// 원본 카메라 사진(수 MB)은 서버가 413으로 거부할 수 있어 축소·재압축해서 올린다.
-const UPLOAD_IMAGE_MAX_WIDTH = 1440;
-const UPLOAD_IMAGE_COMPRESS = 0.7;
 // 심사를 기다리지 않아도 사진 전송과 S3 업로드 시간은 남아, 느린 망에서는 기본 10초를 넘긴다.
 const CREATE_POST_TIMEOUT_MS = 30 * 1000;
-
-async function compressImageForUpload(uri: string): Promise<string> {
-  const context = ImageManipulator.manipulate(uri);
-  context.resize({ width: UPLOAD_IMAGE_MAX_WIDTH });
-  const image = await context.renderAsync();
-  const result = await image.saveAsync({
-    compress: UPLOAD_IMAGE_COMPRESS,
-    format: SaveFormat.JPEG,
-  });
-
-  context.release();
-  image.release();
-
-  return result.uri;
-}
 
 export async function getBoards(): Promise<Board[]> {
   const { data } = await client.get<ApiResponse<BoardListData>>(`/api/board`);

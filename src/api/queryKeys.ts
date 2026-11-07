@@ -73,6 +73,21 @@ export const blockKeys = {
   list: () => [...blockKeys.all, 'list'] as const,
 };
 
+export const territoryKeys = {
+  all: ['territory'] as const,
+  cycle: () => [...territoryKeys.all, 'cycle'] as const,
+  preferences: () => [...territoryKeys.all, 'preferences'] as const,
+  representatives: (locationId?: number) =>
+    [...territoryKeys.all, 'representatives', locationId] as const,
+  /** 부산 전체 땅. 지도는 구를 나누지 않고 한 번에 칠한다. */
+  list: () => [...territoryKeys.all, 'list'] as const,
+  detail: (dongCode: number) => [...territoryKeys.all, 'detail', dongCode] as const,
+  developments: (dongCode: number) => [...territoryKeys.all, 'developments', dongCode] as const,
+  challenge: (challengeId: string) => [...territoryKeys.all, 'challenge', challengeId] as const,
+  mine: () => [...territoryKeys.all, 'mine'] as const,
+  teamRanking: () => [...territoryKeys.all, 'teamRanking'] as const,
+};
+
 export const equipmentKeys = {
   all: ['equipment'] as const,
   current: () => [...equipmentKeys.all, 'current'] as const,
