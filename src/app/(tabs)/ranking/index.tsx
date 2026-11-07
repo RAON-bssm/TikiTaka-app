@@ -12,11 +12,13 @@ import StageBadge from '@/components/ranking/StageBadge';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Skeleton from '@/components/ui/feedback/Skeleton';
 import Header from '@/components/ui/Header';
+import Typography from '@/components/ui/Typography';
 import { RANKING_TABS, type RankingTab } from '@/constants/ranking';
 import { useCurrentBattles } from '@/hooks/match/useCurrentBattles';
 import { useMatchStage } from '@/hooks/match/useMatchStage';
 import { useLocationRanking } from '@/hooks/ranking/useLocationRanking';
 import { useUserRanking } from '@/hooks/ranking/useUserRanking';
+import { formatTimeLeft, useTerritoryPhase } from '@/hooks/territory/useTerritoryPhase';
 import { useMyInfo } from '@/hooks/user/useMyInfo';
 
 const EMPTY_DESCRIPTION: Record<RankingTab, string> = {
@@ -33,6 +35,18 @@ export default function RankingScreen() {
   const matchStage = useMatchStage();
   const locationRanking = useLocationRanking();
   const userRanking = useUserRanking();
+  const territory = useTerritoryPhase();
+  // 땅따먹기 사이클에서는 선발전(4일차) 끝에 랭킹이 멈추고, 그 순위로 동 대표를 뽑는다.
+  const freezeNotice =
+    territory.phase === 'selection'
+      ? `동 대표 선발전 중이에요. ${
+          formatTimeLeft(territory.data?.ranking_freeze_at, territory.now) ?? '곧'
+        } 뒤 랭킹이 멈추고 이 순위로 대표를 뽑아요.`
+      : territory.phase === 'awaitingPick' ||
+          territory.phase === 'setup' ||
+          territory.phase === 'battle'
+        ? '랭킹이 멈췄어요. 땅따먹기가 끝날 때까지 순위가 바뀌지 않아요.'
+        : undefined;
 
   const rankingQuery = tab === '동네랭킹' ? locationRanking : userRanking;
   const districts = locationRanking.data?.location_ranking ?? [];
@@ -73,6 +87,13 @@ export default function RankingScreen() {
           ) : (
             <StageBadge stage={matchStage.data} />
           ))}
+        {freezeNotice && (
+          <View className="rounded-sm bg-secondary-100 px-md py-sm">
+            <Typography variant="caption" className="text-secondary-500">
+              {freezeNotice}
+            </Typography>
+          </View>
+        )}
         {!isRankingEmpty && tab === '개인랭킹' && userRanking.isSuccess && (
           <MyRankingRow myRanking={userRanking.data.my_ranking} />
         )}
