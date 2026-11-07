@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { unblockUser } from '@/api/block';
-import { blockKeys, postKeys, rankingKeys } from '@/api/queryKeys';
+import { blockKeys, postKeys, rankingKeys, territoryKeys } from '@/api/queryKeys';
 
 /** 해제하면 그 유저 콘텐츠가 다시 보여야 하므로 차단과 같은 키들을 무효화한다. */
 export function useUnblockUser() {
@@ -13,6 +13,7 @@ export function useUnblockUser() {
       queryClient.invalidateQueries({ queryKey: blockKeys.all });
       queryClient.invalidateQueries({ queryKey: postKeys.all });
       queryClient.invalidateQueries({ queryKey: rankingKeys.all });
+      queryClient.invalidateQueries({ queryKey: territoryKeys.all });
     },
   });
 }

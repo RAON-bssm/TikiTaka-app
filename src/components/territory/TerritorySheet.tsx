@@ -1,13 +1,19 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { View, type LayoutChangeEvent } from 'react-native';
 
 import ArrowForwardIcon from '@/assets/icons/arrow-forward-ios.svg';
+import { getApiErrorMessage } from '@/api/error';
+import BlockUserDialog from '@/components/block/BlockUserDialog';
 import UserCharacter from '@/components/character/UserCharacter';
+import ReportDialog, { type ReportTarget } from '@/components/report/ReportDialog';
 import Button from '@/components/ui/Button';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Skeleton from '@/components/ui/feedback/Skeleton';
+import MoreMenu from '@/components/ui/MoreMenu';
+import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
 import { palette } from '@/constants/colors';
+import { useDevelopTerritory } from '@/hooks/territory/useDevelopTerritory';
 import { useTeamName } from '@/hooks/territory/useTeamName';
 import type { TerritoryPhase } from '@/hooks/territory/useTerritoryPhase';
 import { useTerritory } from '@/hooks/territory/useTerritory';
@@ -19,6 +25,8 @@ interface Props {
   myPoint: number | undefined;
   /** 내 본진 구 이름. 사진은 이 구 안에서만 찍을 수 있다. */
   myGu: string | undefined;
+  /** 내 팀(본진 구) id. 우리 팀 땅이면 도전 대신 개발한다. */
+  myLocationId: number | undefined;
   ownedCount: number;
   maxOwned: number | undefined;
   onChallenge: (territory: TerritoryDetail) => void;
@@ -36,6 +44,7 @@ export default function TerritorySheet({
   phase,
   myPoint,
   myGu,
+  myLocationId,
   ownedCount,
   maxOwned,
   onChallenge,
@@ -67,6 +76,7 @@ export default function TerritorySheet({
           phase={phase}
           myPoint={myPoint}
           myGu={myGu}
+          myLocationId={myLocationId}
           ownedCount={ownedCount}
           maxOwned={maxOwned}
           onChallenge={onChallenge}
@@ -84,17 +94,50 @@ function TerritoryContent({
   phase,
   myPoint,
   myGu,
+  myLocationId,
   ownedCount,
   maxOwned,
   onChallenge,
   onInsufficientPoint,
 }: ContentProps) {
   const teamName = useTeamName();
+  const { showToast } = useToast();
+  const { mutate: develop, isPending: isDeveloping } = useDevelopTerritory();
+  const [reportTarget, setReportTarget] = useState<ReportTarget>();
+  const [blockTarget, setBlockTarget] = useState<{ userId: string; userName: string }>();
   const guName = teamName(territory.location_id);
   const ownerTeam = teamName(territory.owner_location_id);
   const hasOwner = territory.owner_id !== undefined;
 
   const action = getAction({ territory, phase, myPoint, ownedCount, maxOwned });
+  // 개발은 남의 땅이 아니라 우리 팀 동료의 땅에 포인트를 넣어 팀 땅값을 올린다.
+  const canDevelop =
+    phase === 'battle' &&
+    hasOwner &&
+    !territory.mine &&
+    myLocationId !== undefined &&
+    territory.owner_location_id === myLocationId;
+  const developProbability = Math.round(territory.development_probability * 100);
+  const lacksDevelopPoint = myPoint !== undefined && myPoint < territory.development_cost;
+
+  const handleDevelop = () => {
+    if (isDeveloping) return;
+    develop(territory.dong_code, {
+      onSuccess: (result) => {
+        const remaining = `오늘 ${result.remaining_today}번 더 할 수 있어요`;
+        showToast(
+          result.success
+            ? `개발 성공! 땅값이 ${result.team_gain.toLocaleString()} 올랐어요 · ${remaining}`
+            : `개발에 실패했어요 · ${remaining}`,
+        );
+      },
+      onError: (error) => showToast(getApiErrorMessage(error, '개발하지 못했어요')),
+    });
+  };
+
+  const ownerId = territory.owner_id;
+  const ownerName = territory.owner_name;
+  const canReport = !!ownerId && !!ownerName && !territory.mine && !territory.blocked;
 
   return (
     <>
@@ -107,6 +150,22 @@ function TerritoryContent({
         </View>
         {hasOwner && !territory.blocked && territory.owner_id && (
           <UserCharacter userId={territory.owner_id} size={56} />
+        )}
+        {canReport && (
+          <MoreMenu
+            items={[
+              {
+                label: '신고하기',
+                onPress: () =>
+                  setReportTarget({ type: 'user', userId: ownerId, userName: ownerName }),
+              },
+              {
+                label: '차단하기',
+                destructive: true,
+                onPress: () => setBlockTarget({ userId: ownerId, userName: ownerName }),
+              },
+            ]}
+          />
         )}
       </View>
 
@@ -142,15 +201,37 @@ function TerritoryContent({
             {myGu ? ` · ${myGu} 안에서 찍은 사진만 인정돼요` : ''}
           </Typography>
         )}
-        <Button
-          content={action.label}
-          disabled={action.kind === 'disabled'}
-          onclick={() => {
-            if (action.kind === 'challenge') onChallenge(territory);
-            if (action.kind === 'insufficient') onInsufficientPoint(territory);
-          }}
-        />
+        {canDevelop ? (
+          <>
+            <Typography variant="caption" className="text-center text-gray-400">
+              {`개발비 ${territory.development_cost.toLocaleString()} P · 성공 확률 ${developProbability}% · 실패해도 개발비는 돌려받지 못해요`}
+            </Typography>
+            <Button
+              content={
+                isDeveloping
+                  ? '개발하는 중...'
+                  : lacksDevelopPoint
+                    ? '포인트가 부족해요'
+                    : '개발해서 팀 땅값 올리기'
+              }
+              disabled={isDeveloping || lacksDevelopPoint}
+              onclick={handleDevelop}
+            />
+          </>
+        ) : (
+          <Button
+            content={action.label}
+            disabled={action.kind === 'disabled'}
+            onclick={() => {
+              if (action.kind === 'challenge') onChallenge(territory);
+              if (action.kind === 'insufficient') onInsufficientPoint(territory);
+            }}
+          />
+        )}
       </View>
+
+      <ReportDialog target={reportTarget} onClose={() => setReportTarget(undefined)} />
+      <BlockUserDialog target={blockTarget} onClose={() => setBlockTarget(undefined)} />
     </>
   );
 }
