@@ -25,6 +25,18 @@ export function parseKst(value: DateTimeString): number {
   return new Date(`${value}+09:00`).getTime();
 }
 
+const HOUR_MS = 60 * 60 * 1000;
+const DAY_MS = 24 * HOUR_MS;
+
+/** 하루 넘게 남았으면 `D-n`, 그 안이면 `n시간 남음`. 이미 지났으면 undefined. */
+export function formatTimeLeft(value: DateTimeString | undefined, now: number): string | undefined {
+  if (!value) return undefined;
+  const left = parseKst(value) - now;
+  if (left <= 0) return undefined;
+  if (left >= DAY_MS) return `D-${Math.ceil(left / DAY_MS)}`;
+  return `${Math.max(1, Math.ceil(left / HOUR_MS))}시간 남음`;
+}
+
 export function getTerritoryPhase(cycle: CurrentCycle, now: number): TerritoryPhase {
   if (cycle.round_type === 'BATTLE') return 'battle';
   if (cycle.round_type === 'NONE') return 'none';
@@ -80,5 +92,6 @@ export function useTerritoryPhase() {
     ...query,
     phase: cycle ? getTerritoryPhase(cycle, now) : undefined,
     myLocationId: cycle?.my_location_id,
+    now,
   };
 }

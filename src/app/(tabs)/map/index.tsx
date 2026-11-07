@@ -2,12 +2,14 @@ import { isAxiosError } from 'axios';
 import { router, useIsFocused } from 'expo-router';
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { BackHandler, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import WebView from 'react-native-webview';
 
 import { getApiErrorMessage } from '@/api/error';
 import ChatPanel from '@/components/chat/ChatPanel';
 import MapLoading from '@/components/map/MapLoading';
 import InsufficientPointDialog from '@/components/territory/InsufficientPointDialog';
+import TerritoryPhaseCard from '@/components/territory/TerritoryPhaseCard';
 import TerritorySheet from '@/components/territory/TerritorySheet';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import { useToast } from '@/components/ui/Toast';
@@ -18,7 +20,9 @@ import { useChatbots } from '@/hooks/chat/useChatbots';
 import { useChatHistory } from '@/hooks/chat/useChatHistory';
 import { useSendChat } from '@/hooks/chat/useSendChat';
 import { useMapBridge } from '@/hooks/map/useMapBridge';
+import { useDongPreferences } from '@/hooks/territory/useDongPreferences';
 import { useMyTerritories } from '@/hooks/territory/useMyTerritories';
+import { useTeamRanking } from '@/hooks/territory/useTeamRanking';
 import { useTerritories } from '@/hooks/territory/useTerritories';
 import { useTerritoryPhase } from '@/hooks/territory/useTerritoryPhase';
 import { useMyInfo } from '@/hooks/user/useMyInfo';
@@ -77,11 +81,21 @@ export default function MapScreen() {
   /** 답이 늦게 왔을 때 그 챗봇과 아직 대화 중인지 판단한다. state는 응답 시점의 클로저에서 옛 값이라 ref로 둔다. */
   const openChatbotId = useRef<string>(undefined);
 
-  const { phase, myLocationId } = useTerritoryPhase();
+  const insets = useSafeAreaInsets();
+  const { phase, myLocationId, now, data: cycle } = useTerritoryPhase();
   // 땅은 대표 선발 때 생긴다. 그 전에는 목록이 비어 있고 상세는 404라 부르지 않는다.
   const hasTerritories = phase === 'setup' || phase === 'battle';
   const territories = useTerritories({ enabled: hasTerritories });
   const myTerritories = useMyTerritories({ enabled: hasTerritories });
+  const preferences = useDongPreferences({
+    enabled: phase === 'selection' || phase === 'awaitingPick',
+  });
+  const teamRanking = useTeamRanking({ enabled: phase === 'battle' });
+  const myTeamRank = teamRanking.data?.teams.find(
+    (team) => team.location_id === myLocationId,
+  )?.rank;
+  const unsetCount =
+    myTerritories.data?.territories.filter((territory) => !territory.defense_photo).length ?? 0;
   const mapTerritories: MapTerritory[] = hasTerritories
     ? (territories.data?.territories.map((territory) => toMapTerritory(territory, myLocationId)) ??
       [])
@@ -266,6 +280,21 @@ export default function MapScreen() {
         status === 'loading' && <MapLoading />
       )}
 
+      {status === 'loaded' && cycle && phase && phase !== 'none' && (
+        // 지도는 상태바 밑까지 채우므로 카드만 safe area만큼 내린다.
+        <View className="absolute left-0 right-0 px-lg" style={{ top: insets.top + 12 }}>
+          <TerritoryPhaseCard
+            phase={phase}
+            cycle={cycle}
+            now={now}
+            preferenceCount={preferences.data?.length ?? 0}
+            unsetCount={unsetCount}
+            myTeamRank={myTeamRank}
+            onPress={() => router.push('/map/territory')}
+          />
+        </View>
+      )}
+
       {status === 'loaded' && selectedDong !== undefined && !chatbot && (
         <TerritorySheet
           key={selectedDong}
@@ -273,6 +302,7 @@ export default function MapScreen() {
           phase={phase}
           myPoint={myInfo.data?.point}
           myGu={mainLocation?.location_name}
+          myLocationId={myLocationId}
           ownedCount={myTerritories.data?.territories.length ?? 0}
           maxOwned={myTerritories.data?.max_owned}
           onChallenge={(territory) =>

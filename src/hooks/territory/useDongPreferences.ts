@@ -3,10 +3,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { territoryKeys } from '@/api/queryKeys';
 import { getDongPreferences, updateDongPreferences } from '@/api/territory';
 
-export function useDongPreferences() {
+export function useDongPreferences({ enabled = true }: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: territoryKeys.preferences(),
     queryFn: getDongPreferences,
+    enabled,
   });
 }
 
