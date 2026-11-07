@@ -1,0 +1,138 @@
+import { isAxiosError } from 'axios';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useEffect, useRef } from 'react';
+import { BackHandler, Image, ScrollView, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { getApiErrorMessage } from '@/api/error';
+import Topic from '@/components/camera/Topic';
+import BackButton from '@/components/ui/BackButton';
+import Button from '@/components/ui/Button';
+import { useToast } from '@/components/ui/Toast';
+import Typography from '@/components/ui/Typography';
+import useImageRatio from '@/hooks/useImageRatio';
+import { useRetakeDefensePhoto } from '@/hooks/territory/useRetakeDefensePhoto';
+import { useSetupTerritory } from '@/hooks/territory/useSetupTerritory';
+import { useTerritory } from '@/hooks/territory/useTerritory';
+import type { DefensePhotoResult } from '@/types/territory';
+
+type Params = {
+  dongCode: string;
+  purpose: 'setup' | 'retake';
+  uri: string;
+  adjective?: string;
+  noun?: string;
+  criteria?: string;
+};
+
+export default function DefenseConfirmScreen() {
+  const params = useLocalSearchParams<Params>();
+  const dongCode = Number(params.dongCode);
+  const isSetup = params.purpose === 'setup';
+  const photoRatio = useImageRatio(params.uri);
+  const { showToast } = useToast();
+
+  const { data: territory } = useTerritory(dongCode);
+  const setup = useSetupTerritory();
+  const retake = useRetakeDefensePhoto();
+  const isPending = setup.isPending || retake.isPending;
+  const submittingRef = useRef(false);
+
+  const pendingMission =
+    territory?.pending_adjective && territory.pending_noun
+      ? `${territory.pending_adjective} ${territory.pending_noun}`
+      : undefined;
+  const mission = isSetup
+    ? [params.adjective, params.noun].filter(Boolean).join(' ')
+    : (pendingMission ?? territory?.mission ?? '');
+
+  // 채점 중에 나가면 결과를 놓치므로 뒤로 가기를 막는다.
+  useEffect(() => {
+    if (!isPending) return;
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => true);
+    return () => subscription.remove();
+  }, [isPending]);
+
+  const handleSuccess = (result: DefensePhotoResult) => {
+    router.dismissTo({ pathname: '/map/territory/manage', params: { dongCode: params.dongCode } });
+    router.push({
+      pathname: '/map/territory/defense-result',
+      params: {
+        dongCode: params.dongCode,
+        purpose: params.purpose,
+        uri: params.uri,
+        mission: result.mission,
+        score: String(result.defense_score),
+        previousScore: territory && !isSetup ? String(territory.defense_score) : '',
+        review: result.review ?? '',
+      },
+    });
+  };
+
+  const handleError = (error: unknown) => {
+    submittingRef.current = false;
+    showToast(getApiErrorMessage(error, '방어 사진을 올리지 못했어요. 다시 시도해주세요.'));
+    // 이미 쓴 사진은 다시 낼 수 없어 새로 찍게 한다.
+    if (isAxiosError(error) && error.response?.status === 400) router.back();
+  };
+
+  const handleSubmit = () => {
+    if (submittingRef.current || !params.uri) return;
+    if (isSetup && (!params.adjective || !params.noun)) return;
+    submittingRef.current = true;
+
+    if (isSetup && params.adjective && params.noun) {
+      setup.mutate(
+        {
+          dongCode,
+          adjective: params.adjective,
+          noun: params.noun,
+          ...(params.criteria && { scoringCriteria: params.criteria }),
+          imageUri: params.uri,
+        },
+        { onSuccess: handleSuccess, onError: handleError },
+      );
+      return;
+    }
+    retake.mutate(
+      { dongCode, imageUri: params.uri },
+      { onSuccess: handleSuccess, onError: handleError },
+    );
+  };
+
+  return (
+    <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
+      <ScrollView contentContainerClassName="grow gap-2xl px-xl py-2xl">
+        <BackButton title={territory?.dong_name ?? (isSetup ? '땅 세팅' : '방어 사진')} />
+        <Topic title={mission} />
+
+        {params.uri && photoRatio ? (
+          <Image
+            source={{ uri: params.uri }}
+            resizeMode="cover"
+            className="w-full overflow-hidden rounded-md bg-gray-100"
+            style={{ aspectRatio: photoRatio }}
+          />
+        ) : (
+          <View className="h-[232px] w-full overflow-hidden rounded-md bg-gray-100" />
+        )}
+
+        <View className="gap-xs">
+          <Typography variant="caption" className="text-center text-gray-400">
+            {isSetup
+              ? 'AI가 채점한 점수가 이 땅의 방어 점수가 돼요'
+              : '점수가 지금보다 낮아도 방어 점수가 그대로 바뀌어요'}
+          </Typography>
+          <Button
+            content={isPending ? 'AI가 사진을 채점하고 있어요...' : '이 사진으로 정하기'}
+            disabled={isSetup && !mission}
+            onclick={handleSubmit}
+          />
+          {!isPending && (
+            <Button content="다시 찍기" variant="light" onclick={() => router.back()} />
+          )}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}

@@ -46,14 +46,38 @@ function locationMessage(status: HomeGuLocationStatus, gu: string): string | und
   }
 }
 
+/**
+ * 땅따먹기 사진은 모두 본진 구 안에서 찍어야 해서, 도전·땅 세팅·방어 사진 재촬영이 이 카메라를 같이 쓴다.
+ * `purpose`에 따라 다음 화면만 달라진다.
+ */
+type Params = {
+  dongCode: string;
+  purpose?: 'challenge' | 'setup' | 'retake';
+  /** 땅 세팅은 미션과 사진을 한 요청으로 보내 입력값을 다음 화면까지 넘긴다. */
+  adjective?: string;
+  noun?: string;
+  criteria?: string;
+};
+
 export default function ChallengeCameraScreen() {
-  const { dongCode: dongCodeParam } = useLocalSearchParams<{ dongCode: string }>();
-  const dongCode = Number(dongCodeParam);
+  const params = useLocalSearchParams<Params>();
+  const dongCode = Number(params.dongCode);
+  const purpose = params.purpose ?? 'challenge';
   const insets = useSafeAreaInsets();
   const isFocused = useIsFocused();
   const { showToast } = useToast();
 
   const { data: territory } = useTerritory(dongCode);
+  const pendingMission =
+    territory?.pending_adjective && territory.pending_noun
+      ? `${territory.pending_adjective} ${territory.pending_noun}`
+      : undefined;
+  const missionTitle =
+    purpose === 'setup'
+      ? [params.adjective, params.noun].filter(Boolean).join(' ')
+      : purpose === 'retake'
+        ? (pendingMission ?? territory?.mission ?? territory?.dong_name ?? '')
+        : (territory?.mission ?? territory?.dong_name ?? '');
   const { data: myInfo } = useMyInfo();
   const homeGu = myInfo?.main_location.location_name ?? '본진';
   const location = useHomeGuLocation(myInfo?.main_location.location_name, isFocused);
@@ -96,15 +120,29 @@ export default function ChallengeCameraScreen() {
       const croppedUri = previewAspect
         ? await cropToPreview(uri, previewAspect).catch(() => uri)
         : uri;
-      router.push({
-        pathname: '/map/challenge-confirm',
-        params: {
-          dongCode: String(dongCode),
-          uri: croppedUri,
-          lat: String(latitude),
-          lng: String(longitude),
-        },
-      });
+      if (purpose === 'challenge') {
+        router.push({
+          pathname: '/map/challenge-confirm',
+          params: {
+            dongCode: String(dongCode),
+            uri: croppedUri,
+            lat: String(latitude),
+            lng: String(longitude),
+          },
+        });
+      } else {
+        router.push({
+          pathname: '/map/territory/defense-confirm',
+          params: {
+            dongCode: String(dongCode),
+            purpose,
+            uri: croppedUri,
+            ...(params.adjective && { adjective: params.adjective }),
+            ...(params.noun && { noun: params.noun }),
+            ...(params.criteria && { criteria: params.criteria }),
+          },
+        });
+      }
     } catch {
       showToast('사진을 찍지 못했어요. 다시 시도해주세요.');
     } finally {
@@ -140,7 +178,7 @@ export default function ChallengeCameraScreen() {
         />
       </GestureDetector>
 
-      <MissionTitle title={territory?.mission ?? territory?.dong_name ?? ''} />
+      <MissionTitle title={missionTitle} />
       <CameraBackButton />
 
       <View className="absolute left-0 right-0 bottom-0" style={{ paddingBottom: insets.bottom }}>
