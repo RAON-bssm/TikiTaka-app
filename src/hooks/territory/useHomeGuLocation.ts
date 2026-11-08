@@ -1,8 +1,12 @@
 import * as Location from 'expo-location';
 import { useEffect, useRef, useState } from 'react';
 
+import { useTerritoryMockSettings } from '@/api/mock/territoryMockStore';
 import { isInTeamArea } from '@/constants/territory/region';
 import type { Location as TeamLocation } from '@/types/location';
+
+/** 개발용 목 모드에서 위치 판정을 건너뛸 때 기록하는 좌표(부산시청) */
+const MOCK_POSITION = { latitude: 35.1798, longitude: 129.075 };
 
 export type HomeGuLocationStatus = 'checking' | 'inside' | 'outside' | 'denied' | 'unavailable';
 
@@ -16,7 +20,12 @@ interface Position {
  * 걸어서 구 경계를 넘는 경우를 위해 켜져 있는 동안 위치를 계속 본다.
  */
 export function useHomeGuLocation(team: TeamLocation | undefined, active: boolean) {
-  const [permission, requestPermission] = Location.useForegroundPermissions();
+  const mock = useTerritoryMockSettings();
+  // 개발용 목 모드에서 위치 판정을 건너뛰면 위치 API를 아예 부르지 않는다.
+  // 권한 문구가 없는 예전 빌드에서도 권한 조회만으로 앱이 멈추지 않게 하기 위해서다.
+  const skip = __DEV__ && mock.enabled && mock.skipLocation;
+  const watching = active && !skip;
+  const [permission, requestPermission] = Location.useForegroundPermissions({ get: !skip });
   const [position, setPosition] = useState<Position>();
   const [failed, setFailed] = useState(false);
   const granted = permission?.granted === true;
@@ -25,13 +34,13 @@ export function useHomeGuLocation(team: TeamLocation | undefined, active: boolea
 
   // 아직 한 번도 묻지 않았으면 거부로 보여 주지 말고 카메라를 열 때 바로 묻는다.
   useEffect(() => {
-    if (!active || !undetermined || asked.current) return;
+    if (!watching || !undetermined || asked.current) return;
     asked.current = true;
     void requestPermission();
-  }, [active, undetermined, requestPermission]);
+  }, [watching, undetermined, requestPermission]);
 
   useEffect(() => {
-    if (!active || !granted) return;
+    if (!watching || !granted) return;
     let subscription: Location.LocationSubscription | undefined;
     let cancelled = false;
 
@@ -56,7 +65,7 @@ export function useHomeGuLocation(team: TeamLocation | undefined, active: boolea
       cancelled = true;
       subscription?.remove();
     };
-  }, [active, granted]);
+  }, [watching, granted]);
 
   const status: HomeGuLocationStatus =
     !permission || undetermined
@@ -70,6 +79,15 @@ export function useHomeGuLocation(team: TeamLocation | undefined, active: boolea
             : isInTeamArea(team, position)
               ? 'inside'
               : 'outside';
+
+  if (skip) {
+    return {
+      status: 'inside' as HomeGuLocationStatus,
+      position: position ?? MOCK_POSITION,
+      canAskAgain: true,
+      requestPermission,
+    };
+  }
 
   return {
     status,
