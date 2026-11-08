@@ -63,7 +63,10 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "땅따먹기 사진을 본진 구 안에서 찍었는지 확인하기 위해 위치 권한이 필요합니다."
+          "locationWhenInUsePermission": "땅따먹기 사진을 본진 구 안에서 찍었는지 확인하기 위해 위치 권한이 필요합니다.",
+          "locationAlwaysAndWhenInUsePermission": false,
+          "locationAlwaysPermission": false,
+          "motionUsagePermission": false
         }
       ],
       "./plugins/withReleaseSigning",
