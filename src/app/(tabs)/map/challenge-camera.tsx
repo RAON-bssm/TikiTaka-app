@@ -1,4 +1,3 @@
-import { Asset } from 'expo-asset';
 import { router, useIsFocused, useLocalSearchParams } from 'expo-router';
 import { useRef, useState } from 'react';
 import { type LayoutChangeEvent, Linking, Pressable, StyleSheet, View } from 'react-native';
@@ -31,14 +30,11 @@ import { type HomeGuLocationStatus, useHomeGuLocation } from '@/hooks/territory/
 import { useMyTeam } from '@/hooks/territory/useMyTeam';
 import { useTerritory } from '@/hooks/territory/useTerritory';
 
-/** 개발용 목 모드에서 카메라가 없는 시뮬레이터 대신 쓰는 사진 */
-const SAMPLE_PHOTO = require('@/assets/images/topic-bg.webp');
-
-async function loadSamplePhoto(): Promise<string> {
-  const [asset] = await Asset.loadAsync(SAMPLE_PHOTO);
-  // 업로드 전 압축(ImageManipulator)이 로컬 파일을 읽으므로 내려받은 경로를 쓴다.
-  return asset.localUri ?? asset.uri;
-}
+// 개발용 샘플 사진은 릴리즈 번들에 넣지 않도록 __DEV__ 분기 안에서만 불러온다.
+const loadSamplePhoto: (() => Promise<string>) | undefined = __DEV__
+  ? // eslint-disable-next-line @typescript-eslint/no-require-imports -- 정적 import는 __DEV__와 무관하게 번들된다
+    require('@/api/mock/samplePhoto').loadSamplePhoto
+  : undefined;
 
 const LENS_FILTER: DeviceFilter = {
   physicalDevices: ['ultra-wide-angle', 'wide-angle', 'telephoto'],
@@ -169,7 +165,7 @@ export default function ChallengeCameraScreen() {
     });
 
   // 시뮬레이터에는 카메라가 없어 개발용 목 모드에서는 샘플 사진으로 다음 화면을 볼 수 있게 한다.
-  if (__DEV__ && mock.enabled && (!hasPermission || device == null)) {
+  if (loadSamplePhoto && mock.enabled && (!hasPermission || device == null)) {
     return (
       <View className="flex-1 justify-center gap-lg bg-black px-xl">
         <MissionTitle title={missionTitle} />
