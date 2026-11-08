@@ -13,6 +13,7 @@ import Skeleton from '@/components/ui/feedback/Skeleton';
 import TextInput from '@/components/ui/input/TextInput';
 import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
+import { ADJECTIVE_SUGGESTIONS, NOUN_SUGGESTIONS } from '@/constants/territory/mission';
 import { useTerritory } from '@/hooks/territory/useTerritory';
 import { useUpdateMission } from '@/hooks/territory/useUpdateMission';
 import type { TerritoryDetail } from '@/types/territory';
@@ -147,29 +148,48 @@ function MissionForm({ territory, mode }: { territory: TerritoryDetail; mode: Mo
 
         <Topic title={preview || '미션 미리보기'} />
 
-        <View className="gap-lg">
-          <TextInput
-            label="형용사"
-            placeholder="예: 노을 지는"
-            value={adjective}
-            onChangeText={setAdjective}
-            returnKeyType="next"
-          />
-          <TextInput
-            label="명사"
-            placeholder="예: 바다"
-            value={noun}
-            onChangeText={setNoun}
-            returnKeyType="next"
-          />
-          <TextInput
-            label="채점 기준 (선택)"
-            placeholder="예: 하늘이 주황빛이고 수평선이 보여야 해요"
-            value={criteria}
-            onChangeText={setCriteria}
-            returnKeyType="done"
-          />
+        <View className="gap-sm">
+          <View className="flex-row items-end gap-sm">
+            <View className="flex-1">
+              <TextInput
+                label="형용사"
+                placeholder="노을 지는"
+                value={adjective}
+                onChangeText={setAdjective}
+                returnKeyType="next"
+              />
+            </View>
+            <Typography variant="h2" className="pb-md text-gray-300">
+              +
+            </Typography>
+            <View className="flex-1">
+              <TextInput
+                label="명사"
+                placeholder="바다"
+                value={noun}
+                onChangeText={setNoun}
+                returnKeyType="next"
+              />
+            </View>
+          </View>
+          <View className="flex-row gap-sm">
+            <Suggestions
+              words={ADJECTIVE_SUGGESTIONS}
+              selected={adjective}
+              onSelect={setAdjective}
+            />
+            <View className="w-[16px]" />
+            <Suggestions words={NOUN_SUGGESTIONS} selected={noun} onSelect={setNoun} />
+          </View>
         </View>
+
+        <TextInput
+          label="채점 기준 (선택)"
+          placeholder="예: 하늘이 주황빛이고 수평선이 보여야 해요"
+          value={criteria}
+          onChangeText={setCriteria}
+          returnKeyType="done"
+        />
 
         <View className="grow" />
         <Button
@@ -179,5 +199,36 @@ function MissionForm({ territory, mode }: { territory: TerritoryDetail; mode: Mo
         />
       </Pressable>
     </KeyboardAwareScrollView>
+  );
+}
+
+function Suggestions({
+  words,
+  selected,
+  onSelect,
+}: {
+  words: readonly string[];
+  selected: string;
+  onSelect: (word: string) => void;
+}) {
+  return (
+    <View className="flex-1 flex-row flex-wrap gap-xs">
+      {words.map((word) => {
+        const active = word === selected.trim();
+        return (
+          <Pressable
+            key={word}
+            onPress={() => onSelect(word)}
+            className={`rounded-full border px-sm py-xs ${
+              active ? 'border-primary-600 bg-primary-100' : 'border-gray-200 bg-white'
+            }`}
+          >
+            <Typography variant="caption" className={active ? 'text-primary-600' : 'text-gray-500'}>
+              {word}
+            </Typography>
+          </Pressable>
+        );
+      })}
+    </View>
   );
 }

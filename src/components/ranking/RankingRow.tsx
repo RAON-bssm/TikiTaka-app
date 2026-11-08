@@ -4,10 +4,14 @@ import UserCharacter from '@/components/character/UserCharacter';
 import Ranking from '@/components/ui/Ranking';
 import { formatLocationName } from '@/constants/location';
 import type { LocationRanking, UserRanking } from '@/types/ranking';
+import type { TeamRank } from '@/types/territory';
+import TeamRankingRow from './TeamRankingRow';
 
 export type RankingRowItem =
   | { kind: 'district'; key: string; data: LocationRanking }
-  | { kind: 'person'; key: string; data: UserRanking };
+  | { kind: 'person'; key: string; data: UserRanking }
+  /** 땅따먹기 팀(구)의 땅값 합계 순위 */
+  | { kind: 'team'; key: string; data: TeamRank; mine: boolean };
 
 interface Props {
   row: RankingRowItem;
@@ -16,6 +20,10 @@ interface Props {
 }
 
 export default function RankingRow({ row, myUserId, onBlock }: Props) {
+  if (row.kind === 'team') {
+    return <TeamRankingRow team={row.data} mine={row.mine} />;
+  }
+
   if (row.kind === 'district') {
     const item = row.data;
     return (

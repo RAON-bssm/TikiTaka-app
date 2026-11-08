@@ -4,15 +4,15 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { getApiErrorMessage } from '@/api/error';
-import ArrowUpIcon from '@/assets/icons/arrow-up.svg';
-import CloseIcon from '@/assets/icons/close.svg';
+import RadioSelectedIcon from '@/assets/icons/radio-selected.svg';
+import RadioIcon from '@/assets/icons/radio.svg';
 import BackButton from '@/components/ui/BackButton';
 import Button from '@/components/ui/Button';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Skeleton from '@/components/ui/feedback/Skeleton';
+import TextInput from '@/components/ui/input/TextInput';
 import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
-import { palette } from '@/constants/colors';
 import { findDong, getDongsInTeam } from '@/constants/territory/region';
 import { useDongPreferences, useUpdateDongPreferences } from '@/hooks/territory/useDongPreferences';
 import { useMyTeam } from '@/hooks/territory/useMyTeam';
@@ -63,7 +63,10 @@ function PreferenceForm({ team, initialCodes }: { team: Location; initialCodes: 
   const { showToast } = useToast();
   const { mutate: save, isPending } = useUpdateDongPreferences();
   const [codes, setCodes] = useState(initialCodes);
+  const [query, setQuery] = useState('');
   const dongs = getDongsInTeam(team);
+  const keyword = query.trim();
+  const visibleDongs = keyword ? dongs.filter((dong) => dong.name.includes(keyword)) : dongs;
   const changed = codes.join() !== initialCodes.join();
 
   const toggle = (code: number) => {
@@ -78,7 +81,8 @@ function PreferenceForm({ team, initialCodes }: { team: Location; initialCodes: 
     setCodes([...codes, code]);
   };
 
-  const moveUp = (index: number) => {
+  /** 길게 누르면 한 칸 앞 지망과 자리를 바꾼다. */
+  const moveForward = (index: number) => {
     if (index === 0) return;
     const next = [...codes];
     [next[index - 1], next[index]] = [next[index], next[index - 1]];
@@ -98,97 +102,93 @@ function PreferenceForm({ team, initialCodes }: { team: Location; initialCodes: 
 
   return (
     <>
-      <ScrollView contentContainerClassName="gap-2xl px-xl pb-2xl pt-2xl">
+      <ScrollView
+        contentContainerClassName="gap-2xl px-xl pb-2xl pt-2xl"
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+      >
         <View className="gap-sm">
           <Typography variant="h1" className="text-gray-800">
-            {`${gu}에서 대표가 되고 싶은\n동을 골라 주세요`}
+            {`${gu}에서 대표가 되고 싶은 동`}
           </Typography>
           <Typography variant="body3" className="text-gray-400">
-            포인트 순위가 높은 사람부터 1지망 → 2지망 → 3지망 순서로 배정돼요. 원하는 동이 모두
-            찼거나 고르지 않으면 남은 동 중에서 무작위로 정해져요.
+            포인트 순위가 높은 사람부터 1지망 → 2지망 → 3지망 순서로 배정돼요. 고르지 않으면 남은 동
+            중에서 무작위로 정해져요.
           </Typography>
         </View>
 
         <View className="gap-sm">
+          <View className="flex-row gap-sm">
+            {Array.from({ length: MAX_PREFERENCES }, (_, index) => (
+              <Slot
+                key={index}
+                priority={index + 1}
+                code={codes[index]}
+                onRemove={toggle}
+                onMoveForward={() => moveForward(index)}
+              />
+            ))}
+          </View>
           <View className="flex-row items-center justify-between">
-            <Typography variant="h3" className="text-gray-700">
-              {`내 희망 동 ${codes.length}/${MAX_PREFERENCES}`}
+            <Typography variant="caption" className="text-gray-400">
+              눌러서 빼기 · 길게 눌러 한 칸 앞으로
             </Typography>
             {codes.length > 0 && (
               <Pressable onPress={() => setCodes([])} hitSlop={8}>
-                <Typography variant="body3" className="text-gray-400">
+                <Typography variant="caption" className="text-gray-500 underline">
                   전체 삭제
                 </Typography>
               </Pressable>
             )}
           </View>
-          {Array.from({ length: MAX_PREFERENCES }, (_, index) => {
-            const code = codes[index];
-            const dong = code === undefined ? undefined : findDong(code);
-            return (
-              <View
-                key={index}
-                className={`flex-row items-center gap-md rounded-sm border px-lg py-md ${
-                  dong ? 'border-primary-300 bg-white' : 'border-gray-200 bg-gray-100'
-                }`}
-              >
-                <Typography variant="h4" className={dong ? 'text-primary-600' : 'text-gray-400'}>
-                  {`${index + 1}지망`}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  className={`flex-1 ${dong ? 'text-gray-700' : 'text-gray-400'}`}
-                >
-                  {dong?.name ?? '아래에서 동을 골라 주세요'}
-                </Typography>
-                {dong && index > 0 && (
-                  <Pressable
-                    onPress={() => moveUp(index)}
-                    hitSlop={8}
-                    accessibilityLabel={`${dong.name} 순위 올리기`}
-                  >
-                    <ArrowUpIcon width={20} height={20} color={palette.gray[500]} />
-                  </Pressable>
-                )}
-                {dong && (
-                  <Pressable
-                    onPress={() => toggle(dong.code)}
-                    hitSlop={8}
-                    accessibilityLabel={`${dong.name} 빼기`}
-                  >
-                    <CloseIcon width={20} height={20} />
-                  </Pressable>
-                )}
-              </View>
-            );
-          })}
         </View>
 
-        <View className="gap-sm">
-          <Typography variant="h3" className="text-gray-700">
-            {`${gu}의 동 ${dongs.length}곳`}
-          </Typography>
-          <View className="flex-row flex-wrap gap-sm">
-            {dongs.map((dong) => {
-              const priority = codes.indexOf(dong.code);
-              const selected = priority >= 0;
-              return (
-                <Pressable
-                  key={dong.code}
-                  onPress={() => toggle(dong.code)}
-                  className={`rounded-full border px-md py-sm ${
-                    selected ? 'border-primary-600 bg-primary-100' : 'border-gray-200 bg-white'
-                  }`}
-                >
-                  <Typography
-                    variant={selected ? 'h4' : 'body3'}
-                    className={selected ? 'text-primary-600' : 'text-gray-600'}
+        <View className="gap-md">
+          <TextInput
+            placeholder={`${gu}의 동 이름 검색`}
+            value={query}
+            onChangeText={setQuery}
+            returnKeyType="search"
+          />
+          <View className="overflow-hidden rounded-md border border-gray-200 bg-white">
+            {visibleDongs.length === 0 ? (
+              <Typography variant="body3" className="p-lg text-center text-gray-400">
+                {`'${keyword}'와 맞는 동이 없어요`}
+              </Typography>
+            ) : (
+              visibleDongs.map((dong, index) => {
+                const priority = codes.indexOf(dong.code);
+                const selected = priority >= 0;
+                return (
+                  <Pressable
+                    key={dong.code}
+                    onPress={() => toggle(dong.code)}
+                    className={`flex-row items-center justify-between px-lg py-md active:bg-gray-50 ${
+                      index > 0 ? 'border-t border-gray-100' : ''
+                    }`}
                   >
-                    {selected ? `${priority + 1} · ${dong.name}` : dong.name}
-                  </Typography>
-                </Pressable>
-              );
-            })}
+                    <Typography
+                      variant={selected ? 'h4' : 'body2'}
+                      className={selected ? 'text-gray-800' : 'text-gray-600'}
+                    >
+                      {dong.name}
+                    </Typography>
+                    <View className="flex-row items-center gap-sm">
+                      {selected && (
+                        <Typography variant="caption" className="text-primary-600">
+                          {`${priority + 1}지망`}
+                        </Typography>
+                      )}
+                      {selected ? (
+                        <RadioSelectedIcon width={22} height={22} />
+                      ) : (
+                        <RadioIcon width={22} height={22} />
+                      )}
+                    </View>
+                  </Pressable>
+                );
+              })
+            )}
           </View>
         </View>
       </ScrollView>
@@ -201,5 +201,50 @@ function PreferenceForm({ team, initialCodes }: { team: Location; initialCodes: 
         />
       </View>
     </>
+  );
+}
+
+function Slot({
+  priority,
+  code,
+  onRemove,
+  onMoveForward,
+}: {
+  priority: number;
+  code: number | undefined;
+  onRemove: (code: number) => void;
+  onMoveForward: () => void;
+}) {
+  const dong = code === undefined ? undefined : findDong(code);
+
+  if (!dong) {
+    return (
+      <View className="h-[84px] flex-1 items-center justify-center gap-xs rounded-md border border-dashed border-gray-300 bg-white">
+        <Typography variant="h2" className="text-gray-300">
+          +
+        </Typography>
+        <Typography variant="caption" className="text-gray-400">
+          {`${priority}지망`}
+        </Typography>
+      </View>
+    );
+  }
+
+  return (
+    <Pressable
+      onPress={() => onRemove(dong.code)}
+      onLongPress={onMoveForward}
+      accessibilityLabel={`${priority}지망 ${dong.name}, 눌러서 빼기`}
+      className="h-[84px] flex-1 items-center justify-center gap-xs rounded-md border border-primary-300 bg-primary-100 px-xs active:opacity-80"
+    >
+      <View className="h-[20px] w-[20px] items-center justify-center rounded-full bg-primary-600">
+        <Typography variant="caption" className="text-white">
+          {priority}
+        </Typography>
+      </View>
+      <Typography variant="h4" className="text-center text-gray-800" numberOfLines={1}>
+        {dong.name}
+      </Typography>
+    </Pressable>
   );
 }

@@ -41,6 +41,13 @@ export default function SettingsScreen() {
             onPress={() => WebBrowser.openBrowserAsync(TERMS_OF_SERVICE_URL)}
           />
           <NavRow title="로그아웃" onPress={() => setIsLogoutOpen(true)} />
+          {__DEV__ && (
+            <NavRow
+              title="땅따먹기 미리보기 (개발용)"
+              description="목 데이터로 새 땅따먹기 화면을 직접 조작해요"
+              onPress={() => router.push('/profile/dev-territory')}
+            />
+          )}
         </View>
 
         {profile ? (

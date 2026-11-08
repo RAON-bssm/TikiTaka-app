@@ -1,6 +1,7 @@
 import { FlatList, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import UserCharacter from '@/components/character/UserCharacter';
 import BackButton from '@/components/ui/BackButton';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Skeleton from '@/components/ui/feedback/Skeleton';
@@ -44,10 +45,9 @@ export default function RepresentativesScreen() {
   );
 
   const empty = isLoading ? (
-    <View className="gap-sm">
-      <Skeleton className="h-[64px] w-full rounded-md" />
-      <Skeleton className="h-[64px] w-full rounded-md" />
-      <Skeleton className="h-[64px] w-full rounded-md" />
+    <View className="flex-row gap-sm">
+      <Skeleton className="h-[176px] flex-1 rounded-md" />
+      <Skeleton className="h-[176px] flex-1 rounded-md" />
     </View>
   ) : isError || !data ? (
     <ErrorRetry message="선발 결과를 불러오지 못했어요." onRetry={() => void refetch()} />
@@ -61,14 +61,22 @@ export default function RepresentativesScreen() {
     </View>
   );
 
+  const list = data?.representatives ?? [];
+  // 2열이라 개수가 홀수면 마지막 카드가 혼자 줄을 채우지 않게 빈 칸을 하나 둔다.
+  const cells: (Representative | null)[] = list.length % 2 === 1 ? [...list, null] : list;
+
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
       <FlatList
-        data={data?.representatives ?? []}
-        keyExtractor={(item) => `${item.dong_code}-${item.user_id}`}
-        renderItem={({ item }) => <RepresentativeRow representative={item} />}
+        data={cells}
+        numColumns={2}
+        keyExtractor={(item) => (item ? `${item.dong_code}-${item.user_id}` : 'empty')}
+        renderItem={({ item }) =>
+          item ? <RepresentativeCard representative={item} /> : <View className="flex-1" />
+        }
         ListHeaderComponent={header}
         ListEmptyComponent={empty}
+        columnWrapperClassName="gap-sm"
         ItemSeparatorComponent={() => <View className="h-sm" />}
         contentContainerClassName="px-xl pb-3xl pt-2xl"
       />
@@ -76,30 +84,46 @@ export default function RepresentativesScreen() {
   );
 }
 
-function RepresentativeRow({ representative }: { representative: Representative }) {
+function RepresentativeCard({ representative }: { representative: Representative }) {
   const { mine } = representative;
   return (
     <View
-      className={`flex-row items-center gap-md rounded-md border p-lg ${
+      className={`flex-1 items-center gap-sm rounded-md border px-md pb-lg pt-md ${
         mine ? 'border-primary-300 bg-primary-100' : 'border-gray-200 bg-white'
       }`}
     >
-      <Typography variant="h3" className="w-[32px] text-gray-400">
-        {representative.rank}
-      </Typography>
-      <View className="flex-1 gap-xs">
-        <Typography variant="h3" className={mine ? 'text-primary-700' : 'text-gray-700'}>
-          {representative.dong_name}
-        </Typography>
-        <Typography variant="body3" className="text-gray-500">
-          {mine ? `${representative.user_name} (나)` : representative.user_name}
-        </Typography>
-      </View>
-      <View className="items-end gap-xs">
+      <View className="w-full flex-row items-center justify-between">
         <Typography variant="caption" className="text-gray-400">
-          {ASSIGNED_LABEL[representative.assigned_by]}
+          {`#${representative.rank}`}
         </Typography>
-        <Typography variant="body3" className="text-gray-600">
+        <View className={`rounded-full px-sm py-xs ${mine ? 'bg-white' : 'bg-gray-100'}`}>
+          <Typography variant="caption" className={mine ? 'text-primary-600' : 'text-gray-500'}>
+            {ASSIGNED_LABEL[representative.assigned_by]}
+          </Typography>
+        </View>
+      </View>
+      <Typography
+        variant="h3"
+        className={mine ? 'text-primary-700' : 'text-gray-800'}
+        numberOfLines={1}
+      >
+        {representative.dong_name}
+      </Typography>
+      <UserCharacter userId={representative.user_id} size={64} />
+      <View className="items-center gap-xs">
+        <View className="flex-row items-center gap-xs">
+          <Typography variant="body3" className="text-gray-700" numberOfLines={1}>
+            {representative.user_name}
+          </Typography>
+          {mine && (
+            <View className="rounded-full bg-primary-600 px-sm">
+              <Typography variant="caption" className="text-white">
+                나
+              </Typography>
+            </View>
+          )}
+        </View>
+        <Typography variant="caption" className="text-gray-400">
           {`${representative.score.toLocaleString()}점`}
         </Typography>
       </View>

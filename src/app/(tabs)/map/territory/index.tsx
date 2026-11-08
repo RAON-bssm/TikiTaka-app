@@ -1,6 +1,6 @@
-import { router } from 'expo-router';
+import { router, type Href } from 'expo-router';
 import type { ReactNode } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import ChevronRightIcon from '@/assets/icons/chevron-right.svg';
@@ -14,33 +14,63 @@ import { palette } from '@/constants/colors';
 import { useDongPreferences } from '@/hooks/territory/useDongPreferences';
 import { useMyTerritories } from '@/hooks/territory/useMyTerritories';
 import { useTeamName } from '@/hooks/territory/useTeamName';
-import { useTeamRanking } from '@/hooks/territory/useTeamRanking';
 import {
   describeTimeLeft,
   type TerritoryPhase,
   useTerritoryPhase,
 } from '@/hooks/territory/useTerritoryPhase';
-import type { MyTerritory, TeamRank } from '@/types/territory';
+import type { CurrentCycle, DongPreference, MyTerritory } from '@/types/territory';
 
-const STEPS: { phases: TerritoryPhase[]; label: string }[] = [
-  { phases: ['selection'], label: '대표 선발전' },
-  { phases: ['awaitingPick'], label: '대표 발표' },
-  { phases: ['setup'], label: '땅 세팅' },
-  { phases: ['battle'], label: '땅따먹기' },
+type ActivePhase = Exclude<TerritoryPhase, 'none'>;
+
+const STEPS: { phase: ActivePhase; label: string }[] = [
+  { phase: 'selection', label: '선발' },
+  { phase: 'awaitingPick', label: '발표' },
+  { phase: 'setup', label: '세팅' },
+  { phase: 'battle', label: '땅따먹기' },
 ];
 
+const PHASE_TITLE: Record<ActivePhase, string> = {
+  selection: '대표 선발전',
+  awaitingPick: '대표 발표 대기',
+  setup: '땅 세팅 기간',
+  battle: '땅따먹기',
+};
+
+function countdown(phase: ActivePhase, cycle: CurrentCycle, now: number): string {
+  switch (phase) {
+    case 'selection':
+      return describeTimeLeft(
+        cycle.ranking_freeze_at,
+        now,
+        (left) => `랭킹 마감까지 ${left}`,
+        '곧 랭킹이 멈춰요',
+      );
+    case 'awaitingPick':
+      return '랭킹이 멈췄어요. 곧 동 대표가 발표돼요';
+    case 'setup':
+      return describeTimeLeft(
+        cycle.battle_started_at,
+        now,
+        (left) => `땅따먹기 시작까지 ${left}`,
+        '곧 땅따먹기가 시작돼요',
+      );
+    case 'battle':
+      return describeTimeLeft(
+        cycle.battle_ended_at,
+        now,
+        (left) => `끝나기까지 ${left}`,
+        '곧 땅따먹기가 끝나요',
+      );
+  }
+}
+
 export default function TerritoryHubScreen() {
-  const {
-    phase,
-    myLocationId,
-    now,
-    data: cycle,
-    isLoading,
-    isError,
-    refetch,
-  } = useTerritoryPhase();
+  const { phase, now, data: cycle, isLoading, isError, refetch } = useTerritoryPhase();
   const isSelecting = phase === 'selection' || phase === 'awaitingPick';
   const hasTerritories = phase === 'setup' || phase === 'battle';
+  const preferences = useDongPreferences({ enabled: isSelecting });
+  const myTerritories = useMyTerritories({ enabled: hasTerritories });
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
@@ -49,8 +79,8 @@ export default function TerritoryHubScreen() {
 
         {isLoading ? (
           <View className="gap-lg">
-            <Skeleton className="h-[64px] w-full rounded-md" />
-            <Skeleton className="h-[160px] w-full rounded-md" />
+            <Skeleton className="h-[96px] w-full rounded-md" />
+            <Skeleton className="h-[140px] w-full rounded-md" />
           </View>
         ) : isError || !cycle || !phase ? (
           <ErrorRetry message="땅따먹기 정보를 불러오지 못했어요." onRetry={() => void refetch()} />
@@ -65,51 +95,39 @@ export default function TerritoryHubScreen() {
           </View>
         ) : (
           <>
-            <StepBar phase={phase} />
+            <Hero phase={phase} cycle={cycle} now={now} />
 
-            {phase === 'selection' && (
-              <Notice>
-                {`포인트 순위가 높은 순서로 희망 동의 대표가 돼요. ${describeTimeLeft(
-                  cycle.ranking_freeze_at,
-                  now,
-                  (left) => `${left} 뒤 랭킹이 멈추고 대표를 뽑아요.`,
-                  '곧 랭킹이 멈추고 대표를 뽑아요.',
-                )}`}
-              </Notice>
-            )}
-            {phase === 'awaitingPick' && (
-              <Notice>랭킹이 멈췄어요. 곧 이 순위로 동 대표가 발표돼요.</Notice>
-            )}
-            {phase === 'setup' && (
-              <Notice>
-                {`대표가 된 땅의 미션을 정하고 방어 사진을 찍어 두세요. ${describeTimeLeft(
-                  cycle.battle_started_at,
-                  now,
-                  (left) => `땅따먹기 시작까지 ${left} 남았어요.`,
-                  '곧 땅따먹기가 시작돼요.',
-                )}`}
-              </Notice>
-            )}
-            {phase === 'battle' && (
-              <Notice>
-                {`본진 구 안에서 미션 사진을 찍어 다른 팀 땅을 빼앗고, 우리 팀 땅은 개발해서 땅값을 올려요. ${describeTimeLeft(
-                  cycle.battle_ended_at,
-                  now,
-                  (left) => `끝나기까지 ${left} 남았어요.`,
-                  '곧 땅따먹기가 끝나요.',
-                )}`}
-              </Notice>
-            )}
+            <TodoCard
+              phase={phase}
+              preferences={preferences.data}
+              myTerritories={myTerritories.data?.territories}
+              loading={isSelecting ? preferences.isLoading : myTerritories.isLoading}
+            />
 
-            {isSelecting && <PreferenceSection />}
-            {hasTerritories && <MyTerritorySection phase={phase} />}
-            {phase === 'battle' && <TeamRankingSection myLocationId={myLocationId} />}
             {hasTerritories && (
-              <NavRow
-                title="동 대표 선발 결과"
-                description="우리 구의 동마다 누가 대표가 됐는지 봐요"
-                onPress={() => router.push('/map/territory/representatives')}
-              />
+              <>
+                <MyTerritorySection
+                  territories={myTerritories.data?.territories}
+                  maxOwned={myTerritories.data?.max_owned}
+                  isLoading={myTerritories.isLoading}
+                  isError={myTerritories.isError}
+                  onRetry={() => void myTerritories.refetch()}
+                />
+                <View className="gap-sm">
+                  <NavRow
+                    title="동 대표 선발 결과"
+                    description="우리 구의 동마다 누가 대표가 됐는지 봐요"
+                    onPress={() => router.push('/map/territory/representatives')}
+                  />
+                  {phase === 'battle' && (
+                    <NavRow
+                      title="팀 순위"
+                      description="랭킹 탭에서 구별 땅값 순위를 봐요"
+                      onPress={() => router.push({ pathname: '/ranking', params: { tab: 'team' } })}
+                    />
+                  )}
+                </View>
+              </>
             )}
           </>
         )}
@@ -118,128 +136,245 @@ export default function TerritoryHubScreen() {
   );
 }
 
-function StepBar({ phase }: { phase: TerritoryPhase }) {
-  const current = STEPS.findIndex((step) => step.phases.includes(phase));
+function Hero({ phase, cycle, now }: { phase: ActivePhase; cycle: CurrentCycle; now: number }) {
+  const current = STEPS.findIndex((step) => step.phase === phase);
+
   return (
-    <View className="flex-row gap-xs">
-      {STEPS.map((step, index) => (
-        <View key={step.label} className="flex-1 gap-xs">
-          <View
-            className={`h-[4px] rounded-full ${index <= current ? 'bg-primary-600' : 'bg-gray-200'}`}
-          />
-          <Typography
-            variant="caption"
-            className={index === current ? 'text-primary-600' : 'text-gray-400'}
-          >
-            {step.label}
-          </Typography>
+    <View className="gap-lg">
+      <View className="gap-xs">
+        <Text className="font-title text-2xl text-gray-800">{PHASE_TITLE[phase]}</Text>
+        <Typography variant="body2" className="text-primary-600">
+          {countdown(phase, cycle, now)}
+        </Typography>
+      </View>
+
+      <View className="gap-xs">
+        <View className="flex-row items-center">
+          {STEPS.map((step, index) => (
+            <View
+              key={step.phase}
+              className={`flex-row items-center ${index < STEPS.length - 1 ? 'flex-1' : ''}`}
+            >
+              <View
+                className={`h-[12px] w-[12px] rounded-full ${
+                  index <= current ? 'bg-primary-600' : 'bg-gray-200'
+                }`}
+              />
+              {index < STEPS.length - 1 && (
+                <View
+                  className={`h-[2px] flex-1 ${index < current ? 'bg-primary-600' : 'bg-gray-200'}`}
+                />
+              )}
+            </View>
+          ))}
         </View>
-      ))}
+        <View className="flex-row justify-between">
+          {STEPS.map((step, index) => (
+            <Typography
+              key={step.phase}
+              variant="caption"
+              className={index === current ? 'text-primary-600' : 'text-gray-400'}
+            >
+              {step.label}
+            </Typography>
+          ))}
+        </View>
+      </View>
     </View>
   );
 }
 
-function Notice({ children }: { children: ReactNode }) {
-  return (
-    <View className="rounded-sm bg-secondary-100 p-md">
-      <Typography variant="body3" className="text-secondary-500">
-        {children}
-      </Typography>
-    </View>
-  );
-}
-
-function Section({
-  title,
-  aside,
-  children,
-}: {
+type Todo = {
   title: string;
-  aside?: string;
-  children: ReactNode;
+  description: string;
+  action?: { label: string; href: Href };
+  extra?: ReactNode;
+};
+
+function PreferenceChips({ preferences }: { preferences: DongPreference[] }) {
+  return (
+    <View className="flex-row flex-wrap gap-sm">
+      {[...preferences]
+        .sort((a, b) => a.priority - b.priority)
+        .map((preference) => (
+          <View
+            key={preference.dong_code}
+            className="flex-row items-center gap-xs rounded-full bg-white px-md py-xs"
+          >
+            <Typography variant="caption" className="text-primary-600">
+              {`${preference.priority}지망`}
+            </Typography>
+            <Typography variant="body3" className="text-gray-700">
+              {preference.dong_name}
+            </Typography>
+          </View>
+        ))}
+    </View>
+  );
+}
+
+/** 지금 단계에서 가장 먼저 해야 할 일 하나만 고른다. */
+function getTodo(
+  phase: ActivePhase,
+  preferences: DongPreference[] | undefined,
+  territories: MyTerritory[] | undefined,
+): Todo {
+  if (phase === 'selection' || phase === 'awaitingPick') {
+    const count = preferences?.length ?? 0;
+    const extra = count > 0 ? <PreferenceChips preferences={preferences ?? []} /> : undefined;
+    if (phase === 'awaitingPick') {
+      return {
+        title: '곧 동 대표가 발표돼요',
+        description: '희망 동은 발표 전까지 바꿀 수 있어요.',
+        action: { label: '희망 동 바꾸기', href: '/map/territory/preferences' },
+        extra,
+      };
+    }
+    return count === 0
+      ? {
+          title: '대표가 되고 싶은 동을 골라 주세요',
+          description:
+            '포인트 순위가 높은 사람부터 희망 동에 배정돼요. 최대 3곳까지 고를 수 있어요.',
+          action: { label: '희망 동 고르기', href: '/map/territory/preferences' },
+        }
+      : {
+          title: `희망 동 ${count}/3 등록했어요`,
+          description: '랭킹이 멈추기 전까지 포인트를 모아 순위를 올려 보세요.',
+          action: { label: '희망 동 바꾸기', href: '/map/territory/preferences' },
+          extra,
+        };
+  }
+
+  const unset = territories?.find((territory) => !territory.defense_photo);
+  const pending = territories?.find((territory) => territory.pending_adjective);
+
+  if (phase === 'setup') {
+    if (unset) {
+      return {
+        title: '대표가 됐어요!',
+        description: `${unset.dong_name} 미션을 정하고 방어 사진을 찍어 주세요.`,
+        action: {
+          label: '땅 세팅하기',
+          href: {
+            pathname: '/map/territory/mission',
+            params: { dongCode: String(unset.dong_code), mode: 'setup' },
+          },
+        },
+      };
+    }
+    return territories && territories.length > 0
+      ? {
+          title: '세팅을 모두 마쳤어요',
+          description: '땅따먹기가 시작되면 다른 팀이 내 땅에 도전해요.',
+        }
+      : {
+          title: '이번에는 대표가 되지 못했어요',
+          description: '땅따먹기가 시작되면 다른 팀 땅에 도전해서 내 땅을 만들 수 있어요.',
+          action: { label: '선발 결과 보기', href: '/map/territory/representatives' },
+        };
+  }
+
+  if (pending) {
+    return {
+      title: '새 미션이 기다리고 있어요',
+      description: `${pending.dong_name}의 방어 사진을 다시 찍어야 새 미션이 적용돼요.`,
+      action: {
+        label: '내 땅 보기',
+        href: {
+          pathname: '/map/territory/manage',
+          params: { dongCode: String(pending.dong_code) },
+        },
+      },
+    };
+  }
+  return {
+    title: '다른 팀 땅을 빼앗아 보세요',
+    description: '지도에서 동을 눌러 도전하거나, 우리 팀 동료의 땅을 개발해 땅값을 올려요.',
+    action: { label: '지도로 가기', href: '/map' },
+  };
+}
+
+function TodoCard({
+  phase,
+  preferences,
+  myTerritories,
+  loading,
+}: {
+  phase: ActivePhase;
+  preferences: DongPreference[] | undefined;
+  myTerritories: MyTerritory[] | undefined;
+  loading: boolean;
+}) {
+  if (loading) return <Skeleton className="h-[140px] w-full rounded-md" />;
+  const todo = getTodo(phase, preferences, myTerritories);
+  const action = todo.action;
+
+  return (
+    <View className="gap-md rounded-md bg-primary-100 p-lg">
+      <Typography variant="caption" className="text-primary-600">
+        지금 할 일
+      </Typography>
+      <View className="gap-xs">
+        <Typography variant="h2" className="text-gray-800">
+          {todo.title}
+        </Typography>
+        <Typography variant="body3" className="text-gray-500">
+          {todo.description}
+        </Typography>
+      </View>
+      {todo.extra}
+      {action && (
+        <Button
+          content={action.label}
+          // 지도는 같은 스택의 첫 화면이라 push하지 않고 그 화면으로 돌아간다.
+          onclick={() =>
+            action.href === '/map' ? router.navigate('/map') : router.push(action.href)
+          }
+        />
+      )}
+    </View>
+  );
+}
+
+function MyTerritorySection({
+  territories,
+  maxOwned,
+  isLoading,
+  isError,
+  onRetry,
+}: {
+  territories: MyTerritory[] | undefined;
+  maxOwned: number | undefined;
+  isLoading: boolean;
+  isError: boolean;
+  onRetry: () => void;
 }) {
   return (
     <View className="gap-md">
       <View className="flex-row items-end justify-between">
         <Typography variant="h2" className="text-gray-700">
-          {title}
+          내 땅
         </Typography>
-        {aside && (
+        {territories && maxOwned !== undefined && (
           <Typography variant="caption" className="text-gray-400">
-            {aside}
+            {`${territories.length}/${maxOwned}`}
           </Typography>
         )}
       </View>
-      {children}
-    </View>
-  );
-}
-
-function PreferenceSection() {
-  const { data: preferences, isLoading, isError, refetch } = useDongPreferences();
-
-  return (
-    <Section title="희망 동" aside={`${preferences?.length ?? 0}/3`}>
-      {isLoading ? (
-        <Skeleton className="h-[120px] w-full rounded-md" />
-      ) : isError || !preferences ? (
-        <ErrorRetry message="희망 동을 불러오지 못했어요." onRetry={() => void refetch()} />
-      ) : (
-        <View className="gap-md rounded-md border border-gray-200 bg-white p-lg">
-          {preferences.length === 0 ? (
-            <Typography variant="body3" className="text-gray-400">
-              아직 고른 동이 없어요. 고르지 않으면 남은 동 중에서 무작위로 정해져요.
-            </Typography>
-          ) : (
-            preferences.map((preference) => (
-              <View key={preference.dong_code} className="flex-row items-center gap-md">
-                <Typography variant="h4" className="text-primary-600">
-                  {`${preference.priority}지망`}
-                </Typography>
-                <Typography variant="body2" className="text-gray-700">
-                  {preference.dong_name}
-                </Typography>
-              </View>
-            ))
-          )}
-          <Button
-            content={preferences.length === 0 ? '희망 동 고르기' : '희망 동 바꾸기'}
-            size="sm"
-            variant="light"
-            onclick={() => router.push('/map/territory/preferences')}
-          />
-        </View>
-      )}
-    </Section>
-  );
-}
-
-function MyTerritorySection({ phase }: { phase: TerritoryPhase }) {
-  const { data, isLoading, isError, refetch } = useMyTerritories();
-
-  return (
-    <Section
-      title="내 땅"
-      aside={data ? `${data.territories.length}/${data.max_owned}` : undefined}
-    >
       {isLoading ? (
         <Skeleton className="h-[72px] w-full rounded-md" />
-      ) : isError || !data ? (
-        <ErrorRetry message="내 땅을 불러오지 못했어요." onRetry={() => void refetch()} />
-      ) : data.territories.length === 0 ? (
-        <View className="rounded-md border border-gray-200 bg-white p-lg">
-          <Typography variant="body3" className="text-gray-400">
-            {phase === 'battle'
-              ? '가진 땅이 없어요. 지도에서 다른 팀 땅에 도전해 보세요.'
-              : '이번에는 대표가 되지 못했어요. 땅따먹기가 시작되면 다른 팀 땅에 도전할 수 있어요.'}
-          </Typography>
-        </View>
+      ) : isError || !territories ? (
+        <ErrorRetry message="내 땅을 불러오지 못했어요." onRetry={onRetry} />
+      ) : territories.length === 0 ? (
+        <Typography variant="body3" className="text-gray-400">
+          아직 가진 땅이 없어요.
+        </Typography>
       ) : (
-        data.territories.map((territory) => (
+        territories.map((territory) => (
           <MyTerritoryRow key={territory.dong_code} territory={territory} />
         ))
       )}
-    </Section>
+    </View>
   );
 }
 
@@ -285,53 +420,5 @@ function MyTerritoryRow({ territory }: { territory: MyTerritory }) {
       </View>
       <ChevronRightIcon width={20} height={20} color={palette.gray[400]} />
     </Pressable>
-  );
-}
-
-function TeamRankingSection({ myLocationId }: { myLocationId: number | undefined }) {
-  const { data, isLoading, isError, refetch } = useTeamRanking();
-
-  return (
-    <Section title="팀 순위" aside={data ? (data.finalized ? '최종 순위' : '실시간') : undefined}>
-      {isLoading ? (
-        <Skeleton className="h-[200px] w-full rounded-md" />
-      ) : isError || !data ? (
-        <ErrorRetry message="팀 순위를 불러오지 못했어요." onRetry={() => void refetch()} />
-      ) : (
-        <View className="rounded-md border border-gray-200 bg-white py-sm">
-          {data.teams.map((team) => (
-            <TeamRow
-              key={team.location_id}
-              team={team}
-              mine={team.location_id === (data.my_location_id ?? myLocationId)}
-            />
-          ))}
-        </View>
-      )}
-    </Section>
-  );
-}
-
-function TeamRow({ team, mine }: { team: TeamRank; mine: boolean }) {
-  return (
-    <View className={`flex-row items-center gap-md px-lg py-sm ${mine ? 'bg-primary-100' : ''}`}>
-      <Typography
-        variant="h4"
-        className={`w-[28px] ${team.rank <= 3 ? 'text-primary-600' : 'text-gray-400'}`}
-      >
-        {team.rank}
-      </Typography>
-      <View className="flex-1 gap-xs">
-        <Typography variant="h4" className={mine ? 'text-primary-700' : 'text-gray-700'}>
-          {mine ? `${team.location_name} (우리 팀)` : team.location_name}
-        </Typography>
-        <Typography variant="caption" className="text-gray-400">
-          {`땅 ${team.owned_dong_count}곳`}
-        </Typography>
-      </View>
-      <Typography variant="body3" className="text-gray-600">
-        {team.total_land_price.toLocaleString()}
-      </Typography>
-    </View>
   );
 }

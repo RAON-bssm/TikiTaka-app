@@ -91,7 +91,7 @@ export default function ManageTerritoryScreen() {
             )}
 
             {pendingMission && (
-              <View className="gap-xs rounded-md bg-white p-lg">
+              <View className="gap-xs rounded-md border border-gray-200 bg-white p-lg">
                 <Typography variant="caption" className="text-primary-600">
                   바꿀 미션
                 </Typography>
