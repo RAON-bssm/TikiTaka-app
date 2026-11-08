@@ -11,7 +11,7 @@ export type RankingRowItem =
   | { kind: 'district'; key: string; data: LocationRanking }
   | { kind: 'person'; key: string; data: UserRanking }
   /** 땅따먹기 팀(구)의 땅값 합계 순위 */
-  | { kind: 'team'; key: string; data: TeamRank; mine: boolean };
+  | { kind: 'team'; key: string; data: TeamRank };
 
 interface Props {
   row: RankingRowItem;
@@ -21,7 +21,7 @@ interface Props {
 
 export default function RankingRow({ row, myUserId, onBlock }: Props) {
   if (row.kind === 'team') {
-    return <TeamRankingRow team={row.data} mine={row.mine} />;
+    return <TeamRankingRow team={row.data} />;
   }
 
   if (row.kind === 'district') {

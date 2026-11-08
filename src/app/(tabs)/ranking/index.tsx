@@ -7,7 +7,6 @@ import BlockUserDialog from '@/components/block/BlockUserDialog';
 import BattleSection from '@/components/ranking/BattleSection';
 import MyRankingRow from '@/components/ranking/MyRankingRow';
 import MyTeamCard from '@/components/ranking/MyTeamCard';
-import TeamPodium from '@/components/ranking/TeamPodium';
 import RankingEmptyState from '@/components/ranking/RankingEmptyState';
 import RankingRow, { type RankingRowItem } from '@/components/ranking/RankingRow';
 import RankingTabs from '@/components/ranking/RankingTabs';
@@ -87,12 +86,7 @@ export default function RankingScreen() {
       ? districts.map((data) => ({ kind: 'district', key: `d${data.location_id}`, data }))
       : tab === '개인랭킹'
         ? persons.map((data) => ({ kind: 'person', key: `p${data.user_id}`, data }))
-        : teams.slice(3).map((data) => ({
-            kind: 'team',
-            key: `t${data.location_id}`,
-            data,
-            mine: data.location_id === myTeamId,
-          }));
+        : teams.map((data) => ({ kind: 'team', key: `t${data.location_id}`, data }));
 
   const header = (
     <View className="gap-2xl">
@@ -112,9 +106,7 @@ export default function RankingScreen() {
         {tab === '팀랭킹'
           ? !isRankingEmpty &&
             teamRanking.isSuccess && (
-              <MyTeamCard teams={teams} myTeam={myTeam} finalized={teamRanking.data.finalized}>
-                <TeamPodium teams={teams.slice(0, 3)} myTeamId={myTeamId} />
-              </MyTeamCard>
+              <MyTeamCard teams={teams} myTeam={myTeam} finalized={teamRanking.data.finalized} />
             )
           : !isRankingEmpty &&
             (matchStage.isLoading ? (
@@ -141,19 +133,17 @@ export default function RankingScreen() {
     </View>
   );
 
-  // 팀이 3개 이하면 모두 포디움에 올라가 목록이 비지만, 빈 화면을 띄우면 안 된다.
-  const empty =
-    tab === '팀랭킹' && teams.length > 0 ? null : (
-      <View className="grow bg-white px-xl">
-        {rankingQuery.isLoading ? (
-          <Skeleton className="h-96 w-full rounded-sm" />
-        ) : rankingQuery.isError ? (
-          <ErrorRetry message="랭킹을 불러오지 못했어요." onRetry={() => rankingQuery.refetch()} />
-        ) : (
-          <RankingEmptyState description={EMPTY_DESCRIPTION[tab]} />
-        )}
-      </View>
-    );
+  const empty = (
+    <View className="grow bg-white px-xl">
+      {rankingQuery.isLoading ? (
+        <Skeleton className="h-96 w-full rounded-sm" />
+      ) : rankingQuery.isError ? (
+        <ErrorRetry message="랭킹을 불러오지 못했어요." onRetry={() => rankingQuery.refetch()} />
+      ) : (
+        <RankingEmptyState description={EMPTY_DESCRIPTION[tab]} />
+      )}
+    </View>
+  );
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>

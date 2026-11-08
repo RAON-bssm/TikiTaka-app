@@ -20,7 +20,7 @@ const RIPPLE_SCALE = 2.6;
 const RIPPLE_DURATION = 1800;
 const RIPPLE_OPACITY = 0.5;
 
-const PulsingDot = () => {
+export const PulsingDot = () => {
   const progress = useSharedValue(0);
   const reduceMotion = useReducedMotion();
 

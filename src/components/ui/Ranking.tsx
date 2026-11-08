@@ -11,7 +11,9 @@ const COLOR_GRAY = palette.gray[500];
 type RankingProps = {
   number: number;
   location: string;
-  count: number;
+  count: number | string;
+  /** 점수가 아닌 값(땅값 등)은 단위를 바꾸거나 빈 문자열로 뺀다. */
+  unit?: string;
   avatar?: ReactNode;
   address?: string;
   menuItems?: MoreMenuItem[];
@@ -21,6 +23,7 @@ export default function Ranking({
   number,
   location,
   count,
+  unit = '점',
   avatar,
   address,
   menuItems,
@@ -48,7 +51,8 @@ export default function Ranking({
       </View>
 
       <Typography variant="body1" className="text-primary-600">
-        {count}점
+        {count}
+        {unit}
       </Typography>
 
       {menuItems?.length ? <MoreMenu items={menuItems} /> : null}
