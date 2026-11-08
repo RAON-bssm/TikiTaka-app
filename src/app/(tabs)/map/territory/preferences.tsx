@@ -13,19 +13,20 @@ import Skeleton from '@/components/ui/feedback/Skeleton';
 import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
 import { palette } from '@/constants/colors';
-import { findDong, getDongsInGu } from '@/constants/territory/region';
+import { findDong, getDongsInTeam } from '@/constants/territory/region';
 import { useDongPreferences, useUpdateDongPreferences } from '@/hooks/territory/useDongPreferences';
-import { useMyInfo } from '@/hooks/user/useMyInfo';
+import { useMyTeam } from '@/hooks/territory/useMyTeam';
+import type { Location } from '@/types/location';
 
 const MAX_PREFERENCES = 3;
 
 export default function DongPreferencesScreen() {
-  const myInfo = useMyInfo();
+  const myTeam = useMyTeam();
   const preferences = useDongPreferences();
-  const gu = myInfo.data?.main_location.location_name;
+  const team = myTeam.team;
 
-  const isLoading = myInfo.isLoading || preferences.isLoading;
-  const isError = myInfo.isError || preferences.isError;
+  const isLoading = myTeam.isLoading || preferences.isLoading;
+  const isError = myTeam.isError || preferences.isError;
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top', 'bottom']}>
@@ -37,17 +38,17 @@ export default function DongPreferencesScreen() {
           <Skeleton className="h-[160px] w-full rounded-md" />
           <Skeleton className="h-[240px] w-full rounded-md" />
         </View>
-      ) : isError || !gu || !preferences.data ? (
+      ) : isError || !team || !preferences.data ? (
         <ErrorRetry
           message="희망 동을 불러오지 못했어요."
           onRetry={() => {
-            void myInfo.refetch();
+            myTeam.refetch();
             void preferences.refetch();
           }}
         />
       ) : (
         <PreferenceForm
-          gu={gu}
+          team={team}
           initialCodes={[...preferences.data]
             .sort((a, b) => a.priority - b.priority)
             .map((preference) => preference.dong_code)}
@@ -57,11 +58,12 @@ export default function DongPreferencesScreen() {
   );
 }
 
-function PreferenceForm({ gu, initialCodes }: { gu: string; initialCodes: number[] }) {
+function PreferenceForm({ team, initialCodes }: { team: Location; initialCodes: number[] }) {
+  const gu = team.location_name;
   const { showToast } = useToast();
   const { mutate: save, isPending } = useUpdateDongPreferences();
   const [codes, setCodes] = useState(initialCodes);
-  const dongs = getDongsInGu(gu);
+  const dongs = getDongsInTeam(team);
   const changed = codes.join() !== initialCodes.join();
 
   const toggle = (code: number) => {

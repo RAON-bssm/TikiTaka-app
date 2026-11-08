@@ -16,7 +16,7 @@ import { useMyTerritories } from '@/hooks/territory/useMyTerritories';
 import { useTeamName } from '@/hooks/territory/useTeamName';
 import { useTeamRanking } from '@/hooks/territory/useTeamRanking';
 import {
-  formatTimeLeft,
+  describeTimeLeft,
   type TerritoryPhase,
   useTerritoryPhase,
 } from '@/hooks/territory/useTerritoryPhase';
@@ -69,9 +69,12 @@ export default function TerritoryHubScreen() {
 
             {phase === 'selection' && (
               <Notice>
-                {`포인트 순위가 높은 순서로 희망 동의 대표가 돼요. ${
-                  formatTimeLeft(cycle.ranking_freeze_at, now) ?? ''
-                } 뒤 랭킹이 멈추고 대표를 뽑아요.`}
+                {`포인트 순위가 높은 순서로 희망 동의 대표가 돼요. ${describeTimeLeft(
+                  cycle.ranking_freeze_at,
+                  now,
+                  (left) => `${left} 뒤 랭킹이 멈추고 대표를 뽑아요.`,
+                  '곧 랭킹이 멈추고 대표를 뽑아요.',
+                )}`}
               </Notice>
             )}
             {phase === 'awaitingPick' && (
@@ -79,16 +82,22 @@ export default function TerritoryHubScreen() {
             )}
             {phase === 'setup' && (
               <Notice>
-                {`대표가 된 땅의 미션을 정하고 방어 사진을 찍어 두세요. 땅따먹기 시작까지 ${
-                  formatTimeLeft(cycle.battle_started_at, now) ?? '곧'
-                }`}
+                {`대표가 된 땅의 미션을 정하고 방어 사진을 찍어 두세요. ${describeTimeLeft(
+                  cycle.battle_started_at,
+                  now,
+                  (left) => `땅따먹기 시작까지 ${left} 남았어요.`,
+                  '곧 땅따먹기가 시작돼요.',
+                )}`}
               </Notice>
             )}
             {phase === 'battle' && (
               <Notice>
-                {`본진 구 안에서 미션 사진을 찍어 다른 팀 땅을 빼앗고, 우리 팀 땅은 개발해서 땅값을 올려요. 끝나기까지 ${
-                  formatTimeLeft(cycle.battle_ended_at, now) ?? '곧'
-                }`}
+                {`본진 구 안에서 미션 사진을 찍어 다른 팀 땅을 빼앗고, 우리 팀 땅은 개발해서 땅값을 올려요. ${describeTimeLeft(
+                  cycle.battle_ended_at,
+                  now,
+                  (left) => `끝나기까지 ${left} 남았어요.`,
+                  '곧 땅따먹기가 끝나요.',
+                )}`}
               </Notice>
             )}
 

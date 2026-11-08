@@ -10,6 +10,8 @@ import Header from '@/components/ui/Header';
 import Typography from '@/components/ui/Typography';
 import { useViewUrl } from '@/hooks/storage/useViewUrl';
 import { useChallenge } from '@/hooks/territory/useChallenge';
+import { useMyTeam } from '@/hooks/territory/useMyTeam';
+import { useTeamName } from '@/hooks/territory/useTeamName';
 import { useMyInfo } from '@/hooks/user/useMyInfo';
 
 /**
@@ -18,22 +20,33 @@ import { useMyInfo } from '@/hooks/user/useMyInfo';
  */
 type Params = {
   challengeId: string;
-  guName?: string;
+  guLocationId?: string;
   myPhoto?: string;
+  /** '1'이면 주인 있던 땅, '0'이면 주인 없던 땅. 없으면(결과만 다시 열 때) 모른다. */
+  hasDefender?: '1' | '0';
   defenderName?: string;
-  defenderTeam?: string;
+  defenderLocationId?: string;
   defenderPhoto?: string;
 };
+
+const toId = (value: string | undefined) => (value ? Number(value) : undefined);
 
 export default function ChallengeResultScreen() {
   const params = useLocalSearchParams<Params>();
   const { data: result, isLoading, isError, refetch } = useChallenge(params.challengeId);
   const { data: myInfo } = useMyInfo();
+  const { team } = useMyTeam();
+  const teamName = useTeamName();
   const defenderPhoto = useViewUrl(params.defenderPhoto || undefined);
 
-  const myTeam = myInfo?.main_location.location_name ?? '';
+  const myTeam = team?.location_name ?? '';
   const won = result?.result === 'CAPTURED';
-  const guPrefix = params.guName ? `${params.guName} ` : '';
+  const guName = teamName(toId(params.guLocationId));
+  const guPrefix = guName ? `${guName} ` : '';
+  const hasDefender = params.hasDefender === '1';
+  const defenderTeam = hasDefender
+    ? (teamName(toId(params.defenderLocationId)) ?? '')
+    : '주인 없음';
 
   const goToMap = () => {
     if (router.canGoBack()) router.back();
@@ -83,18 +96,24 @@ export default function ChallengeResultScreen() {
               />
               <PhotoCard
                 uri={defenderPhoto.uri}
-                name={params.defenderName || '주인 없는 땅'}
+                name={
+                  params.hasDefender === undefined
+                    ? '지키던 대표'
+                    : hasDefender
+                      ? (params.defenderName ?? '')
+                      : '주인 없는 땅'
+                }
                 score={result.defense_score_at}
                 side="defender"
               />
             </View>
 
             <View className="gap-sm rounded-sm border border-gray-200 bg-white p-md">
-              {params.defenderTeam !== undefined && (
+              {params.hasDefender !== undefined && (
                 <Row label="차지 팀">
                   <View className="flex-row items-center gap-xs">
                     <Typography variant="body3" className="text-secondary-500">
-                      {params.defenderTeam || '주인 없음'}
+                      {defenderTeam}
                     </Typography>
                     <Typography variant="body3" className="text-gray-400">
                       →
@@ -103,7 +122,7 @@ export default function ChallengeResultScreen() {
                       variant="body3"
                       className={won ? 'text-primary-600' : 'text-secondary-500'}
                     >
-                      {won ? myTeam : params.defenderTeam || '주인 없음'}
+                      {won ? myTeam : defenderTeam}
                     </Typography>
                   </View>
                 </Row>

@@ -1,18 +1,17 @@
 import { isAxiosError } from 'axios';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef } from 'react';
-import { BackHandler, Image, ScrollView, View } from 'react-native';
+import { BackHandler, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { getApiErrorMessage } from '@/api/error';
+import CapturedPhoto from '@/components/camera/CapturedPhoto';
 import Topic from '@/components/camera/Topic';
 import BackButton from '@/components/ui/BackButton';
 import Button from '@/components/ui/Button';
 import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
-import useImageRatio from '@/hooks/useImageRatio';
 import { useChallengeTerritory } from '@/hooks/territory/useChallengeTerritory';
-import { useTeamName } from '@/hooks/territory/useTeamName';
 import { useTerritory } from '@/hooks/territory/useTerritory';
 
 export default function ChallengeConfirmScreen() {
@@ -23,9 +22,7 @@ export default function ChallengeConfirmScreen() {
     lng: string;
   }>();
   const dongCode = Number(params.dongCode);
-  const photoRatio = useImageRatio(params.uri);
   const { showToast } = useToast();
-  const teamName = useTeamName();
 
   const { data: territory } = useTerritory(dongCode);
   const { mutate: challenge, isPending } = useChallengeTerritory();
@@ -44,11 +41,18 @@ export default function ChallengeConfirmScreen() {
     submittingRef.current = true;
 
     // 차지하면 상세 캐시가 새 주인으로 바뀌므로, 결과 화면에 보여 줄 상대 정보는 도전 전에 남겨 둔다.
+    // 팀은 이름이 아니라 id로 넘긴다. 동네 목록을 아직 못 받았어도 결과 화면이 받은 뒤 이름을 찾는다.
+    const hasDefender = territory.owner_id !== undefined;
     const defender = {
-      defenderName: territory.blocked ? '차단한 사용자' : (territory.owner_name ?? ''),
-      defenderTeam: teamName(territory.owner_location_id) ?? '',
+      hasDefender: hasDefender ? '1' : '0',
+      defenderName: !hasDefender
+        ? ''
+        : territory.blocked
+          ? '차단한 사용자'
+          : (territory.owner_name ?? '알 수 없는 사용자'),
+      defenderLocationId: String(territory.owner_location_id ?? ''),
       defenderPhoto: territory.blocked ? '' : (territory.defense_photo ?? ''),
-      guName: teamName(territory.location_id) ?? '',
+      guLocationId: String(territory.location_id),
       myPhoto: params.uri,
     };
 
@@ -83,16 +87,7 @@ export default function ChallengeConfirmScreen() {
         <BackButton title={territory?.dong_name ?? '도전하기'} />
         <Topic title={territory?.mission ?? ''} />
 
-        {params.uri && photoRatio ? (
-          <Image
-            source={{ uri: params.uri }}
-            resizeMode="cover"
-            className="w-full overflow-hidden rounded-md bg-gray-100"
-            style={{ aspectRatio: photoRatio }}
-          />
-        ) : (
-          <View className="h-[232px] w-full overflow-hidden rounded-md bg-gray-100" />
-        )}
+        <CapturedPhoto uri={params.uri} />
 
         <View className="gap-xs">
           {territory && (

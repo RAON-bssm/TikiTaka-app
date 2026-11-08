@@ -22,6 +22,7 @@ import { useSendChat } from '@/hooks/chat/useSendChat';
 import { useMapBridge } from '@/hooks/map/useMapBridge';
 import { useDongPreferences } from '@/hooks/territory/useDongPreferences';
 import { useMyTerritories } from '@/hooks/territory/useMyTerritories';
+import { useTeamName } from '@/hooks/territory/useTeamName';
 import { useTeamRanking } from '@/hooks/territory/useTeamRanking';
 import { useTerritories } from '@/hooks/territory/useTerritories';
 import { useTerritoryPhase } from '@/hooks/territory/useTerritoryPhase';
@@ -91,6 +92,7 @@ export default function MapScreen() {
     enabled: phase === 'selection' || phase === 'awaitingPick',
   });
   const teamRanking = useTeamRanking({ enabled: phase === 'battle' });
+  const teamName = useTeamName();
   const myTeamRank = teamRanking.data?.teams.find(
     (team) => team.location_id === myLocationId,
   )?.rank;
@@ -301,7 +303,7 @@ export default function MapScreen() {
           dongCode={selectedDong}
           phase={phase}
           myPoint={myInfo.data?.point}
-          myGu={mainLocation?.location_name}
+          myGu={teamName(myLocationId)}
           myLocationId={myLocationId}
           ownedCount={myTerritories.data?.territories.length ?? 0}
           maxOwned={myTerritories.data?.max_owned}

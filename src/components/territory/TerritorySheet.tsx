@@ -12,6 +12,7 @@ import Skeleton from '@/components/ui/feedback/Skeleton';
 import MoreMenu from '@/components/ui/MoreMenu';
 import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
+import TerritoryStats from './TerritoryStats';
 import { palette } from '@/constants/colors';
 import { useDevelopTerritory } from '@/hooks/territory/useDevelopTerritory';
 import { useTeamName } from '@/hooks/territory/useTeamName';
@@ -23,7 +24,7 @@ interface Props {
   dongCode: number;
   phase: TerritoryPhase | undefined;
   myPoint: number | undefined;
-  /** 내 본진 구 이름. 사진은 이 구 안에서만 찍을 수 있다. */
+  /** 내 팀(사이클 시작 때의 본진) 구 이름. 사진은 이 구 안에서만 찍을 수 있다. */
   myGu: string | undefined;
   /** 내 팀(본진 구) id. 우리 팀 땅이면 도전 대신 개발한다. */
   myLocationId: number | undefined;
@@ -31,7 +32,7 @@ interface Props {
   maxOwned: number | undefined;
   onChallenge: (territory: TerritoryDetail) => void;
   onInsufficientPoint: (territory: TerritoryDetail) => void;
-  /** 처음 그려졌을 때 한 번만, WebView 아래 끝에서 시트가 가리는 높이를 알린다. */
+  /** 내용(땅 정보 또는 에러)이 처음 그려질 때, WebView 아래 끝에서 시트가 가리는 높이를 알린다. */
   onFirstLayout?: (height: number) => void;
 }
 
@@ -52,11 +53,14 @@ export default function TerritorySheet({
   onFirstLayout,
 }: Props) {
   const { data: territory, isLoading, isError, refetch } = useTerritory(dongCode);
-  const measured = useRef(false);
+  const reported = useRef<'loaded' | 'error'>(undefined);
+  const content = territory ? 'loaded' : isError ? 'error' : undefined;
 
+  // 불러오지 못해도 높이를 알려야 지도가 그 동을 강조하고 시트 위로 옮긴다.
+  // 다시 시도해 내용이 바뀌면 높이도 달라져 한 번 더 알린다.
   const handleLayout = (event: LayoutChangeEvent) => {
-    if (measured.current || !territory) return;
-    measured.current = true;
+    if (!content || reported.current === content) return;
+    reported.current = content;
     onFirstLayout?.(Math.ceil(event.nativeEvent.layout.height));
   };
 
@@ -186,18 +190,16 @@ function TerritoryContent({
         )}
       </View>
 
-      <View className="flex-row rounded-sm border border-gray-200 bg-gray-50 py-md">
-        <Stat label="방어 점수" value={territory.defense_score} highlight />
-        <View className="w-[1px] bg-gray-200" />
-        <Stat label="땅값" value={territory.land_price} />
-        <View className="w-[1px] bg-gray-200" />
-        <Stat label="통행료" value={territory.toll} />
-      </View>
+      <TerritoryStats
+        defenseScore={territory.defense_score}
+        landPrice={territory.land_price}
+        toll={territory.toll}
+      />
 
       <View className="gap-xs">
         {action.kind !== 'disabled' && (
           <Typography variant="caption" className="text-center text-gray-400">
-            {`도전할 때마다 통행료 ${territory.toll} P를 내요`}
+            {`도전할 때마다 통행료 ${territory.toll.toLocaleString()} P를 내요`}
             {myGu ? ` · ${myGu} 안에서 찍은 사진만 인정돼요` : ''}
           </Typography>
         )}
@@ -273,19 +275,6 @@ function OwnerLine({
           </Typography>
         </>
       )}
-    </View>
-  );
-}
-
-function Stat({ label, value, highlight }: { label: string; value: number; highlight?: boolean }) {
-  return (
-    <View className="flex-1 items-center gap-sm">
-      <Typography variant="caption" className="text-gray-400">
-        {label}
-      </Typography>
-      <Typography variant="h2" className={highlight ? 'text-primary-600' : 'text-gray-600'}>
-        {value.toLocaleString()}
-      </Typography>
     </View>
   );
 }

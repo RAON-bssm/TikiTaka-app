@@ -3,11 +3,13 @@ import type { ReactNode } from 'react';
 import { Image, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import TerritoryStats from '@/components/territory/TerritoryStats';
 import BackButton from '@/components/ui/BackButton';
 import Button from '@/components/ui/Button';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Skeleton from '@/components/ui/feedback/Skeleton';
 import Typography from '@/components/ui/Typography';
+import { getPendingMission } from '@/constants/territory/mission';
 import { useViewUrl } from '@/hooks/storage/useViewUrl';
 import { useTeamName } from '@/hooks/territory/useTeamName';
 import { useTerritory } from '@/hooks/territory/useTerritory';
@@ -22,10 +24,7 @@ export default function ManageTerritoryScreen() {
   const photo = useViewUrl(territory?.defense_photo);
 
   const needsSetup = !!territory && !territory.defense_photo;
-  const pendingMission =
-    territory?.pending_adjective && territory.pending_noun
-      ? `${territory.pending_adjective} ${territory.pending_noun}`
-      : undefined;
+  const pendingMission = territory && getPendingMission(territory);
   const canEdit = phase === 'setup' || phase === 'battle';
 
   const goToCamera = (purpose: 'retake') =>
@@ -87,13 +86,11 @@ export default function ManageTerritoryScreen() {
               </Card>
             )}
 
-            <View className="flex-row rounded-sm border border-gray-200 bg-white py-md">
-              <Stat label="방어 점수" value={territory.defense_score} highlight />
-              <View className="w-[1px] bg-gray-200" />
-              <Stat label="땅값" value={territory.land_price} />
-              <View className="w-[1px] bg-gray-200" />
-              <Stat label="통행료" value={territory.toll} />
-            </View>
+            <TerritoryStats
+              defenseScore={territory.defense_score}
+              landPrice={territory.land_price}
+              toll={territory.toll}
+            />
 
             <Typography variant="caption" className="text-gray-400">
               하루 넘게 활동이 없으면 방어 점수가 매일 1점씩 내려가요(60점까지).
@@ -152,19 +149,6 @@ function Card({ label, children }: { label: string; children: ReactNode }) {
         {label}
       </Typography>
       {children}
-    </View>
-  );
-}
-
-function Stat({ label, value, highlight }: { label: string; value: number; highlight?: boolean }) {
-  return (
-    <View className="flex-1 items-center gap-sm">
-      <Typography variant="caption" className="text-gray-400">
-        {label}
-      </Typography>
-      <Typography variant="h2" className={highlight ? 'text-primary-600' : 'text-gray-600'}>
-        {value.toLocaleString()}
-      </Typography>
     </View>
   );
 }

@@ -21,11 +21,12 @@ import ShutterButton from '@/components/camera/ShutterButton';
 import ZoomControl from '@/components/camera/ZoomControl';
 import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
+import { getPendingMission } from '@/constants/territory/mission';
 import { cropToPreview } from '@/hooks/camera/cropToPreview';
 import useCameraZoom from '@/hooks/camera/useCameraZoom';
 import { type HomeGuLocationStatus, useHomeGuLocation } from '@/hooks/territory/useHomeGuLocation';
+import { useMyTeam } from '@/hooks/territory/useMyTeam';
 import { useTerritory } from '@/hooks/territory/useTerritory';
-import { useMyInfo } from '@/hooks/user/useMyInfo';
 
 const LENS_FILTER: DeviceFilter = {
   physicalDevices: ['ultra-wide-angle', 'wide-angle', 'telephoto'],
@@ -68,19 +69,16 @@ export default function ChallengeCameraScreen() {
   const { showToast } = useToast();
 
   const { data: territory } = useTerritory(dongCode);
-  const pendingMission =
-    territory?.pending_adjective && territory.pending_noun
-      ? `${territory.pending_adjective} ${territory.pending_noun}`
-      : undefined;
+  const pendingMission = territory && getPendingMission(territory);
   const missionTitle =
     purpose === 'setup'
       ? [params.adjective, params.noun].filter(Boolean).join(' ')
       : purpose === 'retake'
         ? (pendingMission ?? territory?.mission ?? territory?.dong_name ?? '')
         : (territory?.mission ?? territory?.dong_name ?? '');
-  const { data: myInfo } = useMyInfo();
-  const homeGu = myInfo?.main_location.location_name ?? '본진';
-  const location = useHomeGuLocation(myInfo?.main_location.location_name, isFocused);
+  const { team } = useMyTeam();
+  const homeGu = team?.location_name ?? '본진';
+  const location = useHomeGuLocation(team, isFocused);
   const message = locationMessage(location.status, homeGu);
 
   const { hasPermission, canRequestPermission, requestPermission } = useCameraPermission();

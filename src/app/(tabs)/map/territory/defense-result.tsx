@@ -1,11 +1,11 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { Image, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import CapturedPhoto from '@/components/camera/CapturedPhoto';
 import Topic from '@/components/camera/Topic';
 import Button from '@/components/ui/Button';
 import Typography from '@/components/ui/Typography';
-import useImageRatio from '@/hooks/useImageRatio';
 
 /** 세팅·재촬영 응답은 다시 조회할 API가 없어, 확인 화면이 응답값을 파라미터로 넘긴다. */
 type Params = {
@@ -21,7 +21,6 @@ type Params = {
 
 export default function DefenseResultScreen() {
   const params = useLocalSearchParams<Params>();
-  const photoRatio = useImageRatio(params.uri);
   const score = Number(params.score);
   const previous = params.previousScore ? Number(params.previousScore) : undefined;
   const diff = previous === undefined ? undefined : score - previous;
@@ -53,16 +52,7 @@ export default function DefenseResultScreen() {
 
         <Topic title={params.mission} />
 
-        {params.uri && photoRatio ? (
-          <Image
-            source={{ uri: params.uri }}
-            resizeMode="cover"
-            className="w-full overflow-hidden rounded-md bg-gray-100"
-            style={{ aspectRatio: photoRatio }}
-          />
-        ) : (
-          <View className="h-[232px] w-full overflow-hidden rounded-md bg-gray-100" />
-        )}
+        <CapturedPhoto uri={params.uri} />
 
         {!!params.review && (
           <View className="gap-xs rounded-sm border border-gray-200 bg-white p-md">

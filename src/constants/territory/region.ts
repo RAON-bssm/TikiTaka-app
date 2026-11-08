@@ -1,5 +1,13 @@
+import type { Location } from '@/types/location';
 import { DONGS, type Dong } from './dongs';
 import guBoundaries from './guBoundaries.json';
+
+/** 땅따먹기는 부산만 한다. 동·경계 데이터에는 구 이름만 있어, 다른 시의 같은 이름 구(북구 등)를 여기서 걸러낸다. */
+export const TERRITORY_CITY = '부산광역시';
+
+function isTerritoryCity(team: Location): boolean {
+  return team.city_name === TERRITORY_CITY;
+}
 
 /** 링은 [lng, lat, lng, lat, ...]. 폴리곤의 첫 링이 외곽선, 나머지는 구멍이다. */
 type FlatRing = number[];
@@ -7,8 +15,9 @@ type Polygon = FlatRing[];
 
 const BOUNDARIES = guBoundaries as Record<string, Polygon[]>;
 
-export function getDongsInGu(gu: string): Dong[] {
-  return DONGS.filter((dong) => dong.gu === gu);
+export function getDongsInTeam(team: Location): Dong[] {
+  if (!isTerritoryCity(team)) return [];
+  return DONGS.filter((dong) => dong.gu === team.location_name);
 }
 
 export function findDong(code: number): Dong | undefined {
@@ -33,8 +42,12 @@ function isInPolygon(lng: number, lat: number, polygon: Polygon): boolean {
 }
 
 /** 서버는 촬영 위치를 검증하지 않아 앱이 막는다. 동 경계를 합친 것이 구 경계다. */
-export function isInGu(gu: string, position: { latitude: number; longitude: number }): boolean {
-  const polygons = BOUNDARIES[gu];
+export function isInTeamArea(
+  team: Location,
+  position: { latitude: number; longitude: number },
+): boolean {
+  if (!isTerritoryCity(team)) return false;
+  const polygons = BOUNDARIES[team.location_name];
   if (!polygons) return false;
   return polygons.some((polygon) => isInPolygon(position.longitude, position.latitude, polygon));
 }

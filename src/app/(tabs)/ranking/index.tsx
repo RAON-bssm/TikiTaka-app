@@ -37,11 +37,12 @@ export default function RankingScreen() {
   const userRanking = useUserRanking();
   const territory = useTerritoryPhase();
   // 땅따먹기 사이클에서는 선발전(4일차) 끝에 랭킹이 멈추고, 그 순위로 동 대표를 뽑는다.
+  const freezeLeft = formatTimeLeft(territory.data?.ranking_freeze_at, territory.now);
   const freezeNotice =
     territory.phase === 'selection'
       ? `동 대표 선발전 중이에요. ${
-          formatTimeLeft(territory.data?.ranking_freeze_at, territory.now) ?? '곧'
-        } 뒤 랭킹이 멈추고 이 순위로 대표를 뽑아요.`
+          freezeLeft ? `${freezeLeft} 뒤` : '곧'
+        } 랭킹이 멈추고 이 순위로 대표를 뽑아요.`
       : territory.phase === 'awaitingPick' ||
           territory.phase === 'setup' ||
           territory.phase === 'battle'

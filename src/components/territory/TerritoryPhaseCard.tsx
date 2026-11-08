@@ -3,7 +3,7 @@ import { Pressable, View } from 'react-native';
 import ChevronRightIcon from '@/assets/icons/chevron-right.svg';
 import Typography from '@/components/ui/Typography';
 import { palette } from '@/constants/colors';
-import { formatTimeLeft, type TerritoryPhase } from '@/hooks/territory/useTerritoryPhase';
+import { describeTimeLeft, type TerritoryPhase } from '@/hooks/territory/useTerritoryPhase';
 import type { CurrentCycle } from '@/types/territory';
 
 const CARD_SHADOW = `0px 4px 16px ${palette.gray[800]}1F`;
@@ -32,12 +32,12 @@ function getCopy({
       return {
         label: '대표 선발전',
         title: `희망 동 ${preferenceCount}/3 등록`,
-        description: [
-          '포인트 순위로 동 대표를 뽑아요',
-          formatTimeLeft(cycle.ranking_freeze_at, now),
-        ]
-          .filter(Boolean)
-          .join(' · '),
+        description: describeTimeLeft(
+          cycle.ranking_freeze_at,
+          now,
+          (left) => `포인트 순위로 동 대표를 뽑아요 · 마감까지 ${left}`,
+          '곧 랭킹이 멈추고 대표를 뽑아요',
+        ),
       };
     case 'awaitingPick':
       return {
@@ -55,17 +55,23 @@ function getCopy({
         : {
             label: '땅 세팅',
             title: '선발 결과 보기',
-            description: ['땅따먹기 시작까지', formatTimeLeft(cycle.battle_started_at, now)]
-              .filter(Boolean)
-              .join(' '),
+            description: describeTimeLeft(
+              cycle.battle_started_at,
+              now,
+              (left) => `땅따먹기 시작까지 ${left}`,
+              '곧 땅따먹기가 시작돼요',
+            ),
           };
     case 'battle':
       return {
         label: '땅따먹기',
         title: myTeamRank ? `우리 팀 ${myTeamRank}위` : '다른 팀 땅을 빼앗아 보세요',
-        description: ['팀 순위·내 땅 보기', formatTimeLeft(cycle.battle_ended_at, now)]
-          .filter(Boolean)
-          .join(' · '),
+        description: describeTimeLeft(
+          cycle.battle_ended_at,
+          now,
+          (left) => `팀 순위·내 땅 보기 · 끝나기까지 ${left}`,
+          '팀 순위·내 땅 보기',
+        ),
       };
   }
 }

@@ -1,16 +1,17 @@
 import { isAxiosError } from 'axios';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef } from 'react';
-import { BackHandler, Image, ScrollView, View } from 'react-native';
+import { BackHandler, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { getApiErrorMessage } from '@/api/error';
+import CapturedPhoto from '@/components/camera/CapturedPhoto';
 import Topic from '@/components/camera/Topic';
 import BackButton from '@/components/ui/BackButton';
 import Button from '@/components/ui/Button';
 import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
-import useImageRatio from '@/hooks/useImageRatio';
+import { getPendingMission } from '@/constants/territory/mission';
 import { useRetakeDefensePhoto } from '@/hooks/territory/useRetakeDefensePhoto';
 import { useSetupTerritory } from '@/hooks/territory/useSetupTerritory';
 import { useTerritory } from '@/hooks/territory/useTerritory';
@@ -29,7 +30,6 @@ export default function DefenseConfirmScreen() {
   const params = useLocalSearchParams<Params>();
   const dongCode = Number(params.dongCode);
   const isSetup = params.purpose === 'setup';
-  const photoRatio = useImageRatio(params.uri);
   const { showToast } = useToast();
 
   const { data: territory } = useTerritory(dongCode);
@@ -38,10 +38,7 @@ export default function DefenseConfirmScreen() {
   const isPending = setup.isPending || retake.isPending;
   const submittingRef = useRef(false);
 
-  const pendingMission =
-    territory?.pending_adjective && territory.pending_noun
-      ? `${territory.pending_adjective} ${territory.pending_noun}`
-      : undefined;
+  const pendingMission = territory && getPendingMission(territory);
   const mission = isSetup
     ? [params.adjective, params.noun].filter(Boolean).join(' ')
     : (pendingMission ?? territory?.mission ?? '');
@@ -106,16 +103,7 @@ export default function DefenseConfirmScreen() {
         <BackButton title={territory?.dong_name ?? (isSetup ? '땅 세팅' : '방어 사진')} />
         <Topic title={mission} />
 
-        {params.uri && photoRatio ? (
-          <Image
-            source={{ uri: params.uri }}
-            resizeMode="cover"
-            className="w-full overflow-hidden rounded-md bg-gray-100"
-            style={{ aspectRatio: photoRatio }}
-          />
-        ) : (
-          <View className="h-[232px] w-full overflow-hidden rounded-md bg-gray-100" />
-        )}
+        <CapturedPhoto uri={params.uri} />
 
         <View className="gap-xs">
           <Typography variant="caption" className="text-center text-gray-400">

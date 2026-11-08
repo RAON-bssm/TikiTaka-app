@@ -15,26 +15,47 @@ import type { CurrentCycle } from '@/types/territory';
  */
 export type TerritoryPhase = 'none' | 'selection' | 'awaitingPick' | 'setup' | 'battle';
 
-// 대표 선발은 새벽 배치라 늦을 수 있어, 발표를 기다리는 동안만 자주 다시 묻는다.
-const AWAITING_PICK_REFETCH_MS = 60 * 1000;
+// 단계 전환은 새벽 배치라 시각보다 늦을 수 있어, 서버가 따라올 때까지 이 간격으로 다시 묻는다.
+const LAGGING_REFETCH_MS = 60 * 1000;
+// 남은 시간 표시를 갱신하는 간격
+const TICK_MS = 60 * 1000;
 // setTimeout 상한(약 24.8일)을 넘기지 않게 자른다.
 const MAX_TIMER_MS = 24 * 60 * 60 * 1000;
+
+const MINUTE_MS = 60 * 1000;
+const HOUR_MS = 60 * MINUTE_MS;
+const DAY_MS = 24 * HOUR_MS;
 
 /** 서버 시각은 오프셋 없는 KST라 기기 시간대와 무관하게 KST로 읽는다. */
 export function parseKst(value: DateTimeString): number {
   return new Date(`${value}+09:00`).getTime();
 }
 
-const HOUR_MS = 60 * 60 * 1000;
-const DAY_MS = 24 * HOUR_MS;
-
-/** 하루 넘게 남았으면 `D-n`, 그 안이면 `n시간 남음`. 이미 지났으면 undefined. */
+/**
+ * 남은 시간을 `2일 5시간`, `3시간`, `12분` 같은 기간 명사로 준다(뒤에 "뒤", "남았어요"를 붙여 쓴다).
+ * 시각이 없거나 이미 지났으면 undefined라, 호출부는 이 경우 문장을 따로 둔다.
+ */
 export function formatTimeLeft(value: DateTimeString | undefined, now: number): string | undefined {
   if (!value) return undefined;
   const left = parseKst(value) - now;
   if (left <= 0) return undefined;
-  if (left >= DAY_MS) return `D-${Math.ceil(left / DAY_MS)}`;
-  return `${Math.max(1, Math.ceil(left / HOUR_MS))}시간 남음`;
+  const days = Math.floor(left / DAY_MS);
+  const hours = Math.floor((left % DAY_MS) / HOUR_MS);
+  if (days >= 3) return `${days}일`;
+  if (days >= 1) return hours > 0 ? `${days}일 ${hours}시간` : `${days}일`;
+  if (hours >= 1) return `${hours}시간`;
+  return `${Math.max(1, Math.ceil(left / MINUTE_MS))}분`;
+}
+
+/** 남은 시간이 있으면 `format(남은 시간)`, 없거나 지났으면 `fallback` 문장을 준다. */
+export function describeTimeLeft(
+  value: DateTimeString | undefined,
+  now: number,
+  format: (left: string) => string,
+  fallback: string,
+): string {
+  const left = formatTimeLeft(value, now);
+  return left ? format(left) : fallback;
 }
 
 export function getTerritoryPhase(cycle: CurrentCycle, now: number): TerritoryPhase {
@@ -43,6 +64,19 @@ export function getTerritoryPhase(cycle: CurrentCycle, now: number): TerritoryPh
   if (cycle.representatives_selected) return 'setup';
   if (cycle.ranking_freeze_at && now >= parseKst(cycle.ranking_freeze_at)) return 'awaitingPick';
   return 'selection';
+}
+
+const passed = (value: DateTimeString | undefined, now: number) =>
+  !!value && now >= parseKst(value);
+
+/** 시각상 다음 단계여야 하는데 서버 값이 아직 이전 단계인지(배치 지연) */
+function isServerLagging(cycle: CurrentCycle, now: number): boolean {
+  if (cycle.round_type === 'POINT') {
+    if (passed(cycle.battle_started_at, now)) return true;
+    if (!cycle.representatives_selected && passed(cycle.ranking_freeze_at, now)) return true;
+  }
+  if (cycle.round_type === 'BATTLE' && passed(cycle.battle_ended_at, now)) return true;
+  return false;
 }
 
 function nextBoundary(cycle: CurrentCycle, now: number): number | undefined {
@@ -60,19 +94,25 @@ export function useCurrentCycle() {
     refetchInterval: (query) => {
       const cycle = query.state.data;
       if (!cycle) return false;
-      return getTerritoryPhase(cycle, Date.now()) === 'awaitingPick'
-        ? AWAITING_PICK_REFETCH_MS
-        : false;
+      return isServerLagging(cycle, Date.now()) ? LAGGING_REFETCH_MS : false;
     },
   });
 }
 
-/** 단계 경계 시각이 지나면 사이클을 다시 받아 화면이 저절로 다음 단계로 넘어가게 한다. */
+/**
+ * 단계 경계 시각이 지나면 사이클을 다시 받아 화면이 저절로 다음 단계로 넘어가게 한다.
+ * 서버 전환이 늦으면 `useCurrentCycle`의 refetchInterval이 따라잡을 때까지 다시 묻는다.
+ */
 export function useTerritoryPhase() {
   const query = useCurrentCycle();
   const cycle = query.data;
   const [now, setNow] = useState(() => Date.now());
   const { refetch } = query;
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), TICK_MS);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     if (!cycle) return;
@@ -86,6 +126,7 @@ export function useTerritoryPhase() {
       Math.min(boundary - Date.now() + 1000, MAX_TIMER_MS),
     );
     return () => clearTimeout(timer);
+    // now가 1분마다 바뀌며 타이머를 다시 건다. 사이클은 구조 공유로 참조가 그대로라 상한으로 자른 긴 타이머도 이 덕에 이어진다.
   }, [cycle, now, refetch]);
 
   return {

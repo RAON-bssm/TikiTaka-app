@@ -13,9 +13,10 @@ export function useChallengeTerritory() {
     mutationFn: ({ dongCode, ...req }: ChallengeRequest & { dongCode: number }) =>
       challengeTerritory(dongCode, req),
     onSuccess: (result) => {
-      queryClient.setQueryData(territoryKeys.challenge(result.challenge_id), result);
       syncMyPoint(queryClient, result.my_point);
       queryClient.invalidateQueries({ queryKey: territoryKeys.all });
+      // 무효화보다 뒤에 넣어야 한다. 앞에 넣으면 함께 무효화돼 결과 화면이 같은 결과를 다시 받는다.
+      queryClient.setQueryData(territoryKeys.challenge(result.challenge_id), result);
     },
   });
 }
