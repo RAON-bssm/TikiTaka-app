@@ -1,16 +1,15 @@
 import { router, type Href } from 'expo-router';
 import type { ReactNode } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import ChevronRightIcon from '@/assets/icons/chevron-right.svg';
 import BackButton from '@/components/ui/BackButton';
 import Button from '@/components/ui/Button';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Skeleton from '@/components/ui/feedback/Skeleton';
+import MyTerritoryMap from '@/components/territory/MyTerritoryMap';
 import NavRow from '@/components/ui/NavRow';
 import Typography from '@/components/ui/Typography';
-import { palette } from '@/constants/colors';
 import { useDongPreferences } from '@/hooks/territory/useDongPreferences';
 import { useMyTerritories } from '@/hooks/territory/useMyTerritories';
 import { useTeamName } from '@/hooks/territory/useTeamName';
@@ -66,7 +65,16 @@ function countdown(phase: ActivePhase, cycle: CurrentCycle, now: number): string
 }
 
 export default function TerritoryHubScreen() {
-  const { phase, now, data: cycle, isLoading, isError, refetch } = useTerritoryPhase();
+  const {
+    phase,
+    now,
+    data: cycle,
+    myLocationId,
+    isLoading,
+    isError,
+    refetch,
+  } = useTerritoryPhase();
+  const teamName = useTeamName();
   const isSelecting = phase === 'selection' || phase === 'awaitingPick';
   const hasTerritories = phase === 'setup' || phase === 'battle';
   const preferences = useDongPreferences({ enabled: isSelecting });
@@ -109,6 +117,7 @@ export default function TerritoryHubScreen() {
                 <MyTerritorySection
                   territories={myTerritories.data?.territories}
                   maxOwned={myTerritories.data?.max_owned}
+                  teamGu={teamName(myLocationId)}
                   isLoading={myTerritories.isLoading}
                   isError={myTerritories.isError}
                   onRetry={() => void myTerritories.refetch()}
@@ -339,12 +348,14 @@ function TodoCard({
 function MyTerritorySection({
   territories,
   maxOwned,
+  teamGu,
   isLoading,
   isError,
   onRetry,
 }: {
   territories: MyTerritory[] | undefined;
   maxOwned: number | undefined;
+  teamGu: string | undefined;
   isLoading: boolean;
   isError: boolean;
   onRetry: () => void;
@@ -362,63 +373,21 @@ function MyTerritorySection({
         )}
       </View>
       {isLoading ? (
-        <Skeleton className="h-[72px] w-full rounded-md" />
+        <Skeleton className="h-[240px] w-full rounded-md" />
       ) : isError || !territories ? (
         <ErrorRetry message="내 땅을 불러오지 못했어요." onRetry={onRetry} />
-      ) : territories.length === 0 ? (
-        <Typography variant="body3" className="text-gray-400">
-          아직 가진 땅이 없어요.
-        </Typography>
       ) : (
-        territories.map((territory) => (
-          <MyTerritoryRow key={territory.dong_code} territory={territory} />
-        ))
+        <MyTerritoryMap
+          territories={territories}
+          teamGu={teamGu}
+          onSelect={(dongCode) =>
+            router.push({
+              pathname: '/map/territory/manage',
+              params: { dongCode: String(dongCode) },
+            })
+          }
+        />
       )}
     </View>
-  );
-}
-
-function MyTerritoryRow({ territory }: { territory: MyTerritory }) {
-  const teamName = useTeamName();
-  const needsSetup = !territory.defense_photo;
-  const hasPending = !!territory.pending_adjective;
-
-  return (
-    <Pressable
-      onPress={() =>
-        router.push({
-          pathname: '/map/territory/manage',
-          params: { dongCode: String(territory.dong_code) },
-        })
-      }
-      className="flex-row items-center gap-md rounded-md border border-gray-200 bg-white p-lg active:opacity-80"
-    >
-      <View className="flex-1 gap-xs">
-        <View className="flex-row items-center gap-sm">
-          <Typography variant="h3" className="text-gray-700">
-            {[teamName(territory.location_id), territory.dong_name].filter(Boolean).join(' ')}
-          </Typography>
-          {(needsSetup || hasPending) && (
-            <View className="rounded-full bg-primary-100 px-sm py-xs">
-              <Typography variant="caption" className="text-primary-600">
-                {needsSetup ? '세팅 필요' : '새 미션 대기'}
-              </Typography>
-            </View>
-          )}
-        </View>
-        <Typography variant="body3" className="text-gray-400" numberOfLines={1}>
-          {territory.mission ?? '아직 미션이 없어요'}
-        </Typography>
-      </View>
-      <View className="items-end gap-xs">
-        <Typography variant="h3" className="text-primary-600">
-          {territory.defense_score}
-        </Typography>
-        <Typography variant="caption" className="text-gray-400">
-          방어 점수
-        </Typography>
-      </View>
-      <ChevronRightIcon width={20} height={20} color={palette.gray[400]} />
-    </Pressable>
   );
 }

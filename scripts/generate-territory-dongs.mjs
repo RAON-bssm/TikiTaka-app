@@ -5,6 +5,7 @@
 // - 출력:
 //   - src/constants/territory/dongs.ts: 동 코드 → 구·동 이름
 //   - src/constants/territory/guBoundaries.json: 구별 경계(본진 구 안에서 찍었는지 판정용, 단순화)
+//   - src/constants/territory/dongShapes.json: 동별 경계(내 땅 미니맵 그리기용, 더 거칠게 단순화)
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -20,6 +21,9 @@ const EXPECTED_DONGS = 206;
 // 약 10m. GPS 오차보다 작아 판정 정확도에 영향이 없고, 점 수를 크게 줄인다.
 const SIMPLIFY_TOLERANCE = 0.0001;
 const COORD_DIGITS = 5;
+// 약 30m. 화면 폭 한 장에 구 몇 개를 그리는 미니맵이라 이보다 촘촘해도 차이가 안 보이고, 번들만 커진다.
+const SHAPE_TOLERANCE = 0.0003;
+const SHAPE_DIGITS = 4;
 
 function readCsv() {
   const text = fs
@@ -46,7 +50,7 @@ function perpendicularDistance([x, y], [x1, y1], [x2, y2]) {
   return Math.abs(dy * x - dx * y + x2 * y1 - y2 * x1) / Math.hypot(dx, dy);
 }
 
-function simplify(points) {
+function simplify(points, tolerance = SIMPLIFY_TOLERANCE) {
   if (points.length <= 3) return points;
   let maxDistance = 0;
   let maxIndex = 0;
@@ -58,26 +62,26 @@ function simplify(points) {
       maxIndex = i;
     }
   }
-  if (maxDistance <= SIMPLIFY_TOLERANCE) return [points[0], points[last]];
+  if (maxDistance <= tolerance) return [points[0], points[last]];
   return [
-    ...simplify(points.slice(0, maxIndex + 1)).slice(0, -1),
-    ...simplify(points.slice(maxIndex)),
+    ...simplify(points.slice(0, maxIndex + 1), tolerance).slice(0, -1),
+    ...simplify(points.slice(maxIndex), tolerance),
   ];
 }
 
-const round = (value) => Number(value.toFixed(COORD_DIGITS));
+const round = (value, digits) => Number(value.toFixed(digits));
 
 /** 링을 [lng, lat, lng, lat, ...]로 펼친다. 너무 작아져 면이 사라진 링은 버린다. */
-function flattenRing(ring) {
-  const simplified = simplify(ring);
+function flattenRing(ring, tolerance, digits) {
+  const simplified = simplify(ring, tolerance);
   if (simplified.length < 4) return null;
-  return simplified.flatMap(([lng, lat]) => [round(lng), round(lat)]);
+  return simplified.flatMap(([lng, lat]) => [round(lng, digits), round(lat, digits)]);
 }
 
-function toPolygons(geometry) {
+function toPolygons(geometry, tolerance = SIMPLIFY_TOLERANCE, digits = COORD_DIGITS) {
   const polygons = geometry.type === 'Polygon' ? [geometry.coordinates] : geometry.coordinates;
   return polygons
-    .map((rings) => rings.map(flattenRing).filter(Boolean))
+    .map((rings) => rings.map((ring) => flattenRing(ring, tolerance, digits)).filter(Boolean))
     .filter((rings) => rings.length > 0);
 }
 
@@ -92,6 +96,7 @@ function main() {
   const geojson = JSON.parse(fs.readFileSync(path.join(DATA_DIR, 'busan_dong.geojson'), 'utf8'));
   const guByCode = new Map(dongs.map((dong) => [dong.code, dong.gu]));
   const boundaries = {};
+  const shapes = {};
   const seen = new Set();
   for (const feature of geojson.features) {
     const code = Number(feature.properties.adm_cd2);
@@ -99,6 +104,9 @@ function main() {
     if (!gu) throw new Error(`csv에 없는 동이 경계에 있습니다: ${code}`);
     seen.add(code);
     (boundaries[gu] ??= []).push(...toPolygons(feature.geometry));
+    // 너무 작아 다 사라지는 섬 조각은 버리되, 동 하나가 통째로 빠지면 미니맵에서 구멍이 나므로 촘촘한 값으로 남긴다.
+    const shape = toPolygons(feature.geometry, SHAPE_TOLERANCE, SHAPE_DIGITS);
+    shapes[code] = shape.length > 0 ? shape : toPolygons(feature.geometry);
   }
   const missing = dongs.filter((dong) => !seen.has(dong.code));
   if (missing.length > 0) {
@@ -130,6 +138,7 @@ ${rows}
   fs.mkdirSync(OUT_DIR, { recursive: true });
   fs.writeFileSync(path.join(OUT_DIR, 'dongs.ts'), ts);
   fs.writeFileSync(path.join(OUT_DIR, 'guBoundaries.json'), JSON.stringify(boundaries));
+  fs.writeFileSync(path.join(OUT_DIR, 'dongShapes.json'), JSON.stringify(shapes));
 
   const points = Object.values(boundaries)
     .flat(2)
