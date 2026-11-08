@@ -4,6 +4,7 @@ import { Image, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import Topic from '@/components/camera/Topic';
+import TerritoryStats from '@/components/territory/TerritoryStats';
 import BackButton from '@/components/ui/BackButton';
 import Button from '@/components/ui/Button';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
@@ -104,11 +105,11 @@ export default function ManageTerritoryScreen() {
               </View>
             )}
 
-            <View className="flex-row rounded-md border border-gray-200 bg-white py-md">
-              <Stat label="땅값" value={territory.land_price} />
-              <View className="w-[1px] bg-gray-200" />
-              <Stat label="통행료" value={territory.toll} />
-            </View>
+            <TerritoryStats
+              landPrice={territory.land_price}
+              toll={territory.toll}
+              className="rounded-md bg-white"
+            />
 
             <Typography variant="caption" className="text-gray-400">
               하루 넘게 활동이 없으면 방어 점수가 매일 1점씩 내려가요(60점까지).
@@ -164,18 +165,5 @@ export default function ManageTerritoryScreen() {
         )}
       </ScrollView>
     </SafeAreaView>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: number }) {
-  return (
-    <View className="flex-1 items-center gap-xs">
-      <Typography variant="caption" className="text-gray-400">
-        {label}
-      </Typography>
-      <Typography variant="h3" className="text-gray-700">
-        {value.toLocaleString()}
-      </Typography>
-    </View>
   );
 }

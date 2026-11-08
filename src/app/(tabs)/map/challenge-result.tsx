@@ -1,5 +1,4 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import type { ReactNode } from 'react';
 import { Image, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -7,6 +6,7 @@ import Button from '@/components/ui/Button';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Skeleton from '@/components/ui/feedback/Skeleton';
 import Header from '@/components/ui/Header';
+import ResultRow from '@/components/territory/ResultRow';
 import Typography from '@/components/ui/Typography';
 import { useViewUrl } from '@/hooks/storage/useViewUrl';
 import { useChallenge } from '@/hooks/territory/useChallenge';
@@ -110,7 +110,7 @@ export default function ChallengeResultScreen() {
 
             <View className="gap-sm rounded-sm border border-gray-200 bg-white p-md">
               {params.hasDefender !== undefined && (
-                <Row label="차지 팀">
+                <ResultRow label="차지 팀">
                   <View className="flex-row items-center gap-xs">
                     <Typography variant="body3" className="text-secondary-500">
                       {defenderTeam}
@@ -125,14 +125,17 @@ export default function ChallengeResultScreen() {
                       {won ? myTeam : defenderTeam}
                     </Typography>
                   </View>
-                </Row>
+                </ResultRow>
               )}
               {won ? (
-                <Row label="새 방어 점수" value={String(result.score)} />
+                <ResultRow label="새 방어 점수" value={String(result.score)} />
               ) : (
-                <Row label="모자란 점수" value={String(result.defense_score_at - result.score)} />
+                <ResultRow
+                  label="모자란 점수"
+                  value={String(result.defense_score_at - result.score)}
+                />
               )}
-              <Row label="낸 통행료" value={`${result.toll.toLocaleString()} P`} />
+              <ResultRow label="낸 통행료" value={`${result.toll.toLocaleString()} P`} />
             </View>
 
             {result.review && (
@@ -196,21 +199,6 @@ function PhotoCard({
         {side === 'me' ? scoreText : nameText}
         {side === 'me' ? nameText : scoreText}
       </View>
-    </View>
-  );
-}
-
-function Row({ label, value, children }: { label: string; value?: string; children?: ReactNode }) {
-  return (
-    <View className="flex-row items-center justify-between">
-      <Typography variant="body3" className="text-gray-700">
-        {label}
-      </Typography>
-      {children ?? (
-        <Typography variant="body3" className="text-gray-400">
-          {value}
-        </Typography>
-      )}
     </View>
   );
 }

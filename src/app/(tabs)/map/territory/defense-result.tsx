@@ -1,11 +1,11 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import type { ReactNode } from 'react';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import CapturedPhoto from '@/components/camera/CapturedPhoto';
 import Button from '@/components/ui/Button';
 import Header from '@/components/ui/Header';
+import ResultRow from '@/components/territory/ResultRow';
 import Typography from '@/components/ui/Typography';
 import { findDong } from '@/constants/territory/region';
 
@@ -56,13 +56,13 @@ export default function DefenseResultScreen() {
         <CapturedPhoto uri={params.uri} />
 
         <View className="gap-sm rounded-sm border border-gray-200 bg-white p-md">
-          <Row label="미션">
+          <ResultRow label="미션">
             <Typography variant="body3" className="text-gray-400">
               {params.mission}
             </Typography>
-          </Row>
+          </ResultRow>
           {previous !== undefined ? (
-            <Row label="방어 점수">
+            <ResultRow label="방어 점수">
               <View className="flex-row items-center gap-xs">
                 <Typography variant="body3" className="text-gray-400">
                   {previous}
@@ -77,13 +77,13 @@ export default function DefenseResultScreen() {
                   {score}
                 </Typography>
               </View>
-            </Row>
+            </ResultRow>
           ) : (
-            <Row label="방어 점수">
+            <ResultRow label="방어 점수">
               <Typography variant="body3" className="text-primary-600">
                 {score}
               </Typography>
-            </Row>
+            </ResultRow>
           )}
         </View>
 
@@ -96,16 +96,5 @@ export default function DefenseResultScreen() {
         <Button content="내 땅으로 돌아가기" onclick={() => router.back()} />
       </ScrollView>
     </SafeAreaView>
-  );
-}
-
-function Row({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <View className="flex-row items-center justify-between gap-md">
-      <Typography variant="body3" className="text-gray-700">
-        {label}
-      </Typography>
-      {children}
-    </View>
   );
 }
