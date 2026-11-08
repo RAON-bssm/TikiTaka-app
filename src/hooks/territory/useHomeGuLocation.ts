@@ -1,5 +1,6 @@
 import * as Location from 'expo-location';
 import { useEffect, useRef, useState } from 'react';
+import { AppState } from 'react-native';
 
 import { useTerritoryMockSettings } from '@/api/mock/territoryMockStore';
 import { isInTeamArea } from '@/constants/territory/region';
@@ -25,7 +26,9 @@ export function useHomeGuLocation(team: TeamLocation | undefined, active: boolea
   // 권한 문구가 없는 예전 빌드에서도 권한 조회만으로 앱이 멈추지 않게 하기 위해서다.
   const skip = __DEV__ && mock.enabled && mock.skipLocation;
   const watching = active && !skip;
-  const [permission, requestPermission] = Location.useForegroundPermissions({ get: !skip });
+  const [permission, requestPermission, getPermission] = Location.useForegroundPermissions({
+    get: !skip,
+  });
   const [position, setPosition] = useState<Position>();
   const [failed, setFailed] = useState(false);
   const granted = permission?.granted === true;
@@ -38,6 +41,15 @@ export function useHomeGuLocation(team: TeamLocation | undefined, active: boolea
     asked.current = true;
     void requestPermission();
   }, [watching, undetermined, requestPermission]);
+
+  // 훅은 마운트할 때만 권한을 조회한다. 설정 앱에서 권한을 켜고 돌아와도 반영되도록 앱 복귀 때 다시 읽는다.
+  useEffect(() => {
+    if (!watching) return;
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') void getPermission();
+    });
+    return () => subscription.remove();
+  }, [watching, getPermission]);
 
   useEffect(() => {
     if (!watching || !granted) return;

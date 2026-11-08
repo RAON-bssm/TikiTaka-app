@@ -1,5 +1,5 @@
-import { useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { FlatList, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -32,7 +32,11 @@ const EMPTY_DESCRIPTION: Record<RankingTab, string> = {
 
 export default function RankingScreen() {
   // 땅따먹기 허브에서 `?tab=team`으로 들어오면 팀랭킹을 연다. 탭 화면은 남아 있으므로 파라미터가 바뀔 때도 맞춘다.
+  // 읽은 뒤 파라미터를 지워야, 사용자가 다른 탭으로 바꾼 뒤 같은 `?tab=team`으로 다시 들어와도 바뀜으로 잡힌다.
   const { tab: tabParam } = useLocalSearchParams<{ tab?: string }>();
+  useEffect(() => {
+    if (tabParam === 'team') router.setParams({ tab: undefined });
+  }, [tabParam]);
   const [selectedTab, setSelectedTab] = useState<RankingTab>(
     tabParam === 'team' ? '팀랭킹' : '동네랭킹',
   );
@@ -49,7 +53,8 @@ export default function RankingScreen() {
   const locationRanking = useLocationRanking();
   const userRanking = useUserRanking();
   const territory = useTerritoryPhase();
-  const hasTeamRanking = !!territory.phase && territory.phase !== 'none';
+  // 대표 선발 전에는 서버가 직전 사이클의 확정 순위를 줘서 지금 순위처럼 보인다. 지도처럼 땅따먹기 중에만 연다.
+  const hasTeamRanking = territory.phase === 'battle';
   const tabs: readonly RankingTab[] = hasTeamRanking
     ? RANKING_TABS
     : RANKING_TABS.filter((item) => item !== '팀랭킹');
