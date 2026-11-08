@@ -208,7 +208,7 @@ function PreferenceChips({ preferences }: { preferences: DongPreference[] }) {
         .map((preference) => (
           <View
             key={preference.dong_code}
-            className="flex-row items-center gap-xs rounded-full bg-white px-md py-xs"
+            className="flex-row items-center gap-xs rounded-full bg-primary-100 px-md py-xs"
           >
             <Typography variant="caption" className="text-primary-600">
               {`${preference.priority}지망`}
@@ -319,7 +319,7 @@ function TodoCard({
   const action = todo.action;
 
   return (
-    <View className="gap-md rounded-md bg-primary-100 p-lg">
+    <View className="gap-md rounded-md border border-gray-200 bg-white p-lg">
       <Typography variant="caption" className="text-primary-600">
         지금 할 일
       </Typography>
