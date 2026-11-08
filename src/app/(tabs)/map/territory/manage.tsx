@@ -1,19 +1,23 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import type { ReactNode } from 'react';
-import { Image, ScrollView, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Image, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import TerritoryStats from '@/components/territory/TerritoryStats';
+import Topic from '@/components/camera/Topic';
 import BackButton from '@/components/ui/BackButton';
 import Button from '@/components/ui/Button';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Skeleton from '@/components/ui/feedback/Skeleton';
 import Typography from '@/components/ui/Typography';
+import { palette } from '@/constants/colors';
 import { getPendingMission } from '@/constants/territory/mission';
 import { useViewUrl } from '@/hooks/storage/useViewUrl';
 import { useTeamName } from '@/hooks/territory/useTeamName';
 import { useTerritory } from '@/hooks/territory/useTerritory';
 import { useTerritoryPhase } from '@/hooks/territory/useTerritoryPhase';
+
+// 사진 위 흰 글씨가 읽히도록 아래쪽만 어둡게 덮는다.
+const HERO_SHADE = `${palette.gray[800]}B3`;
 
 export default function ManageTerritoryScreen() {
   const { dongCode: dongCodeParam } = useLocalSearchParams<{ dongCode: string }>();
@@ -40,7 +44,7 @@ export default function ManageTerritoryScreen() {
 
         {isLoading ? (
           <View className="gap-lg">
-            <Skeleton className="h-[28px] w-[160px] rounded-xs" />
+            <Skeleton className="h-[88px] w-full rounded-md" />
             <Skeleton className="h-[232px] w-full rounded-md" />
             <Skeleton className="h-[66px] w-full rounded-sm" />
           </View>
@@ -48,49 +52,63 @@ export default function ManageTerritoryScreen() {
           <ErrorRetry message="땅 정보를 불러오지 못했어요." onRetry={() => void refetch()} />
         ) : (
           <>
-            <Typography variant="display" className="text-gray-800">
-              {[teamName(territory.location_id), territory.dong_name].filter(Boolean).join(' ')}
-            </Typography>
+            <Topic title={territory.mission ?? '미션을 정해 주세요'} />
 
-            <View className="h-[232px] w-full items-center justify-center overflow-hidden rounded-md bg-gray-100">
+            <View className="h-[280px] w-full overflow-hidden rounded-md bg-gray-200">
               {photo.uri ? (
-                <Image source={{ uri: photo.uri }} resizeMode="cover" className="h-full w-full" />
+                <>
+                  <Image source={{ uri: photo.uri }} resizeMode="cover" className="h-full w-full" />
+                  <LinearGradient
+                    colors={['transparent', HERO_SHADE]}
+                    style={StyleSheet.absoluteFill}
+                  />
+                </>
               ) : (
-                <Typography variant="body3" className="text-gray-400">
-                  {needsSetup ? '아직 방어 사진이 없어요' : ''}
-                </Typography>
+                <View className="flex-1 items-center justify-center">
+                  <Typography variant="body3" className="text-gray-500">
+                    아직 방어 사진이 없어요
+                  </Typography>
+                </View>
               )}
+              {!needsSetup && (
+                <View className="absolute right-md top-md rounded-full bg-white px-md py-xs">
+                  <Typography variant="h4" className="text-primary-600">
+                    {`방어 ${territory.defense_score}점`}
+                  </Typography>
+                </View>
+              )}
+              <View className="absolute bottom-0 left-0 right-0 p-lg">
+                <Typography variant="body3" className={photo.uri ? 'text-white' : 'text-gray-500'}>
+                  {[teamName(territory.location_id), territory.dong_name].filter(Boolean).join(' ')}
+                </Typography>
+              </View>
             </View>
 
-            <Card label="지금 미션">
-              <Typography variant="h3" className="text-gray-700">
-                {territory.mission ?? '아직 미션이 없어요'}
+            {territory.scoring_criteria && (
+              <Typography variant="caption" className="-mt-lg text-gray-400">
+                {`채점 기준 · ${territory.scoring_criteria}`}
               </Typography>
-              {territory.scoring_criteria && (
-                <Typography variant="caption" className="text-gray-400">
-                  {territory.scoring_criteria}
-                </Typography>
-              )}
-            </Card>
-
-            {pendingMission && (
-              <Card label="바꿀 미션 (사진을 다시 찍어야 적용돼요)">
-                <Typography variant="h3" className="text-primary-700">
-                  {pendingMission}
-                </Typography>
-                {territory.pending_criteria && (
-                  <Typography variant="caption" className="text-gray-400">
-                    {territory.pending_criteria}
-                  </Typography>
-                )}
-              </Card>
             )}
 
-            <TerritoryStats
-              defenseScore={territory.defense_score}
-              landPrice={territory.land_price}
-              toll={territory.toll}
-            />
+            {pendingMission && (
+              <View className="gap-xs rounded-md bg-white p-lg">
+                <Typography variant="caption" className="text-primary-600">
+                  바꿀 미션
+                </Typography>
+                <Typography variant="h3" className="text-gray-800">
+                  {pendingMission}
+                </Typography>
+                <Typography variant="body3" className="text-gray-500">
+                  방어 사진을 다시 찍어야 적용돼요
+                </Typography>
+              </View>
+            )}
+
+            <View className="flex-row rounded-md border border-gray-200 bg-white py-md">
+              <Stat label="땅값" value={territory.land_price} />
+              <View className="w-[1px] bg-gray-200" />
+              <Stat label="통행료" value={territory.toll} />
+            </View>
 
             <Typography variant="caption" className="text-gray-400">
               하루 넘게 활동이 없으면 방어 점수가 매일 1점씩 내려가요(60점까지).
@@ -116,21 +134,28 @@ export default function ManageTerritoryScreen() {
                         onclick={() => goToCamera('retake')}
                       />
                     )}
-                    <Button
-                      content="미션 바꾸기"
-                      variant={pendingMission ? 'light' : 'primary'}
-                      onclick={() =>
-                        router.push({
-                          pathname: '/map/territory/mission',
-                          params: { dongCode: String(dongCode), mode: 'change' },
-                        })
-                      }
-                    />
-                    <Button
-                      content="방어 사진 다시 찍기"
-                      variant="light"
-                      onclick={() => goToCamera('retake')}
-                    />
+                    <View className="flex-row gap-sm">
+                      <Button
+                        content="미션 바꾸기"
+                        variant="light"
+                        className="flex-1"
+                        onclick={() =>
+                          router.push({
+                            pathname: '/map/territory/mission',
+                            params: { dongCode: String(dongCode), mode: 'change' },
+                          })
+                        }
+                      />
+                      <Button
+                        content="사진 다시 찍기"
+                        variant="light"
+                        className="flex-1"
+                        onclick={() => goToCamera('retake')}
+                      />
+                    </View>
+                    <Typography variant="caption" className="text-center text-gray-400">
+                      다시 찍으면 점수가 지금보다 낮아도 방어 점수가 바뀌어요
+                    </Typography>
                   </>
                 )}
               </View>
@@ -142,13 +167,15 @@ export default function ManageTerritoryScreen() {
   );
 }
 
-function Card({ label, children }: { label: string; children: ReactNode }) {
+function Stat({ label, value }: { label: string; value: number }) {
   return (
-    <View className="gap-xs rounded-sm border border-gray-200 bg-white p-md">
-      <Typography variant="caption" className="text-primary-600">
+    <View className="flex-1 items-center gap-xs">
+      <Typography variant="caption" className="text-gray-400">
         {label}
       </Typography>
-      {children}
+      <Typography variant="h3" className="text-gray-700">
+        {value.toLocaleString()}
+      </Typography>
     </View>
   );
 }
