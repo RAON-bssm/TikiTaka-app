@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useEffect, useSyncExternalStore } from 'react';
 
 import { territoryKeys } from '@/api/queryKeys';
 import { getCurrentCycle } from '@/api/territory';
@@ -99,6 +99,36 @@ export function useCurrentCycle() {
   });
 }
 
+// 지도·랭킹·허브 등 여러 화면이 동시에 이 훅을 쓰므로, 화면마다 타이머를 걸지 않고 시계 하나를 나눠 쓴다.
+// 구독하는 화면이 없으면 타이머도 멈춘다.
+const clock = {
+  now: Date.now(),
+  listeners: new Set<() => void>(),
+  timer: undefined as ReturnType<typeof setInterval> | undefined,
+};
+
+function tickClock() {
+  clock.now = Date.now();
+  clock.listeners.forEach((listener) => listener());
+}
+
+function subscribeClock(listener: () => void) {
+  clock.listeners.add(listener);
+  if (!clock.timer) {
+    clock.now = Date.now();
+    clock.timer = setInterval(tickClock, TICK_MS);
+  }
+  return () => {
+    clock.listeners.delete(listener);
+    if (clock.listeners.size === 0 && clock.timer) {
+      clearInterval(clock.timer);
+      clock.timer = undefined;
+    }
+  };
+}
+
+const getClockNow = () => clock.now;
+
 /**
  * 단계 경계 시각이 지나면 사이클을 다시 받아 화면이 저절로 다음 단계로 넘어가게 한다.
  * 서버 전환이 늦으면 `useCurrentCycle`의 refetchInterval이 따라잡을 때까지 다시 묻는다.
@@ -106,13 +136,8 @@ export function useCurrentCycle() {
 export function useTerritoryPhase() {
   const query = useCurrentCycle();
   const cycle = query.data;
-  const [now, setNow] = useState(() => Date.now());
+  const now = useSyncExternalStore(subscribeClock, getClockNow);
   const { refetch } = query;
-
-  useEffect(() => {
-    const timer = setInterval(() => setNow(Date.now()), TICK_MS);
-    return () => clearInterval(timer);
-  }, []);
 
   useEffect(() => {
     if (!cycle) return;
@@ -120,8 +145,9 @@ export function useTerritoryPhase() {
     if (boundary === undefined) return;
     const timer = setTimeout(
       () => {
-        setNow(Date.now());
-        void refetch();
+        tickClock();
+        // 이 훅을 쓰는 화면마다 같은 시각에 부르므로, 진행 중인 요청을 취소하지 않고 하나로 합친다.
+        void refetch({ cancelRefetch: false });
       },
       Math.min(boundary - Date.now() + 1000, MAX_TIMER_MS),
     );

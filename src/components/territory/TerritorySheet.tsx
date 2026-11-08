@@ -57,7 +57,7 @@ export default function TerritorySheet({
   const content = territory ? 'loaded' : isError ? 'error' : undefined;
 
   // 불러오지 못해도 높이를 알려야 지도가 그 동을 강조하고 시트 위로 옮긴다.
-  // 다시 시도해 내용이 바뀌면 높이도 달라져 한 번 더 알린다.
+  // 내용이 바뀌어도 높이가 같으면 onLayout이 다시 오지 않으므로, 아래 View를 내용별 key로 새로 마운트해 항상 한 번 더 받는다.
   const handleLayout = (event: LayoutChangeEvent) => {
     if (!content || reported.current === content) return;
     reported.current = content;
@@ -66,6 +66,7 @@ export default function TerritorySheet({
 
   return (
     <View
+      key={content ?? 'loading'}
       onLayout={handleLayout}
       className="absolute bottom-0 left-0 right-0 gap-2xl rounded-t-lg border border-gray-100 bg-white px-xl pb-xl pt-md"
     >
