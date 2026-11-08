@@ -10,7 +10,6 @@ import TeamRankingRow from './TeamRankingRow';
 export type RankingRowItem =
   | { kind: 'district'; key: string; data: LocationRanking }
   | { kind: 'person'; key: string; data: UserRanking }
-  /** 땅따먹기 팀(구)의 땅값 합계 순위 */
   | { kind: 'team'; key: string; data: TeamRank };
 
 interface Props {

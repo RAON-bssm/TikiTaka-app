@@ -11,7 +11,6 @@ interface Props {
   finalized: boolean;
 }
 
-/** 팀랭킹 탭 맨 위. 다른 탭의 StageBadge·내 순위와 같은 구성에 바로 위 팀까지의 차이를 더한다. */
 export default function MyTeamCard({ teams, myTeam, finalized }: Props) {
   // 같은 합계는 같은 순위라, 우리 팀보다 합계가 큰 팀 중 가장 작은 팀이 바로 위 팀이다.
   const above = myTeam

@@ -222,7 +222,6 @@ function PreferenceChips({ preferences }: { preferences: DongPreference[] }) {
   );
 }
 
-/** 지금 단계에서 가장 먼저 해야 할 일 하나만 고른다. */
 function getTodo(
   phase: ActivePhase,
   preferences: DongPreference[] | undefined,

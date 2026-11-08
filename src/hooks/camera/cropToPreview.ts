@@ -1,6 +1,5 @@
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 
-/** 미리보기에 보이던 영역만 남기도록 가운데를 잘라 낸다. */
 export async function cropToPreview(uri: string, previewAspect: number): Promise<string> {
   const context = ImageManipulator.manipulate(uri);
   const original = await context.renderAsync();

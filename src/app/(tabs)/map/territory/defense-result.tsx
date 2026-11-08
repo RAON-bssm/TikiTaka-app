@@ -21,7 +21,6 @@ type Params = {
   review?: string;
 };
 
-/** 도전 결과 화면(challenge-result)과 같은 구성으로 맞춘다. */
 export default function DefenseResultScreen() {
   const params = useLocalSearchParams<Params>();
   const dong = findDong(Number(params.dongCode));

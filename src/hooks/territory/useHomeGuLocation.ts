@@ -6,7 +6,6 @@ import { useTerritoryMockSettings } from '@/api/mock/territoryMockStore';
 import { isInTeamArea } from '@/constants/territory/region';
 import type { Location as TeamLocation } from '@/types/location';
 
-/** 개발용 목 모드에서 위치 판정을 건너뛸 때 기록하는 좌표(부산시청) */
 const MOCK_POSITION = { latitude: 35.1798, longitude: 129.075 };
 
 export type HomeGuLocationStatus = 'checking' | 'inside' | 'outside' | 'denied' | 'unavailable';

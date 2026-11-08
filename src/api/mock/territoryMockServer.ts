@@ -83,9 +83,7 @@ interface MockWorld {
   key: string;
   lands: Map<number, MockLand>;
   preferences: number[];
-  /** 대표 발표 때 내 땅이 된 동 */
   myCodes: number[];
-  /** 이번 사이클에 대표 배정을 했는지 */
   assigned: boolean;
   phase: TerritoryMockSettings['phase'];
   challenges: Map<string, ChallengeResult>;
@@ -284,7 +282,6 @@ const PHASE_ORDER: TerritoryMockSettings['phase'][] = [
   'none',
 ];
 
-/** 미리보기 화면의 "다음 단계로". 사이클이 끝나면 다시 선발전으로 돌아간다. */
 export function advanceMockPhase() {
   const { phase } = getTerritoryMockSettings();
   const next = PHASE_ORDER[(PHASE_ORDER.indexOf(phase) + 1) % PHASE_ORDER.length];
@@ -292,19 +289,16 @@ export function advanceMockPhase() {
   updateMockSettings({ phase: next });
 }
 
-/** 미리보기 화면의 "데이터 초기화" */
 export function resetMockWorld() {
   world = null;
   void queryClient.invalidateQueries({ queryKey: territoryKeys.all });
 }
 
-/** 설정을 바꾸고 화면이 새 값을 다시 받게 한다. 단계·팀이 바뀌면 땅을 새로 만든다. */
 export function updateMockSettings(patch: Partial<TerritoryMockSettings>) {
   setTerritoryMockSettings(patch);
   void queryClient.invalidateQueries({ queryKey: territoryKeys.all });
 }
 
-/** 미리보기 화면 바로가기에 쓸 대표 동들 */
 export function getMockShortcuts() {
   const current = getTerritoryMockSettings();
   const lands = [...getWorld().lands.values()];
@@ -329,7 +323,6 @@ function hasLands(phase: TerritoryMockSettings['phase']) {
   return phase === 'setup' || phase === 'battle';
 }
 
-/** 서버 시각처럼 오프셋 없는 KST 문자열 */
 function kst(offsetMs: number): string {
   return new Date(Date.now() + offsetMs + 9 * HOUR).toISOString().slice(0, 19);
 }

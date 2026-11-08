@@ -17,7 +17,6 @@ export type TerritoryPhase = 'none' | 'selection' | 'awaitingPick' | 'setup' | '
 
 // 단계 전환은 새벽 배치라 시각보다 늦을 수 있어, 서버가 따라올 때까지 이 간격으로 다시 묻는다.
 const LAGGING_REFETCH_MS = 60 * 1000;
-// 남은 시간 표시를 갱신하는 간격
 const TICK_MS = 60 * 1000;
 // setTimeout 상한(약 24.8일)을 넘기지 않게 자른다.
 const MAX_TIMER_MS = 24 * 60 * 60 * 1000;
@@ -47,7 +46,6 @@ export function formatTimeLeft(value: DateTimeString | undefined, now: number): 
   return `${Math.max(1, Math.ceil(left / MINUTE_MS))}분`;
 }
 
-/** 남은 시간이 있으면 `format(남은 시간)`, 없거나 지났으면 `fallback` 문장을 준다. */
 export function describeTimeLeft(
   value: DateTimeString | undefined,
   now: number,

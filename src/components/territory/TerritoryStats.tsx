@@ -7,7 +7,6 @@ interface Props {
   defenseScore?: number;
   landPrice: number;
   toll: number;
-  /** 배경·모서리. 시트 안에서는 회색, 카드 사이에서는 흰색을 쓴다. */
   className?: string;
 }
 

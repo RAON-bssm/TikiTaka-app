@@ -81,7 +81,6 @@ function PreferenceForm({ team, initialCodes }: { team: Location; initialCodes: 
     setCodes([...codes, code]);
   };
 
-  /** 길게 누르면 한 칸 앞 지망과 자리를 바꾼다. */
   const moveForward = (index: number) => {
     if (index === 0) return;
     const next = [...codes];

@@ -16,7 +16,6 @@ export interface TerritoryMockSettings {
   /** 부산 밖에서도 도전·세팅 카메라를 쓸 수 있게 본진 구 위치 판정을 건너뛴다. */
   skipLocation: boolean;
   challengeOutcome: MockChallengeOutcome;
-  /** AI 채점(세팅·도전·재촬영) 응답 지연 */
   scoringDelayMs: number;
 }
 

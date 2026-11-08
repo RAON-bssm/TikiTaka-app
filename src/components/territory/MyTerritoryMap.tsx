@@ -52,7 +52,6 @@ interface Props {
   onSelect: (dongCode: number) => void;
 }
 
-/** 내 땅이 있는 구와 우리 구의 동을 그리고, 내 땅만 색칠해 누르면 그 땅으로 들어간다. */
 export default function MyTerritoryMap({ territories, teamGu, onSelect }: Props) {
   const [width, setWidth] = useState(0);
 
@@ -150,7 +149,6 @@ export default function MyTerritoryMap({ territories, teamGu, onSelect }: Props)
                 />
               );
             })}
-            {/* 붙어 있는 동은 이름표가 겹쳐, 겹치면 위아래로 비켜 놓고 선으로 원래 자리를 잇는다. */}
             {placeLabels(
               territories.flatMap((territory) => {
                 const polygons = SHAPES[territory.dong_code];
@@ -283,7 +281,7 @@ interface LabelInput {
   y: number;
 }
 
-/** 앞에서 놓은 이름표와 겹치지 않는 가장 가까운 높이를 고른다. 땅이 최대 몇 곳이라 단순 탐색으로 충분하다. */
+/** 땅이 최대 몇 곳이라 단순 탐색으로 충분하다. */
 function placeLabels(inputs: LabelInput[], width: number, height: number) {
   const placed: { left: number; right: number; top: number; bottom: number }[] = [];
   return inputs.map((input) => {

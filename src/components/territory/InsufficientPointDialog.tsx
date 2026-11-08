@@ -7,7 +7,6 @@ interface Props {
   /** 있으면 연다. */
   target?: { dongName: string; toll: number; myPoint: number };
   onClose: () => void;
-  /** 이 땅은 포기하고 지도에서 다른 땅을 고르게 한다. */
   onPickAnother: () => void;
 }
 

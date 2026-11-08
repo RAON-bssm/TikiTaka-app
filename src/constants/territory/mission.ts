@@ -7,7 +7,6 @@ export function getPendingMission(territory: {
   return `${territory.pending_adjective} ${territory.pending_noun}`;
 }
 
-/** 미션 입력 화면의 추천 단어. 눌러서 바로 채울 수 있다. */
 export const ADJECTIVE_SUGGESTIONS = [
   '노을 지는',
   '반짝이는',
