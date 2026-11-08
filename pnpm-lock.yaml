@@ -34,6 +34,9 @@ importers:
       expo-apple-authentication:
         specifier: ~56.0.4
         version: 56.0.4(expo@56.0.24)(react-native@0.85.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3)
+      expo-asset:
+        specifier: ~56.0.25
+        version: 56.0.25(expo@56.0.24)(react-native@0.85.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3)(typescript@6.0.3)
       expo-build-properties:
         specifier: ~56.0.27
         version: 56.0.27(expo@56.0.24)
@@ -7827,9 +7830,7 @@ snapshots:
       metro-runtime: 0.84.5
     transitivePeerDependencies:
       - '@babel/core'
-      - bufferutil
       - supports-color
-      - utf-8-validate
 
   '@react-native/normalize-colors@0.74.89': {}
 

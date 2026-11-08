@@ -1,3 +1,4 @@
+import { Asset } from 'expo-asset';
 import { router, useIsFocused, useLocalSearchParams } from 'expo-router';
 import { useRef, useState } from 'react';
 import { type LayoutChangeEvent, Linking, Pressable, StyleSheet, View } from 'react-native';
@@ -12,6 +13,7 @@ import {
   usePhotoOutput,
 } from 'react-native-vision-camera';
 
+import { useTerritoryMockSettings } from '@/api/mock/territoryMockStore';
 import CameraBackButton from '@/components/camera/CameraBackButton';
 import CameraNotFound from '@/components/camera/CameraNotFound';
 import CameraPermissionRequest from '@/components/camera/CameraPermissionRequest';
@@ -19,6 +21,7 @@ import FlipButton from '@/components/camera/FlipButton';
 import MissionTitle from '@/components/camera/MissionTitle';
 import ShutterButton from '@/components/camera/ShutterButton';
 import ZoomControl from '@/components/camera/ZoomControl';
+import Button from '@/components/ui/Button';
 import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
 import { getPendingMission } from '@/constants/territory/mission';
@@ -27,6 +30,15 @@ import useCameraZoom from '@/hooks/camera/useCameraZoom';
 import { type HomeGuLocationStatus, useHomeGuLocation } from '@/hooks/territory/useHomeGuLocation';
 import { useMyTeam } from '@/hooks/territory/useMyTeam';
 import { useTerritory } from '@/hooks/territory/useTerritory';
+
+/** 개발용 목 모드에서 카메라가 없는 시뮬레이터 대신 쓰는 사진 */
+const SAMPLE_PHOTO = require('@/assets/images/topic-bg.webp');
+
+async function loadSamplePhoto(): Promise<string> {
+  const [asset] = await Asset.loadAsync(SAMPLE_PHOTO);
+  // 업로드 전 압축(ImageManipulator)이 로컬 파일을 읽으므로 내려받은 경로를 쓴다.
+  return asset.localUri ?? asset.uri;
+}
 
 const LENS_FILTER: DeviceFilter = {
   physicalDevices: ['ultra-wide-angle', 'wide-angle', 'telephoto'],
@@ -69,6 +81,7 @@ export default function ChallengeCameraScreen() {
   const { showToast } = useToast();
 
   const { data: territory } = useTerritory(dongCode);
+  const mock = useTerritoryMockSettings();
   const pendingMission = territory && getPendingMission(territory);
   const missionTitle =
     purpose === 'setup'
@@ -102,51 +115,83 @@ export default function ChallengeCameraScreen() {
     else void Linking.openSettings();
   };
 
-  const handleCapture = async () => {
+  const goToConfirm = (uri: string, latitude: number, longitude: number) => {
+    if (purpose === 'challenge') {
+      router.push({
+        pathname: '/map/challenge-confirm',
+        params: {
+          dongCode: String(dongCode),
+          uri,
+          lat: String(latitude),
+          lng: String(longitude),
+        },
+      });
+    } else {
+      router.push({
+        pathname: '/map/territory/defense-confirm',
+        params: {
+          dongCode: String(dongCode),
+          purpose,
+          uri,
+          ...(params.adjective && { adjective: params.adjective }),
+          ...(params.noun && { noun: params.noun }),
+          ...(params.criteria && { criteria: params.criteria }),
+        },
+      });
+    }
+  };
+
+  /** 셔터를 누른 순간의 위치를 기록한다. 서버는 이 값을 검증하지 않고 기록만 한다. */
+  const takePhoto = async (capture: () => Promise<string | undefined>) => {
     if (location.status !== 'inside' || !location.position) {
       showToast(message ?? '위치를 확인하고 있어요');
       return;
     }
     if (capturingRef.current) return;
     capturingRef.current = true;
-    // 셔터를 누른 순간의 위치를 기록한다. 서버는 이 값을 검증하지 않고 기록만 한다.
     const { latitude, longitude } = location.position;
     try {
-      const photo = await photoOutput.capturePhotoToFile({}, {});
-      if (!photo) return;
-      const uri = `file://${photo.filePath}`;
-      const croppedUri = previewAspect
-        ? await cropToPreview(uri, previewAspect).catch(() => uri)
-        : uri;
-      if (purpose === 'challenge') {
-        router.push({
-          pathname: '/map/challenge-confirm',
-          params: {
-            dongCode: String(dongCode),
-            uri: croppedUri,
-            lat: String(latitude),
-            lng: String(longitude),
-          },
-        });
-      } else {
-        router.push({
-          pathname: '/map/territory/defense-confirm',
-          params: {
-            dongCode: String(dongCode),
-            purpose,
-            uri: croppedUri,
-            ...(params.adjective && { adjective: params.adjective }),
-            ...(params.noun && { noun: params.noun }),
-            ...(params.criteria && { criteria: params.criteria }),
-          },
-        });
-      }
+      const uri = await capture();
+      if (uri) goToConfirm(uri, latitude, longitude);
     } catch {
       showToast('사진을 찍지 못했어요. 다시 시도해주세요.');
     } finally {
       capturingRef.current = false;
     }
   };
+
+  const handleCapture = () =>
+    takePhoto(async () => {
+      const photo = await photoOutput.capturePhotoToFile({}, {});
+      if (!photo) return undefined;
+      const uri = `file://${photo.filePath}`;
+      return previewAspect ? await cropToPreview(uri, previewAspect).catch(() => uri) : uri;
+    });
+
+  // 시뮬레이터에는 카메라가 없어 개발용 목 모드에서는 샘플 사진으로 다음 화면을 볼 수 있게 한다.
+  if (__DEV__ && mock.enabled && (!hasPermission || device == null)) {
+    return (
+      <View className="flex-1 justify-center gap-lg bg-black px-xl">
+        <MissionTitle title={missionTitle} />
+        <CameraBackButton />
+        <Typography variant="body2" className="text-center text-white">
+          카메라를 쓸 수 없어요 (개발용 목 모드)
+        </Typography>
+        {message && (
+          <Pressable
+            onPress={handleLocationAction}
+            disabled={location.status !== 'denied'}
+            className="self-center rounded-full bg-white/20 px-lg py-sm"
+          >
+            <Typography variant="body3" className="text-center text-white">
+              {location.status === 'denied' ? `${message} · 허용하기` : message}
+            </Typography>
+          </Pressable>
+        )}
+        <Button content="샘플 사진으로 찍기" onclick={() => void takePhoto(loadSamplePhoto)} />
+      </View>
+    );
+  }
 
   if (!hasPermission) {
     return (
