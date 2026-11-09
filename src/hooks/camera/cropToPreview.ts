@@ -1,24 +1,27 @@
-import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
+import { ImageManipulator, SaveFormat, type ImageRef } from 'expo-image-manipulator';
 
 export async function cropToPreview(uri: string, previewAspect: number): Promise<string> {
   const context = ImageManipulator.manipulate(uri);
-  const original = await context.renderAsync();
-  const { width, height } = original;
-  original.release();
+  let cropped: ImageRef | undefined;
 
-  const cropWidth = Math.min(width, Math.round(height * previewAspect));
-  const cropHeight = Math.min(height, Math.round(width / previewAspect));
-  context.crop({
-    originX: Math.round((width - cropWidth) / 2),
-    originY: Math.round((height - cropHeight) / 2),
-    width: cropWidth,
-    height: cropHeight,
-  });
-  const cropped = await context.renderAsync();
-  const result = await cropped.saveAsync({ compress: 1, format: SaveFormat.JPEG });
+  try {
+    const original = await context.renderAsync();
+    const { width, height } = original;
+    original.release();
 
-  cropped.release();
-  context.release();
-
-  return result.uri;
+    const cropWidth = Math.min(width, Math.round(height * previewAspect));
+    const cropHeight = Math.min(height, Math.round(width / previewAspect));
+    context.crop({
+      originX: Math.round((width - cropWidth) / 2),
+      originY: Math.round((height - cropHeight) / 2),
+      width: cropWidth,
+      height: cropHeight,
+    });
+    cropped = await context.renderAsync();
+    const result = await cropped.saveAsync({ compress: 1, format: SaveFormat.JPEG });
+    return result.uri;
+  } finally {
+    cropped?.release();
+    context.release();
+  }
 }
