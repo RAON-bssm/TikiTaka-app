@@ -19,12 +19,15 @@ const variantClass: Record<Variant, { bg: string; text: string }> = {
   light: { bg: 'bg-primary-100', text: 'text-primary-600' },
 };
 
+const DISABLED_CLASS = { bg: 'bg-gray-100', text: 'text-gray-400' };
+
 interface Props {
   content: string;
   onclick?: () => void;
   size?: Size;
   variant?: Variant;
   className?: string;
+  disabled?: boolean;
 }
 
 export default function Button({
@@ -33,11 +36,13 @@ export default function Button({
   size = 'md',
   variant = 'primary',
   className = '',
+  disabled = false,
 }: Props) {
-  const color = variantClass[variant];
+  const color = disabled ? DISABLED_CLASS : variantClass[variant];
   return (
     <Pressable
       onPress={onclick}
+      disabled={disabled}
       className={`flex items-center justify-center rounded-sm ${color.bg} ${sizeClass[size]} ${className}`}
     >
       <Typography variant={sizeVariant[size]} className={color.text}>

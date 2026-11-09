@@ -8,6 +8,7 @@ import RegionSelect from '@/components/ui/input/RegionSelect';
 import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
 import { useLocations } from '@/hooks/location/useLocations';
+import { useTerritoryPhase } from '@/hooks/territory/useTerritoryPhase';
 import { useMyInfo } from '@/hooks/user/useMyInfo';
 import { useReserveLocationChange } from '@/hooks/user/useLocationChange';
 import { useMoveCurrentLocation } from '@/hooks/user/useMoveCurrentLocation';
@@ -46,6 +47,12 @@ export default function EditRegion() {
   const { mutate: submit, isPending } = mode === 'main' ? reserveChange : moveCurrent;
 
   const [selectedId, setSelectedId] = useState<number>();
+  const { phase } = useTerritoryPhase();
+  // 본진 = 땅따먹기 팀이라 사이클 중에는 바로 바뀌지 않고, 바뀌면 지금 구의 희망 동은 쓸 수 없게 된다.
+  const territoryNotice =
+    mode === 'main' && phase && phase !== 'none'
+      ? '땅따먹기 중에는 팀이 바뀌지 않아요. 다음 라운드부터 새 본진이 팀이 되고, 등록한 희망 동은 초기화돼요.'
+      : undefined;
 
   const isLoading = locationsQuery.isLoading || myInfoQuery.isLoading;
   const isError = locationsQuery.isError || myInfoQuery.isError;
@@ -94,6 +101,11 @@ export default function EditRegion() {
               <Typography variant="body2" className="text-gray-400">
                 {copy.notice}
               </Typography>
+              {territoryNotice && (
+                <Typography variant="body3" className="text-primary-600">
+                  {territoryNotice}
+                </Typography>
+              )}
             </View>
             {isLoading ? (
               <Skeleton className="h-[65px] w-full rounded-sm" />

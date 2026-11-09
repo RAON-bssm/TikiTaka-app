@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { FlatList, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import BlockUserDialog from '@/components/block/BlockUserDialog';
 import BattleSection from '@/components/ranking/BattleSection';
 import MyRankingRow from '@/components/ranking/MyRankingRow';
+import MyTeamCard from '@/components/ranking/MyTeamCard';
 import RankingEmptyState from '@/components/ranking/RankingEmptyState';
 import RankingRow, { type RankingRowItem } from '@/components/ranking/RankingRow';
 import RankingTabs from '@/components/ranking/RankingTabs';
@@ -12,20 +14,37 @@ import StageBadge from '@/components/ranking/StageBadge';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Skeleton from '@/components/ui/feedback/Skeleton';
 import Header from '@/components/ui/Header';
+import Typography from '@/components/ui/Typography';
 import { RANKING_TABS, type RankingTab } from '@/constants/ranking';
 import { useCurrentBattles } from '@/hooks/match/useCurrentBattles';
 import { useMatchStage } from '@/hooks/match/useMatchStage';
 import { useLocationRanking } from '@/hooks/ranking/useLocationRanking';
 import { useUserRanking } from '@/hooks/ranking/useUserRanking';
+import { useTeamRanking } from '@/hooks/territory/useTeamRanking';
+import { formatTimeLeft, useTerritoryPhase } from '@/hooks/territory/useTerritoryPhase';
 import { useMyInfo } from '@/hooks/user/useMyInfo';
 
 const EMPTY_DESCRIPTION: Record<RankingTab, string> = {
   동네랭킹: '대결이 시작되면 동네 점수 순위가 실시간으로 집계돼요.',
   개인랭킹: '대결이 시작되면 개인 점수 순위가 실시간으로 집계돼요.',
+  팀랭킹: '땅따먹기가 시작되면 팀(구)별 땅값 합계 순위가 집계돼요.',
 };
 
 export default function RankingScreen() {
-  const [tab, setTab] = useState<RankingTab>('동네랭킹');
+  // 땅따먹기 허브에서 `?tab=team`으로 들어오면 팀랭킹을 연다. 탭 화면은 남아 있으므로 파라미터가 바뀔 때도 맞춘다.
+  // 읽은 뒤 파라미터를 지워야, 사용자가 다른 탭으로 바꾼 뒤 같은 `?tab=team`으로 다시 들어와도 바뀜으로 잡힌다.
+  const { tab: tabParam } = useLocalSearchParams<{ tab?: string }>();
+  useEffect(() => {
+    if (tabParam === 'team') router.setParams({ tab: undefined });
+  }, [tabParam]);
+  const [selectedTab, setSelectedTab] = useState<RankingTab>(
+    tabParam === 'team' ? '팀랭킹' : '동네랭킹',
+  );
+  const [lastTabParam, setLastTabParam] = useState(tabParam);
+  if (tabParam !== lastTabParam) {
+    setLastTabParam(tabParam);
+    if (tabParam === 'team') setSelectedTab('팀랭킹');
+  }
   const [blockTarget, setBlockTarget] = useState<{ userId: string; userName: string }>();
 
   const { data: myInfo } = useMyInfo();
@@ -33,11 +52,36 @@ export default function RankingScreen() {
   const matchStage = useMatchStage();
   const locationRanking = useLocationRanking();
   const userRanking = useUserRanking();
+  const territory = useTerritoryPhase();
+  // 대표 선발 전에는 서버가 직전 사이클의 확정 순위를 줘서 지금 순위처럼 보인다. 지도처럼 땅따먹기 중에만 연다.
+  const hasTeamRanking = territory.phase === 'battle';
+  const tabs: readonly RankingTab[] = hasTeamRanking
+    ? RANKING_TABS
+    : RANKING_TABS.filter((item) => item !== '팀랭킹');
+  // 사이클이 끝나 팀랭킹 탭이 사라지면 동네랭킹으로 돌아간다.
+  const tab: RankingTab = tabs.includes(selectedTab) ? selectedTab : '동네랭킹';
+  const teamRanking = useTeamRanking({ enabled: hasTeamRanking });
+  // 땅따먹기 사이클에서는 선발전(4일차) 끝에 랭킹이 멈추고, 그 순위로 동 대표를 뽑는다.
+  const freezeLeft = formatTimeLeft(territory.data?.ranking_freeze_at, territory.now);
+  const freezeNotice =
+    territory.phase === 'selection'
+      ? `동 대표 선발전 중이에요. ${
+          freezeLeft ? `${freezeLeft} 뒤` : '곧'
+        } 랭킹이 멈추고 이 순위로 대표를 뽑아요.`
+      : territory.phase === 'awaitingPick' ||
+          territory.phase === 'setup' ||
+          territory.phase === 'battle'
+        ? '랭킹이 멈췄어요. 땅따먹기가 끝날 때까지 순위가 바뀌지 않아요.'
+        : undefined;
 
-  const rankingQuery = tab === '동네랭킹' ? locationRanking : userRanking;
+  const rankingQuery =
+    tab === '동네랭킹' ? locationRanking : tab === '개인랭킹' ? userRanking : teamRanking;
   const districts = locationRanking.data?.location_ranking ?? [];
   const persons = userRanking.data?.user_ranking ?? [];
-  const currentRows = tab === '동네랭킹' ? districts : persons;
+  const teams = teamRanking.data?.teams ?? [];
+  const myTeamId = teamRanking.data?.my_location_id ?? territory.myLocationId;
+  const myTeam = teams.find((team) => team.location_id === myTeamId);
+  const currentRows = tab === '동네랭킹' ? districts : tab === '개인랭킹' ? persons : teams;
   // 랭킹이 하나도 없으면 시즌 배지·내 순위는 의미가 없어 포디움 empty state만 보여준다.
   const isRankingEmpty = rankingQuery.isSuccess && currentRows.length === 0;
 
@@ -45,7 +89,9 @@ export default function RankingScreen() {
     ? []
     : tab === '동네랭킹'
       ? districts.map((data) => ({ kind: 'district', key: `d${data.location_id}`, data }))
-      : persons.map((data) => ({ kind: 'person', key: `p${data.user_id}`, data }));
+      : tab === '개인랭킹'
+        ? persons.map((data) => ({ kind: 'person', key: `p${data.user_id}`, data }))
+        : teams.map((data) => ({ kind: 'team', key: `t${data.location_id}`, data }));
 
   const header = (
     <View className="gap-2xl">
@@ -61,18 +107,30 @@ export default function RankingScreen() {
       </View>
 
       <View className="gap-lg bg-white px-xl pb-lg pt-lg">
-        <RankingTabs tabs={RANKING_TABS} selected={tab} onSelect={setTab} />
-        {!isRankingEmpty &&
-          (matchStage.isLoading ? (
-            <Skeleton className="h-3xl w-full rounded-full" />
-          ) : matchStage.isError ? (
-            <ErrorRetry
-              message="시즌 정보를 불러오지 못했어요."
-              onRetry={() => matchStage.refetch()}
-            />
-          ) : (
-            <StageBadge stage={matchStage.data} />
-          ))}
+        <RankingTabs tabs={tabs} selected={tab} onSelect={setSelectedTab} />
+        {tab === '팀랭킹'
+          ? !isRankingEmpty &&
+            teamRanking.isSuccess && (
+              <MyTeamCard teams={teams} myTeam={myTeam} finalized={teamRanking.data.finalized} />
+            )
+          : !isRankingEmpty &&
+            (matchStage.isLoading ? (
+              <Skeleton className="h-3xl w-full rounded-full" />
+            ) : matchStage.isError ? (
+              <ErrorRetry
+                message="시즌 정보를 불러오지 못했어요."
+                onRetry={() => matchStage.refetch()}
+              />
+            ) : (
+              <StageBadge stage={matchStage.data} />
+            ))}
+        {freezeNotice && tab !== '팀랭킹' && (
+          <View className="rounded-sm bg-secondary-100 px-md py-sm">
+            <Typography variant="caption" className="text-secondary-500">
+              {freezeNotice}
+            </Typography>
+          </View>
+        )}
         {!isRankingEmpty && tab === '개인랭킹' && userRanking.isSuccess && (
           <MyRankingRow myRanking={userRanking.data.my_ranking} />
         )}

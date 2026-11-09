@@ -24,7 +24,11 @@
         "foregroundImage": "./assets/images/android-icon-foreground.png"
       },
       "predictiveBackGestureEnabled": false,
-      "permissions": ["android.permission.CAMERA"],
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ],
       "package": "com.tikitaka.raon",
       "versionCode": 1
     },
@@ -56,6 +60,15 @@
       ],
       ["expo-secure-store", { "faceIDPermission": false }],
       "expo-apple-authentication",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "땅따먹기 사진을 본진 구 안에서 찍었는지 확인하기 위해 위치 권한이 필요합니다.",
+          "locationAlwaysAndWhenInUsePermission": false,
+          "locationAlwaysPermission": false,
+          "motionUsagePermission": false
+        }
+      ],
       "./plugins/withReleaseSigning",
       [
         "expo-build-properties",

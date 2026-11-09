@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { blockUser } from '@/api/block';
-import { blockKeys, postKeys, rankingKeys } from '@/api/queryKeys';
+import { blockKeys, postKeys, rankingKeys, territoryKeys } from '@/api/queryKeys';
 
-/** 차단하면 게시물·랭킹 목록에서 그 유저가 빠져야 하므로 두 도메인 다 무효화한다. */
+/** 차단하면 게시물·랭킹 목록에서 그 유저가 빠지고 땅은 `blocked`로 바뀌어야 하므로 세 도메인을 무효화한다. */
 export function useBlockUser() {
   const queryClient = useQueryClient();
 
@@ -13,6 +13,7 @@ export function useBlockUser() {
       queryClient.invalidateQueries({ queryKey: blockKeys.all });
       queryClient.invalidateQueries({ queryKey: postKeys.all });
       queryClient.invalidateQueries({ queryKey: rankingKeys.all });
+      queryClient.invalidateQueries({ queryKey: territoryKeys.all });
     },
   });
 }

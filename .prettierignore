@@ -6,3 +6,6 @@ ios/
 android/
 *.lock
 pnpm-lock.yaml
+scripts/data/
+src/constants/territory/guBoundaries.json
+src/constants/territory/dongShapes.json

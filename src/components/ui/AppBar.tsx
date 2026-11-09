@@ -43,6 +43,9 @@ export default function AppBar({ state, navigation }: BottomTabBarProps) {
   ) {
     return null;
   }
+  if (focusedRoute?.name === 'map' && nestedRouteName === 'challenge-camera') {
+    return null;
+  }
 
   return (
     <View className="flex-row bg-white" style={{ paddingBottom: insets.bottom }}>

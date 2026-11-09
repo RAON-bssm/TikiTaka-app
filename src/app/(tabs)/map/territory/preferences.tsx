@@ -1,0 +1,249 @@
+import { router } from 'expo-router';
+import { useState } from 'react';
+import { Pressable, ScrollView, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { getApiErrorMessage } from '@/api/error';
+import RadioSelectedIcon from '@/assets/icons/radio-selected.svg';
+import RadioIcon from '@/assets/icons/radio.svg';
+import BackButton from '@/components/ui/BackButton';
+import Button from '@/components/ui/Button';
+import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
+import Skeleton from '@/components/ui/feedback/Skeleton';
+import TextInput from '@/components/ui/input/TextInput';
+import { useToast } from '@/components/ui/Toast';
+import Typography from '@/components/ui/Typography';
+import { findDong, getDongsInTeam } from '@/constants/territory/region';
+import { useDongPreferences, useUpdateDongPreferences } from '@/hooks/territory/useDongPreferences';
+import { useMyTeam } from '@/hooks/territory/useMyTeam';
+import type { Location } from '@/types/location';
+
+const MAX_PREFERENCES = 3;
+
+export default function DongPreferencesScreen() {
+  const myTeam = useMyTeam();
+  const preferences = useDongPreferences();
+  const team = myTeam.team;
+
+  const isLoading = myTeam.isLoading || preferences.isLoading;
+  const isError = myTeam.isError || preferences.isError;
+
+  return (
+    <SafeAreaView className="flex-1 bg-gray-50" edges={['top', 'bottom']}>
+      <View className="px-xl pt-2xl">
+        <BackButton title="희망 동 고르기" />
+      </View>
+      {isLoading ? (
+        <View className="gap-lg px-xl pt-2xl">
+          <Skeleton className="h-[160px] w-full rounded-md" />
+          <Skeleton className="h-[240px] w-full rounded-md" />
+        </View>
+      ) : isError || !team || !preferences.data ? (
+        <ErrorRetry
+          message="희망 동을 불러오지 못했어요."
+          onRetry={() => {
+            myTeam.refetch();
+            void preferences.refetch();
+          }}
+        />
+      ) : (
+        <PreferenceForm
+          team={team}
+          initialCodes={[...preferences.data]
+            .sort((a, b) => a.priority - b.priority)
+            .map((preference) => preference.dong_code)}
+        />
+      )}
+    </SafeAreaView>
+  );
+}
+
+function PreferenceForm({ team, initialCodes }: { team: Location; initialCodes: number[] }) {
+  const gu = team.location_name;
+  const { showToast } = useToast();
+  const { mutate: save, isPending } = useUpdateDongPreferences();
+  const [codes, setCodes] = useState(initialCodes);
+  const [query, setQuery] = useState('');
+  const dongs = getDongsInTeam(team);
+  const keyword = query.trim();
+  const visibleDongs = keyword ? dongs.filter((dong) => dong.name.includes(keyword)) : dongs;
+  const changed = codes.join() !== initialCodes.join();
+
+  const toggle = (code: number) => {
+    if (codes.includes(code)) {
+      setCodes(codes.filter((item) => item !== code));
+      return;
+    }
+    if (codes.length >= MAX_PREFERENCES) {
+      showToast(`희망 동은 ${MAX_PREFERENCES}개까지 고를 수 있어요`);
+      return;
+    }
+    setCodes([...codes, code]);
+  };
+
+  const moveForward = (index: number) => {
+    if (index === 0) return;
+    const next = [...codes];
+    [next[index - 1], next[index]] = [next[index], next[index - 1]];
+    setCodes(next);
+  };
+
+  const handleSave = () => {
+    if (isPending) return;
+    save(codes, {
+      onSuccess: () => {
+        showToast(codes.length === 0 ? '희망 동을 모두 지웠어요' : '희망 동을 저장했어요');
+        router.back();
+      },
+      onError: (error) => showToast(getApiErrorMessage(error, '희망 동을 저장하지 못했어요')),
+    });
+  };
+
+  return (
+    <>
+      <ScrollView
+        contentContainerClassName="gap-2xl px-xl pb-2xl pt-2xl"
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+      >
+        <View className="gap-sm">
+          <Typography variant="h1" className="text-gray-800">
+            {`${gu}에서 대표가 되고 싶은 동`}
+          </Typography>
+          <Typography variant="body3" className="text-gray-400">
+            포인트 순위가 높은 사람부터 1지망 → 2지망 → 3지망 순서로 배정돼요. 고르지 않으면 남은 동
+            중에서 무작위로 정해져요.
+          </Typography>
+        </View>
+
+        <View className="gap-sm">
+          <View className="flex-row gap-sm">
+            {Array.from({ length: MAX_PREFERENCES }, (_, index) => (
+              <Slot
+                key={index}
+                priority={index + 1}
+                code={codes[index]}
+                onRemove={toggle}
+                onMoveForward={() => moveForward(index)}
+              />
+            ))}
+          </View>
+          <View className="flex-row items-center justify-between">
+            <Typography variant="caption" className="text-gray-400">
+              눌러서 빼기 · 길게 눌러 한 칸 앞으로
+            </Typography>
+            {codes.length > 0 && (
+              <Pressable onPress={() => setCodes([])} hitSlop={8}>
+                <Typography variant="caption" className="text-gray-500 underline">
+                  전체 삭제
+                </Typography>
+              </Pressable>
+            )}
+          </View>
+        </View>
+
+        <View className="gap-md">
+          <TextInput
+            placeholder={`${gu}의 동 이름 검색`}
+            value={query}
+            onChangeText={setQuery}
+            returnKeyType="search"
+          />
+          <View className="overflow-hidden rounded-md border border-gray-200 bg-white">
+            {visibleDongs.length === 0 ? (
+              <Typography variant="body3" className="p-lg text-center text-gray-400">
+                {`'${keyword}'와 맞는 동이 없어요`}
+              </Typography>
+            ) : (
+              visibleDongs.map((dong, index) => {
+                const priority = codes.indexOf(dong.code);
+                const selected = priority >= 0;
+                return (
+                  <Pressable
+                    key={dong.code}
+                    onPress={() => toggle(dong.code)}
+                    className={`flex-row items-center justify-between px-lg py-md active:bg-gray-50 ${
+                      index > 0 ? 'border-t border-gray-100' : ''
+                    }`}
+                  >
+                    <Typography
+                      variant={selected ? 'h4' : 'body2'}
+                      className={selected ? 'text-gray-800' : 'text-gray-600'}
+                    >
+                      {dong.name}
+                    </Typography>
+                    <View className="flex-row items-center gap-sm">
+                      {selected && (
+                        <Typography variant="caption" className="text-primary-600">
+                          {`${priority + 1}지망`}
+                        </Typography>
+                      )}
+                      {selected ? (
+                        <RadioSelectedIcon width={22} height={22} />
+                      ) : (
+                        <RadioIcon width={22} height={22} />
+                      )}
+                    </View>
+                  </Pressable>
+                );
+              })
+            )}
+          </View>
+        </View>
+      </ScrollView>
+
+      <View className="border-t border-gray-100 bg-gray-50 px-xl pb-lg pt-md">
+        <Button
+          content={isPending ? '저장하는 중...' : '저장하기'}
+          disabled={!changed || isPending}
+          onclick={handleSave}
+        />
+      </View>
+    </>
+  );
+}
+
+function Slot({
+  priority,
+  code,
+  onRemove,
+  onMoveForward,
+}: {
+  priority: number;
+  code: number | undefined;
+  onRemove: (code: number) => void;
+  onMoveForward: () => void;
+}) {
+  const dong = code === undefined ? undefined : findDong(code);
+
+  if (!dong) {
+    return (
+      <View className="h-[84px] flex-1 items-center justify-center gap-xs rounded-md border border-dashed border-gray-300 bg-white">
+        <Typography variant="h2" className="text-gray-300">
+          +
+        </Typography>
+        <Typography variant="caption" className="text-gray-400">
+          {`${priority}지망`}
+        </Typography>
+      </View>
+    );
+  }
+
+  return (
+    <Pressable
+      onPress={() => onRemove(dong.code)}
+      onLongPress={onMoveForward}
+      accessibilityLabel={`${priority}지망 ${dong.name}, 눌러서 빼기`}
+      className="h-[84px] flex-1 items-center justify-center gap-xs rounded-md border border-primary-300 bg-primary-100 px-xs active:opacity-80"
+    >
+      <View className="h-[20px] w-[20px] items-center justify-center rounded-full bg-primary-600">
+        <Typography variant="caption" className="text-white">
+          {priority}
+        </Typography>
+      </View>
+      <Typography variant="h4" className="text-center text-gray-800" numberOfLines={1}>
+        {dong.name}
+      </Typography>
+    </Pressable>
+  );
+}

@@ -1,12 +1,16 @@
 import { isAxiosError } from 'axios';
-import { useIsFocused } from 'expo-router';
+import { router, useIsFocused } from 'expo-router';
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { BackHandler, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import WebView from 'react-native-webview';
 
 import { getApiErrorMessage } from '@/api/error';
 import ChatPanel from '@/components/chat/ChatPanel';
 import MapLoading from '@/components/map/MapLoading';
+import InsufficientPointDialog from '@/components/territory/InsufficientPointDialog';
+import TerritoryPhaseCard from '@/components/territory/TerritoryPhaseCard';
+import TerritorySheet from '@/components/territory/TerritorySheet';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
@@ -16,10 +20,31 @@ import { useChatbots } from '@/hooks/chat/useChatbots';
 import { useChatHistory } from '@/hooks/chat/useChatHistory';
 import { useSendChat } from '@/hooks/chat/useSendChat';
 import { useMapBridge } from '@/hooks/map/useMapBridge';
+import { useDongPreferences } from '@/hooks/territory/useDongPreferences';
+import { useMyTerritories } from '@/hooks/territory/useMyTerritories';
+import { useTeamName } from '@/hooks/territory/useTeamName';
+import { useTeamRanking } from '@/hooks/territory/useTeamRanking';
+import { useTerritories } from '@/hooks/territory/useTerritories';
+import { useTerritoryPhase } from '@/hooks/territory/useTerritoryPhase';
 import { useMyInfo } from '@/hooks/user/useMyInfo';
-import type { MapCharacter, Neighborhood } from '@/types/mapBridge';
+import type { MapCharacter, MapTerritory, Neighborhood } from '@/types/mapBridge';
+import type { TerritoryDetail, TerritorySummary } from '@/types/territory';
 
 const MAP_WEB_URL = process.env.EXPO_PUBLIC_MAP_WEB_URL;
+
+function toMapTerritory(
+  territory: TerritorySummary,
+  myLocationId: number | undefined,
+): MapTerritory {
+  const tone: MapTerritory['tone'] = territory.mine
+    ? 'mine'
+    : territory.owner_location_id === undefined
+      ? 'neutral'
+      : territory.owner_location_id === myLocationId
+        ? 'team'
+        : 'rival';
+  return { dongCode: territory.dong_code, tone, ...(territory.blocked && { blocked: true }) };
+}
 
 const replyDurationMs = (text: string) => Math.min(15_000, Math.max(4_000, text.length * 150));
 
@@ -57,6 +82,30 @@ export default function MapScreen() {
   /** 답이 늦게 왔을 때 그 챗봇과 아직 대화 중인지 판단한다. state는 응답 시점의 클로저에서 옛 값이라 ref로 둔다. */
   const openChatbotId = useRef<string>(undefined);
 
+  const insets = useSafeAreaInsets();
+  const { phase, myLocationId, now, data: cycle } = useTerritoryPhase();
+  // 땅은 대표 선발 때 생긴다. 그 전에는 목록이 비어 있고 상세는 404라 부르지 않는다.
+  const hasTerritories = phase === 'setup' || phase === 'battle';
+  const territories = useTerritories({ enabled: hasTerritories });
+  const myTerritories = useMyTerritories({ enabled: hasTerritories });
+  const preferences = useDongPreferences({
+    enabled: phase === 'selection' || phase === 'awaitingPick',
+  });
+  const teamRanking = useTeamRanking({ enabled: phase === 'battle' });
+  const teamName = useTeamName();
+  const myTeamRank = teamRanking.data?.teams.find(
+    (team) => team.location_id === myLocationId,
+  )?.rank;
+  const unsetCount =
+    myTerritories.data?.territories.filter((territory) => !territory.defense_photo).length ?? 0;
+  const mapTerritories: MapTerritory[] = hasTerritories
+    ? (territories.data?.territories.map((territory) => toMapTerritory(territory, myLocationId)) ??
+      [])
+    : [];
+  const [selectedDong, setSelectedDong] = useState<number>();
+  const [pointShortage, setPointShortage] = useState<TerritoryDetail>();
+  const sheetHeight = useRef<number>(undefined);
+
   const characters: MapCharacter[] =
     chatbots.data?.map((chatbot) => ({
       id: chatbot.chatbot_id,
@@ -72,9 +121,24 @@ export default function MapScreen() {
   const { webViewRef, status, onMessage, fail, reload, sendToMap } = useMapBridge({
     neighborhood,
     characters,
-    onCharacterTap: (characterId) => openChat(characterId),
+    territories: mapTerritories,
+    onCharacterTap: (characterId) => {
+      closeSheet();
+      openChat(characterId);
+    },
+    onDongTap: (dongCode) => {
+      if (openChatbotId.current) closeChat();
+      // 지도 전체가 동으로 덮여 빈 지도 탭(mapTap)이 오지 않으므로, 고른 동을 다시 탭하면 닫는다.
+      if (dongCode === selectedDong) {
+        closeSheet();
+        return;
+      }
+      sheetHeight.current = undefined;
+      setSelectedDong(dongCode);
+    },
     onMapTap: () => {
       if (openChatbotId.current) closeChat();
+      closeSheet();
     },
     onMapMoveStart: () => {
       if (openChatbotId.current) closeChat();
@@ -83,12 +147,22 @@ export default function MapScreen() {
       // 웹이 스스로 다시 로드되면 패널은 그대로라 다시 마운트되지 않으므로 여기서 포커스를 다시 맞춘다.
       // status가 loaded가 아니었다면 패널이 지금 새로 마운트되며 포커스를 보낸다.
       if (status === 'loaded' && chatbotId) focus(chatbotId);
+      if (status === 'loaded' && selectedDong !== undefined) selectDong(selectedDong);
     },
   });
 
   // 웹은 결과를 알려 주지 않는다. 숨겨졌거나 표시 상한 밖인 캐릭터면 조용히 무시된다.
   const focus = (characterId: string) =>
     sendToMap({ type: 'focusCharacter', characterId, bottomInsetPx: panelHeight.current });
+
+  const selectDong = (dongCode: number) =>
+    sendToMap({ type: 'selectDong', dongCode, bottomInsetPx: sheetHeight.current });
+
+  const closeSheet = () => {
+    if (selectedDong === undefined) return;
+    setSelectedDong(undefined);
+    sendToMap({ type: 'selectDong' });
+  };
 
   // 패널이 열린 채 다른 캐릭터를 탭하면 패널이 새로 마운트되며 그 캐릭터로 포커스를 옮긴다.
   // 이전 캐릭터의 멈춤은 웹이 풀어 주므로 clearFocus는 보내지 않지만, 남겨 둔 말풍선은 지운다.
@@ -110,9 +184,13 @@ export default function MapScreen() {
     sendToMap({ type: 'clearFocus' });
   };
 
-  const closeOnLeave = useEffectEvent(() => closeChat());
+  const closeOnLeave = useEffectEvent(() => {
+    closeChat();
+    closeSheet();
+  });
   const closeOnBack = useEffectEvent(() => {
     closeChat();
+    closeSheet();
     return true;
   });
 
@@ -123,10 +201,10 @@ export default function MapScreen() {
   }, [isFocused]);
 
   useEffect(() => {
-    if (!isFocused || !chatbotId) return;
+    if (!isFocused || (!chatbotId && selectedDong === undefined)) return;
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => closeOnBack());
     return () => subscription.remove();
-  }, [isFocused, chatbotId]);
+  }, [isFocused, chatbotId, selectedDong]);
 
   // 응답 처리는 패널이 아니라 이 화면에 둔다. 답을 기다리다 패널을 닫아도 말풍선을 끝까지 정리해야 한다.
   // mutate의 호출별 콜백은 마지막 호출에만 실행돼, 여러 챗봇에 동시에 물으면 앞선 '…'가 60초 남는다. 그래서 mutateAsync를 쓴다.
@@ -203,6 +281,61 @@ export default function MapScreen() {
       ) : (
         status === 'loading' && <MapLoading />
       )}
+
+      {status === 'loaded' && cycle && phase && phase !== 'none' && (
+        // 지도는 상태바 밑까지 채우므로 카드만 safe area만큼 내린다.
+        <View className="absolute left-0 right-0 px-lg" style={{ top: insets.top + 12 }}>
+          <TerritoryPhaseCard
+            phase={phase}
+            cycle={cycle}
+            now={now}
+            preferenceCount={preferences.data?.length ?? 0}
+            unsetCount={unsetCount}
+            myTeamRank={myTeamRank}
+            onPress={() => router.push('/map/territory')}
+          />
+        </View>
+      )}
+
+      {status === 'loaded' && selectedDong !== undefined && !chatbot && (
+        <TerritorySheet
+          key={selectedDong}
+          dongCode={selectedDong}
+          phase={phase}
+          myPoint={myInfo.data?.point}
+          myGu={teamName(myLocationId)}
+          myLocationId={myLocationId}
+          ownedCount={myTerritories.data?.territories.length ?? 0}
+          maxOwned={myTerritories.data?.max_owned}
+          onChallenge={(territory) =>
+            router.push({
+              pathname: '/map/challenge-camera',
+              params: { dongCode: String(territory.dong_code) },
+            })
+          }
+          onInsufficientPoint={setPointShortage}
+          onFirstLayout={(height) => {
+            // 시트는 WebView 아래 끝에 붙어 있어 시트 높이가 곧 지도에서 가려지는 높이다.
+            sheetHeight.current = height;
+            selectDong(selectedDong);
+          }}
+        />
+      )}
+
+      <InsufficientPointDialog
+        target={
+          pointShortage && {
+            dongName: pointShortage.dong_name,
+            toll: pointShortage.toll,
+            myPoint: myInfo.data?.point ?? 0,
+          }
+        }
+        onClose={() => setPointShortage(undefined)}
+        onPickAnother={() => {
+          setPointShortage(undefined);
+          closeSheet();
+        }}
+      />
 
       {status === 'loaded' && chatbot && (
         <ChatPanel
