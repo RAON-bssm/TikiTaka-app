@@ -85,7 +85,7 @@ export default function ChallengeConfirmScreen() {
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
       <Stack.Screen options={{ gestureEnabled: !isPending }} />
       <ScrollView contentContainerClassName="grow gap-2xl px-xl py-2xl">
-        <BackButton title={territory?.dong_name ?? '도전하기'} />
+        <BackButton title={territory?.dong_name ?? '도전하기'} disabled={isPending} />
         <Topic title={territory?.mission ?? ''} />
 
         <CapturedPhoto uri={params.uri} />

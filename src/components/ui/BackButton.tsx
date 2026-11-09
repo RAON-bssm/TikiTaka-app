@@ -6,9 +6,10 @@ import Typography from './Typography';
 interface Props {
   link?: Href;
   title: string;
+  disabled?: boolean;
 }
 
-export default function BackButton({ link, title }: Props) {
+export default function BackButton({ link, title, disabled = false }: Props) {
   const onPress = () => {
     if (link) {
       router.push(link);
@@ -21,7 +22,13 @@ export default function BackButton({ link, title }: Props) {
   };
   return (
     <View className="flex flex-row items-center gap-sm">
-      <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel="뒤로 가기">
+      <Pressable
+        onPress={onPress}
+        disabled={disabled}
+        accessibilityRole="button"
+        accessibilityLabel="뒤로 가기"
+        accessibilityState={{ disabled }}
+      >
         <ChevronLeftIcon width={24} height={24} color="#6E7D94" />
       </Pressable>
       <Typography variant="h3" className="text-gray-500">
