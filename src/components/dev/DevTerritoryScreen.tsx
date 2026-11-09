@@ -266,7 +266,7 @@ export default function DevTerritoryScreen() {
               <NavRow title="랭킹 탭 (동결 안내)" onPress={() => go('/ranking')} />
               <NavRow
                 title="랭킹 탭 · 팀랭킹"
-                description="'땅 세팅'·'땅따먹기' 단계에서 팀 순위가 나와요"
+                description="'땅따먹기' 단계에서만 팀 순위가 나와요"
                 onPress={() => go({ pathname: '/ranking', params: { tab: 'team' } })}
               />
               <NavRow
