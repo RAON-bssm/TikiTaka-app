@@ -1,5 +1,5 @@
 import { isAxiosError } from 'axios';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import { BackHandler, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -83,6 +83,7 @@ export default function ChallengeConfirmScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
+      <Stack.Screen options={{ gestureEnabled: !isPending }} />
       <ScrollView contentContainerClassName="grow gap-2xl px-xl py-2xl">
         <BackButton title={territory?.dong_name ?? '도전하기'} />
         <Topic title={territory?.mission ?? ''} />
