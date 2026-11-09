@@ -1,4 +1,4 @@
-import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
+import { ImageManipulator, SaveFormat, type ImageRef } from 'expo-image-manipulator';
 
 // 원본 카메라 사진(수 MB)은 서버가 413으로 거부할 수 있어 축소·재압축해서 올린다.
 const UPLOAD_IMAGE_MAX_WIDTH = 1440;
@@ -6,17 +6,20 @@ const UPLOAD_IMAGE_COMPRESS = 0.7;
 
 export async function compressImageForUpload(uri: string): Promise<string> {
   const context = ImageManipulator.manipulate(uri);
-  context.resize({ width: UPLOAD_IMAGE_MAX_WIDTH });
-  const image = await context.renderAsync();
-  const result = await image.saveAsync({
-    compress: UPLOAD_IMAGE_COMPRESS,
-    format: SaveFormat.JPEG,
-  });
+  let image: ImageRef | undefined;
 
-  context.release();
-  image.release();
-
-  return result.uri;
+  try {
+    context.resize({ width: UPLOAD_IMAGE_MAX_WIDTH });
+    image = await context.renderAsync();
+    const result = await image.saveAsync({
+      compress: UPLOAD_IMAGE_COMPRESS,
+      format: SaveFormat.JPEG,
+    });
+    return result.uri;
+  } finally {
+    image?.release();
+    context.release();
+  }
 }
 
 /** RN FormData의 파일 파트. 파트 이름은 서버 DTO와 정확히 같아야 한다. */
