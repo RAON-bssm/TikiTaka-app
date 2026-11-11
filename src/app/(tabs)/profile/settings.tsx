@@ -12,10 +12,12 @@ import Header from '@/components/ui/Header';
 import NavRow from '@/components/ui/NavRow';
 import Typography from '@/components/ui/Typography';
 import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from '@/constants/legal';
+import { useTutorial } from '@/hooks/tutorial/useTutorial';
 import { useMyProfile } from '@/hooks/user/useMyProfile';
 
 export default function SettingsScreen() {
   const { data: profile } = useMyProfile();
+  const { start: startTutorial } = useTutorial();
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
   const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
 
@@ -32,6 +34,13 @@ export default function SettingsScreen() {
         <View className="gap-md">
           <NavRow title="프로필 수정" onPress={() => router.push('/profile/edit')} />
           <NavRow title="차단 목록" onPress={() => router.push('/profile/blocked-users')} />
+          <NavRow
+            title="튜토리얼 다시 보기"
+            onPress={() => {
+              router.navigate('/');
+              startTutorial();
+            }}
+          />
           <NavRow
             title="개인정보처리방침"
             onPress={() => WebBrowser.openBrowserAsync(PRIVACY_POLICY_URL)}
