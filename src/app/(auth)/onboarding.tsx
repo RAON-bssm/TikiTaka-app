@@ -1,5 +1,7 @@
+import { startTutorialForNewUser } from '@/api/tutorial';
 import Button from '@/components/ui/Button';
 import Typography from '@/components/ui/Typography';
+import { router } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 
@@ -26,8 +28,13 @@ export default function Onboarding() {
   const slide = SLIDES[index];
   const isLast = index === SLIDES.length - 1;
 
-  const handleNext = () => {
-    if (!isLast) setIndex(index + 1);
+  const handleNext = async () => {
+    if (!isLast) {
+      setIndex(index + 1);
+      return;
+    }
+    await startTutorialForNewUser().catch(() => {});
+    router.navigate('/');
   };
 
   return (
