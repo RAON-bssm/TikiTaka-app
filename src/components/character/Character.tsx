@@ -1,4 +1,5 @@
 import { Image } from 'expo-image';
+import { useState } from 'react';
 import { View } from 'react-native';
 
 import { resolveLayerSource } from '@/constants/character/assets';
@@ -21,6 +22,21 @@ const INSET = `${(-(OVERSCALE - 1) / 2) * 100}%`;
 
 /** 파츠를 LAYERS 순서로 겹쳐 합성한다. 모든 파츠가 같은 1:1 캔버스라 겹치기만 하면 정렬된다. */
 export default function Character({ config, size, className }: CharacterProps) {
+  const layers = LAYERS.flatMap((layer) => {
+    const source = resolveLayerSource(config, layer);
+    return source ? [{ key: 'tint' in layer ? layer.tint : layer.group, source }] : [];
+  });
+
+  const [settled, setSettled] = useState<ReadonlySet<number>>(() => new Set());
+  const [isRevealed, setIsRevealed] = useState(false);
+  if (!isRevealed && layers.every(({ source }) => settled.has(source))) {
+    setIsRevealed(true);
+  }
+
+  const markSettled = (source: number) => {
+    setSettled((prev) => (prev.has(source) ? prev : new Set(prev).add(source)));
+  };
+
   return (
     <View
       className={`aspect-square ${className ?? ''}`}
@@ -33,21 +49,20 @@ export default function Character({ config, size, className }: CharacterProps) {
           left: INSET,
           width: `${OVERSCALE * 100}%`,
           height: `${OVERSCALE * 100}%`,
+          opacity: isRevealed ? 1 : 0,
         }}
       >
-        {LAYERS.map((layer) => {
-          const source = resolveLayerSource(config, layer);
-          if (!source) return null; // 미선택 또는 매핑 없음 (예: 뒷머리 없는 헤어)
-
-          return (
-            <Image
-              key={'tint' in layer ? layer.tint : layer.group}
-              source={source}
-              contentFit="contain"
-              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
-            />
-          );
-        })}
+        {layers.map(({ key, source }) => (
+          <Image
+            key={key}
+            source={source}
+            contentFit="contain"
+            cachePolicy="memory"
+            onLoad={() => markSettled(source)}
+            onError={() => markSettled(source)}
+            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+          />
+        ))}
       </View>
     </View>
   );
