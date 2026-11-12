@@ -8,17 +8,19 @@ interface Props {
   /** 상품 목록에서 뽑기권 가격을 못 읽으면 undefined. 이때는 누를 수 없다. */
   cost?: number;
   disabled?: boolean;
+  /** 포인트가 부족할 때. 누를 수는 있게 두고(부족한 포인트를 알려 준다) 흐리게만 보인다. */
+  dimmed?: boolean;
   onPress: () => void;
 }
 
-export default function PullButton({ label, cost, disabled, onPress }: Props) {
+export default function PullButton({ label, cost, disabled, dimmed, onPress }: Props) {
   const isDisabled = disabled || cost === undefined;
 
   return (
     <Pressable onPress={onPress} disabled={isDisabled}>
       {({ pressed }) => (
         <View
-          className={`items-center gap-xs rounded-2xl px-2xl py-md ${pressed || isDisabled ? 'opacity-70' : ''} bg-secondary-600`}
+          className={`items-center gap-xs rounded-2xl px-2xl py-md ${pressed || isDisabled || dimmed ? 'opacity-70' : ''} bg-secondary-600`}
         >
           <Typography variant="h4" className="text-white">
             {label}

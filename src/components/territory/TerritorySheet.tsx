@@ -8,6 +8,7 @@ import BlockUserDialog from '@/components/block/BlockUserDialog';
 import UserCharacter from '@/components/character/UserCharacter';
 import ReportDialog, { type ReportTarget } from '@/components/report/ReportDialog';
 import Button from '@/components/ui/Button';
+import ConfirmDialog from '@/components/ui/feedback/ConfirmDialog';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Skeleton from '@/components/ui/feedback/Skeleton';
 import MoreMenu from '@/components/ui/MoreMenu';
@@ -127,6 +128,8 @@ function TerritoryContent({
   const { mutate: develop, isPending: isDeveloping } = useDevelopTerritory();
   const [reportTarget, setReportTarget] = useState<ReportTarget>();
   const [blockTarget, setBlockTarget] = useState<{ userId: string; userName: string }>();
+  // 포인트가 들고 실패해도 돌려받지 못해, 시트를 만지다 잘못 눌러도 바로 소모되지 않게 한 번 묻는다.
+  const [isConfirmingDevelop, setIsConfirmingDevelop] = useState(false);
   const guName = teamName(territory.location_id);
   const ownerTeam = teamName(territory.owner_location_id);
   const hasOwner = territory.owner_id !== undefined;
@@ -143,6 +146,7 @@ function TerritoryContent({
   const lacksDevelopPoint = myPoint !== undefined && myPoint < territory.development_cost;
 
   const handleDevelop = () => {
+    setIsConfirmingDevelop(false);
     if (isDeveloping) return;
     develop(territory.dong_code, {
       onSuccess: (result) => {
@@ -236,7 +240,7 @@ function TerritoryContent({
                     : '개발해서 팀 땅값 올리기'
               }
               disabled={isDeveloping || lacksDevelopPoint}
-              onclick={handleDevelop}
+              onclick={() => setIsConfirmingDevelop(true)}
             />
           </>
         ) : (
@@ -251,6 +255,14 @@ function TerritoryContent({
         )}
       </View>
 
+      <ConfirmDialog
+        visible={isConfirmingDevelop}
+        title="개발할까요?"
+        description={`개발비 ${territory.development_cost.toLocaleString()} P가 바로 빠져요.\n성공 확률 ${developProbability}% · 실패해도 개발비는 돌려받지 못해요.`}
+        confirmLabel="개발하기"
+        onConfirm={handleDevelop}
+        onCancel={() => setIsConfirmingDevelop(false)}
+      />
       <ReportDialog target={reportTarget} onClose={() => setReportTarget(undefined)} />
       <BlockUserDialog target={blockTarget} onClose={() => setBlockTarget(undefined)} />
     </>

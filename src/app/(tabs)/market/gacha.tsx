@@ -13,6 +13,7 @@ import Gotcha from '@/components/market/gotcha/Gotcha';
 import PullButton from '@/components/market/gotcha/PullButton';
 import MyPointBadge from '@/components/market/MyPointBadge';
 import ShopTabs from '@/components/market/ShopTabs';
+import ConfirmDialog from '@/components/ui/feedback/ConfirmDialog';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Header from '@/components/ui/Header';
 import { useToast } from '@/components/ui/Toast';
@@ -21,6 +22,9 @@ import { GASHAPON_OPTIONS, toGotchaPull, type GotchaPull } from '@/constants/mar
 import { useCharacterConfig } from '@/hooks/character/useCharacterConfig';
 import { useDrawGashapon } from '@/hooks/product/useDrawGashapon';
 import { useProducts } from '@/hooks/product/useProducts';
+import { useMyProfile } from '@/hooks/user/useMyProfile';
+
+type GashaponOption = (typeof GASHAPON_OPTIONS)[number];
 
 export default function GachaScreen() {
   // 뽑기 결과 큐. 탭할 때마다 하나씩 소비한다.
@@ -33,6 +37,29 @@ export default function GachaScreen() {
   const { config: myConfig, isLoaded: isCharacterConfigLoaded } = useCharacterConfig();
   const { mutate: draw, isPending } = useDrawGashapon();
   const { showToast } = useToast();
+  const { data: profile } = useMyProfile();
+  const [confirmTarget, setConfirmTarget] = useState<{ option: GashaponOption; cost: number }>();
+
+  const getCost = (option: GashaponOption) =>
+    products?.find((product) => product.product_id === option.productId)?.price ??
+    option.fallbackCost;
+  // 프로필을 못 받았으면 모르는 것이므로 막지 않고 서버 판단에 맡긴다.
+  const getShortage = (cost: number) => (profile ? Math.max(cost - profile.point, 0) : 0);
+
+  const handlePress = (option: GashaponOption) => {
+    const cost = getCost(option);
+    const shortage = getShortage(cost);
+    // 막아 두면 왜 안 눌리는지 모르므로, 손잡이를 돌리기 전에 바로 알려 준다.
+    if (shortage > 0) {
+      showToast(`포인트가 ${shortage.toLocaleString()} P 부족해요`);
+      return;
+    }
+    if (option.needsConfirm) {
+      setConfirmTarget({ option, cost });
+      return;
+    }
+    handlePull(option.productId);
+  };
 
   const pullingRef = useRef(false);
   const machineRef = useRef<View>(null);
@@ -135,12 +162,10 @@ export default function GachaScreen() {
                 <PullButton
                   key={option.productId}
                   label={option.label}
-                  cost={
-                    products?.find((product) => product.product_id === option.productId)?.price ??
-                    option.fallbackCost
-                  }
+                  cost={getCost(option)}
                   disabled={isPending || !isCharacterConfigLoaded || phase !== 'idle'}
-                  onPress={() => handlePull(option.productId)}
+                  dimmed={getShortage(getCost(option)) > 0}
+                  onPress={() => handlePress(option)}
                 />
               ))}
             </View>
@@ -151,6 +176,18 @@ export default function GachaScreen() {
       {phase === 'revealing' && revealFrom ? (
         <CapsuleReveal from={revealFrom} onOpened={handleOpened} />
       ) : null}
+
+      <ConfirmDialog
+        visible={!!confirmTarget}
+        title={`${confirmTarget?.option.label}를 할까요?`}
+        description={`${confirmTarget?.cost.toLocaleString()} P가 바로 빠져요.`}
+        confirmLabel="뽑기"
+        onConfirm={() => {
+          if (confirmTarget) handlePull(confirmTarget.option.productId);
+          setConfirmTarget(undefined);
+        }}
+        onCancel={() => setConfirmTarget(undefined)}
+      />
 
       {current ? (
         <Gotcha
