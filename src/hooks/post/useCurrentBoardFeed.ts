@@ -5,6 +5,9 @@ import { postKeys } from '@/api/queryKeys';
 import type { Board, Post } from '@/types/post';
 import { useBoards } from './useBoards';
 
+// 첫 요청도 size를 명시해야 서버가 페이지네이션 경로를 탄다(size·cursor 둘 다 없으면 옛 전체 목록 응답).
+const FEED_PAGE_SIZE = 20;
+
 export interface CurrentBoardFeedState {
   /** 없으면 진행 중인 라운드가 없는 것이다. */
   board?: Board;
@@ -28,7 +31,8 @@ export function useCurrentBoardFeed(): CurrentBoardFeedState {
     queryFn:
       boardId === undefined
         ? skipToken
-        : ({ pageParam }: { pageParam?: string }) => getPosts(boardId, { cursor: pageParam }),
+        : ({ pageParam }: { pageParam?: string }) =>
+            getPosts(boardId, { size: FEED_PAGE_SIZE, cursor: pageParam }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
