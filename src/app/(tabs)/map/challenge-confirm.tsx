@@ -1,4 +1,3 @@
-import { isAxiosError } from 'axios';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import { BackHandler, ScrollView, View } from 'react-native';
@@ -74,8 +73,6 @@ export default function ChallengeConfirmScreen() {
         onError: (error) => {
           submittingRef.current = false;
           showToast(getApiErrorMessage(error, '도전하지 못했어요. 다시 시도해주세요.'));
-          // 이미 쓴 사진은 다시 낼 수 없어 새로 찍게 한다.
-          if (isAxiosError(error) && error.response?.status === 400) router.back();
         },
       },
     );
