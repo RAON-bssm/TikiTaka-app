@@ -85,10 +85,20 @@ export default function ChallengeCameraScreen() {
       : purpose === 'retake'
         ? (pendingMission ?? territory?.mission ?? territory?.dong_name ?? '')
         : (territory?.mission ?? territory?.dong_name ?? '');
-  const { team } = useMyTeam();
+  const myTeam = useMyTeam();
+  const { team } = myTeam;
   const homeGu = team?.location_name ?? '본진';
   const location = useHomeGuLocation(team, isFocused);
-  const message = locationMessage(location.status, homeGu);
+  // 본진을 못 받으면 위치 판정이 끝나지 않아 '확인 중'에 멈추므로, 실패로 보여 주고 다시 받게 한다.
+  const teamFailed = !team && !myTeam.isLoading && location.status === 'checking';
+  const message = teamFailed
+    ? '본진 정보를 불러오지 못했어요'
+    : locationMessage(location.status, homeGu);
+  const locationAction = teamFailed
+    ? '다시 시도'
+    : location.status === 'denied'
+      ? '허용하기'
+      : undefined;
 
   const { hasPermission, canRequestPermission, requestPermission } = useCameraPermission();
   const [facing, setFacing] = useState<'back' | 'front'>('back');
@@ -106,6 +116,10 @@ export default function ChallengeCameraScreen() {
   };
 
   const handleLocationAction = () => {
+    if (teamFailed) {
+      myTeam.refetch();
+      return;
+    }
     if (location.status !== 'denied') return;
     if (location.canAskAgain) void location.requestPermission();
     else void Linking.openSettings();
@@ -176,11 +190,11 @@ export default function ChallengeCameraScreen() {
         {message && (
           <Pressable
             onPress={handleLocationAction}
-            disabled={location.status !== 'denied'}
+            disabled={!locationAction}
             className="self-center rounded-full bg-white/20 px-lg py-sm"
           >
             <Typography variant="body3" className="text-center text-white">
-              {location.status === 'denied' ? `${message} · 허용하기` : message}
+              {locationAction ? `${message} · ${locationAction}` : message}
             </Typography>
           </Pressable>
         )}
@@ -225,11 +239,11 @@ export default function ChallengeCameraScreen() {
           {message && (
             <Pressable
               onPress={handleLocationAction}
-              disabled={location.status !== 'denied'}
+              disabled={!locationAction}
               className="rounded-full bg-black/60 px-lg py-sm"
             >
               <Typography variant="body3" className="text-center text-white">
-                {location.status === 'denied' ? `${message} · 허용하기` : message}
+                {locationAction ? `${message} · ${locationAction}` : message}
               </Typography>
             </Pressable>
           )}
