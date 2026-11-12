@@ -8,12 +8,14 @@ import { getApiErrorMessage } from '@/api/error';
 import Topic from '@/components/camera/Topic';
 import BackButton from '@/components/ui/BackButton';
 import Button from '@/components/ui/Button';
+import ConfirmDialog from '@/components/ui/feedback/ConfirmDialog';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Skeleton from '@/components/ui/feedback/Skeleton';
 import TextInput from '@/components/ui/input/TextInput';
 import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
 import { ADJECTIVE_SUGGESTIONS, NOUN_SUGGESTIONS } from '@/constants/territory/mission';
+import { useConfirmLeave } from '@/hooks/navigation/useConfirmLeave';
 import { useTerritory } from '@/hooks/territory/useTerritory';
 import { useUpdateMission } from '@/hooks/territory/useUpdateMission';
 import type { TerritoryDetail } from '@/types/territory';
@@ -64,15 +66,21 @@ function MissionForm({ territory, mode }: { territory: TerritoryDetail; mode: Mo
   const { mutate: updateMission, isPending } = useUpdateMission();
 
   // 바꾸는 중이던 대기 미션이 있으면 그것부터 이어서 고치게 한다.
-  const [adjective, setAdjective] = useState(
-    mode === 'change' ? (territory.pending_adjective ?? territory.mission_adjective ?? '') : '',
+  const [initial] = useState(() =>
+    mode === 'change'
+      ? {
+          adjective: territory.pending_adjective ?? territory.mission_adjective ?? '',
+          noun: territory.pending_noun ?? territory.mission_noun ?? '',
+          criteria: territory.pending_criteria ?? territory.scoring_criteria ?? '',
+        }
+      : { adjective: '', noun: '', criteria: '' },
   );
-  const [noun, setNoun] = useState(
-    mode === 'change' ? (territory.pending_noun ?? territory.mission_noun ?? '') : '',
-  );
-  const [criteria, setCriteria] = useState(
-    mode === 'change' ? (territory.pending_criteria ?? territory.scoring_criteria ?? '') : '',
-  );
+  const [adjective, setAdjective] = useState(initial.adjective);
+  const [noun, setNoun] = useState(initial.noun);
+  const [criteria, setCriteria] = useState(initial.criteria);
+  const isDirty =
+    adjective !== initial.adjective || noun !== initial.noun || criteria !== initial.criteria;
+  const { allowLeave, dialog: leaveDialog } = useConfirmLeave(isDirty);
 
   const trimmed = {
     adjective: adjective.trim(),
@@ -88,6 +96,7 @@ function MissionForm({ territory, mode }: { territory: TerritoryDetail; mode: Mo
 
     // 세팅은 미션과 사진을 한 요청으로 보내므로, 입력값을 들고 카메라로 간다.
     if (mode === 'setup') {
+      allowLeave();
       router.push({
         pathname: '/map/challenge-camera',
         params: {
@@ -109,11 +118,13 @@ function MissionForm({ territory, mode }: { territory: TerritoryDetail; mode: Mo
         ...(trimmed.criteria && { scoring_criteria: trimmed.criteria }),
       },
       {
-        onSuccess: () =>
+        onSuccess: () => {
+          allowLeave();
           router.replace({
             pathname: '/map/challenge-camera',
             params: { dongCode, purpose: 'retake' },
-          }),
+          });
+        },
         onError: (error) => showToast(getApiErrorMessage(error, '미션을 바꾸지 못했어요')),
       },
     );
@@ -198,6 +209,13 @@ function MissionForm({ territory, mode }: { territory: TerritoryDetail; mode: Mo
           onclick={handleSubmit}
         />
       </Pressable>
+      <ConfirmDialog
+        {...leaveDialog}
+        title="저장하지 않고 나갈까요?"
+        description="입력한 미션이 저장되지 않아요."
+        confirmLabel="나가기"
+        cancelLabel="계속 쓰기"
+      />
     </KeyboardAwareScrollView>
   );
 }
