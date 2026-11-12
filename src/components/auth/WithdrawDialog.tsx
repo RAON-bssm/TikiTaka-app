@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { KeyboardAvoidingView, Modal, Pressable, View } from 'react-native';
+import { Keyboard, KeyboardAvoidingView, Modal, Pressable, View } from 'react-native';
 
 import { getApiErrorMessage } from '@/api/error';
 import Button from '@/components/ui/Button';
@@ -50,7 +50,7 @@ export default function WithdrawDialog({ visible, userName, onClose }: Props) {
       <KeyboardAvoidingView behavior="padding" className="flex-1">
         <Pressable className="flex-1 items-center justify-center bg-black/40" onPress={handleClose}>
           <Pressable
-            onPress={() => {}}
+            onPress={Keyboard.dismiss}
             className="w-[300px] gap-2xl rounded-xl bg-white px-xl pb-xl pt-2xl"
           >
             <View className="items-center gap-sm">

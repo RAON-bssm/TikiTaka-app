@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Modal, Pressable, TextInput, View } from 'react-native';
+import { Keyboard, Modal, Pressable, TextInput, View } from 'react-native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 
 import { getApiErrorMessage } from '@/api/error';
@@ -71,7 +71,7 @@ const EditForm = ({ post, onClose }: { post: EditingPost; onClose: () => void })
     <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
       <Pressable className="flex-1 items-center justify-center bg-black/40" onPress={handleClose}>
         <Pressable
-          onPress={() => {}}
+          onPress={Keyboard.dismiss}
           className="w-[300px] gap-2xl rounded-xl bg-white px-xl pb-xl pt-2xl"
         >
           <View className="items-center gap-sm">

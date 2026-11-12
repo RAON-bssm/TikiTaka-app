@@ -12,7 +12,7 @@ import { useLocations } from '@/hooks/location/useLocations';
 import { isAxiosError } from 'axios';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { View } from 'react-native';
+import { Keyboard, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 function getSignupErrorMessage(error: unknown) {
@@ -83,7 +83,11 @@ export default function SignUp() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <View className="flex flex-1 flex-col items-start justify-between gap-4xl p-lg">
+      <Pressable
+        onPress={Keyboard.dismiss}
+        accessible={false}
+        className="flex flex-1 flex-col items-start justify-between gap-4xl p-lg"
+      >
         <View className="flex flex-col items-start gap-3xl w-full">
           <BackButton title="정보등록" link={'/login'} />
           <Typography variant="display" className="text-gray-800">
@@ -114,7 +118,7 @@ export default function SignUp() {
             className={isPending ? 'opacity-50' : ''}
           />
         </View>
-      </View>
+      </Pressable>
     </SafeAreaView>
   );
 }

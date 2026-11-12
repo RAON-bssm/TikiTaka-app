@@ -1,4 +1,4 @@
-import { Pressable } from 'react-native';
+import { Keyboard, Pressable } from 'react-native';
 import Typography from './Typography';
 
 type Size = 'md' | 'sm';
@@ -41,7 +41,11 @@ export default function Button({
   const color = disabled ? DISABLED_CLASS : variantClass[variant];
   return (
     <Pressable
-      onPress={onclick}
+      onPress={() => {
+        // 중복확인·제출처럼 입력을 마무리하는 버튼이 대부분이라, 눌린 뒤에도 키보드가 결과 토스트·문구를 가리지 않게 내린다.
+        Keyboard.dismiss();
+        onclick?.();
+      }}
       disabled={disabled}
       className={`flex items-center justify-center rounded-sm ${color.bg} ${sizeClass[size]} ${className}`}
     >
