@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 
 import { signup } from '@/api/auth';
 import { clearSignupToken, getSignupToken, setTokens } from '@/api/token';
+import { startTutorialForNewUser } from '@/api/tutorial';
 
 /**
  * signup_token은 메모리에만 있고 만료가 10분이라, 앱 재시작·시간 초과 시 로그인부터 다시 해야 한다.
@@ -25,6 +26,8 @@ export function useSignup() {
     onSuccess: async (data) => {
       await setTokens(data.access_token, data.refresh_token);
       clearSignupToken();
+      // 탭 화면이 열리면서 저장된 단계를 읽으므로 이동보다 먼저 기록한다.
+      await startTutorialForNewUser().catch(() => {});
       router.replace('/(tabs)');
     },
   });

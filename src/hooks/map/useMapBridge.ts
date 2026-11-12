@@ -52,8 +52,16 @@ export function useMapBridge({
   const webViewRef = useRef<WebView>(null);
   const isReady = useRef(false);
   const sentLocationId = useRef<number | null>(null);
-  /** 웹이 다시 로드되면 칠한 땅도 사라지므로 `ready`마다 다시 보내려고 마지막으로 보낸 값을 기억한다. */
-  const sentTerritories = useRef<MapTerritory[] | null>(null);
+  /**
+   * 마지막으로 보낸 땅 목록(JSON). 화면은 렌더마다 새 배열을 만들 수 있어 참조가 아니라 내용으로 비교해야
+   * 같은 목록을 계속 다시 칠하지 않는다. 웹이 다시 로드되면(`ready`) 칠한 땅이 사라지므로 그때는 다시 보낸다.
+   */
+  const sentTerritories = useRef<string | null>(null);
+
+  const sendTerritories = () => {
+    post(webViewRef.current, { type: 'setTerritories', territories });
+    sentTerritories.current = JSON.stringify(territories);
+  };
   const [status, setStatus] = useState<MapStatus>('loading');
 
   const sendInit = () => {
@@ -80,9 +88,10 @@ export function useMapBridge({
   }, [characters]);
 
   useEffect(() => {
-    if (!isReady.current || sentTerritories.current === territories) return;
+    const json = JSON.stringify(territories);
+    if (!isReady.current || sentTerritories.current === json) return;
     post(webViewRef.current, { type: 'setTerritories', territories });
-    sentTerritories.current = territories;
+    sentTerritories.current = json;
   }, [territories]);
 
   const onMessage = (event: WebViewMessageEvent) => {
@@ -94,8 +103,7 @@ export function useMapBridge({
         isReady.current = true;
         sentLocationId.current = null;
         sendInit();
-        post(webViewRef.current, { type: 'setTerritories', territories });
-        sentTerritories.current = territories;
+        sendTerritories();
         break;
       case 'mapLoaded':
         setStatus('loaded');

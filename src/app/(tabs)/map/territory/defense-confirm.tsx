@@ -1,7 +1,6 @@
-import { isAxiosError } from 'axios';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useRef } from 'react';
-import { BackHandler, ScrollView, View } from 'react-native';
+import { useRef } from 'react';
+import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { getApiErrorMessage } from '@/api/error';
@@ -12,6 +11,7 @@ import Button from '@/components/ui/Button';
 import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
 import { getPendingMission } from '@/constants/territory/mission';
+import { useBlockLeaveWhilePending } from '@/hooks/navigation/useBlockLeaveWhilePending';
 import { useRetakeDefensePhoto } from '@/hooks/territory/useRetakeDefensePhoto';
 import { useSetupTerritory } from '@/hooks/territory/useSetupTerritory';
 import { useTerritory } from '@/hooks/territory/useTerritory';
@@ -44,11 +44,7 @@ export default function DefenseConfirmScreen() {
     : (pendingMission ?? territory?.mission ?? '');
 
   // 채점 중에 나가면 결과를 놓치므로 뒤로 가기를 막는다.
-  useEffect(() => {
-    if (!isPending) return;
-    const subscription = BackHandler.addEventListener('hardwareBackPress', () => true);
-    return () => subscription.remove();
-  }, [isPending]);
+  useBlockLeaveWhilePending(isPending);
 
   const handleSuccess = (result: DefensePhotoResult) => {
     // 세팅은 허브나 내 땅 화면 어디서든 시작해 스택에 manage가 없을 수 있다. dismissTo는 그때 되돌아가지 않고
@@ -72,8 +68,6 @@ export default function DefenseConfirmScreen() {
   const handleError = (error: unknown) => {
     submittingRef.current = false;
     showToast(getApiErrorMessage(error, '방어 사진을 올리지 못했어요. 다시 시도해주세요.'));
-    // 이미 쓴 사진은 다시 낼 수 없어 새로 찍게 한다.
-    if (isAxiosError(error) && error.response?.status === 400) router.back();
   };
 
   const handleSubmit = () => {
@@ -103,7 +97,10 @@ export default function DefenseConfirmScreen() {
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
       <ScrollView contentContainerClassName="grow gap-2xl px-xl py-2xl">
-        <BackButton title={territory?.dong_name ?? (isSetup ? '땅 세팅' : '방어 사진')} />
+        <BackButton
+          title={territory?.dong_name ?? (isSetup ? '땅 세팅' : '방어 사진')}
+          disabled={isPending}
+        />
         <Topic title={mission} />
 
         <CapturedPhoto uri={params.uri} />
