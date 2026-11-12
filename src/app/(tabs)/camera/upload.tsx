@@ -4,6 +4,7 @@ import Button from '@/components/ui/Button';
 import TextInput from '@/components/ui/input/TextInput';
 import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
+import { useBlockLeaveWhilePending } from '@/hooks/navigation/useBlockLeaveWhilePending';
 import { useMyBoard } from '@/hooks/post/useMyBoard';
 import { UploadConfirmationFailedError, useUploadPost } from '@/hooks/post/useUploadPost';
 import useImageRatio from '@/hooks/useImageRatio';
@@ -27,6 +28,8 @@ export default function Upload() {
   const [content, setContent] = useState('');
   const { showToast } = useToast();
   const { mutate: uploadPost, isPending } = useUploadPost();
+  // 나가면 성공 이동이 실행되지 않아, 실패한 줄 알고 같은 글을 다시 올리게 된다.
+  useBlockLeaveWhilePending(isPending);
 
   const { data: myBoard, isLoading: isBoardLoading } = useMyBoard();
 
@@ -58,7 +61,7 @@ export default function Upload() {
       { fileUri: uri, boardId: myBoard.board_id, content },
       {
         onSuccess: ({ postId, status }) => {
-          showToast(UPLOAD_SUCCESS_MESSAGE[status] ?? UPLOAD_UNSCORED_MESSAGE);
+          showToast(UPLOAD_SUCCESS_MESSAGE[status] ?? UPLOAD_UNSCORED_MESSAGE, { type: 'success' });
           router.dismissAll();
           router.replace({
             pathname: '/feed/[post_id]',
@@ -120,7 +123,11 @@ export default function Upload() {
             returnKeyType="done"
           />
 
-          <Button content={isPending ? '업로드 중...' : '게시물 업로드'} onclick={handleUpload} />
+          <Button
+            content={isPending ? '업로드 중...' : '게시물 업로드'}
+            disabled={isPending}
+            onclick={handleUpload}
+          />
         </Pressable>
       </KeyboardAwareScrollView>
     </SafeAreaView>
