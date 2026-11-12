@@ -1,5 +1,5 @@
 import { type ReactElement, useState } from 'react';
-import { FlatList, type RefreshControlProps, View } from 'react-native';
+import { ActivityIndicator, FlatList, type RefreshControlProps, View } from 'react-native';
 
 import FeedCard from '@/components/feed/FeedCard';
 import FeedCardSkeleton from '@/components/feed/FeedCardSkeleton';
@@ -7,6 +7,8 @@ import PostDeleteDialog from '@/components/feed/PostDeleteDialog';
 import PostEditDialog, { type EditingPost } from '@/components/feed/PostEditDialog';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Typography from '@/components/ui/Typography';
+import { palette } from '@/constants/colors';
+import type { CurrentBoardFeedState } from '@/hooks/post/useCurrentBoardFeed';
 import type { CurrentBoardPostsState } from '@/hooks/post/useCurrentBoardPosts';
 import { useMyInfo } from '@/hooks/user/useMyInfo';
 import { formatRelativeTime } from '@/hooks/useRelativeTime';
@@ -78,7 +80,11 @@ function usePostActions() {
       postId={post.post_id}
       authorName={post.user_name}
       authorUserId={post.user_id}
-      imageUrl={post.post_image}
+      authorEquipment={post.user_equipment}
+      // 썸네일이 없는 글은 서버가 원본 key·URL을 그대로 짝지어 주므로 분기 없이 이 둘만 쓰면 된다.
+      // 둘 다 없으면 이미지 없는 글(기본 이미지) — 원본 presigned URL을 따로 조회하지 않는다.
+      imageKey={post.post_thumbnail}
+      imageUrl={post.post_thumbnail_url}
       title={post.content}
       place={post.location}
       timeAgo={formatRelativeTime(post.created_at)}
@@ -120,14 +126,21 @@ export default function PostList({ state, limit }: Props) {
 }
 
 interface FlatProps {
-  state: CurrentBoardPostsState;
+  state: CurrentBoardFeedState;
   header: ReactElement;
   refreshControl: ReactElement<RefreshControlProps>;
 }
 
+const Footer = ({ loading }: { loading: boolean }) =>
+  loading ? (
+    <View className="w-full items-center py-lg">
+      <ActivityIndicator color={palette.primary[600]} />
+    </View>
+  ) : null;
+
 /**
  * 피드 화면 전체 목록. 카드마다 캐릭터·이미지 URL을 따로 요청하므로, 게시물이 많아도
- * 화면에 보이는 카드만 그리도록 FlatList로 그린다.
+ * 화면에 보이는 카드만 그리도록 FlatList로 그리고, 끝에 닿으면 다음 페이지를 이어 받는다.
  */
 export function PostFlatList({ state, header, refreshControl }: FlatProps) {
   const { renderCard, dialogs } = usePostActions();
@@ -143,6 +156,9 @@ export function PostFlatList({ state, header, refreshControl }: FlatProps) {
         ListHeaderComponent={header}
         ListHeaderComponentClassName="pb-2xl"
         ListEmptyComponent={<PostListStatus state={state} />}
+        ListFooterComponent={<Footer loading={state.isFetchingNextPage} />}
+        onEndReached={state.fetchNextPage}
+        onEndReachedThreshold={0.5}
         contentContainerClassName="px-xl pb-lg pt-lg"
         showsVerticalScrollIndicator={false}
         refreshControl={refreshControl}

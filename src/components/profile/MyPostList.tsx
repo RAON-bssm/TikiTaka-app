@@ -55,7 +55,9 @@ export default function MyPostList() {
           postId={post.post_id}
           authorName={myInfo?.user_name ?? ''}
           authorUserId={myInfo?.user_id}
-          imageUrl={post.post_image}
+          imageKey={post.post_image}
+          imageUrl={post.post_image_url}
+          fallbackToViewUrl
           title={post.content}
           place={post.location}
           timeAgo={formatRelativeTime(post.created_at)}

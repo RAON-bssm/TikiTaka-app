@@ -45,7 +45,7 @@ function RankingRow({ row, myUserId, onBlock }: Props) {
         number={item.user_rank}
         location={item.user_name}
         count={item.user_score}
-        avatar={<UserCharacter userId={item.user_id} size={50} />}
+        avatar={<UserCharacter userId={item.user_id} size={50} equipment={item.user_equipment} />}
         menuItems={
           !myUserId || item.user_id === myUserId
             ? undefined

@@ -1,5 +1,6 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import { memo } from 'react';
+import { memo, useRef } from 'react';
 import { Pressable, View } from 'react-native';
 
 import PlaceIcon from '@/assets/icons/place.svg';
@@ -12,6 +13,8 @@ import Typography from '@/components/ui/Typography';
 import { DEFAULT_CHARACTER_CONFIG } from '@/constants/character/assets';
 import { palette } from '@/constants/colors';
 import type { EditingPost } from '@/components/feed/PostEditDialog';
+import { invalidateImageUrls } from '@/hooks/post/invalidateImageUrls';
+import type { Equipment } from '@/types/equipment';
 import { useViewUrl } from '@/hooks/storage/useViewUrl';
 
 const COLOR_GRAY = palette.gray[400];
@@ -21,7 +24,17 @@ interface Props {
   authorName: string;
   /** 없으면 기본 캐릭터로 렌더한다. */
   authorUserId?: string;
-  imageUrl: string;
+  /** 응답에 같이 온 작성자 착용 정보. 있으면 캐릭터 조회(`GET /api/equipment/{userId}`)를 생략한다. */
+  authorEquipment?: Equipment;
+  /** 카드 이미지 캐시 키(게시판 목록: `post_thumbnail`, 내 게시물: `post_image`). 없으면 이미지 없는 글. */
+  imageKey?: string;
+  /** 서버가 바로 내려준 다운로드 URL. */
+  imageUrl?: string;
+  /**
+   * true면 `imageUrl`이 없을 때 `imageKey`로 직접 조회 URL을 받는다(상세·내 게시물 전용 — URL 발급
+   * 실패 대비). 게시판 목록 썸네일은 키·URL이 항상 짝이라 생략(없으면 그냥 이미지 없는 글).
+   */
+  fallbackToViewUrl?: boolean;
   title: string;
   place: string;
   timeAgo: string;
@@ -44,11 +57,16 @@ interface Props {
   imagePriority?: 'low' | 'normal' | 'high';
 }
 
+const IMAGE_CLASS = 'h-[225px] w-full rounded-lg';
+
 function FeedCard({
   postId,
   authorName,
   authorUserId,
+  authorEquipment,
+  imageKey,
   imageUrl,
+  fallbackToViewUrl,
   title,
   place,
   timeAgo,
@@ -61,8 +79,20 @@ function FeedCard({
   badge,
   imagePriority,
 }: Props) {
-  // imageUrl은 이미지 key라 조회 URL로 변환해야 한다.
-  const { uri: resolvedImageUri, isLoading: imageLoading } = useViewUrl(imageUrl);
+  // URL이 없을 때만(주로 발급 실패) 직접 조회한다. 게시판 목록 썸네일은 키·URL이 항상 짝이라 해당 없음.
+  const needsFallback = !!fallbackToViewUrl && !imageUrl && !!imageKey;
+  const fallback = useViewUrl(needsFallback ? imageKey : undefined);
+  const resolvedUri = imageUrl ?? (needsFallback ? fallback.uri : undefined);
+  const imageLoading = needsFallback && fallback.isLoading;
+
+  // presigned URL 만료(10분)로 다운로드가 실패하면 새 URL을 받도록 목록을 다시 받는다. 한 카드당 한 번만.
+  const queryClient = useQueryClient();
+  const hasRetriedRef = useRef(false);
+  const handleImageError = () => {
+    if (hasRetriedRef.current) return;
+    hasRetriedRef.current = true;
+    invalidateImageUrls(queryClient, postId);
+  };
 
   const menuItems: MoreMenuItem[] = [];
   if (canEdit) {
@@ -87,7 +117,7 @@ function FeedCard({
       <View className="w-full flex-row items-center justify-between">
         <View className="flex-row items-center gap-sm">
           {authorUserId ? (
-            <UserCharacter userId={authorUserId} size={40} />
+            <UserCharacter userId={authorUserId} size={40} equipment={authorEquipment} />
           ) : (
             <Character config={DEFAULT_CHARACTER_CONFIG} size={40} />
           )}
@@ -107,12 +137,18 @@ function FeedCard({
         </View>
       </View>
 
-      <LoadingImage
-        uri={imageLoading ? undefined : resolvedImageUri}
-        cacheKey={imageUrl}
-        priority={imagePriority}
-        className="h-[225px] w-full rounded-lg"
-      />
+      {imageKey ? (
+        <LoadingImage
+          uri={imageLoading ? undefined : resolvedUri}
+          cacheKey={imageKey}
+          priority={imagePriority}
+          enforceEarlyResizing
+          onError={handleImageError}
+          className={IMAGE_CLASS}
+        />
+      ) : (
+        <View className={`bg-gray-100 ${IMAGE_CLASS}`} />
+      )}
 
       <View className="w-full flex-row items-center justify-between gap-md">
         <View className="flex-1 gap-xs">

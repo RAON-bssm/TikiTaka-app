@@ -3,13 +3,13 @@ import { PostFlatList } from '@/components/feed/PostList';
 import Header from '@/components/ui/Header';
 import { palette } from '@/constants/colors';
 import { useCurrentBattle } from '@/hooks/match/useCurrentBattle';
-import { useCurrentBoardPosts } from '@/hooks/post/useCurrentBoardPosts';
+import { useCurrentBoardFeed } from '@/hooks/post/useCurrentBoardFeed';
 import { useState } from 'react';
 import { RefreshControl, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function FeedScreen() {
-  const posts = useCurrentBoardPosts();
+  const posts = useCurrentBoardFeed();
   const battle = useCurrentBattle();
 
   const [isRefreshing, setIsRefreshing] = useState(false);

@@ -11,7 +11,10 @@ export const boardKeys = {
 export const postKeys = {
   all: ['post'] as const,
   lists: () => [...postKeys.all, 'list'] as const,
-  list: (boardId: number) => [...postKeys.lists(), boardId] as const,
+  /** 홈 미리보기처럼 첫 페이지 몇 개만 받을 때(`size`). */
+  list: (boardId: number, size?: number) => [...postKeys.lists(), boardId, size] as const,
+  /** 피드 무한 스크롤. 페이지(cursor)별이 아니라 보드당 하나의 쿼리로 묶는다(useInfiniteQuery). */
+  feed: (boardId: number) => [...postKeys.lists(), boardId, 'feed'] as const,
   /** `lists()` 아래에 둬야 게시물 삭제 때 목록과 함께 무효화된다. */
   mine: () => [...postKeys.lists(), 'mine'] as const,
   detail: (postId: string) => [...postKeys.all, 'detail', postId] as const,

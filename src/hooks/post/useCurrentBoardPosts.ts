@@ -11,11 +11,14 @@ export interface CurrentBoardPostsState {
   refetch: () => Promise<void>;
 }
 
-/** 서버가 내 매치를 맨 앞에 두므로, 내 매치가 없으면 다른 동네 게시판을 구경하게 된다. */
-export function useCurrentBoardPosts(): CurrentBoardPostsState {
+/**
+ * 서버가 내 매치를 맨 앞에 두므로, 내 매치가 없으면 다른 동네 게시판을 구경하게 된다.
+ * `size`를 주면 그만큼만 서버에 요청한다(홈 미리보기). 생략하면 무한 스크롤 전 옛 방식(전체 목록)이다.
+ */
+export function useCurrentBoardPosts(size?: number): CurrentBoardPostsState {
   const boards = useBoards();
   const board = boards.data?.[0];
-  const posts = usePosts(board?.board_id);
+  const posts = usePosts(board?.board_id, size);
 
   return {
     board,
