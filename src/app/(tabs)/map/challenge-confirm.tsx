@@ -1,6 +1,6 @@
-import { router, Stack, useLocalSearchParams } from 'expo-router';
-import { useEffect, useRef } from 'react';
-import { BackHandler, ScrollView, View } from 'react-native';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useRef } from 'react';
+import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { getApiErrorMessage } from '@/api/error';
@@ -10,6 +10,7 @@ import BackButton from '@/components/ui/BackButton';
 import Button from '@/components/ui/Button';
 import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
+import { useBlockLeaveWhilePending } from '@/hooks/navigation/useBlockLeaveWhilePending';
 import { useChallengeTerritory } from '@/hooks/territory/useChallengeTerritory';
 import { useTerritory } from '@/hooks/territory/useTerritory';
 
@@ -29,11 +30,7 @@ export default function ChallengeConfirmScreen() {
   const submittingRef = useRef(false);
 
   // 채점 중에 나가면 결과를 놓치므로(통행료는 이미 빠짐) 뒤로 가기를 막는다.
-  useEffect(() => {
-    if (!isPending) return;
-    const subscription = BackHandler.addEventListener('hardwareBackPress', () => true);
-    return () => subscription.remove();
-  }, [isPending]);
+  useBlockLeaveWhilePending(isPending);
 
   const handleSubmit = () => {
     if (submittingRef.current || !territory || !params.uri) return;
@@ -80,7 +77,6 @@ export default function ChallengeConfirmScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
-      <Stack.Screen options={{ gestureEnabled: !isPending }} />
       <ScrollView contentContainerClassName="grow gap-2xl px-xl py-2xl">
         <BackButton title={territory?.dong_name ?? '도전하기'} disabled={isPending} />
         <Topic title={territory?.mission ?? ''} />
