@@ -147,7 +147,8 @@ function TerritoryContent({
 
   const handleDevelop = () => {
     setIsConfirmingDevelop(false);
-    if (isDeveloping) return;
+    // 확인 창을 띄운 사이 배틀이 끝나거나 포인트·땅 정보가 바뀌었을 수 있다.
+    if (isDeveloping || !canDevelop || lacksDevelopPoint) return;
     develop(territory.dong_code, {
       onSuccess: (result) => {
         const remaining = `오늘 ${result.remaining_today}번 더 할 수 있어요`;
@@ -256,7 +257,7 @@ function TerritoryContent({
       </View>
 
       <ConfirmDialog
-        visible={isConfirmingDevelop}
+        visible={isConfirmingDevelop && canDevelop && !lacksDevelopPoint}
         title="개발할까요?"
         description={`개발비 ${territory.development_cost.toLocaleString()} P가 바로 빠져요.\n성공 확률 ${developProbability}% · 실패해도 개발비는 돌려받지 못해요.`}
         confirmLabel="개발하기"

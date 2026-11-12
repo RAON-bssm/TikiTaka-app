@@ -80,7 +80,7 @@ function MissionForm({ territory, mode }: { territory: TerritoryDetail; mode: Mo
   const [criteria, setCriteria] = useState(initial.criteria);
   const isDirty =
     adjective !== initial.adjective || noun !== initial.noun || criteria !== initial.criteria;
-  const { allowLeave, dialog: leaveDialog } = useConfirmLeave(isDirty);
+  const { allowLeave, dialog: leaveDialog } = useConfirmLeave(isDirty, isPending);
 
   const trimmed = {
     adjective: adjective.trim(),
@@ -144,7 +144,7 @@ function MissionForm({ territory, mode }: { territory: TerritoryDetail; mode: Mo
         accessible={false}
         className="grow gap-2xl px-xl py-2xl"
       >
-        <BackButton title={`${copy.title} · ${territory.dong_name}`} />
+        <BackButton title={`${copy.title} · ${territory.dong_name}`} disabled={isPending} />
 
         <View className="gap-sm">
           <Typography variant="h1" className="text-gray-800">

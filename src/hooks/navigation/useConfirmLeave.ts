@@ -5,8 +5,11 @@ import { useCallback, useRef, useState } from 'react';
 /**
  * 고친 내용이 있으면 뒤로 가기·스와이프처럼 화면이 제거되는 이동 전에 확인을 받는다.
  * 탭 전환은 화면이 스택에 남아 입력도 그대로라 막지 않는다.
+ *
+ * 저장 요청 중(`isPending`)에는 확인 없이 아예 나가지 못하게 한다. 이때 나가면 서버엔 저장되는데
+ * "저장되지 않아요"라고 안내하게 되고, 호출부의 onSuccess(토스트·다음 화면 이동)도 실행되지 않는다.
  */
-export function useConfirmLeave(isDirty: boolean) {
+export function useConfirmLeave(isDirty: boolean, isPending = false) {
   const navigation = useNavigation();
   // 확인 뒤 이어 갈 이동. useState에 함수를 바로 넘기면 updater로 실행되므로 `() => fn`으로 감싸 넣는다.
   const [pendingLeave, setPendingLeave] = useState<() => void>();
@@ -20,11 +23,12 @@ export function useConfirmLeave(isDirty: boolean) {
     }, []),
   );
 
-  usePreventRemove(isDirty, ({ data }) => {
+  usePreventRemove(isDirty || isPending, ({ data }) => {
     if (allowedRef.current) {
       navigation.dispatch(data.action);
       return;
     }
+    if (isPending) return;
     setPendingLeave(() => () => navigation.dispatch(data.action));
   });
 

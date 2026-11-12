@@ -64,13 +64,15 @@ function PreferenceForm({ team, initialCodes }: { team: Location; initialCodes: 
   const gu = team.location_name;
   const { showToast } = useToast();
   const { mutate: save, isPending } = useUpdateDongPreferences();
-  const [codes, setCodes] = useState(initialCodes);
+  // 편집 중 다시 불러와도 기준이 바뀌지 않게 들어올 때 값으로 고정한다. 저장하면 화면을 나가므로 갱신할 일이 없다.
+  const [baselineCodes] = useState(initialCodes);
+  const [codes, setCodes] = useState(baselineCodes);
   const [query, setQuery] = useState('');
   const dongs = getDongsInTeam(team);
   const keyword = query.trim();
   const visibleDongs = keyword ? dongs.filter((dong) => dong.name.includes(keyword)) : dongs;
-  const changed = codes.join() !== initialCodes.join();
-  const { allowLeave, dialog: leaveDialog } = useConfirmLeave(changed);
+  const changed = codes.join() !== baselineCodes.join();
+  const { allowLeave, dialog: leaveDialog } = useConfirmLeave(changed, isPending);
 
   const toggle = (code: number) => {
     if (codes.includes(code)) {
