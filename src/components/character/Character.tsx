@@ -1,4 +1,5 @@
 import { Image } from 'expo-image';
+import { memo } from 'react';
 import { View } from 'react-native';
 
 import { resolveLayerSource } from '@/constants/character/assets';
@@ -19,8 +20,12 @@ const OVERSCALE = CANVAS / DESIGN_FRAME;
 // 확대된 레이어를 중앙에 두는 음수 오프셋
 const INSET = `${(-(OVERSCALE - 1) / 2) * 100}%`;
 
-/** 파츠를 LAYERS 순서로 겹쳐 합성한다. 모든 파츠가 같은 1:1 캔버스라 겹치기만 하면 정렬된다. */
-export default function Character({ config, size, className }: CharacterProps) {
+/**
+ * 파츠를 LAYERS 순서로 겹쳐 합성한다. 모든 파츠가 같은 1:1 캔버스라 겹치기만 하면 정렬된다.
+ * 레이어마다 <Image>를 여러 장 그려 비용이 있어, 피드·랭킹처럼 리스트 안에서 쓸 때
+ * 부모가 리렌더돼도 config가 그대로면 다시 그리지 않게 memo로 감싼다.
+ */
+function Character({ config, size, className }: CharacterProps) {
   return (
     <View
       className={`aspect-square ${className ?? ''}`}
@@ -52,3 +57,5 @@ export default function Character({ config, size, className }: CharacterProps) {
     </View>
   );
 }
+
+export default memo(Character);

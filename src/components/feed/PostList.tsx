@@ -13,6 +13,13 @@ import { formatRelativeTime } from '@/hooks/useRelativeTime';
 import type { Post } from '@/types/post';
 
 const SKELETON_COUNT = 3;
+// 화면 첫 로드 때 바로 보이는 카드 수만큼만 이미지 로딩 우선순위를 올린다.
+const HIGH_PRIORITY_COUNT = 2;
+
+// 카드 하나가 이미지·캐릭터 합성까지 있어 기본값(초기 10장, windowSize 21)은 과하다.
+const INITIAL_NUM_TO_RENDER = 6;
+const MAX_TO_RENDER_PER_BATCH = 6;
+const WINDOW_SIZE = 7;
 
 const Separator = () => <View className="h-md" />;
 
@@ -61,32 +68,27 @@ function usePostActions() {
   const [deletingPostId, setDeletingPostId] = useState<string>();
   const [editingPost, setEditingPost] = useState<EditingPost>();
 
-  const renderCard = (post: Post) => (
+  // 본인 글이면 수정·삭제 메뉴를 보여준다. setEditingPost·setDeletingPostId(useState setter)를
+  // 그대로 넘겨야 매 렌더마다 새 함수가 안 만들어져 FeedCard의 React.memo가 의미 있다.
+  const isMine = (post: Post) => post.user_id === myInfo?.user_id;
+
+  const renderCard = (post: Post, index: number) => (
     <FeedCard
       key={post.post_id}
       postId={post.post_id}
-      author={{ name: post.user_name, userId: post.user_id }}
+      authorName={post.user_name}
+      authorUserId={post.user_id}
       imageUrl={post.post_image}
       title={post.content}
       place={post.location}
       timeAgo={formatRelativeTime(post.created_at)}
       likeCount={post.like_count}
       liked={post.liked_by_me}
-      menuItems={
-        post.user_id === myInfo?.user_id
-          ? [
-              {
-                label: '수정하기',
-                onPress: () => setEditingPost({ postId: post.post_id, content: post.content }),
-              },
-              {
-                label: '삭제하기',
-                destructive: true,
-                onPress: () => setDeletingPostId(post.post_id),
-              },
-            ]
-          : undefined
-      }
+      isMine={isMine(post)}
+      canEdit={isMine(post)}
+      onEditPress={setEditingPost}
+      onDeletePress={setDeletingPostId}
+      imagePriority={index < HIGH_PRIORITY_COUNT ? 'high' : undefined}
     />
   );
 
@@ -136,7 +138,7 @@ export function PostFlatList({ state, header, refreshControl }: FlatProps) {
       <FlatList
         data={posts}
         keyExtractor={(post) => post.post_id}
-        renderItem={({ item }) => renderCard(item)}
+        renderItem={({ item, index }) => renderCard(item, index)}
         ItemSeparatorComponent={Separator}
         ListHeaderComponent={header}
         ListHeaderComponentClassName="pb-2xl"
@@ -144,6 +146,9 @@ export function PostFlatList({ state, header, refreshControl }: FlatProps) {
         contentContainerClassName="px-xl pb-lg pt-lg"
         showsVerticalScrollIndicator={false}
         refreshControl={refreshControl}
+        initialNumToRender={INITIAL_NUM_TO_RENDER}
+        maxToRenderPerBatch={MAX_TO_RENDER_PER_BATCH}
+        windowSize={WINDOW_SIZE}
       />
       {dialogs}
     </>

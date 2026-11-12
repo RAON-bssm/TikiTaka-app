@@ -13,12 +13,14 @@ interface Props {
    */
   cacheKey?: string;
   className?: string;
+  /** 화면 맨 위 1~2장처럼 먼저 보이는 이미지에 'high'를 준다. */
+  priority?: 'low' | 'normal' | 'high';
 }
 
 const FADE_MS = 250;
 
 /** URL 조회부터 다운로드가 끝날 때까지 스켈레톤을 깔고, 다 받으면 이미지를 서서히 드러낸다. */
-export default function LoadingImage({ uri, cacheKey, className = '' }: Props) {
+export default function LoadingImage({ uri, cacheKey, className = '', priority }: Props) {
   const reduceMotion = useReducedMotion();
   const imageKey = cacheKey ?? uri;
   const [loadedKey, setLoadedKey] = useState<string | null>(null);
@@ -34,6 +36,7 @@ export default function LoadingImage({ uri, cacheKey, className = '' }: Props) {
           recyclingKey={imageKey}
           contentFit="cover"
           transition={reduceMotion ? 0 : FADE_MS}
+          priority={priority}
           onLoad={() => setLoadedKey(imageKey ?? null)}
           style={StyleSheet.absoluteFill}
         />

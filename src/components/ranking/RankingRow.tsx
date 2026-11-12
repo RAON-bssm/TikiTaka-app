@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { View } from 'react-native';
 
 import UserCharacter from '@/components/character/UserCharacter';
@@ -18,7 +19,8 @@ interface Props {
   onBlock: (target: { userId: string; userName: string }) => void;
 }
 
-export default function RankingRow({ row, myUserId, onBlock }: Props) {
+/** row·myUserId·onBlock이 그대로면(쿼리 재조회로 목록이 구조적으로 공유될 때) 다시 그리지 않는다. */
+function RankingRow({ row, myUserId, onBlock }: Props) {
   if (row.kind === 'team') {
     return <TeamRankingRow team={row.data} />;
   }
@@ -59,3 +61,5 @@ export default function RankingRow({ row, myUserId, onBlock }: Props) {
     </View>
   );
 }
+
+export default memo(RankingRow);
