@@ -6,7 +6,6 @@ import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
 import { useMyBoard } from '@/hooks/post/useMyBoard';
 import { UploadConfirmationFailedError, useUploadPost } from '@/hooks/post/useUploadPost';
-import { useTutorial } from '@/hooks/tutorial/useTutorial';
 import useImageRatio from '@/hooks/useImageRatio';
 import type { PostStatus } from '@/types/post';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -30,7 +29,6 @@ export default function Upload() {
   const { mutate: uploadPost, isPending } = useUploadPost();
 
   const { data: myBoard, isLoading: isBoardLoading } = useMyBoard();
-  const { notifyPostUploaded } = useTutorial();
 
   const uploadingRef = useRef(false);
   // 등록 여부 확인(getMyPosts)까지 실패해 진짜 상태를 모르는 경우, 중복 게시물을 막기 위해 재업로드를 금지한다.
@@ -66,7 +64,6 @@ export default function Upload() {
             pathname: '/feed/[post_id]',
             params: { post_id: postId, from: 'upload' },
           });
-          notifyPostUploaded();
         },
         onError: (error) => {
           if (error instanceof UploadConfirmationFailedError) {
