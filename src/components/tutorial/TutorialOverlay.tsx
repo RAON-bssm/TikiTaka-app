@@ -9,7 +9,7 @@ import GuideBubble from '@/components/tutorial/GuideBubble';
 import GuideCharacter from '@/components/tutorial/GuideCharacter';
 import Button from '@/components/ui/Button';
 import Typography from '@/components/ui/Typography';
-import { MISSION_MESSAGES, type TutorialStep } from '@/constants/tutorial';
+import { MISSION_MESSAGES, type TutorialStep, type TutorialTarget } from '@/constants/tutorial';
 import { guardedNavigate } from '@/hooks/navigation/useLeaveGuard';
 import { useMyBoard } from '@/hooks/post/useMyBoard';
 import { useTutorial } from '@/hooks/tutorial/useTutorial';
@@ -24,6 +24,13 @@ const DIM_OPACITY = 0.6;
 const GUIDE_GAP = 12;
 // 카메라 화면 상단의 주제 제목·뒤로 가기 버튼 아래에 오도록 띄운다.
 const MISSION_GUIDE_TOP = 48;
+const TARGET_LABELS: Record<TutorialTarget, string> = {
+  'tab:index': '홈',
+  'tab:ranking': '랭킹',
+  'tab:camera': '카메라',
+  'tab:map': '지도',
+  'tab:market': '상점',
+};
 
 /** 탭 레이아웃 위에 덮는다. Modal을 쓰면 아래 화면 터치가 모두 막혀 카메라 촬영 단계를 진행할 수 없다. */
 export default function TutorialOverlay() {
@@ -126,6 +133,7 @@ const SpotlightGuide = ({ step }: { step: TutorialStep }) => {
             </View>
             <Pressable
               accessibilityRole="button"
+              accessibilityLabel={step.target && `${TARGET_LABELS[step.target]} 탭`}
               onPress={handlePrimary}
               className="absolute rounded-lg border-2 border-white"
               style={{ left: rect.x, top: rect.y, width: rect.width, height: rect.height }}
