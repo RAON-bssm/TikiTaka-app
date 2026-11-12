@@ -31,9 +31,15 @@ export default function ConfirmDialog({
       statusBarTranslucent
       onRequestClose={onCancel}
     >
-      <Pressable className="flex-1 items-center justify-center bg-black/40" onPress={onCancel}>
+      {/* Pressable은 기본이 accessible이라 카드 전체가 한 덩어리로 묶여 안쪽 버튼에 포커스가 가지 않는다. */}
+      <Pressable
+        className="flex-1 items-center justify-center bg-black/40"
+        onPress={onCancel}
+        accessible={false}
+      >
         <Pressable
           onPress={() => {}}
+          accessible={false}
           className="w-[300px] gap-2xl rounded-xl bg-white px-xl pb-xl pt-2xl"
         >
           <View className="items-center gap-sm">

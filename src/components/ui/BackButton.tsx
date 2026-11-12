@@ -20,8 +20,9 @@ export default function BackButton({ link, title, disabled = false }: Props) {
       router.replace('/');
     }
   };
+  // hitSlop은 부모 경계를 넘지 못한다. 패딩만큼 음수 마진을 줘 보이는 위치는 그대로 두고 터치 영역을 부모 안에 확보한다.
   return (
-    <View className="flex flex-row items-center gap-sm">
+    <View className="-m-sm flex flex-row items-center gap-sm p-sm">
       <Pressable
         onPress={onPress}
         disabled={disabled}
