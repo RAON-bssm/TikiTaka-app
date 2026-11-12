@@ -103,7 +103,7 @@ const ReportForm = ({
     const options = {
       onSuccess: () => {
         onSuccess();
-        showToast('신고가 접수되었어요');
+        showToast('신고가 접수되었어요', { type: 'success' });
       },
       onError: (error: unknown) => {
         submittingRef.current = false;
@@ -203,7 +203,8 @@ const ReportForm = ({
               <Button content="취소" variant="light" className="flex-1" onclick={onClose} />
               <Button
                 content={isPending ? '신고 중...' : '신고하기'}
-                className={`flex-1 ${canSubmit ? '' : 'opacity-50'}`}
+                className="flex-1"
+                disabled={!canSubmit}
                 onclick={handleSubmit}
               />
             </View>

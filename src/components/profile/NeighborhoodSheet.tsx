@@ -188,7 +188,8 @@ export default function NeighborhoodSheet({ visible, onClose }: Props) {
           <Button
             content={isReturning ? '돌아가는 중...' : '본진으로 돌아가기'}
             onclick={handleReturnHome}
-            className={`w-full ${isReturning ? 'opacity-50' : ''}`}
+            className="w-full"
+            disabled={isReturning}
           />
         )}
       </View>

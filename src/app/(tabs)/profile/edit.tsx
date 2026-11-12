@@ -47,7 +47,7 @@ export default function EditProfile() {
       { user_name: nextName },
       {
         onSuccess: () => {
-          showToast('닉네임을 변경했어요');
+          showToast('닉네임을 변경했어요', { type: 'success' });
           router.back();
         },
         onError: (error) => {
@@ -96,7 +96,7 @@ export default function EditProfile() {
             <Button
               content={isPending ? '수정 중...' : '수정하기'}
               onclick={handleSubmit}
-              className={isPending ? 'opacity-50' : ''}
+              disabled={isPending}
             />
           )}
         </View>

@@ -58,7 +58,7 @@ const EditForm = ({ post, onClose }: { post: EditingPost; onClose: () => void })
       {
         onSuccess: () => {
           onClose();
-          showToast('게시글을 수정했어요');
+          showToast('게시글을 수정했어요', { type: 'success' });
         },
         onError: (error) =>
           setErrorMessage(getApiErrorMessage(error, '게시글을 수정하지 못했어요')),
@@ -103,7 +103,8 @@ const EditForm = ({ post, onClose }: { post: EditingPost; onClose: () => void })
             <Button content="취소" variant="light" className="flex-1" onclick={handleClose} />
             <Button
               content={isPending ? '수정 중...' : '수정하기'}
-              className={`flex-1 ${canSubmit ? '' : 'opacity-50'}`}
+              className="flex-1"
+              disabled={!canSubmit}
               onclick={handleSubmit}
             />
           </View>

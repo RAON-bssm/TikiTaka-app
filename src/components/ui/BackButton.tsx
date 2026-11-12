@@ -25,6 +25,7 @@ export default function BackButton({ link, title, disabled = false }: Props) {
       <Pressable
         onPress={onPress}
         disabled={disabled}
+        hitSlop={12}
         accessibilityRole="button"
         accessibilityLabel="뒤로 가기"
         accessibilityState={{ disabled }}
