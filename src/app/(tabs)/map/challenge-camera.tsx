@@ -1,31 +1,15 @@
 import { router, useIsFocused, useLocalSearchParams } from 'expo-router';
-import { useRef, useState } from 'react';
-import { type LayoutChangeEvent, Linking, Pressable, StyleSheet, View } from 'react-native';
-import { GestureDetector } from 'react-native-gesture-handler';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  Camera,
-  type CameraRef,
-  type DeviceFilter,
-  useCameraDevice,
-  useCameraPermission,
-  usePhotoOutput,
-} from 'react-native-vision-camera';
+import { useRef } from 'react';
+import { Linking, Pressable, View } from 'react-native';
 
 import { useTerritoryMockSettings } from '@/api/mock/territoryMockStore';
 import CameraBackButton from '@/components/camera/CameraBackButton';
-import CameraNotFound from '@/components/camera/CameraNotFound';
-import CameraPermissionRequest from '@/components/camera/CameraPermissionRequest';
-import FlipButton from '@/components/camera/FlipButton';
+import CaptureView from '@/components/camera/CaptureView';
 import MissionTitle from '@/components/camera/MissionTitle';
-import ShutterButton from '@/components/camera/ShutterButton';
-import ZoomControl from '@/components/camera/ZoomControl';
 import Button from '@/components/ui/Button';
 import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
 import { getPendingMission } from '@/constants/territory/mission';
-import { cropToPreview } from '@/hooks/camera/cropToPreview';
-import useCameraZoom from '@/hooks/camera/useCameraZoom';
 import { type HomeGuLocationStatus, useHomeGuLocation } from '@/hooks/territory/useHomeGuLocation';
 import { useMyTeam } from '@/hooks/territory/useMyTeam';
 import { useTerritory } from '@/hooks/territory/useTerritory';
@@ -35,10 +19,6 @@ const loadSamplePhoto: (() => Promise<string>) | undefined = __DEV__
   ? // eslint-disable-next-line @typescript-eslint/no-require-imports -- 정적 import는 __DEV__와 무관하게 번들된다
     require('@/api/mock/samplePhoto').loadSamplePhoto
   : undefined;
-
-const LENS_FILTER: DeviceFilter = {
-  physicalDevices: ['ultra-wide-angle', 'wide-angle', 'telephoto'],
-};
 
 function locationMessage(status: HomeGuLocationStatus, gu: string): string | undefined {
   switch (status) {
@@ -72,7 +52,6 @@ export default function ChallengeCameraScreen() {
   const params = useLocalSearchParams<Params>();
   const dongCode = Number(params.dongCode);
   const purpose = params.purpose ?? 'challenge';
-  const insets = useSafeAreaInsets();
   const isFocused = useIsFocused();
   const { showToast } = useToast();
 
@@ -100,20 +79,9 @@ export default function ChallengeCameraScreen() {
       ? '허용하기'
       : undefined;
 
-  const { hasPermission, canRequestPermission, requestPermission } = useCameraPermission();
-  const [facing, setFacing] = useState<'back' | 'front'>('back');
-  const device = useCameraDevice(facing, LENS_FILTER);
-  const photoOutput = usePhotoOutput({ qualityPrioritization: 'quality' });
-  const { zoom, selectedZoom, levels, handleSelectZoom, pinch } = useCameraZoom(device);
-
-  const cameraRef = useRef<CameraRef>(null);
-  const [previewAspect, setPreviewAspect] = useState<number>();
-  const capturingRef = useRef(false);
-
-  const handleLayout = (event: LayoutChangeEvent) => {
-    const { width, height } = event.nativeEvent.layout;
-    if (width && height) setPreviewAspect(width / height);
-  };
+  /** 셔터를 누른 순간의 위치. 서버는 이 값을 검증하지 않고 기록만 한다. */
+  const shotPosition = useRef<{ latitude: number; longitude: number }>(undefined);
+  const samplingRef = useRef(false);
 
   const handleLocationAction = () => {
     if (teamFailed) {
@@ -151,118 +119,66 @@ export default function ChallengeCameraScreen() {
     }
   };
 
-  /** 셔터를 누른 순간의 위치를 기록한다. 서버는 이 값을 검증하지 않고 기록만 한다. */
-  const takePhoto = async (capture: () => Promise<string | undefined>) => {
+  const holdPosition = () => {
     if (location.status !== 'inside' || !location.position) {
       showToast(message ?? '위치를 확인하고 있어요');
-      return;
+      return false;
     }
-    if (capturingRef.current) return;
-    capturingRef.current = true;
-    const { latitude, longitude } = location.position;
+    shotPosition.current = location.position;
+    return true;
+  };
+
+  const handleCaptured = (uri: string) => {
+    if (!shotPosition.current) return;
+    const { latitude, longitude } = shotPosition.current;
+    goToConfirm(uri, latitude, longitude);
+  };
+
+  const takeSamplePhoto = async (load: () => Promise<string>) => {
+    if (samplingRef.current || !holdPosition()) return;
+    samplingRef.current = true;
     try {
-      const uri = await capture();
-      if (uri) goToConfirm(uri, latitude, longitude);
+      handleCaptured(await load());
     } catch {
       showToast('사진을 찍지 못했어요. 다시 시도해주세요.');
     } finally {
-      capturingRef.current = false;
+      samplingRef.current = false;
     }
   };
 
-  const handleCapture = () =>
-    takePhoto(async () => {
-      const photo = await photoOutput.capturePhotoToFile({}, {});
-      if (!photo) return undefined;
-      const uri = `file://${photo.filePath}`;
-      return previewAspect ? await cropToPreview(uri, previewAspect).catch(() => uri) : uri;
-    });
-
-  // 시뮬레이터에는 카메라가 없어 개발용 목 모드에서는 샘플 사진으로 다음 화면을 볼 수 있게 한다.
-  if (loadSamplePhoto && mock.enabled && (!hasPermission || device == null)) {
-    return (
-      <View className="flex-1 justify-center gap-lg bg-black px-xl">
-        <MissionTitle title={missionTitle} />
-        <CameraBackButton />
-        <Typography variant="body2" className="text-center text-white">
-          카메라를 쓸 수 없어요 (개발용 목 모드)
+  const notice = (className: string) =>
+    message && (
+      <Pressable onPress={handleLocationAction} disabled={!locationAction} className={className}>
+        <Typography variant="body3" className="text-center text-white">
+          {locationAction ? `${message} · ${locationAction}` : message}
         </Typography>
-        {message && (
-          <Pressable
-            onPress={handleLocationAction}
-            disabled={!locationAction}
-            className="self-center rounded-full bg-white/20 px-lg py-sm"
-          >
-            <Typography variant="body3" className="text-center text-white">
-              {locationAction ? `${message} · ${locationAction}` : message}
-            </Typography>
-          </Pressable>
-        )}
-        <Button content="샘플 사진으로 찍기" onclick={() => void takePhoto(loadSamplePhoto)} />
-      </View>
+      </Pressable>
     );
-  }
-
-  if (!hasPermission) {
-    return (
-      <CameraPermissionRequest
-        canRequestPermission={canRequestPermission}
-        onRequestPermission={requestPermission}
-      />
-    );
-  }
-
-  if (device == null) {
-    return <CameraNotFound />;
-  }
 
   return (
-    <View className="flex-1 bg-black">
-      <GestureDetector gesture={pinch}>
-        <Camera
-          ref={cameraRef}
-          style={StyleSheet.absoluteFill}
-          onLayout={handleLayout}
-          onStarted={() => void cameraRef.current?.controller?.setZoom(zoom.get())}
-          device={device}
-          isActive={isFocused}
-          outputs={[photoOutput]}
-          zoom={zoom}
-        />
-      </GestureDetector>
-
-      <MissionTitle title={missionTitle} />
-      <CameraBackButton />
-
-      <View className="absolute left-0 right-0 bottom-0" style={{ paddingBottom: insets.bottom }}>
-        <View className="items-center gap-lg pb-2xl">
-          {message && (
-            <Pressable
-              onPress={handleLocationAction}
-              disabled={!locationAction}
-              className="rounded-full bg-black/60 px-lg py-sm"
-            >
-              <Typography variant="body3" className="text-center text-white">
-                {locationAction ? `${message} · ${locationAction}` : message}
-              </Typography>
-            </Pressable>
-          )}
-          <ZoomControl levels={levels} selected={selectedZoom} onSelect={handleSelectZoom} />
-
-          <View
-            className={`w-full flex-row items-center justify-center ${
-              location.status === 'inside' ? '' : 'opacity-50'
-            }`}
-          >
-            <ShutterButton onPress={handleCapture} />
-            <View className="absolute right-3xl">
-              <FlipButton
-                onPress={() => setFacing((prev) => (prev === 'back' ? 'front' : 'back'))}
-              />
-            </View>
+    <CaptureView
+      title={missionTitle}
+      onShutter={holdPosition}
+      onCaptured={handleCaptured}
+      dimShutter={location.status !== 'inside'}
+      notice={notice('rounded-full bg-black/60 px-lg py-sm')}
+      unavailable={
+        // 시뮬레이터에는 카메라가 없어 개발용 목 모드에서는 샘플 사진으로 다음 화면을 볼 수 있게 한다.
+        loadSamplePhoto && mock.enabled ? (
+          <View className="flex-1 justify-center gap-lg bg-black px-xl">
+            <MissionTitle title={missionTitle} />
+            <CameraBackButton />
+            <Typography variant="body2" className="text-center text-white">
+              카메라를 쓸 수 없어요 (개발용 목 모드)
+            </Typography>
+            {notice('self-center rounded-full bg-white/20 px-lg py-sm')}
+            <Button
+              content="샘플 사진으로 찍기"
+              onclick={() => void takeSamplePhoto(loadSamplePhoto)}
+            />
           </View>
-        </View>
-      </View>
-    </View>
+        ) : undefined
+      }
+    />
   );
 }
