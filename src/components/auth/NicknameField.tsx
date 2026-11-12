@@ -67,11 +67,7 @@ export default function NicknameField({ value, onChangeText, check, onCheck, cur
             onChangeText={onChangeText}
           />
         </View>
-        <Button
-          content="중복확인"
-          onclick={handleCheck}
-          className={isPending ? 'opacity-50' : ''}
-        />
+        <Button content="중복확인" onclick={handleCheck} disabled={isPending} />
       </View>
       {currentCheck ? (
         <Typography

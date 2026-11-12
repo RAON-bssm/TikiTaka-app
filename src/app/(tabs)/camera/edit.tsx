@@ -12,7 +12,7 @@ import usePhotoEditor, {
   useInteraction,
 } from '@/hooks/camera/usePhotoEditor';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { type LayoutChangeEvent, Pressable, View, type ViewStyle } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
 import Animated, { interpolate, useAnimatedStyle } from 'react-native-reanimated';
@@ -84,6 +84,8 @@ export default function EditPhotoScreen() {
   const [ratio, setRatio] = useState<CropRatio>(CROP_RATIOS[0]);
   const [area, setArea] = useState<Size>();
   const [isExporting, setIsExporting] = useState(false);
+  // state는 다음 렌더에야 반영돼, 빠르게 두 번 누르면 업로드 화면이 두 번 쌓인다.
+  const exportingRef = useRef(false);
 
   const bounds = area && {
     width: area.width - FRAME_MARGIN * 2,
@@ -146,7 +148,8 @@ export default function EditPhotoScreen() {
   };
 
   const handleNext = async () => {
-    if (isExporting || !editor.isReady) return;
+    if (exportingRef.current || !editor.isReady) return;
+    exportingRef.current = true;
     setIsExporting(true);
     try {
       const editedUri = await editor.exportPhoto();
@@ -156,6 +159,7 @@ export default function EditPhotoScreen() {
     } catch {
       showToast('사진을 편집하지 못했어요. 다시 시도해주세요.');
     } finally {
+      exportingRef.current = false;
       setIsExporting(false);
     }
   };
@@ -286,7 +290,7 @@ export default function EditPhotoScreen() {
         <Button
           content={isExporting ? '처리 중...' : '다음'}
           onclick={() => void handleNext()}
-          className={isExporting || !editor.isReady ? 'opacity-50' : ''}
+          disabled={isExporting || !editor.isReady}
         />
       </View>
     </SafeAreaView>

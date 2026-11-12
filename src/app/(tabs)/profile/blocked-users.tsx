@@ -21,7 +21,7 @@ export default function BlockedUsersScreen() {
   const handleUnblock = (userId: string, userName: string) => {
     if (isPending) return;
     unblockUser(userId, {
-      onSuccess: () => showToast(`${userName}님을 차단 해제했어요`),
+      onSuccess: () => showToast(`${userName}님을 차단 해제했어요`, { type: 'success' }),
       onError: (error) => showToast(getApiErrorMessage(error, '차단 해제하지 못했어요')),
     });
   };

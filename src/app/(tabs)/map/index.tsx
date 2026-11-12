@@ -314,6 +314,7 @@ export default function MapScreen() {
             })
           }
           onInsufficientPoint={setPointShortage}
+          onClose={closeSheet}
           onFirstLayout={(height) => {
             // 시트는 WebView 아래 끝에 붙어 있어 시트 높이가 곧 지도에서 가려지는 높이다.
             sheetHeight.current = height;

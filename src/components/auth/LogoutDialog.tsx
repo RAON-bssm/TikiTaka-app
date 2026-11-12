@@ -48,7 +48,8 @@ export default function LogoutDialog({ visible, onClose }: Props) {
             <Button content="취소" variant="light" className="flex-1" onclick={handleClose} />
             <Button
               content={isPending ? '로그아웃 중...' : '로그아웃'}
-              className={`flex-1 ${isPending ? 'opacity-50' : ''}`}
+              className="flex-1"
+              disabled={isPending}
               onclick={handleLogout}
             />
           </View>

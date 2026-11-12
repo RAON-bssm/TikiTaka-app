@@ -88,8 +88,9 @@ export function toMarketItem(product: PartProduct): MarketItem {
  * 실제 차감액은 DB의 뽑기권 price이므로, DB 값이 바뀌면 여기도 맞춰야 한다.
  */
 export const GASHAPON_OPTIONS = [
-  { productId: 'gashapon-1set', label: '1회 뽑기', fallbackCost: 500 },
-  { productId: 'gashapon-5set', label: '5회 뽑기', fallbackCost: 2500 },
+  { productId: 'gashapon-1set', label: '1회 뽑기', fallbackCost: 500, needsConfirm: false },
+  // 한 번에 크게 빠지므로 잘못 눌러도 바로 차감되지 않게 묻는다.
+  { productId: 'gashapon-5set', label: '5회 뽑기', fallbackCost: 2500, needsConfirm: true },
 ] as const;
 
 export interface GotchaPull {

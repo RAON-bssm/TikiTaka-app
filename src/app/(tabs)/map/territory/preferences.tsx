@@ -8,12 +8,14 @@ import RadioSelectedIcon from '@/assets/icons/radio-selected.svg';
 import RadioIcon from '@/assets/icons/radio.svg';
 import BackButton from '@/components/ui/BackButton';
 import Button from '@/components/ui/Button';
+import ConfirmDialog from '@/components/ui/feedback/ConfirmDialog';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Skeleton from '@/components/ui/feedback/Skeleton';
 import TextInput from '@/components/ui/input/TextInput';
 import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
 import { findDong, getDongsInTeam } from '@/constants/territory/region';
+import { useConfirmLeave } from '@/hooks/navigation/useConfirmLeave';
 import { useDongPreferences, useUpdateDongPreferences } from '@/hooks/territory/useDongPreferences';
 import { useMyTeam } from '@/hooks/territory/useMyTeam';
 import type { Location } from '@/types/location';
@@ -62,12 +64,15 @@ function PreferenceForm({ team, initialCodes }: { team: Location; initialCodes: 
   const gu = team.location_name;
   const { showToast } = useToast();
   const { mutate: save, isPending } = useUpdateDongPreferences();
-  const [codes, setCodes] = useState(initialCodes);
+  // 편집 중 다시 불러와도 기준이 바뀌지 않게 들어올 때 값으로 고정한다. 저장하면 화면을 나가므로 갱신할 일이 없다.
+  const [baselineCodes] = useState(initialCodes);
+  const [codes, setCodes] = useState(baselineCodes);
   const [query, setQuery] = useState('');
   const dongs = getDongsInTeam(team);
   const keyword = query.trim();
   const visibleDongs = keyword ? dongs.filter((dong) => dong.name.includes(keyword)) : dongs;
-  const changed = codes.join() !== initialCodes.join();
+  const changed = codes.join() !== baselineCodes.join();
+  const { allowLeave, dialog: leaveDialog } = useConfirmLeave(changed, isPending);
 
   const toggle = (code: number) => {
     if (codes.includes(code)) {
@@ -92,7 +97,10 @@ function PreferenceForm({ team, initialCodes }: { team: Location; initialCodes: 
     if (isPending) return;
     save(codes, {
       onSuccess: () => {
-        showToast(codes.length === 0 ? '희망 동을 모두 지웠어요' : '희망 동을 저장했어요');
+        showToast(codes.length === 0 ? '희망 동을 모두 지웠어요' : '희망 동을 저장했어요', {
+          type: 'success',
+        });
+        allowLeave();
         router.back();
       },
       onError: (error) => showToast(getApiErrorMessage(error, '희망 동을 저장하지 못했어요')),
@@ -199,6 +207,13 @@ function PreferenceForm({ team, initialCodes }: { team: Location; initialCodes: 
           onclick={handleSave}
         />
       </View>
+      <ConfirmDialog
+        {...leaveDialog}
+        title="저장하지 않고 나갈까요?"
+        description="고른 희망 동이 저장되지 않아요."
+        confirmLabel="나가기"
+        cancelLabel="계속 고르기"
+      />
     </>
   );
 }
