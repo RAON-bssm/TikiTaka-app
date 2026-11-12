@@ -4,7 +4,6 @@ import { Keyboard, KeyboardAvoidingView, Modal, Pressable, View } from 'react-na
 import { getApiErrorMessage } from '@/api/error';
 import Button from '@/components/ui/Button';
 import TextInput from '@/components/ui/input/TextInput';
-import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
 import { useWithdraw } from '@/hooks/auth/useWithdraw';
 
@@ -16,8 +15,9 @@ interface Props {
 }
 
 export default function WithdrawDialog({ visible, userName, onClose }: Props) {
-  const { showToast } = useToast();
   const { mutate: withdraw, isPending } = useWithdraw();
+  // 토스트는 모달 아래에 깔려 보이지 않으므로 실패 사유는 창 안에 띄운다.
+  const [errorMessage, setErrorMessage] = useState<string>();
   const [confirmName, setConfirmName] = useState('');
   // 앞뒤 공백은 실수로 들어가기 쉬워 무시하고, 나머지는 정확히 같아야 한다.
   const isConfirmed = confirmName.trim() === userName;
@@ -26,6 +26,7 @@ export default function WithdrawDialog({ visible, userName, onClose }: Props) {
     if (isPending) return;
     // 다시 열었을 때 이전 입력이 남아 있으면 확인 절차가 무의미해진다.
     setConfirmName('');
+    setErrorMessage(undefined);
     onClose();
   };
 
@@ -33,8 +34,9 @@ export default function WithdrawDialog({ visible, userName, onClose }: Props) {
     if (!isConfirmed || isPending) return;
 
     // 성공하면 useWithdraw가 토스트를 띄우고 로그인 화면으로 보낸다.
+    setErrorMessage(undefined);
     withdraw(undefined, {
-      onError: (error) => showToast(getApiErrorMessage(error, '탈퇴하지 못했어요')),
+      onError: (error) => setErrorMessage(getApiErrorMessage(error, '탈퇴하지 못했어요')),
     });
   };
 
@@ -79,11 +81,17 @@ export default function WithdrawDialog({ visible, userName, onClose }: Props) {
               />
             </View>
 
+            {errorMessage && (
+              <Typography variant="caption" className="text-center text-primary-600">
+                {errorMessage}
+              </Typography>
+            )}
             <View className="flex-row gap-sm">
               <Button content="취소" variant="light" className="flex-1" onclick={handleClose} />
               <Button
                 content={isPending ? '탈퇴 중...' : '탈퇴하기'}
-                className={`flex-1 ${!isConfirmed || isPending ? 'opacity-50' : ''}`}
+                className="flex-1"
+                disabled={!isConfirmed || isPending}
                 onclick={handleWithdraw}
               />
             </View>

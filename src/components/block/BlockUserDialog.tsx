@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Modal, Pressable, View } from 'react-native';
 
 import { getApiErrorMessage } from '@/api/error';
@@ -16,22 +17,26 @@ interface Props {
 export default function BlockUserDialog({ target, onClose, onBlocked }: Props) {
   const { showToast } = useToast();
   const { mutate: blockUser, isPending } = useBlockUser();
+  // 토스트는 모달 아래에 깔려 보이지 않으므로 실패 사유는 창 안에 띄운다.
+  const [errorMessage, setErrorMessage] = useState<string>();
 
   const handleClose = () => {
     if (isPending) return;
+    setErrorMessage(undefined);
     onClose();
   };
 
   const handleBlock = () => {
     if (!target || isPending) return;
 
+    setErrorMessage(undefined);
     blockUser(target.userId, {
       onSuccess: () => {
-        showToast(`${target.userName}님을 차단했어요`);
+        showToast(`${target.userName}님을 차단했어요`, { type: 'success' });
         onClose();
         onBlocked?.();
       },
-      onError: (error) => showToast(getApiErrorMessage(error, '차단하지 못했어요')),
+      onError: (error) => setErrorMessage(getApiErrorMessage(error, '차단하지 못했어요')),
     });
   };
 
@@ -56,11 +61,17 @@ export default function BlockUserDialog({ target, onClose, onBlocked }: Props) {
               차단하면 이 유저의 게시물과 순위가 더 이상 보이지 않아요.
             </Typography>
           </View>
+          {errorMessage && (
+            <Typography variant="caption" className="text-center text-primary-600">
+              {errorMessage}
+            </Typography>
+          )}
           <View className="flex-row gap-sm">
             <Button content="취소" variant="light" className="flex-1" onclick={handleClose} />
             <Button
               content={isPending ? '차단 중...' : '차단하기'}
-              className={`flex-1 ${isPending ? 'opacity-50' : ''}`}
+              className="flex-1"
+              disabled={isPending}
               onclick={handleBlock}
             />
           </View>
