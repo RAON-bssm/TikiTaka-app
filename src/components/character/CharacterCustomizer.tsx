@@ -238,7 +238,7 @@ export default function CharacterCustomizer({
     }
     void equipCharacter(config);
     setDraft(undefined);
-    showToast('캐릭터를 저장했어요');
+    showToast('캐릭터를 저장했어요', { type: 'success' });
     return true;
   };
 

@@ -92,7 +92,9 @@ function PreferenceForm({ team, initialCodes }: { team: Location; initialCodes: 
     if (isPending) return;
     save(codes, {
       onSuccess: () => {
-        showToast(codes.length === 0 ? '희망 동을 모두 지웠어요' : '희망 동을 저장했어요');
+        showToast(codes.length === 0 ? '희망 동을 모두 지웠어요' : '희망 동을 저장했어요', {
+          type: 'success',
+        });
         router.back();
       },
       onError: (error) => showToast(getApiErrorMessage(error, '희망 동을 저장하지 못했어요')),
