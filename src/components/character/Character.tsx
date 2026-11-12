@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 
 import { resolveLayerSource } from '@/constants/character/assets';
@@ -19,6 +19,7 @@ const DESIGN_FRAME = 1024;
 const OVERSCALE = CANVAS / DESIGN_FRAME;
 // 확대된 레이어를 중앙에 두는 음수 오프셋
 const INSET = `${(-(OVERSCALE - 1) / 2) * 100}%`;
+const REVEAL_TIMEOUT_MS = 1000;
 
 /** 파츠를 LAYERS 순서로 겹쳐 합성한다. 모든 파츠가 같은 1:1 캔버스라 겹치기만 하면 정렬된다. */
 export default function Character({ config, size, className }: CharacterProps) {
@@ -32,6 +33,12 @@ export default function Character({ config, size, className }: CharacterProps) {
   if (!isRevealed && layers.every(({ source }) => settled.has(source))) {
     setIsRevealed(true);
   }
+
+  useEffect(() => {
+    if (isRevealed) return;
+    const timer = setTimeout(() => setIsRevealed(true), REVEAL_TIMEOUT_MS);
+    return () => clearTimeout(timer);
+  }, [isRevealed]);
 
   const markSettled = (source: number) => {
     setSettled((prev) => (prev.has(source) ? prev : new Set(prev).add(source)));
