@@ -10,6 +10,7 @@ import HomeIcon from '@/assets/icons/app-var/home.svg';
 import MapIcon from '@/assets/icons/app-var/map.svg';
 import MarketIcon from '@/assets/icons/app-var/market.svg';
 import RankingIcon from '@/assets/icons/app-var/ranking.svg';
+import { useRequireCamera } from '@/components/camera/CameraPermissionGate';
 import { palette } from '@/constants/colors';
 import type { TutorialTarget } from '@/constants/tutorial';
 import { guardedNavigate } from '@/hooks/navigation/useLeaveGuard';
@@ -37,6 +38,7 @@ const TAB_CONFIG: Record<string, TabConfig> = {
 export default function AppBar({ state, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
   const { registerTarget } = useTutorial();
+  const requireCamera = useRequireCamera();
 
   const focusedRoute = state.routes[state.index];
   const nestedRouteName = getFocusedRouteNameFromRoute(focusedRoute);
@@ -68,7 +70,11 @@ export default function AppBar({ state, navigation }: BottomTabBarProps) {
           });
 
           if (!focused && !event.defaultPrevented) {
-            guardedNavigate(() => navigation.navigate(route.name));
+            guardedNavigate(() =>
+              route.name === 'camera'
+                ? requireCamera(() => navigation.navigate(route.name))
+                : navigation.navigate(route.name),
+            );
           }
         };
 

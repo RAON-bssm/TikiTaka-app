@@ -5,6 +5,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { getApiErrorMessage } from '@/api/error';
+import { useRequireCamera } from '@/components/camera/CameraPermissionGate';
 import Topic from '@/components/camera/Topic';
 import BackButton from '@/components/ui/BackButton';
 import Button from '@/components/ui/Button';
@@ -63,6 +64,7 @@ export default function MissionFormScreen() {
 function MissionForm({ territory, mode }: { territory: TerritoryDetail; mode: Mode }) {
   const copy = COPY[mode];
   const { showToast } = useToast();
+  const requireCamera = useRequireCamera();
   const { mutate: updateMission, isPending } = useUpdateMission();
 
   // 바꾸는 중이던 대기 미션이 있으면 그것부터 이어서 고치게 한다.
@@ -90,8 +92,7 @@ function MissionForm({ territory, mode }: { territory: TerritoryDetail; mode: Mo
   const preview = [trimmed.adjective, trimmed.noun].filter(Boolean).join(' ');
   const isValid = !!trimmed.adjective && !!trimmed.noun;
 
-  const handleSubmit = () => {
-    if (!isValid || isPending) return;
+  const submit = () => {
     const dongCode = String(territory.dong_code);
 
     // 세팅은 미션과 사진을 한 요청으로 보내므로, 입력값을 들고 카메라로 간다.
@@ -128,6 +129,12 @@ function MissionForm({ territory, mode }: { territory: TerritoryDetail; mode: Mo
         onError: (error) => showToast(getApiErrorMessage(error, '미션을 바꾸지 못했어요')),
       },
     );
+  };
+
+  // 어느 모드든 저장 뒤 카메라로 가므로, 권한이 없으면 미션을 바꾸기 전에 멈춘다.
+  const handleSubmit = () => {
+    if (!isValid || isPending) return;
+    requireCamera(submit);
   };
 
   return (

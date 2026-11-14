@@ -3,6 +3,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Image, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useRequireCamera } from '@/components/camera/CameraPermissionGate';
 import Topic from '@/components/camera/Topic';
 import TerritoryStats from '@/components/territory/TerritoryStats';
 import BackButton from '@/components/ui/BackButton';
@@ -26,6 +27,7 @@ export default function ManageTerritoryScreen() {
   const { data: territory, isLoading, isError, refetch } = useTerritory(dongCode);
   const { phase } = useTerritoryPhase();
   const teamName = useTeamName();
+  const requireCamera = useRequireCamera();
   const photo = useViewUrl(territory?.defense_photo);
 
   const needsSetup = !!territory && !territory.defense_photo;
@@ -33,10 +35,12 @@ export default function ManageTerritoryScreen() {
   const canEdit = phase === 'setup' || phase === 'battle';
 
   const goToCamera = (purpose: 'retake') =>
-    router.push({
-      pathname: '/map/challenge-camera',
-      params: { dongCode: String(dongCode), purpose },
-    });
+    requireCamera(() =>
+      router.push({
+        pathname: '/map/challenge-camera',
+        params: { dongCode: String(dongCode), purpose },
+      }),
+    );
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>

@@ -1,5 +1,6 @@
 import { queryClient } from '@/api/queryClient';
 import AuthGate from '@/components/auth/AuthGate';
+import { CameraPermissionProvider } from '@/components/camera/CameraPermissionGate';
 import AppSplash from '@/components/splash/AppSplash';
 import { ToastProvider } from '@/components/ui/Toast';
 import '@/global.css';
@@ -16,9 +17,11 @@ export default function RootLayout() {
         <SafeAreaProvider>
           <QueryClientProvider client={queryClient}>
             <ToastProvider>
-              <AuthGate>
-                <Stack screenOptions={{ headerShown: false }} />
-              </AuthGate>
+              <CameraPermissionProvider>
+                <AuthGate>
+                  <Stack screenOptions={{ headerShown: false }} />
+                </AuthGate>
+              </CameraPermissionProvider>
               <AppSplash />
             </ToastProvider>
           </QueryClientProvider>

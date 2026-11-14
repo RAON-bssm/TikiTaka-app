@@ -5,6 +5,7 @@ import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
+import { useRequireCamera } from '@/components/camera/CameraPermissionGate';
 import GuideBubble from '@/components/tutorial/GuideBubble';
 import GuideCharacter from '@/components/tutorial/GuideCharacter';
 import Button from '@/components/ui/Button';
@@ -44,6 +45,7 @@ export default function TutorialOverlay() {
 const SpotlightGuide = ({ step }: { step: TutorialStep }) => {
   const { next, goTo, getTarget } = useTutorial();
   const { data: myBoard } = useMyBoard();
+  const requireCamera = useRequireCamera();
   const overlayRef = useRef<View>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
   // null = 측정 중, 'none' = 대상이 화면에 없어 가운데에 띄운다.
@@ -97,10 +99,12 @@ const SpotlightGuide = ({ step }: { step: TutorialStep }) => {
 
   const handlePrimary = () => {
     if (canShoot) {
-      guardedNavigate(() => {
-        router.navigate('/camera');
-        goTo('mission');
-      });
+      guardedNavigate(() =>
+        requireCamera(() => {
+          router.navigate('/camera');
+          goTo('mission');
+        }),
+      );
       return;
     }
     if (hasNoMatch) {

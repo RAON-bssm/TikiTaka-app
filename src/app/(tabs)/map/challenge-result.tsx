@@ -2,6 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { Image, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useRequireCamera } from '@/components/camera/CameraPermissionGate';
 import Button from '@/components/ui/Button';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Skeleton from '@/components/ui/feedback/Skeleton';
@@ -37,6 +38,7 @@ export default function ChallengeResultScreen() {
   const { data: myInfo } = useMyInfo();
   const { team } = useMyTeam();
   const teamName = useTeamName();
+  const requireCamera = useRequireCamera();
   const defenderPhoto = useViewUrl(params.defenderPhoto || undefined);
 
   const myTeam = team?.location_name ?? '';
@@ -149,10 +151,12 @@ export default function ChallengeResultScreen() {
                 <Button
                   content="다시 도전하기"
                   onclick={() =>
-                    router.replace({
-                      pathname: '/map/challenge-camera',
-                      params: { dongCode: String(result.dong_code) },
-                    })
+                    requireCamera(() =>
+                      router.replace({
+                        pathname: '/map/challenge-camera',
+                        params: { dongCode: String(result.dong_code) },
+                      }),
+                    )
                   }
                 />
               )}
