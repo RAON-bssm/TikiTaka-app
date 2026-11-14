@@ -2,6 +2,7 @@ import { createPost, getMyPosts } from '@/api/post';
 import { postKeys } from '@/api/queryKeys';
 import { invalidateScoreQueries } from '@/hooks/post/invalidateScoreQueries';
 import { trackPendingUpload } from '@/hooks/post/useMyPosts';
+import { useTutorial } from '@/hooks/tutorial/useTutorial';
 import type { MyPost } from '@/types/post';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
@@ -43,6 +44,7 @@ export class UploadConfirmationFailedError extends Error {
 
 export function useUploadPost() {
   const queryClient = useQueryClient();
+  const { notifyPostUploaded } = useTutorial();
 
   return useMutation({
     mutationFn: async ({ fileUri, boardId, content }: UploadPostParams) => {
@@ -68,6 +70,8 @@ export function useUploadPost() {
       queryClient.invalidateQueries({ queryKey: postKeys.all });
       // 동기 심사면 등록과 함께 동네·개인 점수와 포인트가 바뀐다. 비동기면 심사가 끝날 때 바뀌어 `useMyPosts`가 갱신한다.
       if (status === 'DONE') invalidateScoreQueries(queryClient);
+      // mutate()에 넘긴 onSuccess는 업로드 중 화면을 나가면 실행되지 않아, 튜토리얼이 미션 단계에 멈추지 않게 여기서 알린다.
+      notifyPostUploaded();
     },
   });
 }

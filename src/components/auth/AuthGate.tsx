@@ -5,6 +5,7 @@ import { useEffect, useRef } from 'react';
 
 import { clearSavedCharacter } from '@/api/character';
 import { loadAuthStatus } from '@/api/token';
+import { clearTutorialStep } from '@/api/tutorial';
 import { useAuthStatus } from '@/hooks/auth/useAuthStatus';
 
 // 토큰 확인 전까지 스플래시를 유지한다. 없으면 비로그인 사용자에게 홈이 잠깐 보였다가 튕긴다.
@@ -23,11 +24,12 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
   }, []);
 
   // 재발급 실패로 인터셉터가 세션을 끝내면 useClearSession을 거치지 않는다.
-  // 그때도 다른 계정으로 다시 로그인했을 때 이전 계정의 캐시·캐릭터가 보이지 않게 여기서 비운다.
+  // 그때도 다른 계정으로 다시 로그인했을 때 이전 계정의 캐시·캐릭터·튜토리얼이 남지 않게 여기서 비운다.
   useEffect(() => {
     if (prevStatus.current === 'authenticated' && status === 'unauthenticated') {
       queryClient.clear();
       clearSavedCharacter().catch(() => {});
+      clearTutorialStep().catch(() => {});
     }
     prevStatus.current = status;
   }, [status, queryClient]);

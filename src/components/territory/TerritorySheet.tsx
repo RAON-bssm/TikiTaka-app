@@ -1,12 +1,14 @@
 import { useRef, useState } from 'react';
-import { View, type LayoutChangeEvent } from 'react-native';
+import { Pressable, View, type LayoutChangeEvent } from 'react-native';
 
 import ArrowForwardIcon from '@/assets/icons/arrow-forward-ios.svg';
+import CloseIcon from '@/assets/icons/close.svg';
 import { getApiErrorMessage } from '@/api/error';
 import BlockUserDialog from '@/components/block/BlockUserDialog';
 import UserCharacter from '@/components/character/UserCharacter';
 import ReportDialog, { type ReportTarget } from '@/components/report/ReportDialog';
 import Button from '@/components/ui/Button';
+import ConfirmDialog from '@/components/ui/feedback/ConfirmDialog';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Skeleton from '@/components/ui/feedback/Skeleton';
 import MoreMenu from '@/components/ui/MoreMenu';
@@ -34,11 +36,13 @@ interface Props {
   onInsufficientPoint: (territory: TerritoryDetail) => void;
   /** 내용(땅 정보 또는 에러)이 처음 그려질 때, WebView 아래 끝에서 시트가 가리는 높이를 알린다. */
   onFirstLayout?: (height: number) => void;
+  onClose: () => void;
 }
 
 /**
  * 지도를 가리지 않도록 Modal이 아니라 지도 위에 띄운다(ChatPanel과 같은 방식).
- * 빈 지도 탭·뒤로가기·탭 이동으로 닫히고, 닫는 처리는 지도 화면이 맡는다.
+ * 닫기 버튼·같은 동 다시 탭·뒤로가기·탭 이동으로 닫히고, 닫는 처리는 지도 화면이 맡는다.
+ * 지도 전체가 동으로 덮여 빈 지도 탭이 오지 않고 iOS엔 하드웨어 뒤로가기도 없어, 닫기 버튼이 꼭 필요하다.
  */
 export default function TerritorySheet({
   dongCode,
@@ -51,6 +55,7 @@ export default function TerritorySheet({
   onChallenge,
   onInsufficientPoint,
   onFirstLayout,
+  onClose,
 }: Props) {
   const { data: territory, isLoading, isError, refetch } = useTerritory(dongCode);
   const reported = useRef<'loaded' | 'error'>(undefined);
@@ -70,7 +75,18 @@ export default function TerritorySheet({
       onLayout={handleLayout}
       className="absolute bottom-0 left-0 right-0 gap-2xl rounded-t-lg border border-gray-100 bg-white px-xl pb-xl pt-md"
     >
-      <View className="h-[4px] w-[40px] self-center rounded-full bg-gray-400" />
+      <View className="items-center justify-center">
+        <View className="h-[4px] w-[40px] rounded-full bg-gray-400" />
+        <Pressable
+          onPress={onClose}
+          hitSlop={12}
+          accessibilityRole="button"
+          accessibilityLabel="땅 정보 닫기"
+          className="absolute right-0"
+        >
+          <CloseIcon width={24} height={24} />
+        </Pressable>
+      </View>
       {isLoading ? (
         <SheetSkeleton />
       ) : isError || !territory ? (
@@ -92,7 +108,9 @@ export default function TerritorySheet({
   );
 }
 
-type ContentProps = Omit<Props, 'dongCode' | 'onFirstLayout'> & { territory: TerritoryDetail };
+type ContentProps = Omit<Props, 'dongCode' | 'onFirstLayout' | 'onClose'> & {
+  territory: TerritoryDetail;
+};
 
 function TerritoryContent({
   territory,
@@ -110,6 +128,8 @@ function TerritoryContent({
   const { mutate: develop, isPending: isDeveloping } = useDevelopTerritory();
   const [reportTarget, setReportTarget] = useState<ReportTarget>();
   const [blockTarget, setBlockTarget] = useState<{ userId: string; userName: string }>();
+  // 포인트가 들고 실패해도 돌려받지 못해, 시트를 만지다 잘못 눌러도 바로 소모되지 않게 한 번 묻는다.
+  const [isConfirmingDevelop, setIsConfirmingDevelop] = useState(false);
   const guName = teamName(territory.location_id);
   const ownerTeam = teamName(territory.owner_location_id);
   const hasOwner = territory.owner_id !== undefined;
@@ -126,7 +146,9 @@ function TerritoryContent({
   const lacksDevelopPoint = myPoint !== undefined && myPoint < territory.development_cost;
 
   const handleDevelop = () => {
-    if (isDeveloping) return;
+    setIsConfirmingDevelop(false);
+    // 확인 창을 띄운 사이 배틀이 끝나거나 포인트·땅 정보가 바뀌었을 수 있다.
+    if (isDeveloping || !canDevelop || lacksDevelopPoint) return;
     develop(territory.dong_code, {
       onSuccess: (result) => {
         const remaining = `오늘 ${result.remaining_today}번 더 할 수 있어요`;
@@ -134,6 +156,7 @@ function TerritoryContent({
           result.success
             ? `개발 성공! 땅값이 ${result.team_gain.toLocaleString()} 올랐어요 · ${remaining}`
             : `개발에 실패했어요 · ${remaining}`,
+          { type: result.success ? 'success' : 'info' },
         );
       },
       onError: (error) => showToast(getApiErrorMessage(error, '개발하지 못했어요')),
@@ -218,7 +241,7 @@ function TerritoryContent({
                     : '개발해서 팀 땅값 올리기'
               }
               disabled={isDeveloping || lacksDevelopPoint}
-              onclick={handleDevelop}
+              onclick={() => setIsConfirmingDevelop(true)}
             />
           </>
         ) : (
@@ -233,6 +256,14 @@ function TerritoryContent({
         )}
       </View>
 
+      <ConfirmDialog
+        visible={isConfirmingDevelop && canDevelop && !lacksDevelopPoint}
+        title="개발할까요?"
+        description={`개발비 ${territory.development_cost.toLocaleString()} P가 바로 빠져요.\n성공 확률 ${developProbability}% · 실패해도 개발비는 돌려받지 못해요.`}
+        confirmLabel="개발하기"
+        onConfirm={handleDevelop}
+        onCancel={() => setIsConfirmingDevelop(false)}
+      />
       <ReportDialog target={reportTarget} onClose={() => setReportTarget(undefined)} />
       <BlockUserDialog target={blockTarget} onClose={() => setBlockTarget(undefined)} />
     </>

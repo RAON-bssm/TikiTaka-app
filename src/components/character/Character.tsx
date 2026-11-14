@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { memo } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { View } from 'react-native';
 
 import { resolveLayerSource } from '@/constants/character/assets';
@@ -19,6 +19,7 @@ const DESIGN_FRAME = 1024;
 const OVERSCALE = CANVAS / DESIGN_FRAME;
 // 확대된 레이어를 중앙에 두는 음수 오프셋
 const INSET = `${(-(OVERSCALE - 1) / 2) * 100}%`;
+const REVEAL_TIMEOUT_MS = 1000;
 
 /**
  * 파츠를 LAYERS 순서로 겹쳐 합성한다. 모든 파츠가 같은 1:1 캔버스라 겹치기만 하면 정렬된다.
@@ -26,6 +27,27 @@ const INSET = `${(-(OVERSCALE - 1) / 2) * 100}%`;
  * 부모가 리렌더돼도 config가 그대로면 다시 그리지 않게 memo로 감싼다.
  */
 function Character({ config, size, className }: CharacterProps) {
+  const layers = LAYERS.flatMap((layer) => {
+    const source = resolveLayerSource(config, layer);
+    return source ? [{ key: 'tint' in layer ? layer.tint : layer.group, source }] : [];
+  });
+
+  const [settled, setSettled] = useState<ReadonlySet<number>>(() => new Set());
+  const [isRevealed, setIsRevealed] = useState(false);
+  if (!isRevealed && layers.every(({ source }) => settled.has(source))) {
+    setIsRevealed(true);
+  }
+
+  useEffect(() => {
+    if (isRevealed) return;
+    const timer = setTimeout(() => setIsRevealed(true), REVEAL_TIMEOUT_MS);
+    return () => clearTimeout(timer);
+  }, [isRevealed]);
+
+  const markSettled = (source: number) => {
+    setSettled((prev) => (prev.has(source) ? prev : new Set(prev).add(source)));
+  };
+
   return (
     <View
       className={`aspect-square ${className ?? ''}`}
@@ -38,21 +60,20 @@ function Character({ config, size, className }: CharacterProps) {
           left: INSET,
           width: `${OVERSCALE * 100}%`,
           height: `${OVERSCALE * 100}%`,
+          opacity: isRevealed ? 1 : 0,
         }}
       >
-        {LAYERS.map((layer) => {
-          const source = resolveLayerSource(config, layer);
-          if (!source) return null; // 미선택 또는 매핑 없음 (예: 뒷머리 없는 헤어)
-
-          return (
-            <Image
-              key={'tint' in layer ? layer.tint : layer.group}
-              source={source}
-              contentFit="contain"
-              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
-            />
-          );
-        })}
+        {layers.map(({ key, source }) => (
+          <Image
+            key={key}
+            source={source}
+            contentFit="contain"
+            cachePolicy="memory"
+            onLoad={() => markSettled(source)}
+            onError={() => markSettled(source)}
+            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+          />
+        ))}
       </View>
     </View>
   );

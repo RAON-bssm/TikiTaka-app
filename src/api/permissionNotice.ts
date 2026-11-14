@@ -10,3 +10,8 @@ export async function hasSeenPermissionNotice(): Promise<boolean> {
 export async function markPermissionNoticeSeen(): Promise<void> {
   await SecureStore.setItemAsync(PERMISSION_NOTICE_KEY, 'true');
 }
+
+/** 개발용: 첫 실행 흐름을 다시 확인할 때만 쓴다. */
+export async function resetPermissionNotice(): Promise<void> {
+  await SecureStore.deleteItemAsync(PERMISSION_NOTICE_KEY);
+}

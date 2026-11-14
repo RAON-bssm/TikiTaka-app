@@ -16,7 +16,12 @@ export default function CameraBackButton() {
 
   return (
     <View className="absolute left-0 top-0" style={{ paddingTop: insets.top + 8, paddingLeft: 16 }}>
-      <Pressable onPress={onPress} hitSlop={12}>
+      <Pressable
+        onPress={onPress}
+        hitSlop={12}
+        accessibilityRole="button"
+        accessibilityLabel="뒤로 가기"
+      >
         <ChevronLeftIcon width={24} height={24} color="#FFFFFF" />
       </Pressable>
     </View>

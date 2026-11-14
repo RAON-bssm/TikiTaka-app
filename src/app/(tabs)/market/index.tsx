@@ -36,6 +36,7 @@ export default function MarketScreen() {
   const equipCharacter = useEquipCharacter();
   const { showToast } = useToast();
   const [purchaseOpen, setPurchaseOpen] = useState(false);
+  const [purchaseError, setPurchaseError] = useState<string>();
 
   const previewConfig = selectedItem
     ? { ...config, [selectedItem.group]: selectedItem.assetId }
@@ -46,12 +47,13 @@ export default function MarketScreen() {
   const handleConfirmPurchase = () => {
     if (!selectedItem || purchasingRef.current || isPending) return;
     purchasingRef.current = true;
+    setPurchaseError(undefined);
 
     purchaseProduct(
       { product_id: selectedItem.id },
       {
         onSuccess: () => {
-          showToast('구매가 완료됐어요');
+          showToast('구매가 완료됐어요', { type: 'success' });
           // 구매한 아이템을 바로 착용시킨다. 저장본을 불러오기 전에 저장하면 기본 config로 덮어쓴다.
           if (isLoaded) {
             const next = { ...config, [selectedItem.group]: selectedItem.assetId };
@@ -63,7 +65,7 @@ export default function MarketScreen() {
           setPurchaseOpen(false);
         },
         onError: (error) =>
-          showToast(getApiErrorMessage(error, '구매에 실패했어요. 다시 시도해주세요.')),
+          setPurchaseError(getApiErrorMessage(error, '구매에 실패했어요. 다시 시도해주세요.')),
         onSettled: () => {
           purchasingRef.current = false;
         },
@@ -112,8 +114,13 @@ export default function MarketScreen() {
         visible={purchaseOpen}
         item={selectedItem}
         previewConfig={previewConfig}
-        onClose={() => setPurchaseOpen(false)}
+        onClose={() => {
+          setPurchaseOpen(false);
+          setPurchaseError(undefined);
+        }}
         onConfirm={handleConfirmPurchase}
+        isPending={isPending}
+        errorMessage={purchaseError}
       />
     </SafeAreaView>
   );

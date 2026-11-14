@@ -35,7 +35,7 @@ export function useWithdraw() {
     mutationFn: withdrawWithReauth,
     onSuccess: async (withdrawn) => {
       if (!withdrawn) return;
-      showToast('탈퇴했어요. 그동안 고마웠어요');
+      showToast('탈퇴했어요. 그동안 고마웠어요', { type: 'success' });
       await clearSession();
     },
   });

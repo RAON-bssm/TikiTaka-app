@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Modal, Pressable, View } from 'react-native';
 
 import { getApiErrorMessage } from '@/api/error';
@@ -15,22 +16,26 @@ interface Props {
 export default function PostDeleteDialog({ postId, onClose, onDeleted }: Props) {
   const { showToast } = useToast();
   const { mutate: deletePost, isPending } = useDeletePost();
+  // 토스트는 모달 아래에 깔려 보이지 않으므로 실패 사유는 창 안에 띄운다.
+  const [errorMessage, setErrorMessage] = useState<string>();
 
   const handleClose = () => {
     if (isPending) return;
+    setErrorMessage(undefined);
     onClose();
   };
 
   const handleDelete = () => {
     if (!postId || isPending) return;
 
+    setErrorMessage(undefined);
     deletePost(postId, {
       onSuccess: () => {
-        showToast('게시글을 삭제했어요');
+        showToast('게시글을 삭제했어요', { type: 'success' });
         onClose();
         onDeleted?.();
       },
-      onError: (error) => showToast(getApiErrorMessage(error, '게시글을 삭제하지 못했어요')),
+      onError: (error) => setErrorMessage(getApiErrorMessage(error, '게시글을 삭제하지 못했어요')),
     });
   };
 
@@ -55,11 +60,17 @@ export default function PostDeleteDialog({ postId, onClose, onDeleted }: Props) 
               이 글로 얻은 점수도 함께 빠져요.
             </Typography>
           </View>
+          {errorMessage && (
+            <Typography variant="caption" className="text-center text-primary-600">
+              {errorMessage}
+            </Typography>
+          )}
           <View className="flex-row gap-sm">
             <Button content="취소" variant="light" className="flex-1" onclick={handleClose} />
             <Button
               content={isPending ? '삭제 중...' : '삭제하기'}
-              className={`flex-1 ${isPending ? 'opacity-50' : ''}`}
+              className="flex-1"
+              disabled={isPending}
               onclick={handleDelete}
             />
           </View>

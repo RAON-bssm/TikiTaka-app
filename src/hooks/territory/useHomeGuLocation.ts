@@ -33,6 +33,14 @@ export function useHomeGuLocation(team: TeamLocation | undefined, active: boolea
   const granted = permission?.granted === true;
   const undetermined = permission?.status === Location.PermissionStatus.UNDETERMINED;
   const asked = useRef(false);
+  const [inForeground, setInForeground] = useState(AppState.currentState !== 'background');
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (state) =>
+      setInForeground(state !== 'background'),
+    );
+    return () => subscription.remove();
+  }, []);
 
   // 아직 한 번도 묻지 않았으면 거부로 보여 주지 말고 카메라를 열 때 바로 묻는다.
   useEffect(() => {
@@ -51,7 +59,7 @@ export function useHomeGuLocation(team: TeamLocation | undefined, active: boolea
   }, [watching, getPermission]);
 
   useEffect(() => {
-    if (!watching || !granted) return;
+    if (!watching || !granted || !inForeground) return;
     let subscription: Location.LocationSubscription | undefined;
     let cancelled = false;
 
@@ -75,8 +83,10 @@ export function useHomeGuLocation(team: TeamLocation | undefined, active: boolea
     return () => {
       cancelled = true;
       subscription?.remove();
+      setPosition(undefined);
+      setFailed(false);
     };
-  }, [watching, granted]);
+  }, [watching, granted, inForeground]);
 
   const status: HomeGuLocationStatus =
     !permission || undetermined

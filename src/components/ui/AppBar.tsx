@@ -11,7 +11,9 @@ import MapIcon from '@/assets/icons/app-var/map.svg';
 import MarketIcon from '@/assets/icons/app-var/market.svg';
 import RankingIcon from '@/assets/icons/app-var/ranking.svg';
 import { palette } from '@/constants/colors';
+import type { TutorialTarget } from '@/constants/tutorial';
 import { guardedNavigate } from '@/hooks/navigation/useLeaveGuard';
+import { useTutorial } from '@/hooks/tutorial/useTutorial';
 import Typography from './Typography';
 
 type TabConfig = {
@@ -34,6 +36,7 @@ const TAB_CONFIG: Record<string, TabConfig> = {
 
 export default function AppBar({ state, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
+  const { registerTarget } = useTutorial();
 
   const focusedRoute = state.routes[state.index];
   const nestedRouteName = getFocusedRouteNameFromRoute(focusedRoute);
@@ -72,6 +75,7 @@ export default function AppBar({ state, navigation }: BottomTabBarProps) {
         return (
           <Pressable
             key={route.key}
+            ref={(node) => registerTarget(`tab:${route.name}` as TutorialTarget, node)}
             onPress={onPress}
             className="flex-1 items-center justify-center gap-xs py-sm active:opacity-70"
           >

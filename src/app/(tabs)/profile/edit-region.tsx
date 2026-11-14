@@ -80,7 +80,7 @@ export default function EditRegion() {
 
     submit(selectedId, {
       onSuccess: () => {
-        showToast(copy.success);
+        showToast(copy.success, { type: 'success' });
         router.back();
       },
       onError: (error) => showToast(getApiErrorMessage(error, copy.failure)),
@@ -120,7 +120,7 @@ export default function EditRegion() {
           <Button
             content={isPending ? '처리 중...' : copy.submit}
             onclick={handleSubmit}
-            className={isPending ? 'opacity-50' : ''}
+            disabled={isPending}
           />
         </View>
       </View>

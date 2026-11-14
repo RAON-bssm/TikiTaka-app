@@ -1,3 +1,4 @@
+import CameraBackButton from '@/components/camera/CameraBackButton';
 import Typography from '@/components/ui/Typography';
 import { Linking, Pressable, View } from 'react-native';
 
@@ -13,6 +14,8 @@ export default function CameraPermissionRequest({
 }: Props) {
   return (
     <View className="flex-1 items-center justify-center gap-lg bg-black p-xl">
+      {/* 카메라 탭은 탭바를 숨기고 탭 루트라 스와이프 뒤로가기도 없다. 이 버튼이 없으면 iOS에서 갇힌다. */}
+      <CameraBackButton />
       <Typography variant="body1" className="text-center text-white">
         동네 사진을 촬영하려면 카메라 권한이 필요해요.
       </Typography>
