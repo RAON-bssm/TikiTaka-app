@@ -46,6 +46,6 @@ export function setupQueryPersistence(): () => void {
 }
 
 /** 로그아웃·탈퇴 때 다음 계정에 이전 캐시가 보이지 않도록 저장소에서도 지운다(`useClearSession`). */
-export function clearPersistedQueryCache() {
-  return persister.removeClient();
+export async function clearPersistedQueryCache(): Promise<void> {
+  await persister.removeClient();
 }

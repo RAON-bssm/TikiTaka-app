@@ -7,7 +7,8 @@ import ConfirmDialog from '@/components/ui/feedback/ConfirmDialog';
 export const CAMERA_PERMISSION_TITLE = '카메라 권한이 필요해요';
 export const CAMERA_PERMISSION_DESCRIPTION = '동네 사진을 촬영하려면 카메라 권한을 허용해 주세요.';
 
-type RequireCamera = (onGranted: () => void) => void;
+/** `onDenied`는 OS 팝업에서 방금 거절했을 때만 불린다. 이미 거절된 상태면 설정 안내를 띄운다. */
+type RequireCamera = (onGranted: () => void, onDenied?: () => void) => void;
 
 const CameraPermissionContext = createContext<RequireCamera | null>(null);
 
@@ -15,7 +16,7 @@ const CameraPermissionContext = createContext<RequireCamera | null>(null);
 export function CameraPermissionProvider({ children }: { children: ReactNode }) {
   const [deniedVisible, setDeniedVisible] = useState(false);
 
-  const requireCamera: RequireCamera = (onGranted) => {
+  const requireCamera: RequireCamera = (onGranted, onDenied) => {
     const status = VisionCamera.cameraPermissionStatus;
     if (status === 'authorized') {
       onGranted();
@@ -26,6 +27,7 @@ export function CameraPermissionProvider({ children }: { children: ReactNode }) 
       VisionCamera.requestCameraPermission()
         .then((granted) => {
           if (granted) onGranted();
+          else onDenied?.();
         })
         .catch(() => setDeniedVisible(true));
       return;

@@ -26,7 +26,8 @@ export function useClearSession() {
     } finally {
       clearSignupToken();
       queryClient.clear();
-      await clearPersistedQueryCache();
+      // 저장소 오류로 실패해도 메모리 캐시는 이미 비웠고, 여기서 멈추면 로그인 화면으로 가지 못한다.
+      await clearPersistedQueryCache().catch(() => {});
       router.replace('/(auth)/login');
     }
   };

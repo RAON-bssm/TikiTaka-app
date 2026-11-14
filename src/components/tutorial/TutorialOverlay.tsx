@@ -100,10 +100,14 @@ const SpotlightGuide = ({ step }: { step: TutorialStep }) => {
   const handlePrimary = () => {
     if (canShoot) {
       guardedNavigate(() =>
-        requireCamera(() => {
-          router.navigate('/camera');
-          goTo('mission');
-        }),
+        requireCamera(
+          () => {
+            router.navigate('/camera');
+            goTo('mission');
+          },
+          // 거절하면 다시 눌러도 설정 안내만 떠 진행되지 않으므로, '나중에 할게요'처럼 사진 단계를 건너뛴다.
+          () => goTo('map'),
+        ),
       );
       return;
     }
