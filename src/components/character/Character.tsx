@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { View } from 'react-native';
 
 import { resolveLayerSource } from '@/constants/character/assets';
@@ -21,8 +21,12 @@ const OVERSCALE = CANVAS / DESIGN_FRAME;
 const INSET = `${(-(OVERSCALE - 1) / 2) * 100}%`;
 const REVEAL_TIMEOUT_MS = 1000;
 
-/** 파츠를 LAYERS 순서로 겹쳐 합성한다. 모든 파츠가 같은 1:1 캔버스라 겹치기만 하면 정렬된다. */
-export default function Character({ config, size, className }: CharacterProps) {
+/**
+ * 파츠를 LAYERS 순서로 겹쳐 합성한다. 모든 파츠가 같은 1:1 캔버스라 겹치기만 하면 정렬된다.
+ * 레이어마다 <Image>를 여러 장 그려 비용이 있어, 피드·랭킹처럼 리스트 안에서 쓸 때
+ * 부모가 리렌더돼도 config가 그대로면 다시 그리지 않게 memo로 감싼다.
+ */
+function Character({ config, size, className }: CharacterProps) {
   const layers = LAYERS.flatMap((layer) => {
     const source = resolveLayerSource(config, layer);
     return source ? [{ key: 'tint' in layer ? layer.tint : layer.group, source }] : [];
@@ -74,3 +78,5 @@ export default function Character({ config, size, className }: CharacterProps) {
     </View>
   );
 }
+
+export default memo(Character);

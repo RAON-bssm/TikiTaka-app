@@ -1,4 +1,5 @@
 import type { ApiResponse, DateTimeString, EmptyResponse } from './api';
+import type { Equipment } from './equipment';
 
 /**
  * 현재 라운드의 모든 게시판. 내 매치가 맨 앞에 오지만, 내 매치가 없으면 첫 항목은 남의 게시판이니
@@ -27,13 +28,22 @@ export type BoardListResponse = ApiResponse<BoardListData>;
 
 /**
  * 삭제된 글과 심사가 끝나지 않은(`DONE`이 아닌) 글은 빠진다. 없는 board_id도 404가 아니라 빈 목록이다.
- * `post_image`는 URL이 아니라 S3 key다. 표시하려면 `getViewUrl(key)`를 거친다.
+ *
+ * `post_image`는 URL이 아니라 S3 key(구버전 호환용, 캐시 키로 안 쓴다). 카드에는 `post_thumbnail`
+ * (캐시 키)과 `post_thumbnail_url`(다운로드)만 쓰면 된다 — 썸네일이 없는 글은 이 두 필드에 원본과
+ * 같은 값이 들어가므로 분기 불필요. **두 필드가 응답에 아예 없으면 이미지가 없는 글이다(기본 이미지 표시).**
+ * `post_image_url`은 상세·내 게시물 화면 전용이라 피드 카드에서는 쓰지 않는다.
+ * `user_equipment`는 작성자 캐릭터 정보(`GET /api/equipment/{userId}`와 같은 모양). 없는 슬롯은 키가 빠진다.
  */
 export interface Post {
   post_id: string;
   user_id: string;
   user_name: string;
+  user_equipment?: Equipment;
   post_image: string;
+  post_image_url?: string;
+  post_thumbnail?: string;
+  post_thumbnail_url?: string;
   score: number;
   like_count: number;
   liked_by_me: boolean;
@@ -44,8 +54,10 @@ export interface Post {
   location: string;
 }
 
+/** `next_cursor`는 size·cursor 파라미터로 요청했을 때만, 다음 페이지가 있으면 들어간다. */
 export interface PostListData {
   post: Post[];
+  next_cursor?: string;
 }
 
 export type PostListResponse = ApiResponse<PostListData>;
@@ -58,6 +70,8 @@ export type PostListResponse = ApiResponse<PostListData>;
 export interface MyPost {
   post_id: string;
   post_image: string;
+  /** 이미지가 없거나 조회 URL 발급에 실패하면 빠진다 — 없으면 `useViewUrl(post_image)`로 받는다. */
+  post_image_url?: string;
   status: PostStatus;
   score?: number;
   created_at: DateTimeString;
@@ -91,6 +105,8 @@ export interface PostDetail {
   user_id: string;
   user_name: string;
   post_image: string;
+  /** 이미지가 없거나 조회 URL 발급에 실패하면 빠진다 — 없으면 `useViewUrl(post_image)`로 받는다. */
+  post_image_url?: string;
   content: string;
   status: PostStatus;
   score?: number;
