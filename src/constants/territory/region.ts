@@ -15,9 +15,18 @@ type Polygon = FlatRing[];
 
 const BOUNDARIES = guBoundaries as Record<string, Polygon[]>;
 
+const NO_DONGS: Dong[] = [];
+const dongsByGu = new Map<string, Dong[]>();
+
+/** 같은 구면 같은 배열을 돌려준다. 렌더마다 새 배열이면 이 값으로 그리는 지도(`PreferenceMap`)가 매번 경계를 다시 계산한다. */
 export function getDongsInTeam(team: Location): Dong[] {
-  if (!isTerritoryCity(team)) return [];
-  return DONGS.filter((dong) => dong.gu === team.location_name);
+  if (!isTerritoryCity(team)) return NO_DONGS;
+  let dongs = dongsByGu.get(team.location_name);
+  if (!dongs) {
+    dongs = DONGS.filter((dong) => dong.gu === team.location_name);
+    dongsByGu.set(team.location_name, dongs);
+  }
+  return dongs;
 }
 
 export function findDong(code: number): Dong | undefined {

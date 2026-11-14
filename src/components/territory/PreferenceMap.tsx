@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { type LayoutChangeEvent, View } from 'react-native';
 import Svg, { Circle, G, Line, Path, Rect, Text as SvgText } from 'react-native-svg';
 
@@ -17,20 +17,32 @@ interface Props {
   onToggle: (code: number) => void;
 }
 
-export default function PreferenceMap({ dongs, codes, onToggle }: Props) {
-  const [width, setWidth] = useState(0);
+function buildShapes(dongs: Dong[], width: number) {
   const drawable = dongs.filter((dong) => hasShape(dong.code));
   const { height, scale, toPath, labelPoint } = projectDongs(
     drawable.map((dong) => dong.code),
     width,
     MAP_OPTIONS,
   );
+  const shapes = drawable.map((dong) => ({
+    code: dong.code,
+    name: dong.name,
+    path: toPath(dong.code),
+    label: labelPoint(dong.code),
+  }));
+  return { height, scale, shapes };
+}
+
+export default function PreferenceMap({ dongs, codes, onToggle }: Props) {
+  const [width, setWidth] = useState(0);
+  // 경로 문자열은 구 전체 좌표를 훑어 만들어 비싸다. React Compiler는 이 계산을 고를 때마다 바뀌는 `codes`와
+  // 한 캐시로 묶어(컴파일 결과로 확인) 동을 누를 때마다 다시 만들므로, `dongs`·`width`에만 묶어 직접 메모한다.
+  const { height, scale, shapes } = useMemo(() => buildShapes(dongs, width), [dongs, width]);
 
   const selected = codes.flatMap((code, priority) => {
-    const dong = drawable.find((item) => item.code === code);
-    const point = dong && labelPoint(code);
-    return dong && point
-      ? [{ code, priority, text: `${priority + 1}지망 ${dong.name}`, ...point }]
+    const shape = shapes.find((item) => item.code === code);
+    return shape?.label
+      ? [{ code, priority, text: `${priority + 1}지망 ${shape.name}`, ...shape.label }]
       : [];
   });
 
@@ -44,19 +56,19 @@ export default function PreferenceMap({ dongs, codes, onToggle }: Props) {
     >
       {width > 0 && scale > 0 && (
         <Svg width={width} height={height}>
-          {drawable.map((dong) => {
-            const priority = codes.indexOf(dong.code);
+          {shapes.map(({ code, path }) => {
+            const priority = codes.indexOf(code);
             const isSelected = priority >= 0;
             return (
               <Path
-                key={dong.code}
-                d={toPath(dong.code)}
+                key={code}
+                d={path}
                 fill={isSelected ? palette.primary[600] : palette.gray[50]}
                 fillOpacity={isSelected ? PRIORITY_OPACITY[priority] : 1}
                 stroke={isSelected ? 'white' : palette.gray[300]}
                 strokeWidth={isSelected ? 1.5 : 0.75}
                 fillRule="evenodd"
-                onPress={() => onToggle(dong.code)}
+                onPress={() => onToggle(code)}
               />
             );
           })}
