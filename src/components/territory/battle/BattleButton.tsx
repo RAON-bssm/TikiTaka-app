@@ -15,7 +15,6 @@ const TONE_CLASS = {
 // 면이 아래 테두리(pb-xs = 4px) 위로 내려앉는다.
 const PRESSED_STYLE = { transform: [{ translateY: 4 }] };
 
-/** 아래 테두리가 두꺼운 도장형 버튼. 누르면 면이 테두리 위로 내려앉아 '콕' 누르는 느낌을 준다. */
 export default function BattleButton({ content, onclick, disabled = false, tone = 'me' }: Props) {
   const color = TONE_CLASS[tone];
   return (

@@ -77,7 +77,6 @@ const CORNER_STYLES: ViewStyle[] = [
 
 interface PhotoEditorProps {
   uri: string | undefined;
-  /** 잘라낸 사진의 로컬 경로를 받아 다음 화면으로 넘긴다. */
   onDone: (editedUri: string) => void;
 }
 

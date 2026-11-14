@@ -11,7 +11,6 @@ const MAP_OPTIONS = { padding: 12, minHeight: 200, maxHeight: 300 };
 const PRIORITY_OPACITY = [1, 0.7, 0.45];
 
 interface Props {
-  /** 우리 구의 동 전체 */
   dongs: Dong[];
   /** 지망 순서대로 고른 동 코드 */
   codes: number[];

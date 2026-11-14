@@ -24,7 +24,6 @@ interface Props {
   children?: ReactNode;
 }
 
-/** 결과·단계처럼 화면의 핵심 상태를 색이 꽉 찬 카드로 크게 보여 준다. */
 export default function BattleHero({ tag, title, subtitle, tone, children }: Props) {
   const color = TONE_CLASS[tone];
   return (

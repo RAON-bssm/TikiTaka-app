@@ -14,7 +14,7 @@ interface ProjectionOptions {
   maxHeight: number;
 }
 
-/** 주어진 동들을 폭에 맞춰 화면 좌표로 옮긴다. 폭을 아직 모르거나 그릴 동이 없으면 scale이 0이다. */
+/** 폭을 아직 모르거나 그릴 동이 없으면 scale이 0이다. */
 export function projectDongs(
   codes: number[],
   width: number,

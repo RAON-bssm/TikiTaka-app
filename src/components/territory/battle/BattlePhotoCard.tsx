@@ -22,7 +22,6 @@ interface Props {
   /** 한 장만 보여 줄 때 폭. 없으면 flex-1로 옆 카드와 나눈다. */
   width?: DimensionValue;
   win?: boolean;
-  /** 진 쪽 사진은 흐리게 눌러 승자가 바로 보이게 한다. */
   dimmed?: boolean;
 }
 

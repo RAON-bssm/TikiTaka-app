@@ -24,7 +24,6 @@ import type { TerritoryPhase } from '@/hooks/territory/useTerritoryPhase';
 import { useTerritory } from '@/hooks/territory/useTerritory';
 import type { TerritoryDetail } from '@/types/territory';
 
-// 손잡이를 이만큼 내리거나 빠르게 튕기면 닫는다.
 const CLOSE_DISTANCE = 30;
 const CLOSE_VELOCITY = 500;
 const ENTER_MS = 260;

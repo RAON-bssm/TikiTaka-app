@@ -2,7 +2,6 @@ import { router, useLocalSearchParams } from 'expo-router';
 
 import PhotoEditor from '@/components/camera/PhotoEditor';
 
-/** `challenge-camera`가 넘긴 값을 그대로 받아, 편집한 사진으로 `purpose`별 확인 화면에 간다. */
 type Params = {
   dongCode: string;
   purpose?: 'challenge' | 'setup' | 'retake';
