@@ -1,27 +1,15 @@
-import { type InfiniteData, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { likePost, type PostPage, unlikePost } from '@/api/post';
+import { likePost, unlikePost } from '@/api/post';
 import { postKeys } from '@/api/queryKeys';
-import type { MyPost, Post, PostDetail } from '@/types/post';
+import type { PostDetail } from '@/types/post';
+import { mapPostList, type PostListCache } from './postListCache';
 
 type LikeFields = Pick<PostDetail, 'like_count' | 'liked_by_me'>;
 
 function applyLike<T extends LikeFields>(target: T, liked: boolean): T {
   if (target.liked_by_me === liked) return target;
   return { ...target, liked_by_me: liked, like_count: target.like_count + (liked ? 1 : -1) };
-}
-
-/** `lists()` 아래에는 배열 목록(홈 미리보기·내 게시물)과 무한 스크롤 피드(페이지 묶음)가 섞여 있다. */
-type PostListCache = Post[] | MyPost[] | InfiniteData<PostPage>;
-
-function applyLikeToList(data: PostListCache, postId: string, liked: boolean): PostListCache {
-  const update = <T extends LikeFields & { post_id: string }>(post: T) =>
-    post.post_id === postId ? applyLike(post, liked) : post;
-  if (Array.isArray(data)) return data.map(update) as Post[] | MyPost[];
-  return {
-    ...data,
-    pages: data.pages.map((page) => ({ ...page, posts: page.posts.map(update) })),
-  };
 }
 
 /**
@@ -50,7 +38,11 @@ export function useTogglePostLike(postId: string) {
 
       if (previousDetail) queryClient.setQueryData(detailKey, applyLike(previousDetail, liked));
       for (const [key, data] of previousLists) {
-        if (data) queryClient.setQueryData(key, applyLikeToList(data, postId, liked));
+        if (!data) continue;
+        queryClient.setQueryData(
+          key,
+          mapPostList(data, (post) => (post.post_id === postId ? applyLike(post, liked) : post)),
+        );
       }
       return { previousDetail, previousLists };
     },

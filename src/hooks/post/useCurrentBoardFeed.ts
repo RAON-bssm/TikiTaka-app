@@ -13,11 +13,13 @@ export interface CurrentBoardFeedState {
   board?: Board;
   posts: Post[];
   isLoading: boolean;
+  /** 보여 줄 글이 없을 때만 true. 다음 페이지 실패는 `isFetchNextPageError`로 따로 알린다. */
   isError: boolean;
   refetch: () => Promise<void>;
   fetchNextPage: () => void;
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
+  isFetchNextPageError: boolean;
 }
 
 /** 피드 화면 전용 무한 스크롤. 홈 미리보기(`useCurrentBoardPosts`)와 달리 커서로 이어 받는다. */
@@ -41,7 +43,8 @@ export function useCurrentBoardFeed(): CurrentBoardFeedState {
     board,
     posts: feed.data?.pages.flatMap((page) => page.posts) ?? [],
     isLoading: boards.isLoading || feed.isLoading,
-    isError: boards.isError || feed.isError,
+    // 다음 페이지만 실패해도 쿼리 전체가 error가 된다. 그때 이미 받은 글까지 실패 화면으로 바꾸지 않는다.
+    isError: boards.isError || (feed.isError && !feed.data),
     refetch: async () => {
       // 게시판이 바뀌면 쿼리 키가 바뀌어 새로 받는다. 게시판이 없을 때 refetch하면 skipToken 에러가 난다.
       await Promise.all([boards.refetch(), board ? feed.refetch() : undefined]);
@@ -51,5 +54,6 @@ export function useCurrentBoardFeed(): CurrentBoardFeedState {
     },
     hasNextPage: feed.hasNextPage,
     isFetchingNextPage: feed.isFetchingNextPage,
+    isFetchNextPageError: feed.isFetchNextPageError,
   };
 }
