@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { Image, Pressable, View } from 'react-native';
 
-import ProfileImageIcon from '@/assets/icons/header/ProfileImage.svg';
+import SettingIcon from '@/assets/icons/header/setting.svg';
 import LogoImage from '@/assets/icons/logo.webp';
 import { guardedNavigate } from '@/hooks/navigation/useLeaveGuard';
 
@@ -19,7 +19,7 @@ const Header = () => {
         onPress={() => guardedNavigate(() => router.push('/(tabs)/profile'))}
         className="active:opacity-70"
       >
-        <ProfileImageIcon width={32} height={32} />
+        <SettingIcon width={32} height={32} />
       </Pressable>
     </View>
   );
