@@ -17,7 +17,7 @@ const PREVIEW_COUNT = 3;
 export default function HomeScreen() {
   const router = useRouter();
   const battle = useCurrentBattle();
-  const posts = useCurrentBoardPosts();
+  const posts = useCurrentBoardPosts(PREVIEW_COUNT);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleRefresh = async () => {

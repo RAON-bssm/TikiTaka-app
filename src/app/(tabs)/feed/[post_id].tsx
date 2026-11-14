@@ -127,7 +127,11 @@ export default function PostDetailScreen() {
                         ]
                 }
               />
-              <PostImage uri={post.post_image} />
+              <PostImage
+                postId={post_id}
+                imageKey={post.post_image}
+                imageUrl={post.post_image_url}
+              />
             </View>
 
             <PostTitleRow

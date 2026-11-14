@@ -13,6 +13,8 @@ import { formatRelativeTime } from '@/hooks/useRelativeTime';
 import { useMyInfo } from '@/hooks/user/useMyInfo';
 
 const SKELETON_COUNT = 2;
+// 화면 첫 로드 때 바로 보이는 카드 수만큼만 이미지 로딩 우선순위를 올린다.
+const HIGH_PRIORITY_COUNT = 2;
 
 export default function MyPostList() {
   const { data: posts, isLoading, isError, refetch } = useMyPosts();
@@ -47,12 +49,15 @@ export default function MyPostList() {
 
   return (
     <View className="flex flex-col gap-md">
-      {posts.map((post) => (
+      {posts.map((post, index) => (
         <FeedCard
           key={post.post_id}
           postId={post.post_id}
-          author={{ name: myInfo?.user_name ?? '', userId: myInfo?.user_id }}
-          imageUrl={post.post_image}
+          authorName={myInfo?.user_name ?? ''}
+          authorUserId={myInfo?.user_id}
+          imageKey={post.post_image}
+          imageUrl={post.post_image_url}
+          fallbackToViewUrl
           title={post.content}
           place={post.location}
           timeAgo={formatRelativeTime(post.created_at)}
@@ -60,21 +65,11 @@ export default function MyPostList() {
           likeCount={post.status === 'DONE' ? post.like_count : undefined}
           liked={post.liked_by_me}
           badge={post.status === 'DONE' ? undefined : getPostReviewNotice(post.status).label}
-          menuItems={[
-            ...(post.status === 'DONE'
-              ? [
-                  {
-                    label: '수정하기',
-                    onPress: () => setEditingPost({ postId: post.post_id, content: post.content }),
-                  },
-                ]
-              : []),
-            {
-              label: '삭제하기',
-              destructive: true,
-              onPress: () => setDeletingPostId(post.post_id),
-            },
-          ]}
+          isMine
+          canEdit={post.status === 'DONE'}
+          onEditPress={setEditingPost}
+          onDeletePress={setDeletingPostId}
+          imagePriority={index < HIGH_PRIORITY_COUNT ? 'high' : undefined}
         />
       ))}
       <PostEditDialog post={editingPost} onClose={() => setEditingPost(undefined)} />

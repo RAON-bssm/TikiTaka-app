@@ -26,10 +26,25 @@ export async function getBoards(): Promise<Board[]> {
   return data.data.board;
 }
 
-// 목록과 상세가 같은 `/api/post/{id}` 경로다. 서버가 숫자면 목록, UUID면 상세로 라우팅한다.
-export async function getPosts(boardId: number): Promise<Post[]> {
-  const { data } = await client.get<ApiResponse<PostListData>>(`/api/post/${boardId}`);
-  return data.data.post;
+export interface PostPage {
+  posts: Post[];
+  /** 다음 페이지가 있을 때만 있다(`size`·`cursor`로 요청했을 때 한정). */
+  nextCursor?: string;
+}
+
+/**
+ * 목록과 상세가 같은 `/api/post/{id}` 경로다. 서버가 숫자면 목록, UUID면 상세로 라우팅한다.
+ * `size`·`cursor` 둘 다 생략하면 보드 전체 글이 한 번에 온다(옛 방식, 서버가 페이징 전면 적용되면 없어질 예정).
+ * `size`는 1~50, `cursor`는 이전 응답의 `next_cursor`를 그대로 넘긴다.
+ */
+export async function getPosts(
+  boardId: number,
+  params?: { size?: number; cursor?: string },
+): Promise<PostPage> {
+  const { data } = await client.get<ApiResponse<PostListData>>(`/api/post/${boardId}`, {
+    params,
+  });
+  return { posts: data.data.post, nextCursor: data.data.next_cursor };
 }
 
 export async function getMyPosts(): Promise<MyPost[]> {

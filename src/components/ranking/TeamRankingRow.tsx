@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { View } from 'react-native';
 
 import Ranking from '@/components/ui/Ranking';
@@ -7,7 +8,7 @@ interface Props {
   team: TeamRank;
 }
 
-export default function TeamRankingRow({ team }: Props) {
+function TeamRankingRow({ team }: Props) {
   return (
     <View className="bg-white px-xl">
       <Ranking
@@ -19,3 +20,5 @@ export default function TeamRankingRow({ team }: Props) {
     </View>
   );
 }
+
+export default memo(TeamRankingRow);
