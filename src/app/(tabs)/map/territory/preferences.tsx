@@ -1,13 +1,15 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { getApiErrorMessage } from '@/api/error';
 import RadioSelectedIcon from '@/assets/icons/radio-selected.svg';
 import RadioIcon from '@/assets/icons/radio.svg';
+import BattleButton from '@/components/territory/battle/BattleButton';
+import BattleTag from '@/components/territory/battle/BattleTag';
+import { TILT } from '@/components/territory/battle/tilt';
 import BackButton from '@/components/ui/BackButton';
-import Button from '@/components/ui/Button';
 import ConfirmDialog from '@/components/ui/feedback/ConfirmDialog';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Skeleton from '@/components/ui/feedback/Skeleton';
@@ -115,9 +117,10 @@ function PreferenceForm({ team, initialCodes }: { team: Location; initialCodes: 
         keyboardDismissMode="on-drag"
       >
         <View className="gap-sm">
-          <Typography variant="h1" className="text-gray-800">
-            {`${gu}에서 대표가 되고 싶은 동`}
-          </Typography>
+          <BattleTag label="대표 선발전" />
+          <Text className="font-title text-2xl text-gray-800">
+            {`${gu}에서\n대표가 되고 싶은 동`}
+          </Text>
           <Typography variant="body3" className="text-gray-400">
             포인트 순위가 높은 사람부터 1지망 → 2지망 → 3지망 순서로 배정돼요. 고르지 않으면 남은 동
             중에서 무작위로 정해져요.
@@ -201,7 +204,7 @@ function PreferenceForm({ team, initialCodes }: { team: Location; initialCodes: 
       </ScrollView>
 
       <View className="border-t border-gray-100 bg-gray-50 px-xl pb-lg pt-md">
-        <Button
+        <BattleButton
           content={isPending ? '저장하는 중...' : '저장하기'}
           disabled={!changed || isPending}
           onclick={handleSave}
@@ -233,10 +236,8 @@ function Slot({
 
   if (!dong) {
     return (
-      <View className="h-[84px] flex-1 items-center justify-center gap-xs rounded-md border border-dashed border-gray-300 bg-white">
-        <Typography variant="h2" className="text-gray-300">
-          +
-        </Typography>
+      <View className="h-[84px] flex-1 items-center justify-center gap-xs rounded-md border-2 border-dashed border-gray-300 bg-white">
+        <Text className="font-title text-2xl text-gray-300">+</Text>
         <Typography variant="caption" className="text-gray-400">
           {`${priority}지망`}
         </Typography>
@@ -249,12 +250,13 @@ function Slot({
       onPress={() => onRemove(dong.code)}
       onLongPress={onMoveForward}
       accessibilityLabel={`${priority}지망 ${dong.name}, 눌러서 빼기`}
-      className="h-[84px] flex-1 items-center justify-center gap-xs rounded-md border border-primary-300 bg-primary-100 px-xs active:opacity-80"
+      className="h-[84px] flex-1 items-center justify-center gap-xs rounded-md border-2 border-primary-600 bg-primary-100 px-xs active:opacity-80"
     >
-      <View className="h-[20px] w-[20px] items-center justify-center rounded-full bg-primary-600">
-        <Typography variant="caption" className="text-white">
-          {priority}
-        </Typography>
+      <View
+        className="absolute -left-sm -top-sm rounded-sm bg-primary-600 px-sm py-xs"
+        style={TILT.sticker}
+      >
+        <Text className="font-title text-sm text-white">{`${priority}지망`}</Text>
       </View>
       <Typography variant="h4" className="text-center text-gray-800" numberOfLines={1}>
         {dong.name}

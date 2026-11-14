@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
@@ -19,9 +20,12 @@ interface Props {
   title: string;
   subtitle?: string;
   tone: 'me' | 'rival';
+  /** 부제 아래에 붙는 내용(단계 표시 등). 흰 글씨 기준으로 그린다. */
+  children?: ReactNode;
 }
 
-export default function ResultHero({ tag, title, subtitle, tone }: Props) {
+/** 결과·단계처럼 화면의 핵심 상태를 색이 꽉 찬 카드로 크게 보여 준다. */
+export default function BattleHero({ tag, title, subtitle, tone, children }: Props) {
   const color = TONE_CLASS[tone];
   return (
     <View className={`gap-md overflow-hidden rounded-xl p-2xl ${color.bg}`}>
@@ -45,6 +49,7 @@ export default function ResultHero({ tag, title, subtitle, tone }: Props) {
           {subtitle}
         </Typography>
       )}
+      {children}
     </View>
   );
 }

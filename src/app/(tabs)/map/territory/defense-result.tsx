@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import BattleButton from '@/components/territory/battle/BattleButton';
 import BattlePhotoCard from '@/components/territory/battle/BattlePhotoCard';
 import JudgeComment from '@/components/territory/battle/JudgeComment';
-import ResultHero from '@/components/territory/battle/ResultHero';
+import BattleHero from '@/components/territory/battle/BattleHero';
 import Header from '@/components/ui/Header';
 import ResultRow from '@/components/territory/ResultRow';
 import Typography from '@/components/ui/Typography';
@@ -35,7 +35,7 @@ export default function DefenseResultScreen() {
       <ScrollView contentContainerClassName="gap-3xl px-xl pb-2xl pt-2xl">
         <Header />
 
-        <ResultHero
+        <BattleHero
           tone="me"
           tag={isSetup ? '땅 세팅 완료!' : '방어 사진 교체!'}
           title={`방어 점수\n${score}점`}

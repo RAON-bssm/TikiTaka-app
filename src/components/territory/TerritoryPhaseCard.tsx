@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -142,9 +142,9 @@ export default function TerritoryPhaseCard({ onPress, ...rest }: Props) {
         <Typography variant="caption" className="text-primary-100" numberOfLines={1}>
           {copy.description ? `${copy.label} · ${copy.description}` : copy.label}
         </Typography>
-        <Typography variant="h2" className="text-white" numberOfLines={1}>
+        <Text className="font-title text-xl text-white" numberOfLines={1}>
           {copy.title}
-        </Typography>
+        </Text>
       </View>
       <Animated.View style={breatheStyle} className="rounded-sm bg-secondary-100 p-md">
         <Typography variant="h3" className="text-primary-600">

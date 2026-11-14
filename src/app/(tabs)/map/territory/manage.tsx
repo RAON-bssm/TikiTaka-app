@@ -1,10 +1,13 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Image, ScrollView, StyleSheet, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useRequireCamera } from '@/components/camera/CameraPermissionGate';
 import Topic from '@/components/camera/Topic';
+import BattleButton from '@/components/territory/battle/BattleButton';
+import BattleTag, { type BattleTone } from '@/components/territory/battle/BattleTag';
+import { TILT } from '@/components/territory/battle/tilt';
 import TerritoryStats from '@/components/territory/TerritoryStats';
 import BackButton from '@/components/ui/BackButton';
 import Button from '@/components/ui/Button';
@@ -20,6 +23,7 @@ import { useTerritoryPhase } from '@/hooks/territory/useTerritoryPhase';
 
 // 사진 위 흰 글씨가 읽히도록 아래쪽만 어둡게 덮는다.
 const HERO_SHADE = `${palette.gray[800]}B3`;
+const PHOTO_SHADOW = `0px 8px 20px ${palette.gray[800]}33`;
 
 export default function ManageTerritoryScreen() {
   const { dongCode: dongCodeParam } = useLocalSearchParams<{ dongCode: string }>();
@@ -33,6 +37,11 @@ export default function ManageTerritoryScreen() {
   const needsSetup = !!territory && !territory.defense_photo;
   const pendingMission = territory && getPendingMission(territory);
   const canEdit = phase === 'setup' || phase === 'battle';
+  const status: { label: string; tone: BattleTone } = needsSetup
+    ? { label: '세팅 필요', tone: 'neutral' }
+    : pendingMission
+      ? { label: '새 미션 대기', tone: 'rival' }
+      : { label: '방어 중', tone: 'me' };
 
   const goToCamera = (purpose: 'retake') =>
     requireCamera(() =>
@@ -57,9 +66,15 @@ export default function ManageTerritoryScreen() {
           <ErrorRetry message="땅 정보를 불러오지 못했어요." onRetry={() => void refetch()} />
         ) : (
           <>
-            <Topic title={territory.mission ?? '미션을 정해 주세요'} />
+            <View className="gap-md">
+              <BattleTag label={status.label} tone={status.tone} />
+              <Topic title={territory.mission ?? '미션을 정해 주세요'} />
+            </View>
 
-            <View className="h-[280px] w-full overflow-hidden rounded-md bg-gray-200">
+            <View
+              className="h-[280px] w-full overflow-hidden rounded-md border-4 border-white bg-gray-200"
+              style={{ boxShadow: PHOTO_SHADOW }}
+            >
               {photo.uri ? (
                 <>
                   <Image source={{ uri: photo.uri }} resizeMode="cover" className="h-full w-full" />
@@ -76,16 +91,22 @@ export default function ManageTerritoryScreen() {
                 </View>
               )}
               {!needsSetup && (
-                <View className="absolute right-md top-md rounded-full bg-white px-md py-xs">
-                  <Typography variant="h4" className="text-primary-600">
-                    {`방어 ${territory.defense_score}점`}
+                <View
+                  className="absolute right-md top-md items-center rounded-md border-2 border-white bg-primary-600 px-md py-xs"
+                  style={TILT.sticker}
+                >
+                  <Typography variant="caption" className="text-white">
+                    방어 점수
                   </Typography>
+                  <Text className="font-title text-2xl text-white">{territory.defense_score}</Text>
                 </View>
               )}
               <View className="absolute bottom-0 left-0 right-0 p-lg">
-                <Typography variant="body3" className={photo.uri ? 'text-white' : 'text-gray-500'}>
+                <Text
+                  className={`font-title text-xl ${photo.uri ? 'text-white' : 'text-gray-500'}`}
+                >
                   {[teamName(territory.location_id), territory.dong_name].filter(Boolean).join(' ')}
-                </Typography>
+                </Text>
               </View>
             </View>
 
@@ -96,8 +117,8 @@ export default function ManageTerritoryScreen() {
             )}
 
             {pendingMission && (
-              <View className="gap-xs rounded-md border border-gray-200 bg-white p-lg">
-                <Typography variant="caption" className="text-primary-600">
+              <View className="gap-sm rounded-md border border-secondary-200 bg-secondary-100 p-lg">
+                <Typography variant="caption" className="text-secondary-500">
                   바꿀 미션
                 </Typography>
                 <Typography variant="h3" className="text-gray-800">
@@ -122,7 +143,7 @@ export default function ManageTerritoryScreen() {
             {canEdit && (
               <View className="gap-sm">
                 {needsSetup ? (
-                  <Button
+                  <BattleButton
                     content="땅 세팅하기"
                     onclick={() =>
                       router.push({
@@ -134,7 +155,7 @@ export default function ManageTerritoryScreen() {
                 ) : (
                   <>
                     {pendingMission && (
-                      <Button
+                      <BattleButton
                         content="새 미션으로 사진 찍기"
                         onclick={() => goToCamera('retake')}
                       />

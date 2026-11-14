@@ -9,7 +9,7 @@ import Skeleton from '@/components/ui/feedback/Skeleton';
 import Header from '@/components/ui/Header';
 import BattleButton from '@/components/territory/battle/BattleButton';
 import JudgeComment from '@/components/territory/battle/JudgeComment';
-import ResultHero from '@/components/territory/battle/ResultHero';
+import BattleHero from '@/components/territory/battle/BattleHero';
 import VersusPhotos from '@/components/territory/battle/VersusPhotos';
 import ResultRow from '@/components/territory/ResultRow';
 import Typography from '@/components/ui/Typography';
@@ -73,7 +73,7 @@ export default function ChallengeResultScreen() {
           <ErrorRetry message="도전 결과를 불러오지 못했어요." onRetry={() => void refetch()} />
         ) : (
           <>
-            <ResultHero
+            <BattleHero
               tone={won ? 'me' : 'rival'}
               tag={won ? '땅 차지!' : '방어당했어요'}
               title={won ? `${result.dong_name}\n이제 내 땅!` : `${result.dong_name}\n차지 실패`}

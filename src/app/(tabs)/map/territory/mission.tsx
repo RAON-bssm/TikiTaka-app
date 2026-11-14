@@ -1,14 +1,15 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Keyboard, Pressable, View } from 'react-native';
+import { Keyboard, Pressable, Text, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { getApiErrorMessage } from '@/api/error';
 import { useRequireCamera } from '@/components/camera/CameraPermissionGate';
 import Topic from '@/components/camera/Topic';
+import BattleButton from '@/components/territory/battle/BattleButton';
+import BattleTag from '@/components/territory/battle/BattleTag';
 import BackButton from '@/components/ui/BackButton';
-import Button from '@/components/ui/Button';
 import ConfirmDialog from '@/components/ui/feedback/ConfirmDialog';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Skeleton from '@/components/ui/feedback/Skeleton';
@@ -154,9 +155,8 @@ function MissionForm({ territory, mode }: { territory: TerritoryDetail; mode: Mo
         <BackButton title={`${copy.title} · ${territory.dong_name}`} disabled={isPending} />
 
         <View className="gap-sm">
-          <Typography variant="h1" className="text-gray-800">
-            {copy.heading}
-          </Typography>
+          <BattleTag label={mode === 'setup' ? '내 땅 지키기' : '미션 바꾸기'} />
+          <Text className="font-title text-2xl text-gray-800">{copy.heading}</Text>
           <Typography variant="body3" className="text-gray-400">
             {mode === 'setup'
               ? '미션에 맞춰 방어 사진을 찍으면 AI가 채점한 점수가 방어 점수가 돼요. 도전자는 이 점수를 넘어야 땅을 빼앗아요.'
@@ -210,7 +210,7 @@ function MissionForm({ territory, mode }: { territory: TerritoryDetail; mode: Mo
         />
 
         <View className="grow" />
-        <Button
+        <BattleButton
           content={isPending ? '저장하는 중...' : copy.submit}
           disabled={!isValid || isPending}
           onclick={handleSubmit}

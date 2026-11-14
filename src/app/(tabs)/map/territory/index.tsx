@@ -3,8 +3,10 @@ import type { ReactNode } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import BattleButton from '@/components/territory/battle/BattleButton';
+import BattleHero from '@/components/territory/battle/BattleHero';
+import BattleTag from '@/components/territory/battle/BattleTag';
 import BackButton from '@/components/ui/BackButton';
-import Button from '@/components/ui/Button';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Skeleton from '@/components/ui/feedback/Skeleton';
 import MyTerritoryMap from '@/components/territory/MyTerritoryMap';
@@ -87,7 +89,7 @@ export default function TerritoryHubScreen() {
 
         {isLoading ? (
           <View className="gap-lg">
-            <Skeleton className="h-[96px] w-full rounded-md" />
+            <Skeleton className="h-[176px] w-full rounded-xl" />
             <Skeleton className="h-[140px] w-full rounded-md" />
           </View>
         ) : isError || !cycle || !phase ? (
@@ -149,15 +151,13 @@ function Hero({ phase, cycle, now }: { phase: ActivePhase; cycle: CurrentCycle; 
   const current = STEPS.findIndex((step) => step.phase === phase);
 
   return (
-    <View className="gap-lg">
-      <View className="gap-xs">
-        <Text className="font-title text-2xl text-gray-800">{PHASE_TITLE[phase]}</Text>
-        <Typography variant="body2" className="text-primary-600">
-          {countdown(phase, cycle, now)}
-        </Typography>
-      </View>
-
-      <View className="gap-xs">
+    <BattleHero
+      tone="me"
+      tag={`STEP ${current + 1}/${STEPS.length}`}
+      title={PHASE_TITLE[phase]}
+      subtitle={countdown(phase, cycle, now)}
+    >
+      <View className="gap-xs pt-sm">
         <View className="flex-row items-center">
           {STEPS.map((step, index) => (
             <View
@@ -165,13 +165,13 @@ function Hero({ phase, cycle, now }: { phase: ActivePhase; cycle: CurrentCycle; 
               className={`flex-row items-center ${index < STEPS.length - 1 ? 'flex-1' : ''}`}
             >
               <View
-                className={`h-[12px] w-[12px] rounded-full ${
-                  index <= current ? 'bg-primary-600' : 'bg-gray-200'
+                className={`h-[14px] w-[14px] rounded-full border-2 border-white ${
+                  index <= current ? 'bg-white' : 'bg-primary-600'
                 }`}
               />
               {index < STEPS.length - 1 && (
                 <View
-                  className={`h-[2px] flex-1 ${index < current ? 'bg-primary-600' : 'bg-gray-200'}`}
+                  className={`h-[3px] flex-1 ${index < current ? 'bg-white' : 'bg-white/40'}`}
                 />
               )}
             </View>
@@ -181,15 +181,15 @@ function Hero({ phase, cycle, now }: { phase: ActivePhase; cycle: CurrentCycle; 
           {STEPS.map((step, index) => (
             <Typography
               key={step.phase}
-              variant="caption"
-              className={index === current ? 'text-primary-600' : 'text-gray-400'}
+              variant={index === current ? 'h4' : 'caption'}
+              className={index === current ? 'text-white' : 'text-white/70'}
             >
               {step.label}
             </Typography>
           ))}
         </View>
       </View>
-    </View>
+    </BattleHero>
   );
 }
 
@@ -319,9 +319,7 @@ function TodoCard({
 
   return (
     <View className="gap-md rounded-md border border-gray-200 bg-white p-lg">
-      <Typography variant="caption" className="text-primary-600">
-        지금 할 일
-      </Typography>
+      <BattleTag label="지금 할 일" />
       <View className="gap-xs">
         <Typography variant="h2" className="text-gray-800">
           {todo.title}
@@ -332,7 +330,7 @@ function TodoCard({
       </View>
       {todo.extra}
       {action && (
-        <Button
+        <BattleButton
           content={action.label}
           // 지도는 같은 스택의 첫 화면이라 push하지 않고 그 화면으로 돌아간다.
           onclick={() =>
@@ -361,14 +359,14 @@ function MyTerritorySection({
 }) {
   return (
     <View className="gap-md">
-      <View className="flex-row items-end justify-between">
-        <Typography variant="h2" className="text-gray-700">
-          내 땅
-        </Typography>
+      <View className="flex-row items-center justify-between">
+        <Text className="font-title text-2xl text-gray-800">내 땅</Text>
         {territories && maxOwned !== undefined && (
-          <Typography variant="caption" className="text-gray-400">
-            {`${territories.length}/${maxOwned}`}
-          </Typography>
+          <View className="rounded-full bg-primary-100 px-md py-xs">
+            <Typography variant="h4" className="text-primary-600">
+              {`${territories.length}/${maxOwned}곳`}
+            </Typography>
+          </View>
         )}
       </View>
       {isLoading ? (
