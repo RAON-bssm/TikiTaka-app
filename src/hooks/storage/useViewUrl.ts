@@ -1,10 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { getViewUrl } from '@/api/storage';
+import { getViewUrl, VIEW_URL_SAFE_AGE } from '@/api/storage';
 import { storageKeys } from '@/api/queryKeys';
-
-// presigned URL 유효시간(10분)보다 짧게 잡아 만료 전에 갱신되게 한다.
-const VIEW_URL_STALE_TIME = 9 * 60 * 1000;
 
 function isAbsoluteUrl(value: string): boolean {
   return /^https?:\/\//.test(value);
@@ -19,7 +16,7 @@ export function useViewUrl(key: string | undefined) {
     queryKey: storageKeys.viewUrl(key),
     queryFn: () => getViewUrl(key as string),
     enabled: !!key && !isAbsoluteUrl(key),
-    staleTime: VIEW_URL_STALE_TIME,
+    staleTime: VIEW_URL_SAFE_AGE,
   });
 
   if (!key || isAbsoluteUrl(key)) {

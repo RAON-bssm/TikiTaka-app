@@ -1,6 +1,6 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { type InfiniteData, useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { likePost, unlikePost } from '@/api/post';
+import { likePost, type PostPage, unlikePost } from '@/api/post';
 import { postKeys } from '@/api/queryKeys';
 import type { MyPost, Post, PostDetail } from '@/types/post';
 
@@ -9,6 +9,19 @@ type LikeFields = Pick<PostDetail, 'like_count' | 'liked_by_me'>;
 function applyLike<T extends LikeFields>(target: T, liked: boolean): T {
   if (target.liked_by_me === liked) return target;
   return { ...target, liked_by_me: liked, like_count: target.like_count + (liked ? 1 : -1) };
+}
+
+/** `lists()` 아래에는 배열 목록(홈 미리보기·내 게시물)과 무한 스크롤 피드(페이지 묶음)가 섞여 있다. */
+type PostListCache = Post[] | MyPost[] | InfiniteData<PostPage>;
+
+function applyLikeToList(data: PostListCache, postId: string, liked: boolean): PostListCache {
+  const update = <T extends LikeFields & { post_id: string }>(post: T) =>
+    post.post_id === postId ? applyLike(post, liked) : post;
+  if (Array.isArray(data)) return data.map(update) as Post[] | MyPost[];
+  return {
+    ...data,
+    pages: data.pages.map((page) => ({ ...page, posts: page.posts.map(update) })),
+  };
 }
 
 /**
@@ -31,17 +44,13 @@ export function useTogglePostLike(postId: string) {
     onMutate: async (liked) => {
       await queryClient.cancelQueries({ queryKey: postKeys.all });
       const previousDetail = queryClient.getQueryData<PostDetail>(detailKey);
-      const previousLists = queryClient.getQueriesData<Post[] | MyPost[]>({
+      const previousLists = queryClient.getQueriesData<PostListCache>({
         queryKey: postKeys.lists(),
       });
 
       if (previousDetail) queryClient.setQueryData(detailKey, applyLike(previousDetail, liked));
-      for (const [key, posts] of previousLists) {
-        if (!posts) continue;
-        queryClient.setQueryData(
-          key,
-          posts.map((post) => (post.post_id === postId ? applyLike(post, liked) : post)),
-        );
+      for (const [key, data] of previousLists) {
+        if (data) queryClient.setQueryData(key, applyLikeToList(data, postId, liked));
       }
       return { previousDetail, previousLists };
     },
@@ -50,8 +59,8 @@ export function useTogglePostLike(postId: string) {
       // 같은 scope의 뒤 요청도 onMutate는 즉시 돌아 캐시가 이미 마지막 목표 상태다. 되돌리면 그걸 덮어쓴다.
       if (hasLaterInScope()) return;
       if (context.previousDetail) queryClient.setQueryData(detailKey, context.previousDetail);
-      for (const [key, posts] of context.previousLists) {
-        queryClient.setQueryData(key, posts);
+      for (const [key, data] of context.previousLists) {
+        queryClient.setQueryData(key, data);
       }
     },
     onSettled: () => {
