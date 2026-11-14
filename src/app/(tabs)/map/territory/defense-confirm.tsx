@@ -49,8 +49,8 @@ export default function DefenseConfirmScreen() {
   const handleSuccess = (result: DefensePhotoResult) => {
     // 세팅은 허브나 내 땅 화면 어디서든 시작해 스택에 manage가 없을 수 있다. dismissTo는 그때 되돌아가지 않고
     // 현재 화면만 바꿔 세팅 카메라가 스택에 남으므로, 이 흐름이 쌓은 화면 수만큼 닫고 시작한 화면으로 돌아간다.
-    // 세팅: 미션 입력 → 카메라 → 확인(3), 재촬영: 카메라 → 확인(2. 미션 바꾸기는 미션 입력을 카메라로 replace한다).
-    router.dismiss(isSetup ? 3 : 2);
+    // 세팅: 미션 입력 → 카메라 → 편집 → 확인(4), 재촬영: 카메라 → 편집 → 확인(3. 미션 바꾸기는 미션 입력을 카메라로 replace한다).
+    router.dismiss(isSetup ? 4 : 3);
     router.push({
       pathname: '/map/territory/defense-result',
       params: {
@@ -117,7 +117,8 @@ export default function DefenseConfirmScreen() {
             onclick={handleSubmit}
           />
           {!isPending && (
-            <Button content="다시 찍기" variant="light" onclick={() => router.back()} />
+            // 바로 뒤는 편집 화면이라, 편집까지 닫아 카메라로 돌아간다.
+            <Button content="다시 찍기" variant="light" onclick={() => router.dismiss(2)} />
           )}
         </View>
       </ScrollView>

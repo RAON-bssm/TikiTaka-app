@@ -48,7 +48,10 @@ export default function AppBar({ state, navigation }: BottomTabBarProps) {
   ) {
     return null;
   }
-  if (focusedRoute?.name === 'map' && nestedRouteName === 'challenge-camera') {
+  if (
+    focusedRoute?.name === 'map' &&
+    (nestedRouteName === 'challenge-camera' || nestedRouteName === 'challenge-edit')
+  ) {
     return null;
   }
 

@@ -95,7 +95,8 @@ export default function ChallengeConfirmScreen() {
             onclick={handleSubmit}
           />
           {!isPending && (
-            <Button content="다시 찍기" variant="light" onclick={() => router.back()} />
+            // 바로 뒤는 편집 화면이라, 편집까지 닫아 카메라로 돌아간다.
+            <Button content="다시 찍기" variant="light" onclick={() => router.dismiss(2)} />
           )}
         </View>
       </ScrollView>
