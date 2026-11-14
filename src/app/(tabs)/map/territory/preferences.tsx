@@ -7,6 +7,7 @@ import { getApiErrorMessage } from '@/api/error';
 import RadioSelectedIcon from '@/assets/icons/radio-selected.svg';
 import RadioIcon from '@/assets/icons/radio.svg';
 import BattleButton from '@/components/territory/battle/BattleButton';
+import PreferenceMap from '@/components/territory/PreferenceMap';
 import BattleTag from '@/components/territory/battle/BattleTag';
 import { TILT } from '@/components/territory/battle/tilt';
 import BackButton from '@/components/ui/BackButton';
@@ -153,6 +154,13 @@ function PreferenceForm({ team, initialCodes }: { team: Location; initialCodes: 
           </View>
         </View>
 
+        <View className="gap-sm">
+          <PreferenceMap dongs={dongs} codes={codes} onToggle={toggle} />
+          <Typography variant="caption" className="text-gray-400">
+            지도에서 동을 눌러도 고르거나 뺄 수 있어요
+          </Typography>
+        </View>
+
         <View className="gap-md">
           <TextInput
             placeholder={`${gu}의 동 이름 검색`}
@@ -252,10 +260,7 @@ function Slot({
       accessibilityLabel={`${priority}지망 ${dong.name}, 눌러서 빼기`}
       className="h-[84px] flex-1 items-center justify-center gap-xs rounded-md border-2 border-primary-600 bg-primary-100 px-xs active:opacity-80"
     >
-      <View
-        className="absolute -left-sm -top-sm rounded-sm bg-primary-600 px-sm py-xs"
-        style={TILT.sticker}
-      >
+      <View className="rounded-sm bg-primary-600 px-sm py-xs" style={TILT.sticker}>
         <Text className="font-title text-sm text-white">{`${priority}지망`}</Text>
       </View>
       <Typography variant="h4" className="text-center text-gray-800" numberOfLines={1}>

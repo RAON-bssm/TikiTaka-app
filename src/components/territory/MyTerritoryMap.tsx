@@ -4,24 +4,12 @@ import Svg, { Circle, G, Line, Path, Rect, Text as SvgText } from 'react-native-
 
 import Typography from '@/components/ui/Typography';
 import { palette } from '@/constants/colors';
-import dongShapes from '@/constants/territory/dongShapes.json';
 import { DONGS } from '@/constants/territory/dongs';
 import { findDong } from '@/constants/territory/region';
 import type { MyTerritory } from '@/types/territory';
+import { hasShape, LABEL_HEIGHT, LABEL_SIZE, placeLabels, projectDongs } from './dongMap';
 
-/** 링은 [lng, lat, lng, lat, ...]. 폴리곤의 첫 링이 외곽선, 나머지는 구멍이다. */
-type Polygon = number[][];
-const SHAPES = dongShapes as Record<string, Polygon[]>;
-
-const PADDING = 12;
-const MIN_HEIGHT = 200;
-const MAX_HEIGHT = 320;
-const LABEL_SIZE = 11;
-const LABEL_HEIGHT = 20;
-const LABEL_PAD_X = 8;
-// 한글 한 글자 폭은 글자 크기와 거의 같다. 텍스트를 재지 않고 겹침만 피하려는 근사값이다.
-const labelWidth = (name: string) => name.length * LABEL_SIZE + LABEL_PAD_X * 2;
-const LABEL_OFFSETS = [0, -1, 1, -2, 2, -3, 3].map((step) => step * (LABEL_HEIGHT + 4));
+const MAP_OPTIONS = { padding: 12, minHeight: 200, maxHeight: 320 };
 
 type LandStatus = 'owned' | 'unset' | 'pending';
 
@@ -61,51 +49,13 @@ export default function MyTerritoryMap({ territories, teamGu, onSelect }: Props)
     const gu = findDong(territory.dong_code)?.gu;
     if (gu) gus.add(gu);
   }
-  const contextDongs = DONGS.filter((dong) => gus.has(dong.gu) && SHAPES[dong.code]);
+  const contextDongs = DONGS.filter((dong) => gus.has(dong.gu) && hasShape(dong.code));
   const lands = new Map(territories.map((territory) => [territory.dong_code, territory]));
-
-  let minLng = Infinity;
-  let maxLng = -Infinity;
-  let minLat = Infinity;
-  let maxLat = -Infinity;
-  for (const dong of contextDongs) {
-    for (const [outer] of SHAPES[dong.code]) {
-      for (let i = 0; i < outer.length; i += 2) {
-        minLng = Math.min(minLng, outer[i]);
-        maxLng = Math.max(maxLng, outer[i]);
-        minLat = Math.min(minLat, outer[i + 1]);
-        maxLat = Math.max(maxLat, outer[i + 1]);
-      }
-    }
-  }
-
-  // 경도 1도는 위도 1도보다 짧아(부산 기준 약 0.82배) 그대로 그리면 옆으로 늘어난다.
-  const lngScale = Math.cos((((minLat + maxLat) / 2) * Math.PI) / 180);
-  const spanX = (maxLng - minLng) * lngScale;
-  const spanY = maxLat - minLat;
-  const innerWidth = width - PADDING * 2;
-  const height =
-    spanX > 0
-      ? Math.min(MAX_HEIGHT, Math.max(MIN_HEIGHT, (innerWidth * spanY) / spanX + PADDING * 2))
-      : MIN_HEIGHT;
-  const scale = spanX > 0 ? Math.min(innerWidth / spanX, (height - PADDING * 2) / spanY) : 0;
-  const offsetX = (width - spanX * scale) / 2;
-  const offsetY = (height - spanY * scale) / 2;
-  const toX = (lng: number) => offsetX + (lng - minLng) * lngScale * scale;
-  const toY = (lat: number) => offsetY + (maxLat - lat) * scale;
-
-  const toPath = (polygons: Polygon[]) =>
-    polygons
-      .flatMap((rings) =>
-        rings.map((ring) => {
-          let d = '';
-          for (let i = 0; i < ring.length; i += 2) {
-            d += `${i === 0 ? 'M' : 'L'}${toX(ring[i]).toFixed(1)} ${toY(ring[i + 1]).toFixed(1)}`;
-          }
-          return `${d}Z`;
-        }),
-      )
-      .join('');
+  const { height, scale, toPath, labelPoint } = projectDongs(
+    contextDongs.map((dong) => dong.code),
+    width,
+    MAP_OPTIONS,
+  );
 
   const handleLayout = (e: LayoutChangeEvent) => setWidth(e.nativeEvent.layout.width);
   const statuses = new Set(territories.map(statusOf));
@@ -125,7 +75,7 @@ export default function MyTerritoryMap({ territories, teamGu, onSelect }: Props)
               return (
                 <Path
                   key={dong.code}
-                  d={toPath(SHAPES[dong.code])}
+                  d={toPath(dong.code)}
                   fill={dong.gu === teamGu ? palette.gray[100] : palette.gray[50]}
                   stroke={palette.gray[300]}
                   strokeWidth={0.5}
@@ -135,12 +85,11 @@ export default function MyTerritoryMap({ territories, teamGu, onSelect }: Props)
             })}
             {/* 내 땅은 이웃 동 테두리에 가리지 않게 맨 위에 그린다. */}
             {territories.map((territory) => {
-              const polygons = SHAPES[territory.dong_code];
-              if (!polygons) return null;
+              if (!hasShape(territory.dong_code)) return null;
               return (
                 <Path
                   key={territory.dong_code}
-                  d={toPath(polygons)}
+                  d={toPath(territory.dong_code)}
                   fill={STATUS_STYLE[statusOf(territory)].fill}
                   stroke="white"
                   strokeWidth={1.5}
@@ -151,10 +100,8 @@ export default function MyTerritoryMap({ territories, teamGu, onSelect }: Props)
             })}
             {placeLabels(
               territories.flatMap((territory) => {
-                const polygons = SHAPES[territory.dong_code];
-                if (!polygons) return [];
-                const [lng, lat] = labelPoint(polygons);
-                return [{ territory, x: toX(lng), y: toY(lat) }];
+                const point = labelPoint(territory.dong_code);
+                return point ? [{ territory, text: territory.dong_name, ...point }] : [];
               }),
               width,
               height,
@@ -251,67 +198,4 @@ export default function MyTerritoryMap({ territories, teamGu, onSelect }: Props)
       )}
     </View>
   );
-}
-
-/** 가장 큰 조각의 무게중심. 섬이 딸린 동도 본토 위에 이름이 놓인다. */
-function labelPoint(polygons: Polygon[]): [number, number] {
-  let best: [number, number] = [polygons[0][0][0], polygons[0][0][1]];
-  let bestArea = 0;
-  for (const [outer] of polygons) {
-    let area = 0;
-    let cx = 0;
-    let cy = 0;
-    for (let i = 0, j = outer.length - 2; i < outer.length; j = i, i += 2) {
-      const cross = outer[j] * outer[i + 1] - outer[i] * outer[j + 1];
-      area += cross;
-      cx += (outer[j] + outer[i]) * cross;
-      cy += (outer[j + 1] + outer[i + 1]) * cross;
-    }
-    if (Math.abs(area) > bestArea && area !== 0) {
-      bestArea = Math.abs(area);
-      best = [cx / (3 * area), cy / (3 * area)];
-    }
-  }
-  return best;
-}
-
-interface LabelInput {
-  territory: MyTerritory;
-  x: number;
-  y: number;
-}
-
-/** 땅이 최대 몇 곳이라 단순 탐색으로 충분하다. */
-function placeLabels(inputs: LabelInput[], width: number, height: number) {
-  const placed: { left: number; right: number; top: number; bottom: number }[] = [];
-  return inputs.map((input) => {
-    const w = labelWidth(input.territory.dong_name);
-    const x = Math.min(Math.max(input.x, w / 2 + 2), width - w / 2 - 2);
-    let labelY = input.y;
-    for (const offset of LABEL_OFFSETS) {
-      const candidate = Math.min(
-        Math.max(input.y + offset, LABEL_HEIGHT / 2 + 2),
-        height - LABEL_HEIGHT / 2 - 2,
-      );
-      const box = {
-        left: x - w / 2,
-        right: x + w / 2,
-        top: candidate - LABEL_HEIGHT / 2,
-        bottom: candidate + LABEL_HEIGHT / 2,
-      };
-      const overlaps = placed.some(
-        (other) =>
-          box.left < other.right &&
-          box.right > other.left &&
-          box.top < other.bottom &&
-          box.bottom > other.top,
-      );
-      if (!overlaps) {
-        labelY = candidate;
-        placed.push(box);
-        break;
-      }
-    }
-    return { territory: input.territory, x, y: input.y, labelY, w };
-  });
 }
