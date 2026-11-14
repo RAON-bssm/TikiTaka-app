@@ -2,8 +2,10 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import CapturedPhoto from '@/components/camera/CapturedPhoto';
-import Button from '@/components/ui/Button';
+import BattleButton from '@/components/territory/battle/BattleButton';
+import BattlePhotoCard from '@/components/territory/battle/BattlePhotoCard';
+import JudgeComment from '@/components/territory/battle/JudgeComment';
+import ResultHero from '@/components/territory/battle/ResultHero';
 import Header from '@/components/ui/Header';
 import ResultRow from '@/components/territory/ResultRow';
 import Typography from '@/components/ui/Typography';
@@ -33,26 +35,14 @@ export default function DefenseResultScreen() {
       <ScrollView contentContainerClassName="gap-3xl px-xl pb-2xl pt-2xl">
         <Header />
 
-        <View className="items-start gap-sm">
-          <View className="rounded-full bg-primary-100 px-md py-xs">
-            <Typography variant="caption" className="text-primary-600">
-              {isSetup ? '땅 세팅 완료' : '방어 사진 변경'}
-            </Typography>
-          </View>
-          <Typography variant="display" className="text-gray-800">
-            {dong ? `${dong.gu} ` : ''}
-            <Typography variant="display" className="text-primary-700">
-              {dong?.name ?? '내 땅'}
-            </Typography>
-            {'의\n방어 점수는 '}
-            <Typography variant="display" className="text-primary-600">
-              {score}
-            </Typography>
-            점이에요
-          </Typography>
-        </View>
+        <ResultHero
+          tone="me"
+          tag={isSetup ? '땅 세팅 완료!' : '방어 사진 교체!'}
+          title={`방어 점수\n${score}점`}
+          subtitle={`${dong ? `${dong.gu} ` : ''}${dong?.name ?? '내 땅'}을 이 사진으로 지켜요`}
+        />
 
-        <CapturedPhoto uri={params.uri} />
+        <BattlePhotoCard uri={params.uri} name="내 방어 사진" tone="me" tilt="left" width="60%" />
 
         <View className="gap-sm rounded-sm border border-gray-200 bg-white p-md">
           <ResultRow label="미션">
@@ -86,13 +76,9 @@ export default function DefenseResultScreen() {
           )}
         </View>
 
-        {!!params.review && (
-          <Typography variant="body3" className="text-gray-500">
-            {params.review}
-          </Typography>
-        )}
+        {!!params.review && <JudgeComment review={params.review} />}
 
-        <Button content="내 땅으로 돌아가기" onclick={() => router.back()} />
+        <BattleButton content="내 땅으로 돌아가기" onclick={() => router.back()} />
       </ScrollView>
     </SafeAreaView>
   );

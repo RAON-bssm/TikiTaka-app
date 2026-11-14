@@ -7,13 +7,14 @@ import { getApiErrorMessage } from '@/api/error';
 import BlockUserDialog from '@/components/block/BlockUserDialog';
 import UserCharacter from '@/components/character/UserCharacter';
 import ReportDialog, { type ReportTarget } from '@/components/report/ReportDialog';
-import Button from '@/components/ui/Button';
 import ConfirmDialog from '@/components/ui/feedback/ConfirmDialog';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Skeleton from '@/components/ui/feedback/Skeleton';
 import MoreMenu from '@/components/ui/MoreMenu';
 import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
+import BattleButton from './battle/BattleButton';
+import BattleTag, { type BattleTone } from './battle/BattleTag';
 import TerritoryStats from './TerritoryStats';
 import { palette } from '@/constants/colors';
 import { useDevelopTerritory } from '@/hooks/territory/useDevelopTerritory';
@@ -163,6 +164,14 @@ function TerritoryContent({
     });
   };
 
+  const tag: { label: string; tone: BattleTone } = territory.mine
+    ? { label: '내 땅', tone: 'me' }
+    : !hasOwner
+      ? { label: '빈 땅', tone: 'neutral' }
+      : myLocationId !== undefined && territory.owner_location_id === myLocationId
+        ? { label: '우리 팀 땅', tone: 'me' }
+        : { label: '상대 땅', tone: 'rival' };
+
   const ownerId = territory.owner_id;
   const ownerName = territory.owner_name;
   const canReport = !!ownerId && !!ownerName && !territory.mine && !territory.blocked;
@@ -171,6 +180,7 @@ function TerritoryContent({
     <>
       <View className="flex-row items-start gap-2xl">
         <View className="flex-1 gap-sm">
+          <BattleTag label={tag.label} tone={tag.tone} />
           <Typography variant="h1" className="text-gray-800">
             {[guName, territory.dong_name].filter(Boolean).join(' ')}
           </Typography>
@@ -232,7 +242,7 @@ function TerritoryContent({
             <Typography variant="caption" className="text-center text-gray-400">
               {`개발비 ${territory.development_cost.toLocaleString()} P · 성공 확률 ${developProbability}% · 실패해도 개발비는 돌려받지 못해요`}
             </Typography>
-            <Button
+            <BattleButton
               content={
                 isDeveloping
                   ? '개발하는 중...'
@@ -245,7 +255,7 @@ function TerritoryContent({
             />
           </>
         ) : (
-          <Button
+          <BattleButton
             content={action.label}
             disabled={action.kind === 'disabled'}
             onclick={() => {
@@ -331,15 +341,16 @@ function getAction({
     return { kind: 'disabled', label: `땅은 최대 ${maxOwned}개까지 가질 수 있어요` };
   }
   if (myPoint !== undefined && myPoint < territory.toll) {
-    return { kind: 'insufficient', label: '도전하기' };
+    return { kind: 'insufficient', label: '콕! 도전하기' };
   }
-  return { kind: 'challenge', label: '도전하기' };
+  return { kind: 'challenge', label: '콕! 도전하기' };
 }
 
 function SheetSkeleton() {
   return (
     <View className="gap-2xl">
       <View className="gap-sm">
+        <Skeleton className="h-[24px] w-[64px] rounded-sm" />
         <Skeleton className="h-[28px] w-[160px] rounded-xs" />
         <Skeleton className="h-[17px] w-[120px] rounded-xs" />
       </View>

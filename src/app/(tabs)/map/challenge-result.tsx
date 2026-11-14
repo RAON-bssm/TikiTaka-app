@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { Image, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useRequireCamera } from '@/components/camera/CameraPermissionGate';
@@ -7,6 +7,10 @@ import Button from '@/components/ui/Button';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Skeleton from '@/components/ui/feedback/Skeleton';
 import Header from '@/components/ui/Header';
+import BattleButton from '@/components/territory/battle/BattleButton';
+import JudgeComment from '@/components/territory/battle/JudgeComment';
+import ResultHero from '@/components/territory/battle/ResultHero';
+import VersusPhotos from '@/components/territory/battle/VersusPhotos';
 import ResultRow from '@/components/territory/ResultRow';
 import Typography from '@/components/ui/Typography';
 import { useViewUrl } from '@/hooks/storage/useViewUrl';
@@ -62,53 +66,38 @@ export default function ChallengeResultScreen() {
 
         {isLoading ? (
           <View className="gap-2xl">
-            <Skeleton className="h-[107px] w-full rounded-md" />
-            <Skeleton className="h-[155px] w-full rounded-md" />
+            <Skeleton className="h-[160px] w-full rounded-xl" />
+            <Skeleton className="h-[240px] w-full rounded-md" />
           </View>
         ) : isError || !result ? (
           <ErrorRetry message="도전 결과를 불러오지 못했어요." onRetry={() => void refetch()} />
         ) : (
           <>
-            <View className="items-start gap-sm">
-              <View
-                className={`rounded-full px-md py-xs ${won ? 'bg-primary-100' : 'bg-gray-100'}`}
-              >
-                <Typography
-                  variant="caption"
-                  className={won ? 'text-primary-600' : 'text-gray-600'}
-                >
-                  {won ? '땅 차지' : '땅 방어됨'}
-                </Typography>
-              </View>
-              <Typography variant="display" className="text-gray-800">
-                {guPrefix}
-                <Typography variant="display" className="text-primary-700">
-                  {result.dong_name}
-                </Typography>
-                {won ? '은\n이제 내 땅이에요.' : '을\n차지할 수 없어요'}
-              </Typography>
-            </View>
+            <ResultHero
+              tone={won ? 'me' : 'rival'}
+              tag={won ? '땅 차지!' : '방어당했어요'}
+              title={won ? `${result.dong_name}\n이제 내 땅!` : `${result.dong_name}\n차지 실패`}
+              subtitle={
+                won
+                  ? `${guPrefix}${result.dong_name}에 우리 팀 깃발을 꽂았어요`
+                  : `방어 점수 ${result.defense_score_at}점을 넘지 못했어요`
+              }
+            />
 
-            <View className="flex-row gap-lg">
-              <PhotoCard
-                uri={params.myPhoto}
-                name={myInfo?.user_name ?? '나'}
-                score={result.score}
-                side="me"
-              />
-              <PhotoCard
-                uri={defenderPhoto.uri}
-                name={
+            <VersusPhotos
+              me={{ uri: params.myPhoto, name: myInfo?.user_name ?? '나', score: result.score }}
+              rival={{
+                uri: defenderPhoto.uri,
+                name:
                   params.hasDefender === undefined
                     ? '지키던 대표'
                     : hasDefender
                       ? (params.defenderName ?? '')
-                      : '주인 없는 땅'
-                }
-                score={result.defense_score_at}
-                side="defender"
-              />
-            </View>
+                      : '주인 없는 땅',
+                score: result.defense_score_at,
+              }}
+              winner={won ? 'me' : 'rival'}
+            />
 
             <View className="gap-sm rounded-sm border border-gray-200 bg-white p-md">
               {params.hasDefender !== undefined && (
@@ -140,15 +129,11 @@ export default function ChallengeResultScreen() {
               <ResultRow label="낸 통행료" value={`${result.toll.toLocaleString()} P`} />
             </View>
 
-            {result.review && (
-              <Typography variant="body3" className="text-gray-500">
-                {result.review}
-              </Typography>
-            )}
+            {result.review && <JudgeComment review={result.review} />}
 
             <View className="gap-sm">
               {!won && (
-                <Button
+                <BattleButton
                   content="다시 도전하기"
                   onclick={() =>
                     requireCamera(() =>
@@ -166,43 +151,5 @@ export default function ChallengeResultScreen() {
         )}
       </ScrollView>
     </SafeAreaView>
-  );
-}
-
-function PhotoCard({
-  uri,
-  name,
-  score,
-  side,
-}: {
-  uri: string | undefined;
-  name: string;
-  score: number;
-  side: 'me' | 'defender';
-}) {
-  const scoreText = (
-    <Typography
-      variant="display"
-      className={side === 'me' ? 'text-primary-600' : 'text-secondary-500'}
-    >
-      {score}
-    </Typography>
-  );
-  const nameText = (
-    <Typography variant="h3" className="text-gray-500">
-      {name}
-    </Typography>
-  );
-
-  return (
-    <View className="flex-1 gap-sm">
-      <View className="h-[155px] w-full overflow-hidden rounded-md bg-gray-400">
-        {uri && <Image source={{ uri }} resizeMode="cover" className="h-full w-full" />}
-      </View>
-      <View className="flex-row items-center justify-between px-xs">
-        {side === 'me' ? scoreText : nameText}
-        {side === 'me' ? nameText : scoreText}
-      </View>
-    </View>
   );
 }

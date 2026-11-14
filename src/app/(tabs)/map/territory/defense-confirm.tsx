@@ -4,8 +4,10 @@ import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { getApiErrorMessage } from '@/api/error';
-import CapturedPhoto from '@/components/camera/CapturedPhoto';
 import Topic from '@/components/camera/Topic';
+import BattleButton from '@/components/territory/battle/BattleButton';
+import BattlePhotoCard from '@/components/territory/battle/BattlePhotoCard';
+import BattleTag from '@/components/territory/battle/BattleTag';
 import BackButton from '@/components/ui/BackButton';
 import Button from '@/components/ui/Button';
 import { useToast } from '@/components/ui/Toast';
@@ -101,9 +103,12 @@ export default function DefenseConfirmScreen() {
           title={territory?.dong_name ?? (isSetup ? '땅 세팅' : '방어 사진')}
           disabled={isPending}
         />
-        <Topic title={mission} />
+        <View className="gap-md">
+          <BattleTag label={isSetup ? '내 땅 세팅' : '방어 사진 교체'} />
+          <Topic title={mission} />
+        </View>
 
-        <CapturedPhoto uri={params.uri} />
+        <BattlePhotoCard uri={params.uri} name="내 방어 사진" tone="me" tilt="left" width="60%" />
 
         <View className="gap-xs">
           <Typography variant="caption" className="text-center text-gray-400">
@@ -111,8 +116,8 @@ export default function DefenseConfirmScreen() {
               ? 'AI가 채점한 점수가 이 땅의 방어 점수가 돼요'
               : '점수가 지금보다 낮아도 방어 점수가 그대로 바뀌어요'}
           </Typography>
-          <Button
-            content={isPending ? 'AI가 사진을 채점하고 있어요...' : '이 사진으로 정하기'}
+          <BattleButton
+            content={isPending ? 'AI가 채점하고 있어요...' : '이 사진으로 지키기'}
             disabled={isSetup && !mission}
             onclick={handleSubmit}
           />
