@@ -1,8 +1,11 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
-import { persistQueryClient, type PersistedClient } from '@tanstack/react-query-persist-client';
+import type {
+  PersistedClient,
+  PersistQueryClientOptions,
+} from '@tanstack/react-query-persist-client';
 
-import { QUERY_CACHE_MAX_AGE, queryClient } from './queryClient';
+import { QUERY_CACHE_MAX_AGE } from './queryClient';
 import { postKeys, storageKeys } from './queryKeys';
 import { VIEW_URL_SAFE_AGE } from './storage';
 
@@ -30,20 +33,16 @@ const persister = createAsyncStoragePersister({
 /**
  * 마지막으로 본 피드·랭킹을 기기에 저장해, 앱을 다시 열었을 때 빈 화면 대신 바로 보여준다.
  * `view-url`은 URL만 담고 있어 곧 만료되므로 아예 저장하지 않는다.
- * 루트 레이아웃에서 한 번만 호출한다. 반환하는 해제 함수는 StrictMode 이중 마운트 대비용.
+ * 루트 레이아웃의 `PersistQueryClientProvider`에 넘긴다. 복원이 끝날 때까지 쿼리 요청을 멈춰 둔다.
  */
-export function setupQueryPersistence(): () => void {
-  const [unsubscribe] = persistQueryClient({
-    queryClient,
-    persister,
-    maxAge: QUERY_CACHE_MAX_AGE,
-    dehydrateOptions: {
-      shouldDehydrateQuery: (query) =>
-        query.state.status === 'success' && query.queryKey[0] !== storageKeys.all[0],
-    },
-  });
-  return unsubscribe;
-}
+export const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
+  persister,
+  maxAge: QUERY_CACHE_MAX_AGE,
+  dehydrateOptions: {
+    shouldDehydrateQuery: (query) =>
+      query.state.status === 'success' && query.queryKey[0] !== storageKeys.all[0],
+  },
+};
 
 /** 로그아웃·탈퇴 때 다음 계정에 이전 캐시가 보이지 않도록 저장소에서도 지운다(`useClearSession`). */
 export async function clearPersistedQueryCache(): Promise<void> {
