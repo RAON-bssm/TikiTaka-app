@@ -22,10 +22,14 @@ export interface CurrentBoardFeedState {
   isFetchNextPageError: boolean;
 }
 
-/** 피드 화면 전용 무한 스크롤. 홈 미리보기(`useCurrentBoardPosts`)와 달리 커서로 이어 받는다. */
-export function useCurrentBoardFeed(): CurrentBoardFeedState {
-  const boards = useBoards();
-  const board = boards.data?.[0];
+/**
+ * 게시판 하나의 글을 커서로 이어 받는다. 홈 미리보기(`useCurrentBoardPosts`)와 달리 무한 스크롤용이다.
+ * `board`가 없으면(라운드가 없거나 끝남) 요청하지 않는다.
+ */
+function useBoardPostFeed(
+  board: Board | undefined,
+  boards: { isLoading: boolean; isError: boolean; refetch: () => Promise<unknown> },
+): CurrentBoardFeedState {
   const boardId = board?.board_id;
 
   const feed = useInfiniteQuery({
@@ -56,4 +60,19 @@ export function useCurrentBoardFeed(): CurrentBoardFeedState {
     isFetchingNextPage: feed.isFetchingNextPage,
     isFetchNextPageError: feed.isFetchNextPageError,
   };
+}
+
+/** 피드 화면: 서버가 맨 앞에 두는 게시판(내 매치가 있으면 내 매치). */
+export function useCurrentBoardFeed(): CurrentBoardFeedState {
+  const boards = useBoards();
+  return useBoardPostFeed(boards.data?.[0], boards);
+}
+
+/** 랭킹에서 고른 대결의 게시판. 라운드가 바뀌어 목록에서 사라졌으면 `board`가 없다. */
+export function useBoardFeed(boardId: number): CurrentBoardFeedState {
+  const boards = useBoards();
+  return useBoardPostFeed(
+    boards.data?.find((item) => item.board_id === boardId),
+    boards,
+  );
 }
