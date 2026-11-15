@@ -1,4 +1,6 @@
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, View } from 'react-native';
+
+import Typography from '@/components/ui/Typography';
 
 interface Props {
   content: string;
@@ -27,13 +29,14 @@ export default function BattleButton({ content, onclick, disabled = false, tone 
               disabled ? 'bg-gray-100' : color.face
             }`}
           >
-            <Text
+            <Typography
+              variant="title2"
               numberOfLines={1}
               adjustsFontSizeToFit
-              className={`font-title text-xl ${disabled ? 'text-gray-400' : 'text-white'}`}
+              className={disabled ? 'text-gray-400' : 'text-white'}
             >
               {content}
-            </Text>
+            </Typography>
           </View>
         )}
       </Pressable>

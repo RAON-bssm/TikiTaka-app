@@ -105,6 +105,11 @@ export default function MoreMenu({
         ref={triggerRef}
         onPress={trigger === 'press' ? open : undefined}
         onLongPress={trigger === 'longPress' ? open : undefined}
+        // 스크린 리더의 두 번 탭은 onPress로 가서 길게 누르기 메뉴가 열리지 않으므로 activate 액션으로 연다.
+        accessibilityActions={trigger === 'longPress' ? [{ name: 'activate' }] : undefined}
+        onAccessibilityAction={(event) => {
+          if (trigger === 'longPress' && event.nativeEvent.actionName === 'activate') open();
+        }}
         hitSlop={8}
         accessibilityRole="button"
         accessibilityLabel={accessibilityLabel}

@@ -1,5 +1,6 @@
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 
+import Typography from '@/components/ui/Typography';
 import { palette } from '@/constants/colors';
 import BattlePhotoCard from './BattlePhotoCard';
 import { TILT } from './tilt';
@@ -42,7 +43,9 @@ export default function VersusPhotos({ me, rival, winner }: Props) {
           className="h-[56px] w-[56px] items-center justify-center rounded-full border-4 border-white bg-gray-800"
           style={[TILT.sticker, { boxShadow: BADGE_SHADOW }]}
         >
-          <Text className="font-title text-xl text-white">VS</Text>
+          <Typography variant="title2" className="text-white">
+            VS
+          </Typography>
         </View>
       </View>
     </View>

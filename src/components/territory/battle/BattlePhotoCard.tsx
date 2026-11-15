@@ -1,4 +1,4 @@
-import { type DimensionValue, Image, Text, View } from 'react-native';
+import { type DimensionValue, Image, View } from 'react-native';
 
 import Typography from '@/components/ui/Typography';
 import { palette } from '@/constants/colors';
@@ -49,7 +49,9 @@ export default function BattlePhotoCard({
           <Image source={{ uri }} resizeMode="cover" className="h-full w-full" />
         ) : (
           <View className="flex-1 items-center justify-center">
-            <Text className="font-title text-3xl text-gray-400">?</Text>
+            <Typography variant="title1" className="text-gray-400">
+              ?
+            </Typography>
           </View>
         )}
         {dimmed && <View className="absolute inset-0 bg-white/50" />}
@@ -64,15 +66,18 @@ export default function BattlePhotoCard({
           className="absolute -top-md self-center rounded-full border-2 border-white bg-gray-800 px-md py-xs"
           style={TILT.sticker}
         >
-          <Text className="font-title text-md text-white">WIN</Text>
+          <Typography variant="title3" className="text-white">
+            WIN
+          </Typography>
         </View>
       )}
       {score !== undefined && (
-        <Text
-          className={`mt-sm text-center font-title text-3xl ${dimmed ? 'text-gray-300' : color.score}`}
+        <Typography
+          variant="title1"
+          className={`mt-sm text-center ${dimmed ? 'text-gray-300' : color.score}`}
         >
           {score}
-        </Text>
+        </Typography>
       )}
     </View>
   );

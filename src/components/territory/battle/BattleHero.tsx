@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 import Typography from '@/components/ui/Typography';
@@ -40,9 +40,13 @@ export default function BattleHero({ tag, title, subtitle, tone, children }: Pro
       </View>
 
       <View className="self-start rounded-sm bg-white px-md py-xs" style={TILT.left}>
-        <Text className={`font-title text-md ${color.tagText}`}>{tag}</Text>
+        <Typography variant="title3" className={color.tagText}>
+          {tag}
+        </Typography>
       </View>
-      <Text className="font-title text-3xl text-white">{title}</Text>
+      <Typography variant="title1" className="text-white">
+        {title}
+      </Typography>
       {subtitle && (
         <Typography variant="body3" className="text-white/80">
           {subtitle}

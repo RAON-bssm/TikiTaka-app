@@ -104,6 +104,11 @@ export default function TerritorySheet({
             accessibilityRole="button"
             accessibilityLabel="땅 정보 닫기"
             accessibilityHint="아래로 밀거나 눌러서 닫아요"
+            // onAccessibilityTap은 iOS 전용이라, TalkBack 두 번 탭은 activate 액션으로 받는다.
+            accessibilityActions={[{ name: 'activate' }]}
+            onAccessibilityAction={(event) => {
+              if (event.nativeEvent.actionName === 'activate') onClose();
+            }}
             onAccessibilityTap={onClose}
             className="w-full items-center justify-center py-sm"
           >
