@@ -1,8 +1,8 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { type QueryKey, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { likePost, unlikePost } from '@/api/post';
 import { postKeys } from '@/api/queryKeys';
-import type { PostDetail } from '@/types/post';
+import type { MyPost, Post, PostDetail } from '@/types/post';
 import { mapPostList, type PostListCache } from './postListCache';
 
 type LikeFields = Pick<PostDetail, 'like_count' | 'liked_by_me'>;
@@ -10,6 +10,18 @@ type LikeFields = Pick<PostDetail, 'like_count' | 'liked_by_me'>;
 function applyLike<T extends LikeFields>(target: T, liked: boolean): T {
   if (target.liked_by_me === liked) return target;
   return { ...target, liked_by_me: liked, like_count: target.like_count + (liked ? 1 : -1) };
+}
+
+function pickLike(target: LikeFields): LikeFields {
+  return { like_count: target.like_count, liked_by_me: target.liked_by_me };
+}
+
+function findPostLike(data: PostListCache, postId: string): LikeFields | undefined {
+  const posts: (Post | MyPost)[] = Array.isArray(data)
+    ? data
+    : data.pages.flatMap((page) => page.posts);
+  const post = posts.find((item) => item.post_id === postId);
+  return post && pickLike(post);
 }
 
 /**
@@ -32,27 +44,42 @@ export function useTogglePostLike(postId: string) {
     onMutate: async (liked) => {
       await queryClient.cancelQueries({ queryKey: postKeys.all });
       const previousDetail = queryClient.getQueryData<PostDetail>(detailKey);
-      const previousLists = queryClient.getQueriesData<PostListCache>({
-        queryKey: postKeys.lists(),
-      });
+      const lists = queryClient.getQueriesData<PostListCache>({ queryKey: postKeys.lists() });
+      // 실패하면 이 글의 좋아요 값만 되돌린다. 캐시 전체를 되돌리면 그사이 받은 페이지 등이 사라진다.
+      const previousLists: [QueryKey, LikeFields][] = [];
 
       if (previousDetail) queryClient.setQueryData(detailKey, applyLike(previousDetail, liked));
-      for (const [key, data] of previousLists) {
-        if (!data) continue;
+      for (const [key, data] of lists) {
+        const previous = data && findPostLike(data, postId);
+        if (!data || !previous) continue;
+        previousLists.push([key, previous]);
         queryClient.setQueryData(
           key,
           mapPostList(data, (post) => (post.post_id === postId ? applyLike(post, liked) : post)),
         );
       }
-      return { previousDetail, previousLists };
+      return { previousDetail: previousDetail && pickLike(previousDetail), previousLists };
     },
     onError: (_error, _liked, context) => {
       if (!context) return;
       // 같은 scope의 뒤 요청도 onMutate는 즉시 돌아 캐시가 이미 마지막 목표 상태다. 되돌리면 그걸 덮어쓴다.
       if (hasLaterInScope()) return;
-      if (context.previousDetail) queryClient.setQueryData(detailKey, context.previousDetail);
-      for (const [key, data] of context.previousLists) {
-        queryClient.setQueryData(key, data);
+      const { previousDetail } = context;
+      if (previousDetail) {
+        queryClient.setQueryData<PostDetail>(
+          detailKey,
+          (current) => current && { ...current, ...previousDetail },
+        );
+      }
+      for (const [key, previous] of context.previousLists) {
+        queryClient.setQueryData<PostListCache>(
+          key,
+          (current) =>
+            current &&
+            mapPostList(current, (post) =>
+              post.post_id === postId ? { ...post, ...previous } : post,
+            ),
+        );
       }
     },
     onSettled: () => {
