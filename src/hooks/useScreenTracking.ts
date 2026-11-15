@@ -12,8 +12,11 @@ export default function useScreenTracking() {
   const screenName = `/${segments.filter((segment) => !segment.startsWith('(')).join('/')}`;
 
   useEffect(() => {
-    logScreenView(getAnalytics(), { screen_name: screenName, screen_class: screenName }).catch(
-      () => {},
-    );
+    // getAnalytics()와 파라미터 검증은 동기로 throw하므로 체인 안에서 불러야 catch에 걸린다.
+    Promise.resolve()
+      .then(() =>
+        logScreenView(getAnalytics(), { screen_name: screenName, screen_class: screenName }),
+      )
+      .catch(() => {});
   }, [screenName]);
 }
