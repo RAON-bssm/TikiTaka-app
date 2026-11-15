@@ -30,6 +30,11 @@ export interface PostPage {
   posts: Post[];
   /** 다음 페이지가 있을 때만 있다(`size`·`cursor`로 요청했을 때 한정). */
   nextCursor?: string;
+  /**
+   * 이 페이지의 presigned URL을 받은 시각. 무한 스크롤은 다음 페이지를 받을 때 쿼리의 `dataUpdatedAt`이
+   * 갱신되므로, 앞 페이지 URL이 만료됐는지는 페이지마다 따로 봐야 한다(`queryPersister`).
+   */
+  urlIssuedAt: number;
 }
 
 /**
@@ -44,7 +49,7 @@ export async function getPosts(
   const { data } = await client.get<ApiResponse<PostListData>>(`/api/post/${boardId}`, {
     params,
   });
-  return { posts: data.data.post, nextCursor: data.data.next_cursor };
+  return { posts: data.data.post, nextCursor: data.data.next_cursor, urlIssuedAt: Date.now() };
 }
 
 export async function getMyPosts(): Promise<MyPost[]> {

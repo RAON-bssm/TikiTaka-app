@@ -12,6 +12,8 @@ interface BoardCursor {
   cursor?: string;
   done: boolean;
   buffer: Post[];
+  /** `buffer` 글의 URL을 받은 시각. 남은 글은 다음 페이지로 넘어가므로 그 페이지의 발급 시각이 된다. */
+  urlIssuedAt?: number;
 }
 
 type MergedPage = PostPage & { next?: BoardCursor[] };
@@ -26,6 +28,7 @@ const isNewer = (a: Post, b: Post) => a.created_at > b.created_at;
 async function fetchMergedPage(state: BoardCursor[], size: number): Promise<MergedPage> {
   const boards = state.map((board) => ({ ...board, buffer: [...board.buffer] }));
   const posts: Post[] = [];
+  let urlIssuedAt = Date.now();
 
   while (posts.length < size) {
     await Promise.all(
@@ -36,16 +39,18 @@ async function fetchMergedPage(state: BoardCursor[], size: number): Promise<Merg
           board.buffer.push(...page.posts);
           board.cursor = page.nextCursor;
           board.done = !page.nextCursor;
+          board.urlIssuedAt = page.urlIssuedAt;
         }),
     );
     const heads = boards.filter((board) => board.buffer.length > 0);
     if (heads.length === 0) break;
     const newest = heads.reduce((a, b) => (isNewer(b.buffer[0], a.buffer[0]) ? b : a));
+    urlIssuedAt = Math.min(urlIssuedAt, newest.urlIssuedAt ?? 0);
     posts.push(newest.buffer.shift() as Post);
   }
 
   const hasMore = boards.some((board) => board.buffer.length > 0 || !board.done);
-  return { posts, next: hasMore ? boards : undefined };
+  return { posts, urlIssuedAt, next: hasMore ? boards : undefined };
 }
 
 /** 진행 중인 모든 대결 게시판의 글을 최신순으로. `size`는 한 번에 보여 줄 글 수다. */
