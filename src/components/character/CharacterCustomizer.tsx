@@ -1,3 +1,4 @@
+import { trackEvent } from '@/api/analytics';
 import CategoryTabs from '@/components/ui/CategoryTabs';
 import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
@@ -237,6 +238,7 @@ export default function CharacterCustomizer({
       return false;
     }
     void equipCharacter(config);
+    trackEvent('character_save');
     setDraft(undefined);
     showToast('캐릭터를 저장했어요', { type: 'success' });
     return true;

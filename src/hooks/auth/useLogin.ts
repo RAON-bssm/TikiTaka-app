@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { router } from 'expo-router';
 
+import { toAnalyticsMethod, trackEvent } from '@/api/analytics';
 import { login } from '@/api/auth';
 import { setLoginProvider, setSignupToken, setTokens } from '@/api/token';
 import type { LoginData, Provider } from '@/types/auth';
@@ -33,6 +34,7 @@ export function useLogin() {
         throw new Error('로그인 응답에 토큰이 없습니다.');
       }
       await setTokens(data.access_token, data.refresh_token);
+      trackEvent('login', { method: toAnalyticsMethod(provider) });
       router.replace('/(tabs)');
     },
   });

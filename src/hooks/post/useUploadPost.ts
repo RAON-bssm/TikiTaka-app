@@ -1,3 +1,4 @@
+import { trackEvent } from '@/api/analytics';
 import { createPost, getMyPosts } from '@/api/post';
 import { postKeys } from '@/api/queryKeys';
 import { invalidateScoreQueries } from '@/hooks/post/invalidateScoreQueries';
@@ -65,7 +66,8 @@ export function useUploadPost() {
         return { postId: matched.post_id, status: matched.status };
       }
     },
-    onSuccess: ({ postId, status }) => {
+    onSuccess: ({ postId, status }, { boardId }) => {
+      trackEvent('post_create', { board_id: boardId });
       if (status === 'PENDING') trackPendingUpload(postId);
       queryClient.invalidateQueries({ queryKey: postKeys.all });
       // 동기 심사면 등록과 함께 동네·개인 점수와 포인트가 바뀐다. 비동기면 심사가 끝날 때 바뀌어 `useMyPosts`가 갱신한다.

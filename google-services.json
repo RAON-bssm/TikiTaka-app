@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "843525368072",
+    "project_id": "tikitaka-34eea",
+    "storage_bucket": "tikitaka-34eea.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:843525368072:android:ffc11ef5f36151dc9664bd",
+        "android_client_info": {
+          "package_name": "com.tikitaka.raon"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCuVdwng8-2ejVwgUIEVF5mU5j4Z2XXhxk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

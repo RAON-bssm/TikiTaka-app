@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { trackEvent } from '@/api/analytics';
 import { sendChat } from '@/api/chat';
 import { chatKeys } from '@/api/queryKeys';
 import type { ChatMessage } from '@/types/chat';
@@ -15,6 +16,7 @@ export function useSendChat() {
   return useMutation({
     mutationFn: ({ chatbotId, message }: Variables) => sendChat(chatbotId, message),
     onSuccess: (reply, { chatbotId, message }) => {
+      trackEvent('chat_send', { chatbot_id: chatbotId });
       // 다시 받아 오기 전까지 보낸 질문이 사라졌다 나타나지 않게 캐시에 먼저 붙인다.
       // 서버는 질문의 id를 주지 않아 임시 id를 쓰고, 아래 무효화로 서버 값으로 바뀐다.
       queryClient.setQueryData<ChatMessage[]>(chatKeys.history(chatbotId), (prev = []) => [

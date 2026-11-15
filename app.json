@@ -16,7 +16,9 @@
       },
       "infoPlist": {
         "NSCameraUsageDescription": "동네 사진을 촬영하기 위해 카메라 접근 권한이 필요합니다."
-      }
+      },
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "appleTeamId": "64FFS3NVX7"
     },
     "android": {
       "adaptiveIcon": {
@@ -30,7 +32,13 @@
         "android.permission.ACCESS_FINE_LOCATION"
       ],
       "package": "com.tikitaka.raon",
-      "versionCode": 1
+      "versionCode": 1,
+      "googleServicesFile": "./google-services.json",
+      "blockedPermissions": [
+        "com.google.android.gms.permission.AD_ID",
+        "android.permission.ACCESS_ADSERVICES_AD_ID",
+        "android.permission.ACCESS_ADSERVICES_ATTRIBUTION"
+      ]
     },
     "web": {
       "output": "static",
@@ -58,7 +66,12 @@
           ]
         }
       ],
-      ["expo-secure-store", { "faceIDPermission": false }],
+      [
+        "expo-secure-store",
+        {
+          "faceIDPermission": false
+        }
+      ],
       "expo-apple-authentication",
       [
         "expo-location",
@@ -70,9 +83,22 @@
         }
       ],
       "./plugins/withReleaseSigning",
+      "@react-native-firebase/app",
+      [
+        "@react-native-firebase/analytics",
+        {
+          "ios": {
+            "withoutAdIdSupport": true
+          }
+        }
+      ],
       [
         "expo-build-properties",
         {
+          "ios": {
+            "useFrameworks": "dynamic",
+            "buildReactNativeFromSource": true
+          },
           "android": {
             "extraMavenRepos": ["https://devrepo.kakao.com/nexus/content/groups/public/"]
           }

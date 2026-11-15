@@ -1,8 +1,9 @@
 import { useMutation } from '@tanstack/react-query';
 import { router } from 'expo-router';
 
+import { toAnalyticsMethod, trackEvent } from '@/api/analytics';
 import { signup } from '@/api/auth';
-import { clearSignupToken, getSignupToken, setTokens } from '@/api/token';
+import { clearSignupToken, getLoginProvider, getSignupToken, setTokens } from '@/api/token';
 import { startTutorialForNewUser } from '@/api/tutorial';
 
 /**
@@ -26,6 +27,9 @@ export function useSignup() {
     onSuccess: async (data) => {
       await setTokens(data.access_token, data.refresh_token);
       clearSignupToken();
+      // 가입 API는 provider를 받지 않아, 직전 로그인 시도에서 저장한 값을 쓴다.
+      const provider = await getLoginProvider().catch(() => null);
+      trackEvent('sign_up', { method: provider ? toAnalyticsMethod(provider) : 'unknown' });
       // 탭 화면이 열리면서 저장된 단계를 읽으므로 이동보다 먼저 기록한다.
       await startTutorialForNewUser().catch(() => {});
       router.replace('/(tabs)');
