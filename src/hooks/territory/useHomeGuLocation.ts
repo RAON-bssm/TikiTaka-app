@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 
 import { useTerritoryMockSettings } from '@/api/mock/territoryMockStore';
-import { isInTeamArea } from '@/constants/territory/region';
+import { HOME_GU_LOCATION_CHECK_ENABLED, isInTeamArea } from '@/constants/territory/region';
 import type { Location as TeamLocation } from '@/types/location';
 
 const MOCK_POSITION = { latitude: 35.1798, longitude: 129.075 };
@@ -21,9 +21,10 @@ interface Position {
  */
 export function useHomeGuLocation(team: TeamLocation | undefined, active: boolean) {
   const mock = useTerritoryMockSettings();
-  // 개발용 목 모드에서 위치 판정을 건너뛰면 위치 API를 아예 부르지 않는다.
+  const mockSkip = __DEV__ && mock.enabled && mock.skipLocation;
+  // 위치 판정을 건너뛰면 위치 API를 아예 부르지 않는다.
   // 권한 문구가 없는 예전 빌드에서도 권한 조회만으로 앱이 멈추지 않게 하기 위해서다.
-  const skip = __DEV__ && mock.enabled && mock.skipLocation;
+  const skip = !HOME_GU_LOCATION_CHECK_ENABLED || mockSkip;
   const watching = active && !skip;
   const [permission, requestPermission, getPermission] = Location.useForegroundPermissions({
     get: !skip,
@@ -104,7 +105,8 @@ export function useHomeGuLocation(team: TeamLocation | undefined, active: boolea
   if (skip) {
     return {
       status: 'inside' as HomeGuLocationStatus,
-      position: position ?? MOCK_POSITION,
+      // 판정을 꺼 둔 릴리즈에서는 가짜 좌표를 서버에 기록하지 않도록 목 모드에서만 채운다.
+      position: mockSkip ? (position ?? MOCK_POSITION) : undefined,
       canAskAgain: true,
       requestPermission,
     };

@@ -18,6 +18,7 @@ import BattleButton from './battle/BattleButton';
 import BattleTag, { type BattleTone } from './battle/BattleTag';
 import TerritoryStats from './TerritoryStats';
 import { palette } from '@/constants/colors';
+import { HOME_GU_LOCATION_CHECK_ENABLED } from '@/constants/territory/region';
 import { useDevelopTerritory } from '@/hooks/territory/useDevelopTerritory';
 import { useTeamName } from '@/hooks/territory/useTeamName';
 import type { TerritoryPhase } from '@/hooks/territory/useTerritoryPhase';
@@ -268,7 +269,7 @@ function TerritoryContent({
         {action.kind !== 'disabled' && (
           <Typography variant="caption" className="text-center text-gray-400">
             {`도전할 때마다 통행료 ${territory.toll.toLocaleString()} P를 내요`}
-            {myGu ? ` · ${myGu} 안에서 찍은 사진만 인정돼요` : ''}
+            {HOME_GU_LOCATION_CHECK_ENABLED && myGu ? ` · ${myGu} 안에서 찍은 사진만 인정돼요` : ''}
           </Typography>
         )}
         {canDevelop ? (
