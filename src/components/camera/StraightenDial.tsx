@@ -23,6 +23,7 @@ const FADE_COLORS = ['white', 'rgba(255, 255, 255, 0)'] as const;
 interface Props {
   tilt: SharedValue<number>;
   interaction: Interaction;
+  disabled?: boolean;
 }
 
 const Tick = ({ degree }: { degree: number }) => {
@@ -43,7 +44,7 @@ const Tick = ({ degree }: { degree: number }) => {
   );
 };
 
-export default function StraightenDial({ tilt, interaction }: Props) {
+export default function StraightenDial({ tilt, interaction, disabled = false }: Props) {
   const [width, setWidth] = useState(0);
   const [label, setLabel] = useState(0);
 
@@ -55,6 +56,7 @@ export default function StraightenDial({ tilt, interaction }: Props) {
   );
 
   const pan = Gesture.Pan()
+    .enabled(!disabled)
     .onBegin(interaction.begin)
     .onChange((event) => {
       const next = tilt.get() - event.changeX / TICK_GAP;

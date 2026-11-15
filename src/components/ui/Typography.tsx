@@ -1,6 +1,18 @@
 import { Text, TextProps } from 'react-native';
 
-type Variant = 'display' | 'h1' | 'h2' | 'h3' | 'h4' | 'body1' | 'body2' | 'body3' | 'caption';
+type Variant =
+  | 'display'
+  | 'h1'
+  | 'h2'
+  | 'h3'
+  | 'h4'
+  | 'body1'
+  | 'body2'
+  | 'body3'
+  | 'caption'
+  | 'title1'
+  | 'title2'
+  | 'title3';
 
 const variantClass: Record<Variant, string> = {
   display: 'text-3xl font-bold',
@@ -12,6 +24,10 @@ const variantClass: Record<Variant, string> = {
   body2: 'text-md font-sans',
   body3: 'text-sm font-sans',
   caption: 'text-xs font-regular',
+  // 제목 폰트(OkDanDan) 전용. h*는 font-bold를 깔아 className으로 font-title을 얹으면 충돌하므로 따로 둔다.
+  title1: 'text-3xl font-title',
+  title2: 'text-xl font-title',
+  title3: 'text-md font-title',
 };
 
 interface Props extends TextProps {

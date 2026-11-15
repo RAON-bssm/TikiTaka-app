@@ -1,5 +1,5 @@
 import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
-import { type FC, useRef, useState } from 'react';
+import { type FC, type ReactNode, useRef, useState } from 'react';
 import { type LayoutChangeEvent, Modal, Pressable, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { SvgProps } from 'react-native-svg';
@@ -18,6 +18,9 @@ interface Props {
   items: MoreMenuItem[];
   icon?: FC<SvgProps>;
   iconColor?: string;
+  children?: ReactNode;
+  trigger?: 'press' | 'longPress';
+  accessibilityLabel?: string;
 }
 
 const MENU_GAP = 4;
@@ -29,6 +32,9 @@ export default function MoreMenu({
   items,
   icon: Icon = MoreIcon,
   iconColor = palette.gray[500],
+  children,
+  trigger = 'press',
+  accessibilityLabel,
 }: Props) {
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
@@ -95,8 +101,22 @@ export default function MoreMenu({
 
   return (
     <>
-      <Pressable ref={triggerRef} onPress={open} hitSlop={8} className="active:opacity-70">
-        <Icon width={24} height={24} color={iconColor} />
+      <Pressable
+        ref={triggerRef}
+        onPress={trigger === 'press' ? open : undefined}
+        onLongPress={trigger === 'longPress' ? open : undefined}
+        // 스크린 리더의 두 번 탭은 onPress로 가서 길게 누르기 메뉴가 열리지 않으므로 activate 액션으로 연다.
+        accessibilityActions={trigger === 'longPress' ? [{ name: 'activate' }] : undefined}
+        onAccessibilityAction={(event) => {
+          if (trigger === 'longPress' && event.nativeEvent.actionName === 'activate') open();
+        }}
+        hitSlop={8}
+        accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel}
+        accessibilityHint={trigger === 'longPress' ? '길게 눌러 메뉴 열기' : undefined}
+        className="active:opacity-70"
+      >
+        {children ?? <Icon width={24} height={24} color={iconColor} />}
       </Pressable>
 
       {/* statusBarTranslucent가 없으면 Android에서 모달 좌표가 상태바 높이만큼 어긋나 measureInWindow 값과 맞지 않는다. */}

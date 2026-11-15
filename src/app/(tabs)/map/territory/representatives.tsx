@@ -1,7 +1,8 @@
-import { FlatList, View } from 'react-native';
+import { FlatList, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import UserCharacter from '@/components/character/UserCharacter';
+import BattleTag from '@/components/territory/battle/BattleTag';
 import BackButton from '@/components/ui/BackButton';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Skeleton from '@/components/ui/feedback/Skeleton';
@@ -34,9 +35,10 @@ export default function RepresentativesScreen() {
     <View className="gap-2xl pb-lg">
       <BackButton title="동 대표 선발 결과" />
       <View className="gap-sm">
-        <Typography variant="h1" className="text-gray-800">
+        <BattleTag label="선발 결과" />
+        <Text className="font-title text-2xl text-gray-800">
           {guName ? `${guName} 동 대표` : '동 대표'}
-        </Typography>
+        </Text>
         <Typography variant="body3" className="text-gray-400">
           선발전 포인트 순위대로 희망 동을 배정했어요.
         </Typography>
@@ -88,14 +90,18 @@ function RepresentativeCard({ representative }: { representative: Representative
   const { mine } = representative;
   return (
     <View
-      className={`flex-1 items-center gap-sm rounded-md border px-md pb-lg pt-md ${
-        mine ? 'border-primary-300 bg-primary-100' : 'border-gray-200 bg-white'
+      className={`flex-1 items-center gap-sm rounded-md px-md pb-lg pt-md ${
+        mine ? 'border-2 border-primary-600 bg-primary-100' : 'border border-gray-200 bg-white'
       }`}
     >
       <View className="w-full flex-row items-center justify-between">
-        <Typography variant="caption" className="text-gray-400">
+        <Text
+          className={`font-title text-lg ${
+            representative.rank <= 3 ? 'text-primary-600' : 'text-gray-400'
+          }`}
+        >
           {`#${representative.rank}`}
-        </Typography>
+        </Text>
         <View className={`rounded-full px-sm py-xs ${mine ? 'bg-white' : 'bg-gray-100'}`}>
           <Typography variant="caption" className={mine ? 'text-primary-600' : 'text-gray-500'}>
             {ASSIGNED_LABEL[representative.assigned_by]}

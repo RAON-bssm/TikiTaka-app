@@ -37,7 +37,7 @@ function locationMessage(status: HomeGuLocationStatus, gu: string): string | und
 
 /**
  * 땅따먹기 사진은 모두 본진 구 안에서 찍어야 해서, 도전·땅 세팅·방어 사진 재촬영이 이 카메라를 같이 쓴다.
- * `purpose`에 따라 다음 화면만 달라진다.
+ * 찍은 사진은 편집 화면(`challenge-edit`)을 거치고, `purpose`에 따라 그다음 확인 화면만 달라진다.
  */
 type Params = {
   dongCode: string;
@@ -93,30 +93,20 @@ export default function ChallengeCameraScreen() {
     else void Linking.openSettings();
   };
 
-  const goToConfirm = (uri: string, latitude: number, longitude: number) => {
-    if (purpose === 'challenge') {
-      router.push({
-        pathname: '/map/challenge-confirm',
-        params: {
-          dongCode: String(dongCode),
-          uri,
-          lat: String(latitude),
-          lng: String(longitude),
-        },
-      });
-    } else {
-      router.push({
-        pathname: '/map/territory/defense-confirm',
-        params: {
-          dongCode: String(dongCode),
-          purpose,
-          uri,
-          ...(params.adjective && { adjective: params.adjective }),
-          ...(params.noun && { noun: params.noun }),
-          ...(params.criteria && { criteria: params.criteria }),
-        },
-      });
-    }
+  const goToEdit = (uri: string, latitude: number, longitude: number) => {
+    router.push({
+      pathname: '/map/challenge-edit',
+      params: {
+        dongCode: String(dongCode),
+        purpose,
+        uri,
+        lat: String(latitude),
+        lng: String(longitude),
+        ...(params.adjective && { adjective: params.adjective }),
+        ...(params.noun && { noun: params.noun }),
+        ...(params.criteria && { criteria: params.criteria }),
+      },
+    });
   };
 
   const holdPosition = () => {
@@ -131,7 +121,7 @@ export default function ChallengeCameraScreen() {
   const handleCaptured = (uri: string) => {
     if (!shotPosition.current) return;
     const { latitude, longitude } = shotPosition.current;
-    goToConfirm(uri, latitude, longitude);
+    goToEdit(uri, latitude, longitude);
   };
 
   const takeSamplePhoto = async (load: () => Promise<string>) => {

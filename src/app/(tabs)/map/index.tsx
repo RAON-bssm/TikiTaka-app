@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import WebView from 'react-native-webview';
 
 import { getApiErrorMessage } from '@/api/error';
+import { useRequireCamera } from '@/components/camera/CameraPermissionGate';
 import ChatPanel from '@/components/chat/ChatPanel';
 import MapLoading from '@/components/map/MapLoading';
 import InsufficientPointDialog from '@/components/territory/InsufficientPointDialog';
@@ -72,6 +73,7 @@ export default function MapScreen() {
     : null;
 
   const { showToast } = useToast();
+  const requireCamera = useRequireCamera();
   const chatbots = useChatbots();
   const { mutateAsync: sendChat } = useSendChat();
   const isFocused = useIsFocused();
@@ -308,10 +310,12 @@ export default function MapScreen() {
           ownedCount={myTerritories.data?.territories.length ?? 0}
           maxOwned={myTerritories.data?.max_owned}
           onChallenge={(territory) =>
-            router.push({
-              pathname: '/map/challenge-camera',
-              params: { dongCode: String(territory.dong_code) },
-            })
+            requireCamera(() =>
+              router.push({
+                pathname: '/map/challenge-camera',
+                params: { dongCode: String(territory.dong_code) },
+              }),
+            )
           }
           onInsufficientPoint={setPointShortage}
           onClose={closeSheet}

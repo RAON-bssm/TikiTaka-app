@@ -131,12 +131,20 @@ interface FlatProps {
   refreshControl: ReactElement<RefreshControlProps>;
 }
 
-const Footer = ({ loading }: { loading: boolean }) =>
-  loading ? (
-    <View className="w-full items-center py-lg">
-      <ActivityIndicator color={palette.primary[600]} />
-    </View>
-  ) : null;
+// 다음 페이지 요청이 실패하면 끝에 다시 닿아도 onEndReached가 다시 오지 않아, 직접 다시 받게 한다.
+const Footer = ({ state }: { state: CurrentBoardFeedState }) => {
+  if (state.isFetchingNextPage) {
+    return (
+      <View className="w-full items-center py-lg">
+        <ActivityIndicator color={palette.primary[600]} />
+      </View>
+    );
+  }
+  if (state.isFetchNextPageError) {
+    return <ErrorRetry message="다음 게시글을 불러오지 못했어요." onRetry={state.fetchNextPage} />;
+  }
+  return null;
+};
 
 /**
  * 피드 화면 전체 목록. 카드마다 캐릭터·이미지 URL을 따로 요청하므로, 게시물이 많아도
@@ -156,7 +164,7 @@ export function PostFlatList({ state, header, refreshControl }: FlatProps) {
         ListHeaderComponent={header}
         ListHeaderComponentClassName="pb-2xl"
         ListEmptyComponent={<PostListStatus state={state} />}
-        ListFooterComponent={<Footer loading={state.isFetchingNextPage} />}
+        ListFooterComponent={<Footer state={state} />}
         onEndReached={state.fetchNextPage}
         onEndReachedThreshold={0.5}
         contentContainerClassName="px-xl pb-lg pt-lg"

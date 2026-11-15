@@ -15,6 +15,9 @@ export const postKeys = {
   list: (boardId: number, size?: number) => [...postKeys.lists(), boardId, size] as const,
   /** 피드 무한 스크롤. 페이지(cursor)별이 아니라 보드당 하나의 쿼리로 묶는다(useInfiniteQuery). */
   feed: (boardId: number) => [...postKeys.lists(), boardId, 'feed'] as const,
+  /** 진행 중인 모든 게시판을 합친 전체 글. 라운드가 바뀌면 게시판이 바뀌므로 게시판 id를 키에 넣는다. */
+  everyBoard: (boardIds: number[], size: number) =>
+    [...postKeys.lists(), 'everyBoard', boardIds, size] as const,
   /** `lists()` 아래에 둬야 게시물 삭제 때 목록과 함께 무효화된다. */
   mine: () => [...postKeys.lists(), 'mine'] as const,
   detail: (postId: string) => [...postKeys.all, 'detail', postId] as const,

@@ -1,4 +1,5 @@
-import { View } from 'react-native';
+import { router } from 'expo-router';
+import { Pressable, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 
 import MatchCard from '@/components/ui/MatchCard';
@@ -24,7 +25,20 @@ export default function BattleSection({ battles }: { battles: CurrentBattle[] })
           contentContainerClassName="gap-md"
         >
           {battles.map((battle) => (
-            <MatchCard key={battle.boardId} {...battle} />
+            <Pressable
+              key={battle.boardId}
+              onPress={() =>
+                router.push({
+                  pathname: '/ranking/battle/[boardId]',
+                  params: { boardId: String(battle.boardId) },
+                })
+              }
+              accessibilityRole="button"
+              accessibilityLabel={`${battle.team1.name} 대 ${battle.team2.name} 대결 게시물 보기`}
+              className="active:opacity-80"
+            >
+              <MatchCard {...battle} />
+            </Pressable>
           ))}
         </ScrollView>
       )}

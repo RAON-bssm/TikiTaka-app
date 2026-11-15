@@ -103,6 +103,7 @@ export default function usePhotoEditor({
   area,
   ratio,
   interaction,
+  disabled = false,
 }: {
   uri: string | undefined;
   canvas: Size | undefined;
@@ -110,6 +111,8 @@ export default function usePhotoEditor({
   /** null이면 자유 비율. */
   ratio: number | null;
   interaction: Interaction;
+  /** 내보내는 동안 편집 상태가 바뀌지 않게 제스처를 막는다. */
+  disabled?: boolean;
 }) {
   const [imageSize, setImageSize] = useState<Size & { uri: string }>();
   const [failedUri, setFailedUri] = useState<string>();
@@ -353,6 +356,7 @@ export default function usePhotoEditor({
   // 모서리용 제스처를 따로 겹쳐 두면 바깥 사진 이동 제스처가 터치를 먼저 가져가 모서리가 움직이지 않았다.
   // 그래서 제스처는 하나로 두고, 터치가 모서리 근처에서 시작됐는지로 크기 조절과 사진 이동을 나눈다.
   const pan = Gesture.Pan()
+    .enabled(!disabled)
     .averageTouches(true)
     .onBegin((event) => {
       interaction.begin();
@@ -385,6 +389,7 @@ export default function usePhotoEditor({
     });
 
   const pinch = Gesture.Pinch()
+    .enabled(!disabled)
     .onBegin(interaction.begin)
     .onFinalize(interaction.end)
     .onChange((event) => {
@@ -448,6 +453,8 @@ export default function usePhotoEditor({
     const sin = Math.sin(radians);
     const cover = coverScale(frameSize, image, radians);
     const scale = cover * zoom.get();
+    // 렌더를 기다리는 동안 값이 바뀌어도 위 프레임·배율과 어긋나지 않게 await 전에 함께 읽어 둔다.
+    const offset = { x: offsetX.get(), y: offsetY.get() };
 
     const context = ImageManipulator.manipulate(uri);
     if (degrees !== 0) context.rotate(degrees);
@@ -457,8 +464,8 @@ export default function usePhotoEditor({
 
     const cropWidth = Math.min(canvas.width, Math.round(frameSize.width / scale));
     const cropHeight = Math.min(canvas.height, Math.round(frameSize.height / scale));
-    const centerX = canvas.width / 2 + cos * offsetX.get() - sin * offsetY.get();
-    const centerY = canvas.height / 2 + sin * offsetX.get() + cos * offsetY.get();
+    const centerX = canvas.width / 2 + cos * offset.x - sin * offset.y;
+    const centerY = canvas.height / 2 + sin * offset.x + cos * offset.y;
     context.crop({
       originX: clamp(Math.round(centerX - cropWidth / 2), 0, canvas.width - cropWidth),
       originY: clamp(Math.round(centerY - cropHeight / 2), 0, canvas.height - cropHeight),

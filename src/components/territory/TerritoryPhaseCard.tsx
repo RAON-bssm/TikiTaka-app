@@ -142,7 +142,7 @@ export default function TerritoryPhaseCard({ onPress, ...rest }: Props) {
         <Typography variant="caption" className="text-primary-100" numberOfLines={1}>
           {copy.description ? `${copy.label} · ${copy.description}` : copy.label}
         </Typography>
-        <Typography variant="h2" className="text-white" numberOfLines={1}>
+        <Typography variant="title2" className="text-white" numberOfLines={1}>
           {copy.title}
         </Typography>
       </View>

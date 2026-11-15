@@ -1,19 +1,21 @@
 import { useRef, useState } from 'react';
-import { Pressable, View, type LayoutChangeEvent } from 'react-native';
+import { View, type LayoutChangeEvent } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Animated, { Easing, SlideInDown, SlideOutDown } from 'react-native-reanimated';
 
 import ArrowForwardIcon from '@/assets/icons/arrow-forward-ios.svg';
-import CloseIcon from '@/assets/icons/close.svg';
 import { getApiErrorMessage } from '@/api/error';
 import BlockUserDialog from '@/components/block/BlockUserDialog';
 import UserCharacter from '@/components/character/UserCharacter';
 import ReportDialog, { type ReportTarget } from '@/components/report/ReportDialog';
-import Button from '@/components/ui/Button';
 import ConfirmDialog from '@/components/ui/feedback/ConfirmDialog';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Skeleton from '@/components/ui/feedback/Skeleton';
 import MoreMenu from '@/components/ui/MoreMenu';
 import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
+import BattleButton from './battle/BattleButton';
+import BattleTag, { type BattleTone } from './battle/BattleTag';
 import TerritoryStats from './TerritoryStats';
 import { palette } from '@/constants/colors';
 import { useDevelopTerritory } from '@/hooks/territory/useDevelopTerritory';
@@ -21,6 +23,11 @@ import { useTeamName } from '@/hooks/territory/useTeamName';
 import type { TerritoryPhase } from '@/hooks/territory/useTerritoryPhase';
 import { useTerritory } from '@/hooks/territory/useTerritory';
 import type { TerritoryDetail } from '@/types/territory';
+
+const CLOSE_DISTANCE = 30;
+const CLOSE_VELOCITY = 500;
+const ENTER_MS = 260;
+const EXIT_MS = 200;
 
 interface Props {
   dongCode: number;
@@ -41,8 +48,8 @@ interface Props {
 
 /**
  * 지도를 가리지 않도록 Modal이 아니라 지도 위에 띄운다(ChatPanel과 같은 방식).
- * 닫기 버튼·같은 동 다시 탭·뒤로가기·탭 이동으로 닫히고, 닫는 처리는 지도 화면이 맡는다.
- * 지도 전체가 동으로 덮여 빈 지도 탭이 오지 않고 iOS엔 하드웨어 뒤로가기도 없어, 닫기 버튼이 꼭 필요하다.
+ * 손잡이 밀기·누르기·같은 동 다시 탭·뒤로가기·탭 이동으로 닫히고, 닫는 처리는 지도 화면이 맡는다.
+ * 지도 전체가 동으로 덮여 빈 지도 탭이 오지 않고 iOS엔 하드웨어 뒤로가기도 없어, 손잡이로 닫는 길이 꼭 필요하다.
  */
 export default function TerritorySheet({
   dongCode,
@@ -61,6 +68,16 @@ export default function TerritorySheet({
   const reported = useRef<'loaded' | 'error'>(undefined);
   const content = territory ? 'loaded' : isError ? 'error' : undefined;
 
+  const closeGesture = Gesture.Race(
+    Gesture.Pan()
+      .activeOffsetY(10)
+      .onEnd((event) => {
+        if (event.translationY > CLOSE_DISTANCE || event.velocityY > CLOSE_VELOCITY) onClose();
+      })
+      .runOnJS(true),
+    Gesture.Tap().onEnd(onClose).runOnJS(true),
+  );
+
   // 불러오지 못해도 높이를 알려야 지도가 그 동을 강조하고 시트 위로 옮긴다.
   // 내용이 바뀌어도 높이가 같으면 onLayout이 다시 오지 않으므로, 아래 View를 내용별 key로 새로 마운트해 항상 한 번 더 받는다.
   const handleLayout = (event: LayoutChangeEvent) => {
@@ -70,41 +87,53 @@ export default function TerritorySheet({
   };
 
   return (
-    <View
-      key={content ?? 'loading'}
-      onLayout={handleLayout}
-      className="absolute bottom-0 left-0 right-0 gap-2xl rounded-t-lg border border-gray-100 bg-white px-xl pb-xl pt-md"
+    // 안쪽 View는 내용이 바뀔 때마다 다시 마운트되므로, 등장·퇴장 모션은 바깥에만 걸어 한 번만 돌게 한다.
+    <Animated.View
+      entering={SlideInDown.duration(ENTER_MS).easing(Easing.out(Easing.cubic))}
+      exiting={SlideOutDown.duration(EXIT_MS).easing(Easing.in(Easing.cubic))}
+      className="absolute bottom-0 left-0 right-0 rounded-t-lg border border-gray-100 bg-white"
     >
-      <View className="items-center justify-center">
-        <View className="h-[4px] w-[40px] rounded-full bg-gray-400" />
-        <Pressable
-          onPress={onClose}
-          hitSlop={12}
-          accessibilityRole="button"
-          accessibilityLabel="땅 정보 닫기"
-          className="absolute right-0"
-        >
-          <CloseIcon width={24} height={24} />
-        </Pressable>
+      <View
+        key={content ?? 'loading'}
+        onLayout={handleLayout}
+        className="gap-2xl px-xl pb-xl pt-md"
+      >
+        <GestureDetector gesture={closeGesture}>
+          <View
+            accessible
+            accessibilityRole="button"
+            accessibilityLabel="땅 정보 닫기"
+            accessibilityHint="아래로 밀거나 눌러서 닫아요"
+            // onAccessibilityTap은 iOS 전용이라, TalkBack 두 번 탭은 activate 액션으로 받는다.
+            accessibilityActions={[{ name: 'activate' }]}
+            onAccessibilityAction={(event) => {
+              if (event.nativeEvent.actionName === 'activate') onClose();
+            }}
+            onAccessibilityTap={onClose}
+            className="w-full items-center justify-center py-sm"
+          >
+            <View className="h-[4px] w-[40px] rounded-full bg-gray-400" />
+          </View>
+        </GestureDetector>
+        {isLoading ? (
+          <SheetSkeleton />
+        ) : isError || !territory ? (
+          <ErrorRetry message="땅 정보를 불러오지 못했어요." onRetry={() => void refetch()} />
+        ) : (
+          <TerritoryContent
+            territory={territory}
+            phase={phase}
+            myPoint={myPoint}
+            myGu={myGu}
+            myLocationId={myLocationId}
+            ownedCount={ownedCount}
+            maxOwned={maxOwned}
+            onChallenge={onChallenge}
+            onInsufficientPoint={onInsufficientPoint}
+          />
+        )}
       </View>
-      {isLoading ? (
-        <SheetSkeleton />
-      ) : isError || !territory ? (
-        <ErrorRetry message="땅 정보를 불러오지 못했어요." onRetry={() => void refetch()} />
-      ) : (
-        <TerritoryContent
-          territory={territory}
-          phase={phase}
-          myPoint={myPoint}
-          myGu={myGu}
-          myLocationId={myLocationId}
-          ownedCount={ownedCount}
-          maxOwned={maxOwned}
-          onChallenge={onChallenge}
-          onInsufficientPoint={onInsufficientPoint}
-        />
-      )}
-    </View>
+    </Animated.View>
   );
 }
 
@@ -163,6 +192,14 @@ function TerritoryContent({
     });
   };
 
+  const tag: { label: string; tone: BattleTone } = territory.mine
+    ? { label: '내 땅', tone: 'me' }
+    : !hasOwner
+      ? { label: '빈 땅', tone: 'neutral' }
+      : myLocationId !== undefined && territory.owner_location_id === myLocationId
+        ? { label: '우리 팀 땅', tone: 'me' }
+        : { label: '상대 땅', tone: 'rival' };
+
   const ownerId = territory.owner_id;
   const ownerName = territory.owner_name;
   const canReport = !!ownerId && !!ownerName && !territory.mine && !territory.blocked;
@@ -171,16 +208,17 @@ function TerritoryContent({
     <>
       <View className="flex-row items-start gap-2xl">
         <View className="flex-1 gap-sm">
+          <BattleTag label={tag.label} tone={tag.tone} />
           <Typography variant="h1" className="text-gray-800">
             {[guName, territory.dong_name].filter(Boolean).join(' ')}
           </Typography>
           <OwnerLine territory={territory} ownerTeam={ownerTeam} />
         </View>
-        {hasOwner && !territory.blocked && territory.owner_id && (
-          <UserCharacter userId={territory.owner_id} size={56} />
-        )}
-        {canReport && (
+        {canReport ? (
+          // 신고·차단은 앱 심사상 꼭 있어야 해서, 따로 버튼을 두지 않고 주인 캐릭터를 길게 눌러 연다.
           <MoreMenu
+            trigger="longPress"
+            accessibilityLabel={`${ownerName} 신고·차단 메뉴`}
             items={[
               {
                 label: '신고하기',
@@ -193,7 +231,13 @@ function TerritoryContent({
                 onPress: () => setBlockTarget({ userId: ownerId, userName: ownerName }),
               },
             ]}
-          />
+          >
+            <UserCharacter userId={ownerId} size={56} />
+          </MoreMenu>
+        ) : (
+          hasOwner &&
+          !territory.blocked &&
+          territory.owner_id && <UserCharacter userId={territory.owner_id} size={56} />
         )}
       </View>
 
@@ -232,7 +276,7 @@ function TerritoryContent({
             <Typography variant="caption" className="text-center text-gray-400">
               {`개발비 ${territory.development_cost.toLocaleString()} P · 성공 확률 ${developProbability}% · 실패해도 개발비는 돌려받지 못해요`}
             </Typography>
-            <Button
+            <BattleButton
               content={
                 isDeveloping
                   ? '개발하는 중...'
@@ -245,7 +289,7 @@ function TerritoryContent({
             />
           </>
         ) : (
-          <Button
+          <BattleButton
             content={action.label}
             disabled={action.kind === 'disabled'}
             onclick={() => {
@@ -331,15 +375,16 @@ function getAction({
     return { kind: 'disabled', label: `땅은 최대 ${maxOwned}개까지 가질 수 있어요` };
   }
   if (myPoint !== undefined && myPoint < territory.toll) {
-    return { kind: 'insufficient', label: '도전하기' };
+    return { kind: 'insufficient', label: '콕! 도전하기' };
   }
-  return { kind: 'challenge', label: '도전하기' };
+  return { kind: 'challenge', label: '콕! 도전하기' };
 }
 
 function SheetSkeleton() {
   return (
     <View className="gap-2xl">
       <View className="gap-sm">
+        <Skeleton className="h-[24px] w-[64px] rounded-sm" />
         <Skeleton className="h-[28px] w-[160px] rounded-xs" />
         <Skeleton className="h-[17px] w-[120px] rounded-xs" />
       </View>

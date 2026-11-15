@@ -6,6 +6,12 @@ import { isAxiosError } from 'axios';
 /** 개별 훅에서 덮어쓴다. (`useViewUrl` 9분, `useUserCharacter` 10분, `useCharacterConfig` Infinity) */
 const DEFAULT_STALE_TIME = 60 * 1000;
 
+/**
+ * 기기에 저장한 캐시를 이 기간까지 복원한다(`queryPersister`). 메모리에서 이보다 먼저 지우면(기본 5분)
+ * 그 쿼리는 다음 저장 때 빠져, 잠깐 다른 화면에 있던 사이 저장본에서 사라진다.
+ */
+export const QUERY_CACHE_MAX_AGE = 24 * 60 * 60 * 1000;
+
 /** 첫 요청 제외. */
 const QUERY_RETRY_COUNT = 1;
 
@@ -29,6 +35,7 @@ export const queryClient = new QueryClient({
     queries: {
       retry: retryQuery,
       staleTime: DEFAULT_STALE_TIME,
+      gcTime: QUERY_CACHE_MAX_AGE,
     },
     mutations: {
       // 자동 재시도하면 게시물이 두 번 올라가거나 포인트가 두 번 차감된다.

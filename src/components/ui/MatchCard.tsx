@@ -8,12 +8,19 @@ import Typography from './Typography';
 const COLOR_TEAM1 = palette.secondary[500];
 const COLOR_TEAM2 = palette.primary[600];
 
-export default function MatchCard({ team1, team2, isBye }: CurrentBattle) {
+interface Props extends CurrentBattle {
+  /** 가로 스크롤 목록이 아니라 화면 폭을 다 쓸 때. */
+  fullWidth?: boolean;
+}
+
+export default function MatchCard({ team1, team2, isBye, fullWidth = false }: Props) {
   const leader = team1.score > team2.score ? team1 : team2.score > team1.score ? team2 : undefined;
   const leaderIsTeam1 = leader === team1;
 
   return (
-    <View className="w-[250px] items-center gap-lg rounded-md border border-gray-100 bg-white px-lg py-md">
+    <View
+      className={`${fullWidth ? 'w-full' : 'w-[250px]'} items-center gap-lg rounded-md border border-gray-100 bg-white px-lg py-md`}
+    >
       {isBye ? (
         <View className="rounded-full bg-gray-100 px-md py-xs">
           <Typography variant="body3" className="text-xs text-gray-700">

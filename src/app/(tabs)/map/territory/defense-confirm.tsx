@@ -4,8 +4,10 @@ import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { getApiErrorMessage } from '@/api/error';
-import CapturedPhoto from '@/components/camera/CapturedPhoto';
 import Topic from '@/components/camera/Topic';
+import BattleButton from '@/components/territory/battle/BattleButton';
+import BattlePhotoCard from '@/components/territory/battle/BattlePhotoCard';
+import BattleTag from '@/components/territory/battle/BattleTag';
 import BackButton from '@/components/ui/BackButton';
 import Button from '@/components/ui/Button';
 import { useToast } from '@/components/ui/Toast';
@@ -49,8 +51,8 @@ export default function DefenseConfirmScreen() {
   const handleSuccess = (result: DefensePhotoResult) => {
     // 세팅은 허브나 내 땅 화면 어디서든 시작해 스택에 manage가 없을 수 있다. dismissTo는 그때 되돌아가지 않고
     // 현재 화면만 바꿔 세팅 카메라가 스택에 남으므로, 이 흐름이 쌓은 화면 수만큼 닫고 시작한 화면으로 돌아간다.
-    // 세팅: 미션 입력 → 카메라 → 확인(3), 재촬영: 카메라 → 확인(2. 미션 바꾸기는 미션 입력을 카메라로 replace한다).
-    router.dismiss(isSetup ? 3 : 2);
+    // 세팅: 미션 입력 → 카메라 → 편집 → 확인(4), 재촬영: 카메라 → 편집 → 확인(3. 미션 바꾸기는 미션 입력을 카메라로 replace한다).
+    router.dismiss(isSetup ? 4 : 3);
     router.push({
       pathname: '/map/territory/defense-result',
       params: {
@@ -101,9 +103,12 @@ export default function DefenseConfirmScreen() {
           title={territory?.dong_name ?? (isSetup ? '땅 세팅' : '방어 사진')}
           disabled={isPending}
         />
-        <Topic title={mission} />
+        <View className="gap-md">
+          <BattleTag label={isSetup ? '내 땅 세팅' : '방어 사진 교체'} />
+          <Topic title={mission} />
+        </View>
 
-        <CapturedPhoto uri={params.uri} />
+        <BattlePhotoCard uri={params.uri} name="내 방어 사진" tone="me" tilt="left" width="60%" />
 
         <View className="gap-xs">
           <Typography variant="caption" className="text-center text-gray-400">
@@ -111,13 +116,14 @@ export default function DefenseConfirmScreen() {
               ? 'AI가 채점한 점수가 이 땅의 방어 점수가 돼요'
               : '점수가 지금보다 낮아도 방어 점수가 그대로 바뀌어요'}
           </Typography>
-          <Button
-            content={isPending ? 'AI가 사진을 채점하고 있어요...' : '이 사진으로 정하기'}
+          <BattleButton
+            content={isPending ? 'AI가 채점하고 있어요...' : '이 사진으로 지키기'}
             disabled={isSetup && !mission}
             onclick={handleSubmit}
           />
           {!isPending && (
-            <Button content="다시 찍기" variant="light" onclick={() => router.back()} />
+            // 바로 뒤는 편집 화면이라, 편집까지 닫아 카메라로 돌아간다.
+            <Button content="다시 찍기" variant="light" onclick={() => router.dismiss(2)} />
           )}
         </View>
       </ScrollView>
