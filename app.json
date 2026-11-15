@@ -17,7 +17,8 @@
       "infoPlist": {
         "NSCameraUsageDescription": "동네 사진을 촬영하기 위해 카메라 접근 권한이 필요합니다."
       },
-      "googleServicesFile": "./GoogleService-Info.plist"
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "appleTeamId": "64FFS3NVX7"
     },
     "android": {
       "adaptiveIcon": {
@@ -65,7 +66,12 @@
           ]
         }
       ],
-      ["expo-secure-store", { "faceIDPermission": false }],
+      [
+        "expo-secure-store",
+        {
+          "faceIDPermission": false
+        }
+      ],
       "expo-apple-authentication",
       [
         "expo-location",
