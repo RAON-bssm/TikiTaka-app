@@ -11,7 +11,8 @@ import usePhotoEditor, {
   type Size,
   useInteraction,
 } from '@/hooks/camera/usePhotoEditor';
-import { useRef, useState } from 'react';
+import { useIsFocused } from 'expo-router';
+import { useEffect, useRef, useState } from 'react';
 import { type LayoutChangeEvent, Pressable, View, type ViewStyle } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
 import Animated, { interpolate, useAnimatedStyle } from 'react-native-reanimated';
@@ -89,6 +90,15 @@ export default function PhotoEditor({ uri, onDone }: PhotoEditorProps) {
   const [isExporting, setIsExporting] = useState(false);
   // state는 다음 렌더에야 반영돼, 빠르게 두 번 누르면 다음 화면이 두 번 쌓인다.
   const exportingRef = useRef(false);
+  // 내보내는 사이 뒤로 가 편집 화면을 떠났으면, 끝난 뒤에 다음 화면을 띄우지 않는다.
+  const isFocused = useIsFocused();
+  const activeRef = useRef(isFocused);
+  useEffect(() => {
+    activeRef.current = isFocused;
+    return () => {
+      activeRef.current = false;
+    };
+  }, [isFocused]);
 
   const bounds = area && {
     width: area.width - FRAME_MARGIN * 2,
@@ -102,6 +112,7 @@ export default function PhotoEditor({ uri, onDone }: PhotoEditorProps) {
     area: bounds,
     ratio: ratio.value,
     interaction,
+    disabled: isExporting,
   });
 
   const areaWidth = area?.width ?? 0;
@@ -156,7 +167,7 @@ export default function PhotoEditor({ uri, onDone }: PhotoEditorProps) {
     setIsExporting(true);
     try {
       const editedUri = await editor.exportPhoto();
-      if (editedUri) onDone(editedUri);
+      if (editedUri && activeRef.current) onDone(editedUri);
     } catch {
       showToast('사진을 편집하지 못했어요. 다시 시도해주세요.');
     } finally {
@@ -173,8 +184,10 @@ export default function PhotoEditor({ uri, onDone }: PhotoEditorProps) {
           <BackButton title="사진 편집" />
           <Pressable
             onPress={editor.reset}
-            disabled={!editor.isEdited}
+            disabled={!editor.isEdited || isExporting}
             hitSlop={8}
+            accessibilityRole="button"
+            accessibilityState={{ disabled: !editor.isEdited || isExporting }}
             className="active:opacity-60"
           >
             <Typography
@@ -259,6 +272,9 @@ export default function PhotoEditor({ uri, onDone }: PhotoEditorProps) {
                   <Pressable
                     key={option.label}
                     onPress={() => setRatio(option)}
+                    disabled={isExporting}
+                    accessibilityRole="radio"
+                    accessibilityState={{ checked: active, disabled: isExporting }}
                     className={`flex-1 flex-row items-center justify-center gap-sm rounded-full border py-sm ${
                       active ? 'border-primary-600 bg-primary-600' : 'border-gray-200 bg-gray-50'
                     }`}
@@ -276,7 +292,9 @@ export default function PhotoEditor({ uri, onDone }: PhotoEditorProps) {
               })}
               <Pressable
                 onPress={editor.rotate90}
+                disabled={isExporting}
                 hitSlop={4}
+                accessibilityRole="button"
                 accessibilityLabel="90도 회전"
                 className="h-[36px] w-[36px] items-center justify-center rounded-full bg-primary-100 active:opacity-60"
               >
@@ -285,7 +303,7 @@ export default function PhotoEditor({ uri, onDone }: PhotoEditorProps) {
             </View>
           </View>
 
-          <StraightenDial tilt={editor.tilt} interaction={interaction} />
+          <StraightenDial tilt={editor.tilt} interaction={interaction} disabled={isExporting} />
         </View>
 
         <Button

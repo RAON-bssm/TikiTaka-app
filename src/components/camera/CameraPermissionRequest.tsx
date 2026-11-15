@@ -26,7 +26,12 @@ export default function CameraPermissionRequest({
   // 탭 화면은 떠난 뒤에도 마운트돼 있어, 다른 화면에 있을 때 권한이 바뀌어도 팝업이 그 위에 뜨지 않게 한다.
   const isFocused = useIsFocused();
   // OS 팝업으로 물을 화면이면, 거절 직후 상태가 'denied'로 바뀌어도 설정 안내를 겹쳐 띄우지 않고 바로 떠난다.
-  const [willAsk] = useState(canRequestPermission);
+  // 탭 화면은 떠나도 마운트돼 있으므로, 화면에 다시 들어올 때마다 그때 상태로 다시 정한다.
+  const [session, setSession] = useState({ isFocused, willAsk: canRequestPermission });
+  if (session.isFocused !== isFocused) {
+    setSession({ isFocused, willAsk: canRequestPermission });
+  }
+  const { willAsk } = session;
   const askedRef = useRef(false);
 
   // App Store 심사(5.1.1)상 OS 팝업 앞에 취소할 수 있는 자체 안내를 두면 리젝되므로, 물을 수 있으면 바로 OS 팝업을 띄운다.
