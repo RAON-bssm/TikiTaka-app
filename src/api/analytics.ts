@@ -1,4 +1,4 @@
-import { getAnalytics, logEvent, setUserId } from '@react-native-firebase/analytics';
+import { getAnalytics, setUserId } from '@react-native-firebase/analytics';
 
 import type { Provider } from '@/types/auth';
 
@@ -27,17 +27,14 @@ type EventArgs<K extends EventName> = AnalyticsEvents[K] extends undefined
   ? []
   : [params: AnalyticsEvents[K]];
 
-// 권장 이벤트마다 오버로드가 따로 있어, 이름을 유니온으로 받는 래퍼에서는 하나로 맞춘다.
-const log = logEvent as (
-  analytics: ReturnType<typeof getAnalytics>,
-  name: string,
-  params?: Record<string, string | number>,
-) => Promise<void> | void;
-
-/** 분석 전송이 실패해도 사용자 동작에는 영향을 주지 않도록 에러를 삼킨다. */
+/**
+ * 분석 전송이 실패해도 사용자 동작에는 영향을 주지 않도록 에러를 삼킨다.
+ * 모듈러 `logEvent`는 내부 Promise를 `void`로 버려 네이티브 거부가 unhandled rejection이 되므로,
+ * Promise를 돌려주는 인스턴스 메서드를 직접 호출한다.
+ */
 export function trackEvent<K extends EventName>(name: K, ...[params]: EventArgs<K>): void {
   Promise.resolve()
-    .then(() => log(getAnalytics(), name, params))
+    .then(() => getAnalytics().logEvent(name, params))
     .catch(() => {});
 }
 
