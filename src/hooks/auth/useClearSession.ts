@@ -1,6 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 
+import { setAnalyticsUserId } from '@/api/analytics';
 import { clearSavedCharacter } from '@/api/character';
 import { clearPersistedQueryCache } from '@/api/queryPersister';
 import { clearProviderSession } from '@/api/social';
@@ -25,6 +26,7 @@ export function useClearSession() {
       await clearSavedCharacter();
     } finally {
       clearSignupToken();
+      setAnalyticsUserId(null);
       queryClient.clear();
       // 저장소 오류로 실패해도 메모리 캐시는 이미 비웠고, 여기서 멈추면 로그인 화면으로 가지 못한다.
       await clearPersistedQueryCache().catch(() => {});

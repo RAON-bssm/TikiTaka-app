@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { trackEvent } from '@/api/analytics';
 import { drawGashapon } from '@/api/product';
 import { inventoryKeys, productKeys, userKeys } from '@/api/queryKeys';
 import type { DrawGashaponRequest } from '@/types/product';
@@ -10,7 +11,8 @@ export function useDrawGashapon() {
 
   return useMutation({
     mutationFn: (req: DrawGashaponRequest) => drawGashapon(req),
-    onSuccess: () => {
+    onSuccess: (_data, { product_id }) => {
+      trackEvent('gashapon_draw', { item_id: product_id });
       queryClient.invalidateQueries({ queryKey: productKeys.all });
       queryClient.invalidateQueries({ queryKey: inventoryKeys.all });
       queryClient.invalidateQueries({ queryKey: userKeys.all });

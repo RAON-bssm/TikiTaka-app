@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { trackEvent } from '@/api/analytics';
 import { purchaseProduct } from '@/api/product';
 import { inventoryKeys, productKeys, userKeys } from '@/api/queryKeys';
 import type { PurchaseProductRequest } from '@/types/product';
@@ -10,7 +11,8 @@ export function usePurchaseProduct() {
 
   return useMutation({
     mutationFn: (req: PurchaseProductRequest) => purchaseProduct(req),
-    onSuccess: () => {
+    onSuccess: (_data, { product_id }) => {
+      trackEvent('shop_purchase', { item_id: product_id });
       queryClient.invalidateQueries({ queryKey: productKeys.all });
       queryClient.invalidateQueries({ queryKey: inventoryKeys.all });
       queryClient.invalidateQueries({ queryKey: userKeys.all });

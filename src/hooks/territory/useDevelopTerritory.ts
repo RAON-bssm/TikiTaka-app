@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { trackEvent } from '@/api/analytics';
 import { territoryKeys } from '@/api/queryKeys';
 import { developTerritory } from '@/api/territory';
 import { syncMyPoint } from './syncMyPoint';
@@ -11,6 +12,7 @@ export function useDevelopTerritory() {
   return useMutation({
     mutationFn: (dongCode: number) => developTerritory(dongCode),
     onSuccess: (result) => {
+      trackEvent('territory_develop', { result: result.success ? 'success' : 'failed' });
       syncMyPoint(queryClient, result.my_point);
       queryClient.invalidateQueries({ queryKey: territoryKeys.all });
     },

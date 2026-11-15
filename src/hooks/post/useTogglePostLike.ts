@@ -1,5 +1,6 @@
 import { type QueryKey, useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { trackEvent } from '@/api/analytics';
 import { likePost, unlikePost } from '@/api/post';
 import { postKeys } from '@/api/queryKeys';
 import type { MyPost, Post, PostDetail } from '@/types/post';
@@ -81,6 +82,9 @@ export function useTogglePostLike(postId: string) {
             ),
         );
       }
+    },
+    onSuccess: (_data, liked) => {
+      if (liked) trackEvent('post_like');
     },
     onSettled: () => {
       if (hasLaterInScope()) return;

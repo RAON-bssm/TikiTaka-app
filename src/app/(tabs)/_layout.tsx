@@ -5,9 +5,11 @@ import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
 import TutorialProvider from '@/components/tutorial/TutorialProvider';
 import AppBar from '@/components/ui/AppBar';
 import { useMyPosts } from '@/hooks/post/useMyPosts';
+import { useAnalyticsUserId } from '@/hooks/user/useAnalyticsUserId';
 
 export default function TabsLayout() {
   useMyPosts();
+  useAnalyticsUserId();
 
   return (
     <TutorialProvider>
