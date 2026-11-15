@@ -10,6 +10,7 @@ import Button from '@/components/ui/Button';
 import { useToast } from '@/components/ui/Toast';
 import Typography from '@/components/ui/Typography';
 import { getPendingMission } from '@/constants/territory/mission';
+import { HOME_GU_LOCATION_CHECK_ENABLED } from '@/constants/territory/region';
 import { type HomeGuLocationStatus, useHomeGuLocation } from '@/hooks/territory/useHomeGuLocation';
 import { useMyTeam } from '@/hooks/territory/useMyTeam';
 import { useTerritory } from '@/hooks/territory/useTerritory';
@@ -79,8 +80,11 @@ export default function ChallengeCameraScreen() {
       ? '허용하기'
       : undefined;
 
-  /** 셔터를 누른 순간의 위치. 서버는 이 값을 검증하지 않고 기록만 한다. */
-  const shotPosition = useRef<{ latitude: number; longitude: number }>(undefined);
+  /**
+   * 셔터를 누른 순간의 위치. 서버는 이 값을 검증하지 않고 기록만 한다.
+   * 위치 판정을 꺼 두면 좌표 없이 찍으므로 null, 셔터를 누르기 전은 undefined다.
+   */
+  const shotPosition = useRef<{ latitude: number; longitude: number } | null>(undefined);
   const samplingRef = useRef(false);
 
   const handleLocationAction = () => {
@@ -93,15 +97,14 @@ export default function ChallengeCameraScreen() {
     else void Linking.openSettings();
   };
 
-  const goToEdit = (uri: string, latitude: number, longitude: number) => {
+  const goToEdit = (uri: string, position: { latitude: number; longitude: number } | null) => {
     router.push({
       pathname: '/map/challenge-edit',
       params: {
         dongCode: String(dongCode),
         purpose,
         uri,
-        lat: String(latitude),
-        lng: String(longitude),
+        ...(position && { lat: String(position.latitude), lng: String(position.longitude) }),
         ...(params.adjective && { adjective: params.adjective }),
         ...(params.noun && { noun: params.noun }),
         ...(params.criteria && { criteria: params.criteria }),
@@ -110,18 +113,17 @@ export default function ChallengeCameraScreen() {
   };
 
   const holdPosition = () => {
-    if (location.status !== 'inside' || !location.position) {
+    if (location.status !== 'inside' || (HOME_GU_LOCATION_CHECK_ENABLED && !location.position)) {
       showToast(message ?? '위치를 확인하고 있어요');
       return false;
     }
-    shotPosition.current = location.position;
+    shotPosition.current = location.position ?? null;
     return true;
   };
 
   const handleCaptured = (uri: string) => {
-    if (!shotPosition.current) return;
-    const { latitude, longitude } = shotPosition.current;
-    goToEdit(uri, latitude, longitude);
+    if (shotPosition.current === undefined) return;
+    goToEdit(uri, shotPosition.current);
   };
 
   const takeSamplePhoto = async (load: () => Promise<string>) => {

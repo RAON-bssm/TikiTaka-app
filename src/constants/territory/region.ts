@@ -5,6 +5,12 @@ import guBoundaries from './guBoundaries.json';
 /** 땅따먹기는 부산만 한다. 동·경계 데이터에는 구 이름만 있어, 다른 시의 같은 이름 구(북구 등)를 여기서 걸러낸다. */
 export const TERRITORY_CITY = '부산광역시';
 
+/**
+ * 땅따먹기 사진을 본진 구 안에서 찍었는지 GPS로 확인할지. 사용자가 적은 동안은 구 밖에서도 찍게 꺼 둔다.
+ * 끄면 위치 권한을 묻지 않고 좌표도 보내지 않는다. 서버는 위치를 검증하지 않아 다시 켤 때 이 값만 바꾸면 된다.
+ */
+export const HOME_GU_LOCATION_CHECK_ENABLED = false;
+
 function isTerritoryCity(team: Location): boolean {
   return team.city_name === TERRITORY_CITY;
 }

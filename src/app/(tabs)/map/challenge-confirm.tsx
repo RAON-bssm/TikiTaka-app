@@ -21,8 +21,8 @@ export default function ChallengeConfirmScreen() {
   const params = useLocalSearchParams<{
     dongCode: string;
     uri: string;
-    lat: string;
-    lng: string;
+    lat?: string;
+    lng?: string;
   }>();
   const dongCode = Number(params.dongCode);
   const { showToast } = useToast();
@@ -60,8 +60,8 @@ export default function ChallengeConfirmScreen() {
       {
         dongCode,
         imageUri: params.uri,
-        lat: Number(params.lat),
-        lng: Number(params.lng),
+        // 위치 판정을 꺼 두면 좌표가 안 넘어온다. Number(undefined)인 NaN이 그대로 전송되지 않게 거른다.
+        ...(params.lat && params.lng && { lat: Number(params.lat), lng: Number(params.lng) }),
       },
       {
         onSuccess: (result) => {

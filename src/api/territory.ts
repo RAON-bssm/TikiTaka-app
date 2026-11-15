@@ -5,7 +5,6 @@ import type {
   CurrentCycle,
   DefensePhotoResult,
   DevelopResult,
-  DevelopmentListData,
   DongPreference,
   DongPreferenceListData,
   MissionChange,
@@ -121,13 +120,6 @@ export async function getChallenge(challengeId: string): Promise<ChallengeResult
 export async function developTerritory(dongCode: number): Promise<DevelopResult> {
   const { data } = await client.post<ApiResponse<DevelopResult>>(
     `/api/territory/dongs/${dongCode}/develop`,
-  );
-  return data.data;
-}
-
-export async function getDevelopments(dongCode: number): Promise<DevelopmentListData> {
-  const { data } = await client.get<ApiResponse<DevelopmentListData>>(
-    `/api/territory/dongs/${dongCode}/developments`,
   );
   return data.data;
 }
