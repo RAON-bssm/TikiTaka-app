@@ -1,2 +1,3 @@
 patchedDependencies:
+  '@react-native-seoul/kakao-login': patches/@react-native-seoul__kakao-login.patch
   react-native-vision-camera: patches/react-native-vision-camera.patch

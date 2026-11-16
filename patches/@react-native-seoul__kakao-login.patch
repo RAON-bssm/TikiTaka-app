@@ -1,0 +1,35 @@
+diff --git a/ios/RNKakaoLogins/RNKakaoLogins.swift b/ios/RNKakaoLogins/RNKakaoLogins.swift
+index e7786eead016709bc695e412d0d445152e81160a..466d4c0b73679ee788728dd4c548c4d96e22b519 100644
+--- a/ios/RNKakaoLogins/RNKakaoLogins.swift
++++ b/ios/RNKakaoLogins/RNKakaoLogins.swift
+@@ -12,8 +12,11 @@ import KakaoSDKCommon
+ import KakaoSDKAuth
+ import KakaoSDKUser
+ 
++// TikiTaka 패치: iOS 동적 프레임워크(Firebase 필요) 릴리즈 빌드는 internal 클래스 심볼을 숨겨
++// AppDelegate의 RNKakaoLogins 참조가 링크되지 않는다. public으로 내보내고, Swift 이름을
++// 헤더(RNKakaoLogins.h)에서 가져온 이름과 맞춰 Expo 플러그인이 넣는 AppDelegate 코드가 그대로 컴파일되게 한다.
+ @objc(RNKakaoLogins)
+-class RNKakaoLogins: NSObject {
++public class RNKakaoLogins: NSObject {
+ 
+     public override init() {
+         super.init()
+@@ -118,7 +121,7 @@ class RNKakaoLogins: NSObject {
+     }
+ 
+     @objc(isKakaoTalkLoginUrl:)
+-    public static func isKakaoTalkLoginUrl(url:URL) -> Bool {
++    public static func isKakaoTalkLoginUrl(_ url:URL) -> Bool {
+ 
+         let appKey = try? KakaoSDK.shared.appKey();
+ 
+@@ -129,7 +132,7 @@ class RNKakaoLogins: NSObject {
+     }
+ 
+     @objc(handleOpenUrl:)
+-    public static func handleOpenUrl(url:URL) -> Bool {
++    public static func handleOpen(_ url:URL) -> Bool {
+         return AuthController.handleOpenUrl(url: url)
+     }
+ 
