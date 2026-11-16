@@ -56,9 +56,9 @@ export default function CaptureView({
   const [facing, setFacing] = useState<'back' | 'front'>('back');
   const device = useCameraDevice(facing, LENS_FILTER);
   const photoOutput = usePhotoOutput({ qualityPrioritization: 'quality' });
-  const { zoom, selectedZoom, levels, handleSelectZoom, pinch } = useCameraZoom(device);
-
   const cameraRef = useRef<CameraRef>(null);
+  const { zoom, selectedZoom, levels, handleSelectZoom, pinch } = useCameraZoom(device, cameraRef);
+
   const [previewAspect, setPreviewAspect] = useState<number>();
   const capturingRef = useRef(false);
 
@@ -111,7 +111,6 @@ export default function CaptureView({
           device={device}
           isActive={isFocused}
           outputs={[photoOutput]}
-          zoom={zoom}
         />
       </GestureDetector>
 

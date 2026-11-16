@@ -39,6 +39,7 @@ export default function GachaScreen() {
   const { showToast } = useToast();
   const { data: profile } = useMyProfile();
   const [confirmTarget, setConfirmTarget] = useState<{ option: GashaponOption; cost: number }>();
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const getCost = (option: GashaponOption) =>
     products?.find((product) => product.product_id === option.productId)?.price ??
@@ -56,6 +57,7 @@ export default function GachaScreen() {
     }
     if (option.needsConfirm) {
       setConfirmTarget({ option, cost });
+      setConfirmOpen(true);
       return;
     }
     handlePull(option.productId);
@@ -178,15 +180,15 @@ export default function GachaScreen() {
       ) : null}
 
       <ConfirmDialog
-        visible={!!confirmTarget}
-        title={`${confirmTarget?.option.label}를 할까요?`}
-        description={`${confirmTarget?.cost.toLocaleString()} P가 바로 빠져요.`}
+        visible={confirmOpen}
+        title={`${confirmTarget?.option.label ?? ''}를 할까요?`}
+        description={`${confirmTarget?.cost.toLocaleString() ?? ''} P가 바로 빠져요.`}
         confirmLabel="뽑기"
         onConfirm={() => {
           if (confirmTarget) handlePull(confirmTarget.option.productId);
-          setConfirmTarget(undefined);
+          setConfirmOpen(false);
         }}
-        onCancel={() => setConfirmTarget(undefined)}
+        onCancel={() => setConfirmOpen(false)}
       />
 
       {current ? (
