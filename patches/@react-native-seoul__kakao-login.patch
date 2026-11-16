@@ -1,21 +1,39 @@
+diff --git a/ios/RNKakaoLogins/RNKakaoLogins.h b/ios/RNKakaoLogins/RNKakaoLogins.h
+index 7ae75916f9057e6cb90fce1bfac41cc3977c0016..9b538e6026ec38093ff3088fb3276d45e8f3ec4c 100644
+--- a/ios/RNKakaoLogins/RNKakaoLogins.h
++++ b/ios/RNKakaoLogins/RNKakaoLogins.h
+@@ -6,10 +6,6 @@
+ //  Copyright © 2021 Facebook. All rights reserved.
+ //
+ 
++// TikiTaka 패치: RNKakaoLogins는 public Swift 클래스라 선언이 생성 헤더(kakao_login-Swift.h)에 들어간다.
++// 여기서도 @interface를 선언하면 모듈 빌드가 "duplicate interface definition"으로 실패하므로 전방 선언만 남긴다.
+ @class RNKakaoLogins;
+-
+-@interface RNKakaoLogins : NSObject
+-- (RNKakaoLogins *)returnSwiftClassInstance;
+-+ (BOOL)isKakaoTalkLoginUrl:(NSURL *)url;
+-+ (BOOL)handleOpenUrl:(NSURL *)url;
+-@end
 diff --git a/ios/RNKakaoLogins/RNKakaoLogins.swift b/ios/RNKakaoLogins/RNKakaoLogins.swift
-index e7786eead016709bc695e412d0d445152e81160a..466d4c0b73679ee788728dd4c548c4d96e22b519 100644
+index e7786eead016709bc695e412d0d445152e81160a..cfb95bed0ecc14ca9fca6623a5fb95fe103020e2 100644
 --- a/ios/RNKakaoLogins/RNKakaoLogins.swift
 +++ b/ios/RNKakaoLogins/RNKakaoLogins.swift
-@@ -12,8 +12,11 @@ import KakaoSDKCommon
+@@ -12,8 +12,12 @@ import KakaoSDKCommon
  import KakaoSDKAuth
  import KakaoSDKUser
  
 +// TikiTaka 패치: iOS 동적 프레임워크(Firebase 필요) 릴리즈 빌드는 internal 클래스 심볼을 숨겨
 +// AppDelegate의 RNKakaoLogins 참조가 링크되지 않는다. public으로 내보내고, Swift 이름을
-+// 헤더(RNKakaoLogins.h)에서 가져온 이름과 맞춰 Expo 플러그인이 넣는 AppDelegate 코드가 그대로 컴파일되게 한다.
++// Expo 플러그인이 AppDelegate에 넣는 호출(isKakaoTalkLoginUrl(url), handleOpen(url))과 맞춘다.
++// public이면 생성 헤더에 @interface가 들어가므로 RNKakaoLogins.h의 선언은 지웠다.
  @objc(RNKakaoLogins)
 -class RNKakaoLogins: NSObject {
 +public class RNKakaoLogins: NSObject {
  
      public override init() {
          super.init()
-@@ -118,7 +121,7 @@ class RNKakaoLogins: NSObject {
+@@ -118,7 +122,7 @@ class RNKakaoLogins: NSObject {
      }
  
      @objc(isKakaoTalkLoginUrl:)
@@ -24,7 +42,7 @@ index e7786eead016709bc695e412d0d445152e81160a..466d4c0b73679ee788728dd4c548c4d9
  
          let appKey = try? KakaoSDK.shared.appKey();
  
-@@ -129,7 +132,7 @@ class RNKakaoLogins: NSObject {
+@@ -129,7 +133,7 @@ class RNKakaoLogins: NSObject {
      }
  
      @objc(handleOpenUrl:)
