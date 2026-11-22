@@ -28,6 +28,9 @@ importers:
       '@react-native-firebase/app':
         specifier: ^27.1.1
         version: 27.1.1(@react-native-async-storage/async-storage@2.2.0(react-native@0.85.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3)))(expo@56.0.24)(react-native@0.85.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3)
+      '@react-native-firebase/messaging':
+        specifier: ^27.1.1
+        version: 27.1.1(@react-native-firebase/app@27.1.1(@react-native-async-storage/async-storage@2.2.0(react-native@0.85.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3)))(expo@56.0.24)(react-native@0.85.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3))(expo@56.0.24)
       '@react-native-seoul/kakao-login':
         specifier: ^6.0.4
         version: 6.0.4(patch_hash=5dac8673145acd40b7da978b451a1c1ededca676cf8728803e3f9c2e03e117ea)(react-native@0.85.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3)
@@ -1747,6 +1750,15 @@ packages:
       expo: '>=47.0.0'
       react: '*'
       react-native: '>=0.60.0-0'
+    peerDependenciesMeta:
+      expo:
+        optional: true
+
+  '@react-native-firebase/messaging@27.1.1':
+    resolution: {integrity: sha512-G0OstSenPerkYSl+RmnVmWVYDWdDah5TtD6k8XCQuzrl2Jlu+i2mrvqsIeQkTitiQjCQ78VW6o8aUTOd8o+3lw==}
+    peerDependencies:
+      '@react-native-firebase/app': 27.1.1
+      expo: '>=47.0.0'
     peerDependenciesMeta:
       expo:
         optional: true
@@ -8347,6 +8359,12 @@ snapshots:
     transitivePeerDependencies:
       - '@react-native-async-storage/async-storage'
 
+  '@react-native-firebase/messaging@27.1.1(@react-native-firebase/app@27.1.1(@react-native-async-storage/async-storage@2.2.0(react-native@0.85.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3)))(expo@56.0.24)(react-native@0.85.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3))(expo@56.0.24)':
+    dependencies:
+      '@react-native-firebase/app': 27.1.1(@react-native-async-storage/async-storage@2.2.0(react-native@0.85.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3)))(expo@56.0.24)(react-native@0.85.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3)
+    optionalDependencies:
+      expo: 56.0.24(@babel/core@7.29.7)(@expo/dom-webview@56.0.5)(@expo/metro-runtime@56.0.15)(expo-router@56.2.22)(react-dom@19.2.3(react@19.2.3))(react-native-web@0.21.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-native-webview@13.16.1(react-native@0.85.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3))(react-native-worklets@0.8.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(react-native@0.85.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3))(react-native@0.85.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3)(typescript@6.0.3)
+
   '@react-native-masked-view/masked-view@0.3.2(react-native@0.85.3(@babel/core@7.29.7)(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3)':
     dependencies:
       react: 19.2.3
@@ -8481,7 +8499,9 @@ snapshots:
       metro-runtime: 0.84.5
     transitivePeerDependencies:
       - '@babel/core'
+      - bufferutil
       - supports-color
+      - utf-8-validate
 
   '@react-native/normalize-colors@0.74.89': {}
 

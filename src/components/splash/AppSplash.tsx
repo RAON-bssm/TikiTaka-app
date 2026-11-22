@@ -13,15 +13,24 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { hasSeenPermissionNotice, markPermissionNoticeSeen } from '@/api/permissionNotice';
+import {
+  hasAskedNotificationPermission,
+  markNotificationPermissionAsked,
+  requestNotificationPermission,
+} from '@/api/pushNotification';
 import LogoIcon from '@/assets/images/splash/logo.svg';
 import RingIcon from '@/assets/images/splash/ring.svg';
 import StarIcon from '@/assets/images/splash/star.svg';
 import AppUpdateDialog from '@/components/appVersion/AppUpdateDialog';
-import PermissionNoticeDialog from '@/components/permission/PermissionNoticeDialog';
+import PermissionNoticeDialog, {
+  type NoticePermission,
+} from '@/components/permission/PermissionNoticeDialog';
+import WageDialog from '@/components/territory/WageDialog';
 import Typography from '@/components/ui/Typography';
 import { palette } from '@/constants/colors';
 import { useAppVersionCheck } from '@/hooks/appVersion/useAppVersionCheck';
 import { useAuthStatus } from '@/hooks/auth/useAuthStatus';
+import { useOpenedPushType } from '@/hooks/useOpenedPushType';
 
 const GRADIENT_COLORS = [
   palette.primary[600],
@@ -91,7 +100,11 @@ export default function AppSplash() {
   const [isMinTimeElapsed, setIsMinTimeElapsed] = useState(false);
   // null = 아직 확인 중. 확인 전에 스플래시를 걷으면 앱 화면이 잠깐 보인 뒤 안내가 떠서, 결과가 나올 때까지 덮어 둔다.
   const [showPermissionNotice, setShowPermissionNotice] = useState<boolean | null>(null);
+  // 닫히는 애니메이션 동안에도 내용이 남아 있어야 해서 표시 여부와 따로 둔다.
+  const [noticePermissions, setNoticePermissions] = useState<NoticePermission[]>([]);
   const { data: versionCheck } = useAppVersionCheck();
+  // 앱이 꺼진 상태에서 알림으로 열린 경우를 놓치지 않도록 스플래시 때부터 구독한다.
+  const { openedType: openedPushType, clear: clearOpenedPushType } = useOpenedPushType();
 
   useEffect(() => {
     const timer = setTimeout(() => setIsMinTimeElapsed(true), MIN_VISIBLE_MS);
@@ -99,9 +112,18 @@ export default function AppSplash() {
   }, []);
 
   useEffect(() => {
-    hasSeenPermissionNotice()
-      .then((seen) => setShowPermissionNotice(!seen))
-      .catch(() => setShowPermissionNotice(true));
+    Promise.all([hasSeenPermissionNotice(), hasAskedNotificationPermission()])
+      .then(([seen, askedNotification]) => {
+        const permissions: NoticePermission[] = [];
+        if (!seen) permissions.push('camera');
+        if (!askedNotification) permissions.push('notification');
+        setNoticePermissions(permissions);
+        setShowPermissionNotice(permissions.length > 0);
+      })
+      .catch(() => {
+        setNoticePermissions(['camera', 'notification']);
+        setShowPermissionNotice(true);
+      });
   }, []);
 
   const ringOpacity = useSharedValue(0);
@@ -146,6 +168,11 @@ export default function AppSplash() {
   const handleConfirmPermissionNotice = () => {
     setShowPermissionNotice(false);
     markPermissionNoticeSeen().catch(() => {});
+    if (noticePermissions.includes('notification')) {
+      markNotificationPermissionAsked().catch(() => {});
+      // 거절해도 앱은 그대로 쓴다. 다시 켜는 건 기기 설정에서 한다.
+      requestNotificationPermission().catch(() => {});
+    }
   };
 
   if (status !== 'loading' && isMinTimeElapsed && showPermissionNotice !== null) {
@@ -153,9 +180,14 @@ export default function AppSplash() {
       <>
         <PermissionNoticeDialog
           visible={showPermissionNotice}
+          permissions={noticePermissions}
           onConfirm={handleConfirmPermissionNotice}
         />
         <AppUpdateDialog versionCheck={versionCheck} enabled={!showPermissionNotice} />
+        <WageDialog
+          visible={openedPushType === 'WAGE' && status === 'authenticated' && !showPermissionNotice}
+          onClose={clearOpenedPushType}
+        />
       </>
     );
   }

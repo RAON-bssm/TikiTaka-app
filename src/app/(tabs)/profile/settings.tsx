@@ -6,6 +6,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { resetPermissionNotice } from '@/api/permissionNotice';
+import { resetNotificationPermissionAsked } from '@/api/pushNotification';
 import { startTutorialForNewUser } from '@/api/tutorial';
 import LogoutDialog from '@/components/auth/LogoutDialog';
 import WithdrawDialog from '@/components/auth/WithdrawDialog';
@@ -23,7 +24,11 @@ export default function SettingsScreen() {
 
   // 신규 가입 직후와 같은 상태(권한 안내 미확인 + 튜토리얼 대기)로 만든 뒤 JS를 다시 띄운다.
   const handleDevFirstLaunch = async () => {
-    await Promise.all([resetPermissionNotice(), startTutorialForNewUser()]).catch(() => {});
+    await Promise.all([
+      resetPermissionNotice(),
+      resetNotificationPermissionAsked(),
+      startTutorialForNewUser(),
+    ]).catch(() => {});
     DevSettings.reload();
   };
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
