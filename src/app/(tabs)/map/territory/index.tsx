@@ -361,7 +361,8 @@ function MyTerritorySection({
     <View className="gap-md">
       <View className="flex-row items-center justify-between">
         <Text className="font-title text-2xl text-gray-800">내 땅</Text>
-        {territories && maxOwned !== undefined && (
+        {/* max_owned 0은 보유 제한 없음이라 상한을 보여 주지 않는다. */}
+        {territories && maxOwned !== undefined && maxOwned > 0 && (
           <View className="rounded-full bg-primary-100 px-md py-xs">
             <Typography variant="h4" className="text-primary-600">
               {`${territories.length}/${maxOwned}곳`}

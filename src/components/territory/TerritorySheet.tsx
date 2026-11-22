@@ -181,13 +181,13 @@ function TerritoryContent({
     if (isDeveloping || !canDevelop || lacksDevelopPoint) return;
     develop(territory.dong_code, {
       onSuccess: (result) => {
-        const remaining = `오늘 ${result.remaining_today}번 더 할 수 있어요`;
-        showToast(
-          result.success
-            ? `개발 성공! 땅값이 ${result.team_gain.toLocaleString()} 올랐어요 · ${remaining}`
-            : `개발에 실패했어요 · ${remaining}`,
-          { type: result.success ? 'success' : 'info' },
-        );
+        const message = result.success
+          ? `개발 성공! 땅값이 ${result.team_gain.toLocaleString()} 올랐어요`
+          : '개발에 실패했어요';
+        // -1이면 개인 하루 제한이 없다.
+        const remaining =
+          result.remaining_today >= 0 ? ` · 오늘 ${result.remaining_today}번 더 할 수 있어요` : '';
+        showToast(`${message}${remaining}`, { type: result.success ? 'success' : 'info' });
       },
       onError: (error) => showToast(getApiErrorMessage(error, '개발하지 못했어요')),
     });
@@ -372,7 +372,8 @@ function getAction({
   if (phase !== 'battle') return { kind: 'disabled', label: '땅따먹기 주간에 도전할 수 있어요' };
   if (!territory.challengeable) return { kind: 'disabled', label: '우리 팀 땅이에요' };
   // 서버도 409로 막지만 통행료 없이 끝나는 요청이라 미리 안내만 한다.
-  if (maxOwned !== undefined && ownedCount >= maxOwned) {
+  // 0이면 보유 제한이 없다.
+  if (maxOwned !== undefined && maxOwned > 0 && ownedCount >= maxOwned) {
     return { kind: 'disabled', label: `땅은 최대 ${maxOwned}개까지 가질 수 있어요` };
   }
   if (myPoint !== undefined && myPoint < territory.toll) {
