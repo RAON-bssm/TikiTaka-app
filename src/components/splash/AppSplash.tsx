@@ -16,9 +16,11 @@ import { hasSeenPermissionNotice, markPermissionNoticeSeen } from '@/api/permiss
 import LogoIcon from '@/assets/images/splash/logo.svg';
 import RingIcon from '@/assets/images/splash/ring.svg';
 import StarIcon from '@/assets/images/splash/star.svg';
+import AppUpdateDialog from '@/components/appVersion/AppUpdateDialog';
 import PermissionNoticeDialog from '@/components/permission/PermissionNoticeDialog';
 import Typography from '@/components/ui/Typography';
 import { palette } from '@/constants/colors';
+import { useAppVersionCheck } from '@/hooks/appVersion/useAppVersionCheck';
 import { useAuthStatus } from '@/hooks/auth/useAuthStatus';
 
 const GRADIENT_COLORS = [
@@ -89,6 +91,7 @@ export default function AppSplash() {
   const [isMinTimeElapsed, setIsMinTimeElapsed] = useState(false);
   // null = 아직 확인 중. 확인 전에 스플래시를 걷으면 앱 화면이 잠깐 보인 뒤 안내가 떠서, 결과가 나올 때까지 덮어 둔다.
   const [showPermissionNotice, setShowPermissionNotice] = useState<boolean | null>(null);
+  const { data: versionCheck } = useAppVersionCheck();
 
   useEffect(() => {
     const timer = setTimeout(() => setIsMinTimeElapsed(true), MIN_VISIBLE_MS);
@@ -147,10 +150,13 @@ export default function AppSplash() {
 
   if (status !== 'loading' && isMinTimeElapsed && showPermissionNotice !== null) {
     return (
-      <PermissionNoticeDialog
-        visible={showPermissionNotice}
-        onConfirm={handleConfirmPermissionNotice}
-      />
+      <>
+        <PermissionNoticeDialog
+          visible={showPermissionNotice}
+          onConfirm={handleConfirmPermissionNotice}
+        />
+        <AppUpdateDialog versionCheck={versionCheck} enabled={!showPermissionNotice} />
+      </>
     );
   }
 

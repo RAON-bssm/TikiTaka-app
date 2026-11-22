@@ -7,7 +7,7 @@ import type {
 
 import type { PostPage } from './post';
 import { QUERY_CACHE_MAX_AGE } from './queryClient';
-import { postKeys, storageKeys } from './queryKeys';
+import { appVersionKeys, postKeys, storageKeys } from './queryKeys';
 import { VIEW_URL_SAFE_AGE } from './storage';
 
 const PERSIST_KEY = 'tikitaka:query-cache';
@@ -47,6 +47,7 @@ const persister = createAsyncStoragePersister({
 /**
  * 마지막으로 본 피드·랭킹을 기기에 저장해, 앱을 다시 열었을 때 빈 화면 대신 바로 보여준다.
  * `view-url`은 URL만 담고 있어 곧 만료되므로 아예 저장하지 않는다.
+ * 앱 버전 확인은 `staleTime: Infinity`라, 저장본이 복원되면 서버에서 강제 업데이트를 풀어도 하루 동안 다시 묻지 않는다.
  * 루트 레이아웃의 `PersistQueryClientProvider`에 넘긴다. 복원이 끝날 때까지 쿼리 요청을 멈춰 둔다.
  */
 export const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
@@ -54,7 +55,9 @@ export const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
   maxAge: QUERY_CACHE_MAX_AGE,
   dehydrateOptions: {
     shouldDehydrateQuery: (query) =>
-      query.state.status === 'success' && query.queryKey[0] !== storageKeys.all[0],
+      query.state.status === 'success' &&
+      query.queryKey[0] !== storageKeys.all[0] &&
+      query.queryKey[0] !== appVersionKeys.all[0],
   },
 };
 

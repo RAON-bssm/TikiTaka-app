@@ -97,3 +97,9 @@ export const equipmentKeys = {
   current: () => [...equipmentKeys.all, 'current'] as const,
   user: (userId: string) => [...equipmentKeys.all, 'user', userId] as const,
 };
+
+export const appVersionKeys = {
+  all: ['appVersion'] as const,
+  check: (platform: string, currentVersion: string | undefined) =>
+    [...appVersionKeys.all, 'check', platform, currentVersion] as const,
+};
