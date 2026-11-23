@@ -13,6 +13,7 @@ interface AnalyticsEvents {
   post_create: { board_id: number };
   post_like: undefined;
   post_share: undefined;
+  post_image_save: undefined;
   post_report: { reason: string };
   territory_setup: undefined;
   territory_challenge: { result: 'captured' | 'failed' };

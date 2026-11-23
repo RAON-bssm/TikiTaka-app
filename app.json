@@ -57,7 +57,9 @@
       "blockedPermissions": [
         "com.google.android.gms.permission.AD_ID",
         "android.permission.ACCESS_ADSERVICES_AD_ID",
-        "android.permission.ACCESS_ADSERVICES_ATTRIBUTION"
+        "android.permission.ACCESS_ADSERVICES_ATTRIBUTION",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_VISUAL_USER_SELECTED"
       ]
     },
     "web": {
@@ -113,6 +115,14 @@
         }
       ],
       "@react-native-firebase/messaging",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": false,
+          "savePhotosPermission": "게시글 사진을 앨범에 저장하기 위해 사진 추가 권한이 필요합니다.",
+          "granularPermissions": []
+        }
+      ],
       [
         "expo-build-properties",
         {

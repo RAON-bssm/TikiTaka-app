@@ -141,6 +141,8 @@ export default function PostDetailScreen() {
             <PostTitleRow
               postId={post_id}
               title={post.content}
+              imageKey={post.post_image}
+              imageUrl={post.post_image_url}
               likeCount={post.status === 'DONE' ? post.like_count : undefined}
               liked={post.liked_by_me}
             />
