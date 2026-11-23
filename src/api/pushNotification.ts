@@ -117,11 +117,24 @@ export function registerCurrentPushToken(): Promise<void> {
   return trackRegistration(getToken(getMessaging()).then(registerPushToken));
 }
 
-/** 로그아웃·탈퇴 API보다 먼저 부른다(access token이 살아 있어야 한다). 내 계정의 이 기기 토큰만 지운다. */
-export async function unregisterPushToken(): Promise<void> {
-  await pendingRegistration;
-  const token = await getToken(getMessaging());
-  await client.delete<EmptyResponse>('/api/push-tokens', { data: { token } });
+// 해제는 로그아웃·탈퇴를 붙잡고 있으니 오래 기다리지 않는다. getToken은 자체 타임아웃 없이 FCM 서버를 기다릴 수 있다.
+const UNREGISTER_TIMEOUT_MS = 3000;
+
+/**
+ * 로그아웃·탈퇴 API보다 먼저 부른다(access token이 살아 있어야 한다). 내 계정의 이 기기 토큰만 지운다.
+ * 제한 시간을 넘기면 실패로 끝낸다. 남은 토큰은 다른 계정이 이 기기에서 로그인하면 주인이 바뀌고, 아니면 60일 뒤 서버가 지운다.
+ */
+export function unregisterPushToken(): Promise<void> {
+  const unregister = (async () => {
+    await pendingRegistration;
+    const token = await getToken(getMessaging());
+    await client.delete<EmptyResponse>('/api/push-tokens', { data: { token } });
+  })();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error('푸시 토큰 해제 시간 초과')), UNREGISTER_TIMEOUT_MS);
+  });
+  return Promise.race([unregister, timeout]).finally(() => clearTimeout(timer));
 }
 
 /** 로그인 상태인 동안 지금 토큰을 등록하고, FCM이 토큰을 바꾸면 다시 등록한다. 실패해도 다음 실행 때 다시 보내므로 무시한다. */
