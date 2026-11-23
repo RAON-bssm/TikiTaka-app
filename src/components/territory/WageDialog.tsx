@@ -22,7 +22,11 @@ function getTodayString() {
 
 /** 일급 알림을 눌러 들어왔을 때 띄운다. 알림에는 금액이 없어 내역의 최신 항목을 보여 준다. */
 export default function WageDialog({ visible, onClose }: Props) {
-  const { data, isLoading, isError, refetch } = useMyWages(undefined, { enabled: visible });
+  // 저장해 둔 캐시는 지급 전 값일 수 있다. 열 때마다 새로 받고, 받는 동안은 옛 금액 대신 스켈레톤을 보인다.
+  const { data, isFetching, isError, refetch } = useMyWages(undefined, {
+    enabled: visible,
+    staleTime: 0,
+  });
   const latest = data?.wages[0];
 
   return (
@@ -35,7 +39,7 @@ export default function WageDialog({ visible, onClose }: Props) {
     >
       <View className="flex-1 items-center justify-center bg-black/40">
         <View className="w-[300px] gap-2xl rounded-xl bg-white px-xl pb-xl pt-2xl">
-          {isLoading ? (
+          {isFetching ? (
             <Skeleton className="h-[160px] w-full rounded-md" />
           ) : isError ? (
             <ErrorRetry message="일급 내역을 불러오지 못했어요." onRetry={() => void refetch()} />

@@ -30,7 +30,7 @@ import Typography from '@/components/ui/Typography';
 import { palette } from '@/constants/colors';
 import { useAppVersionCheck } from '@/hooks/appVersion/useAppVersionCheck';
 import { useAuthStatus } from '@/hooks/auth/useAuthStatus';
-import { useOpenedPushType } from '@/hooks/useOpenedPushType';
+import { useOpenedPushType } from '@/hooks/pushNotification/useOpenedPushType';
 
 const GRADIENT_COLORS = [
   palette.primary[600],
@@ -106,6 +106,11 @@ export default function AppSplash() {
   // 앱이 꺼진 상태에서 알림으로 열린 경우를 놓치지 않도록 스플래시 때부터 구독한다.
   const { openedType: openedPushType, clear: clearOpenedPushType } = useOpenedPushType();
 
+  // 로그아웃 상태에서 알림으로 열렸으면 팝업을 버린다. 남겨 두면 나중에 (다른 계정일 수도 있는) 로그인 직후 갑자기 뜬다.
+  useEffect(() => {
+    if (status === 'unauthenticated' && openedPushType) clearOpenedPushType();
+  }, [status, openedPushType, clearOpenedPushType]);
+
   useEffect(() => {
     const timer = setTimeout(() => setIsMinTimeElapsed(true), MIN_VISIBLE_MS);
     return () => clearTimeout(timer);
@@ -176,6 +181,8 @@ export default function AppSplash() {
   };
 
   if (status !== 'loading' && isMinTimeElapsed && showPermissionNotice !== null) {
+    const showWage =
+      openedPushType === 'WAGE' && status === 'authenticated' && !showPermissionNotice;
     return (
       <>
         <PermissionNoticeDialog
@@ -183,11 +190,9 @@ export default function AppSplash() {
           permissions={noticePermissions}
           onConfirm={handleConfirmPermissionNotice}
         />
-        <AppUpdateDialog versionCheck={versionCheck} enabled={!showPermissionNotice} />
-        <WageDialog
-          visible={openedPushType === 'WAGE' && status === 'authenticated' && !showPermissionNotice}
-          onClose={clearOpenedPushType}
-        />
+        {/* iOS는 모달을 하나만 띄워서 일급 팝업을 먼저 보여 주고, 닫으면 업데이트 안내를 띄운다. */}
+        <AppUpdateDialog versionCheck={versionCheck} enabled={!showPermissionNotice && !showWage} />
+        <WageDialog visible={showWage} onClose={clearOpenedPushType} />
       </>
     );
   }

@@ -1,11 +1,11 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { router, useSegments } from 'expo-router';
+import { router, usePathname, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useRef } from 'react';
 
 import { setAnalyticsUserId } from '@/api/analytics';
 import { clearSavedCharacter } from '@/api/character';
-import { clearPendingPostId } from '@/api/deepLink';
+import { clearPendingPostId, setPendingPostId } from '@/api/deepLink';
 import { loadAuthStatus } from '@/api/token';
 import { clearTutorialStep } from '@/api/tutorial';
 import { useAuthStatus } from '@/hooks/auth/useAuthStatus';
@@ -14,10 +14,13 @@ import { useAuthStatus } from '@/hooks/auth/useAuthStatus';
 // 이미 숨겨진 뒤 호출되면 reject되므로 무시한다.
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
+const POST_PATH_PATTERN = /^\/post\/([^/]+)$/;
+
 /** 로그인 가드. 인터셉터가 재발급 실패로 토큰을 비워도 상태를 구독하므로 로그인 화면으로 보낸다. */
 export default function AuthGate({ children }: { children: React.ReactNode }) {
   const status = useAuthStatus();
   const segments = useSegments();
+  const pathname = usePathname();
   const queryClient = useQueryClient();
   const prevStatus = useRef(status);
 
@@ -43,6 +46,10 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
     const isAuthScreen = segments[0] === '(auth)';
 
     if (status === 'unauthenticated' && !isAuthScreen) {
+      // 공유 링크로 연 게시글이면 로그인 뒤 돌아오도록 기억한다. 로그아웃이 확정된 이 시점에만 저장해야
+      // 저장된 토큰이 만료된 사용자도 목적지를 잃지 않는다.
+      const postId = POST_PATH_PATTERN.exec(pathname)?.[1];
+      if (postId) setPendingPostId(postId);
       router.replace('/(auth)/login');
       // 스플래시는 화면이 실제로 바뀌어 이 effect가 다시 돌 때 내린다. 지금 내리면 홈이 스쳐 보인다.
       return;
@@ -52,7 +59,7 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
     if (status === 'authenticated' && !isAuthScreen) clearPendingPostId();
 
     SplashScreen.hideAsync().catch(() => {});
-  }, [status, segments]);
+  }, [status, segments, pathname]);
 
   return children;
 }
