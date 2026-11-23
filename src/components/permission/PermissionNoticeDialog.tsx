@@ -27,15 +27,23 @@ interface PermissionNoticeDialogProps {
   visible: boolean;
   permissions: NoticePermission[];
   onConfirm: () => void;
+  onDismiss?: () => void;
 }
 
 export default function PermissionNoticeDialog({
   visible,
   permissions,
   onConfirm,
+  onDismiss,
 }: PermissionNoticeDialogProps) {
   return (
-    <Modal visible={visible} transparent animationType="fade" statusBarTranslucent>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      statusBarTranslucent
+      onDismiss={onDismiss}
+    >
       <View className="flex-1 items-center justify-center bg-black/40">
         <View className="w-[300px] gap-2xl rounded-xl bg-white px-xl pb-xl pt-2xl">
           <View className="items-center gap-sm">

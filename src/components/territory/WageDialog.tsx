@@ -10,6 +10,7 @@ import { useMyWages } from '@/hooks/territory/useMyWages';
 interface Props {
   visible: boolean;
   onClose: () => void;
+  onDismiss?: () => void;
 }
 
 // `paid_on`은 KST 날짜다. 사용자가 한국에 있다고 보고 기기 날짜와 비교한다.
@@ -21,7 +22,7 @@ function getTodayString() {
 }
 
 /** 일급 알림을 눌러 들어왔을 때 띄운다. 알림에는 금액이 없어 내역의 최신 항목을 보여 준다. */
-export default function WageDialog({ visible, onClose }: Props) {
+export default function WageDialog({ visible, onClose, onDismiss }: Props) {
   // 저장해 둔 캐시는 지급 전 값일 수 있다. 열 때마다 새로 받고, 받는 동안은 옛 금액 대신 스켈레톤을 보인다.
   const { data, isFetching, isError, refetch } = useMyWages(undefined, {
     enabled: visible,
@@ -36,6 +37,7 @@ export default function WageDialog({ visible, onClose }: Props) {
       animationType="fade"
       statusBarTranslucent
       onRequestClose={onClose}
+      onDismiss={onDismiss}
     >
       <View className="flex-1 items-center justify-center bg-black/40">
         <View className="w-[300px] gap-2xl rounded-xl bg-white px-xl pb-xl pt-2xl">

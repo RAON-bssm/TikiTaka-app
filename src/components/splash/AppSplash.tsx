@@ -1,7 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
   FadeOutUp,
@@ -44,6 +44,8 @@ const GRADIENT_LOCATIONS = [0, 0.5, 1] as const;
 // 토큰 확인은 대개 순식간이라, 최소 시간이 없으면 스플래시가 깜빡이고 사라진다.
 // 등장 모션(1.5초)이 끝까지 보이는 길이이기도 하다.
 const MIN_VISIBLE_MS = 1500;
+
+const MODAL_DISMISS_FALLBACK_MS = 1000;
 
 const EASE_IN_OUT = Easing.bezier(0.5, 0, 0.5, 1);
 const EASE_BACK = Easing.bezier(0.7, -0.4, 0.4, 1.4);
@@ -104,6 +106,7 @@ export default function AppSplash() {
   const [showPermissionNotice, setShowPermissionNotice] = useState<boolean | null>(null);
   // 닫히는 애니메이션 동안에도 내용이 남아 있어야 해서 표시 여부와 따로 둔다.
   const [noticePermissions, setNoticePermissions] = useState<NoticePermission[]>([]);
+  const [isModalDismissing, setIsModalDismissing] = useState(false);
   const { data: versionCheck } = useAppVersionCheck();
   // 앱이 꺼진 상태에서 알림으로 열린 경우를 놓치지 않도록 스플래시 때부터 구독한다.
   const { openedType: openedPushType, clear: clearOpenedPushType } = useOpenedPushType();
@@ -114,6 +117,12 @@ export default function AppSplash() {
   useEffect(() => {
     if (status === 'unauthenticated' && openedPushType) clearOpenedPushType();
   }, [status, openedPushType, clearOpenedPushType]);
+
+  useEffect(() => {
+    if (!isModalDismissing) return;
+    const timer = setTimeout(() => setIsModalDismissing(false), MODAL_DISMISS_FALLBACK_MS);
+    return () => clearTimeout(timer);
+  }, [isModalDismissing]);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsMinTimeElapsed(true), MIN_VISIBLE_MS);
@@ -174,8 +183,14 @@ export default function AppSplash() {
     transform: [{ rotate: `${logoRotate.value}deg` }],
   }));
 
+  const startModalDismiss = () => {
+    if (Platform.OS === 'ios') setIsModalDismissing(true);
+  };
+  const finishModalDismiss = () => setIsModalDismissing(false);
+
   const handleConfirmPermissionNotice = () => {
     setShowPermissionNotice(false);
+    startModalDismiss();
     markPermissionNoticeSeen().catch(() => {});
     if (noticePermissions.includes('notification')) {
       markNotificationPermissionAsked().catch(() => {});
@@ -186,17 +201,31 @@ export default function AppSplash() {
 
   if (status !== 'loading' && isMinTimeElapsed && showPermissionNotice !== null) {
     const showWage =
-      openedPushType === 'DAILY_WAGE' && status === 'authenticated' && !showPermissionNotice;
+      openedPushType === 'DAILY_WAGE' &&
+      status === 'authenticated' &&
+      !showPermissionNotice &&
+      !isModalDismissing;
     return (
       <>
         <PermissionNoticeDialog
           visible={showPermissionNotice}
           permissions={noticePermissions}
           onConfirm={handleConfirmPermissionNotice}
+          onDismiss={finishModalDismiss}
         />
         {/* iOS는 모달을 하나만 띄워서 일급 팝업을 먼저 보여 주고, 닫으면 업데이트 안내를 띄운다. */}
-        <AppUpdateDialog versionCheck={versionCheck} enabled={!showPermissionNotice && !showWage} />
-        <WageDialog visible={showWage} onClose={clearOpenedPushType} />
+        <AppUpdateDialog
+          versionCheck={versionCheck}
+          enabled={!showPermissionNotice && !showWage && !isModalDismissing}
+        />
+        <WageDialog
+          visible={showWage}
+          onClose={() => {
+            clearOpenedPushType();
+            startModalDismiss();
+          }}
+          onDismiss={finishModalDismiss}
+        />
       </>
     );
   }
