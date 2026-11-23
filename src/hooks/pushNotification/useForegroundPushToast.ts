@@ -15,11 +15,9 @@ export function useForegroundPushToast() {
   useEffect(
     () =>
       subscribeForegroundNotification(({ type, text }) => {
-        // 일급은 새벽 배치로 들어와, 화면에 떠 있던 내역·포인트는 지급 전 값이다.
-        if (type === 'WAGE') {
-          queryClient.invalidateQueries({ queryKey: territoryKeys.all });
-          queryClient.invalidateQueries({ queryKey: userKeys.all });
-        }
+        // 일급·땅 뺏김은 서버에서 바뀐 결과라, 화면에 떠 있던 내역·포인트는 그 전 값이다.
+        if (type === 'DAILY_WAGE') queryClient.invalidateQueries({ queryKey: userKeys.all });
+        if (type) queryClient.invalidateQueries({ queryKey: territoryKeys.all });
         showToast(text, { duration: FOREGROUND_TOAST_MS });
       }),
     [queryClient, showToast],

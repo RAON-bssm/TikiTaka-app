@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 
 import { withdraw } from '@/api/auth';
+import { registerCurrentPushToken, unregisterPushToken } from '@/api/pushNotification';
 import { getAppleAuthorizationCode } from '@/api/social';
 import { getLoginProvider } from '@/api/token';
 import { useToast } from '@/components/ui/Toast';
@@ -12,14 +13,12 @@ import { useClearSession } from './useClearSession';
  */
 async function withdrawWithReauth(): Promise<boolean> {
   const provider = await getLoginProvider();
-  if (provider !== 'APPLE') {
-    await withdraw();
-    return true;
-  }
+  const authorizationCode = provider === 'APPLE' ? await getAppleAuthorizationCode() : undefined;
+  if (provider === 'APPLE' && !authorizationCode) return false;
 
-  const authorizationCode = await getAppleAuthorizationCode();
-  if (!authorizationCode) return false;
-  await withdraw({ authorization_code: authorizationCode });
+  // 푸시 토큰 해제는 access token이 살아 있는 탈퇴 API 전에 보낸다. 실패해도 탈퇴는 그대로 진행한다.
+  await unregisterPushToken().catch(() => {});
+  await withdraw(authorizationCode ? { authorization_code: authorizationCode } : undefined);
   return true;
 }
 
@@ -33,6 +32,10 @@ export function useWithdraw() {
 
   return useMutation({
     mutationFn: withdrawWithReauth,
+    // 탈퇴가 실패하면 계정이 살아 있으니, 먼저 지운 푸시 토큰을 되돌린다.
+    onError: () => {
+      registerCurrentPushToken().catch(() => {});
+    },
     onSuccess: async (withdrawn) => {
       if (!withdrawn) return;
       showToast('탈퇴했어요. 그동안 고마웠어요', { type: 'success' });

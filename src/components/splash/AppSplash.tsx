@@ -32,6 +32,7 @@ import { useAppVersionCheck } from '@/hooks/appVersion/useAppVersionCheck';
 import { useAuthStatus } from '@/hooks/auth/useAuthStatus';
 import { useForegroundPushToast } from '@/hooks/pushNotification/useForegroundPushToast';
 import { useOpenedPushType } from '@/hooks/pushNotification/useOpenedPushType';
+import { usePushTokenRegistration } from '@/hooks/pushNotification/usePushTokenRegistration';
 
 const GRADIENT_COLORS = [
   palette.primary[600],
@@ -107,6 +108,7 @@ export default function AppSplash() {
   // 앱이 꺼진 상태에서 알림으로 열린 경우를 놓치지 않도록 스플래시 때부터 구독한다.
   const { openedType: openedPushType, clear: clearOpenedPushType } = useOpenedPushType();
   useForegroundPushToast();
+  usePushTokenRegistration();
 
   // 로그아웃 상태에서 알림으로 열렸으면 팝업을 버린다. 남겨 두면 나중에 (다른 계정일 수도 있는) 로그인 직후 갑자기 뜬다.
   useEffect(() => {
@@ -184,7 +186,7 @@ export default function AppSplash() {
 
   if (status !== 'loading' && isMinTimeElapsed && showPermissionNotice !== null) {
     const showWage =
-      openedPushType === 'WAGE' && status === 'authenticated' && !showPermissionNotice;
+      openedPushType === 'DAILY_WAGE' && status === 'authenticated' && !showPermissionNotice;
     return (
       <>
         <PermissionNoticeDialog

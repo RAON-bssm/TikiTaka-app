@@ -13,11 +13,9 @@ export function useOpenedPushType() {
   useEffect(
     () =>
       subscribeNotificationOpen((type) => {
-        // 일급은 새벽 배치로 들어와, 앱에 남아 있던 내역·포인트 캐시는 지급 전 값이다.
-        if (type === 'WAGE') {
-          queryClient.invalidateQueries({ queryKey: territoryKeys.all });
-          queryClient.invalidateQueries({ queryKey: userKeys.all });
-        }
+        // 일급·땅 뺏김은 서버에서 바뀐 결과라, 앱에 남아 있던 내역·포인트 캐시는 그 전 값이다.
+        if (type === 'DAILY_WAGE') queryClient.invalidateQueries({ queryKey: userKeys.all });
+        queryClient.invalidateQueries({ queryKey: territoryKeys.all });
         setOpenedType(type);
       }),
     [queryClient],

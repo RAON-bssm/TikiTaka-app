@@ -2,17 +2,21 @@ import {
   AuthorizationStatus,
   getInitialNotification,
   getMessaging,
+  getToken,
   onMessage,
   onNotificationOpenedApp,
+  onTokenRefresh,
   requestPermission,
 } from '@react-native-firebase/messaging';
 import * as SecureStore from 'expo-secure-store';
 import { PermissionsAndroid, Platform } from 'react-native';
 
+import type { EmptyResponse } from '@/types/api';
 import type { PushType } from '@/types/pushNotification';
+import client from './client';
 
 const NOTIFICATION_PERMISSION_ASKED_KEY = 'notificationPermissionAsked';
-const PUSH_TYPES: readonly string[] = ['WAGE'] satisfies PushType[];
+const PUSH_TYPES: readonly string[] = ['DAILY_WAGE', 'TERRITORY_CAPTURED'] satisfies PushType[];
 
 // 접근권한 안내를 이미 본 기존 사용자에게 알림 권한만 한 번 더 묻기 위한 표시다.
 // 계정이 아니라 기기 단위라 로그아웃 때 지우지 않는다.
@@ -92,5 +96,31 @@ export function subscribeForegroundNotification(
     const { title, body } = message.notification ?? {};
     const text = [title, body].filter(Boolean).join('\n');
     if (text) listener({ type: toPushType(message), text });
+  });
+}
+
+/**
+ * 이 기기의 FCM 토큰을 서버에 등록한다. 서버가 upsert라 여러 번 불러도 되고, 같은 기기에서 다른 계정으로 로그인하면
+ * 토큰 주인이 새 계정으로 바뀐다. 서버는 60일 동안 등록되지 않은 토큰을 지우므로 실행마다 다시 보낸다.
+ */
+async function registerPushToken(token: string): Promise<void> {
+  await client.put<EmptyResponse>('/api/push-tokens', { token, platform: Platform.OS });
+}
+
+export async function registerCurrentPushToken(): Promise<void> {
+  await registerPushToken(await getToken(getMessaging()));
+}
+
+/** 로그아웃·탈퇴 API보다 먼저 부른다(access token이 살아 있어야 한다). 내 계정의 이 기기 토큰만 지운다. */
+export async function unregisterPushToken(): Promise<void> {
+  const token = await getToken(getMessaging());
+  await client.delete<EmptyResponse>('/api/push-tokens', { data: { token } });
+}
+
+/** 로그인 상태인 동안 지금 토큰을 등록하고, FCM이 토큰을 바꾸면 다시 등록한다. 실패해도 다음 실행 때 다시 보내므로 무시한다. */
+export function subscribePushTokenRegistration(): () => void {
+  registerCurrentPushToken().catch(() => {});
+  return onTokenRefresh(getMessaging(), (token) => {
+    registerPushToken(token).catch(() => {});
   });
 }
