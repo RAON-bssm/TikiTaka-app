@@ -5,6 +5,8 @@ import { RefreshControl, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { trackEvent } from '@/api/analytics';
+import { PhotoPermissionDeniedError } from '@/api/photoSave';
 import BlockUserDialog from '@/components/block/BlockUserDialog';
 import AiScoreCard from '@/components/feed/AiScoreCard';
 import AiScoreCheckCard from '@/components/feed/AiScoreCheckCard';
@@ -17,10 +19,13 @@ import PostReviewNotice from '@/components/feed/PostReviewNotice';
 import PostTitleRow from '@/components/feed/PostTitleRow';
 import ReportDialog, { type ReportTarget } from '@/components/report/ReportDialog';
 import BackButton from '@/components/ui/BackButton';
+import ConfirmDialog from '@/components/ui/feedback/ConfirmDialog';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Header from '@/components/ui/Header';
+import { useToast } from '@/components/ui/Toast';
 import { palette } from '@/constants/colors';
 import { usePostDetail } from '@/hooks/post/usePostDetail';
+import { useSavePostImage } from '@/hooks/post/useSavePostImage';
 import { useMyInfo } from '@/hooks/user/useMyInfo';
 
 export default function PostDetailScreen() {
@@ -36,6 +41,29 @@ export default function PostDetailScreen() {
   const [reportTarget, setReportTarget] = useState<ReportTarget>();
   const [blockTarget, setBlockTarget] = useState<{ userId: string; userName: string }>();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isSaveConfirmOpen, setIsSaveConfirmOpen] = useState(false);
+  const { mutate: saveImage, isPending: isSavingImage } = useSavePostImage();
+  const { showToast } = useToast();
+
+  const handleSaveImage = (imageKey: string, imageUrl?: string) => {
+    if (isSavingImage) return;
+    saveImage(
+      { imageKey, imageUrl },
+      {
+        onSuccess: () => {
+          trackEvent('post_image_save');
+          showToast('사진을 앨범에 저장했어요');
+        },
+        onError: (error) => {
+          showToast(
+            error instanceof PhotoPermissionDeniedError
+              ? '사진 저장 권한을 기기 설정에서 허용해 주세요'
+              : '사진을 저장하지 못했어요. 다시 시도해 주세요.',
+          );
+        },
+      },
+    );
+  };
 
   // 업로드 직후·공유 링크로 들어오면 피드 스택에 이 화면만 있어, 뒤로 가기가 피드 목록으로 가도록 목록을 밑에 깐다.
   useEffect(() => {
@@ -135,14 +163,14 @@ export default function PostDetailScreen() {
                 postId={post_id}
                 imageKey={post.post_image}
                 imageUrl={post.post_image_url}
+                onLongPress={() => setIsSaveConfirmOpen(true)}
               />
             </View>
 
             <PostTitleRow
               postId={post_id}
               title={post.content}
-              imageKey={post.post_image}
-              imageUrl={post.post_image_url}
+              onSaveImage={() => handleSaveImage(post.post_image, post.post_image_url)}
               likeCount={post.status === 'DONE' ? post.like_count : undefined}
               liked={post.liked_by_me}
             />
@@ -165,6 +193,17 @@ export default function PostDetailScreen() {
         postId={isDeleteOpen ? post_id : undefined}
         onClose={() => setIsDeleteOpen(false)}
         onDeleted={() => router.back()}
+      />
+      <ConfirmDialog
+        visible={isSaveConfirmOpen}
+        title="사진을 저장할까요?"
+        description="게시글 사진을 앨범에 저장해요."
+        confirmLabel="저장"
+        onConfirm={() => {
+          setIsSaveConfirmOpen(false);
+          if (post) handleSaveImage(post.post_image, post.post_image_url);
+        }}
+        onCancel={() => setIsSaveConfirmOpen(false)}
       />
       <ReportDialog target={reportTarget} onClose={() => setReportTarget(undefined)} />
       <BlockUserDialog

@@ -1,5 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useRef } from 'react';
+import { Pressable } from 'react-native';
 
 import LoadingImage from '@/components/ui/feedback/LoadingImage';
 import { invalidateImageUrls } from '@/hooks/post/invalidateImageUrls';
@@ -11,9 +12,11 @@ interface Props {
   imageKey: string;
   /** 응답에 같이 온 조회 URL. 없으면(발급 실패) `imageKey`로 직접 받는다. */
   imageUrl?: string;
+  /** 길게 누르면 호출한다(사진 저장 확인). */
+  onLongPress?: () => void;
 }
 
-export default function PostImage({ postId, imageKey, imageUrl }: Props) {
+export default function PostImage({ postId, imageKey, imageUrl, onLongPress }: Props) {
   const needsFallback = !imageUrl;
   const fallback = useViewUrl(needsFallback ? imageKey : undefined);
   const resolvedUri = imageUrl ?? fallback.uri;
@@ -29,12 +32,19 @@ export default function PostImage({ postId, imageKey, imageUrl }: Props) {
   };
 
   return (
-    <LoadingImage
-      uri={isLoading ? undefined : resolvedUri}
-      cacheKey={imageKey}
-      enforceEarlyResizing
-      onError={handleImageError}
-      className="h-[320px] w-full rounded-lg"
-    />
+    <Pressable
+      onLongPress={onLongPress}
+      disabled={!onLongPress}
+      accessibilityLabel="게시글 사진"
+      accessibilityHint={onLongPress ? '길게 눌러 사진 저장' : undefined}
+    >
+      <LoadingImage
+        uri={isLoading ? undefined : resolvedUri}
+        cacheKey={imageKey}
+        enforceEarlyResizing
+        onError={handleImageError}
+        className="h-[320px] w-full rounded-lg"
+      />
+    </Pressable>
   );
 }

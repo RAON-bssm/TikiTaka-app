@@ -1,5 +1,4 @@
-import { File, Paths } from 'expo-file-system';
-import { Asset, requestPermissionsAsync } from 'expo-media-library';
+import type { File } from 'expo-file-system';
 
 import { getViewUrl } from './storage';
 
@@ -25,6 +24,7 @@ function getExtension(key: string): string {
 }
 
 async function download(url: string, extension: string): Promise<File> {
+  const { File, Paths } = await import('expo-file-system');
   const target = new File(Paths.cache, `post-save-${Date.now()}.${extension}`);
   return File.downloadFileAsync(url, target, { idempotent: true });
 }
@@ -34,6 +34,9 @@ async function download(url: string, extension: string): Promise<File> {
  * iOS는 "사진 추가" 권한만, Android 13+는 런타임 권한 없이 저장된다.
  */
 export async function savePostImage({ imageKey, imageUrl }: SavePostImageParams): Promise<void> {
+  // 맨 위에서 가져오면 네이티브 모듈이 없는 빌드(이전 dev client·스토어 버전)에서 게시글 화면 자체가 열리지 않는다.
+  // 누를 때 불러와서, 없으면 저장만 실패하게 한다.
+  const { Asset, requestPermissionsAsync } = await import('expo-media-library');
   const permission = await requestPermissionsAsync(true);
   if (!permission.granted) throw new PhotoPermissionDeniedError();
 
