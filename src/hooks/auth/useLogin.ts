@@ -3,11 +3,12 @@ import { router } from 'expo-router';
 
 import { toAnalyticsMethod, trackEvent } from '@/api/analytics';
 import { login } from '@/api/auth';
+import { consumePendingPostId } from '@/api/deepLink';
 import { setLoginProvider, setSignupToken, setTokens } from '@/api/token';
 import type { LoginData, Provider } from '@/types/auth';
 
 /**
- * 'LOGIN'이면 토큰 저장 후 홈으로, 'SIGNUP_REQUIRED'면 signup_token을 메모리에 두고 가입 화면으로 보낸다.
+ * 'LOGIN'이면 토큰 저장 후 홈으로(공유 링크로 들어왔다면 그 게시글로), 'SIGNUP_REQUIRED'면 signup_token을 메모리에 두고 가입 화면으로 보낸다.
  */
 export function useLogin() {
   return useMutation({
@@ -35,6 +36,14 @@ export function useLogin() {
       }
       await setTokens(data.access_token, data.refresh_token);
       trackEvent('login', { method: toAnalyticsMethod(provider) });
+      const pendingPostId = consumePendingPostId();
+      if (pendingPostId) {
+        router.replace({
+          pathname: '/feed/[post_id]',
+          params: { post_id: pendingPostId, from: 'link' },
+        });
+        return;
+      }
       router.replace('/(tabs)');
     },
   });

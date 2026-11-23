@@ -1,6 +1,7 @@
 import { View } from 'react-native';
 import Typography from '../ui/Typography';
 import LikeButton from './LikeButton';
+import PostShareButton from './PostShareButton';
 
 interface Props {
   postId: string;
@@ -24,6 +25,7 @@ export default function PostTitleRow({ postId, title, likeCount, liked }: Props)
           textClassName="text-gray-700"
         />
       )}
+      <PostShareButton postId={postId} />
     </View>
   );
 }

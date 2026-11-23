@@ -24,7 +24,10 @@ import { usePostDetail } from '@/hooks/post/usePostDetail';
 import { useMyInfo } from '@/hooks/user/useMyInfo';
 
 export default function PostDetailScreen() {
-  const { post_id, from } = useLocalSearchParams<{ post_id: string; from?: 'upload' }>();
+  const { post_id, from } = useLocalSearchParams<{
+    post_id: string;
+    from?: 'upload' | 'link';
+  }>();
   const navigation = useNavigation();
   const { data: post, isLoading, isError, refetch } = usePostDetail(post_id);
   const { data: myInfo } = useMyInfo();
@@ -34,8 +37,9 @@ export default function PostDetailScreen() {
   const [blockTarget, setBlockTarget] = useState<{ userId: string; userName: string }>();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
+  // 업로드 직후·공유 링크로 들어오면 피드 스택에 이 화면만 있어, 뒤로 가기가 피드 목록으로 가도록 목록을 밑에 깐다.
   useEffect(() => {
-    if (from !== 'upload') return;
+    if (from !== 'upload' && from !== 'link') return;
     const state = navigation.getState();
     if (!state || state.index !== 0) return;
     navigation.dispatch(

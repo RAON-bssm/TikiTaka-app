@@ -21,6 +21,7 @@
       "entitlements": {
         "aps-environment": "development"
       },
+      "associatedDomains": ["applinks:web-view.raon-tikitaka.shop"],
       "googleServicesFile": "./GoogleService-Info.plist",
       "appleTeamId": "64FFS3NVX7"
     },
@@ -37,6 +38,20 @@
         "android.permission.POST_NOTIFICATIONS"
       ],
       "package": "com.tikitaka.raon",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "web-view.raon-tikitaka.shop",
+              "pathPrefix": "/p/"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ],
       "versionCode": 1,
       "googleServicesFile": "./google-services.json",
       "blockedPermissions": [

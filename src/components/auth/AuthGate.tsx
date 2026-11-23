@@ -5,6 +5,7 @@ import { useEffect, useRef } from 'react';
 
 import { setAnalyticsUserId } from '@/api/analytics';
 import { clearSavedCharacter } from '@/api/character';
+import { clearPendingPostId } from '@/api/deepLink';
 import { loadAuthStatus } from '@/api/token';
 import { clearTutorialStep } from '@/api/tutorial';
 import { useAuthStatus } from '@/hooks/auth/useAuthStatus';
@@ -46,6 +47,9 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
       // 스플래시는 화면이 실제로 바뀌어 이 effect가 다시 돌 때 내린다. 지금 내리면 홈이 스쳐 보인다.
       return;
     }
+
+    // 로그인된 채로 앱 화면에 왔으면 공유 링크 목적지에 이미 도착했거나 쓸 일이 없다. 남겨 두면 다음 로그인 때 엉뚱하게 이동한다.
+    if (status === 'authenticated' && !isAuthScreen) clearPendingPostId();
 
     SplashScreen.hideAsync().catch(() => {});
   }, [status, segments]);
