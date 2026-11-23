@@ -2,6 +2,7 @@ import {
   AuthorizationStatus,
   getInitialNotification,
   getMessaging,
+  onMessage,
   onNotificationOpenedApp,
   requestPermission,
 } from '@react-native-firebase/messaging';
@@ -47,7 +48,10 @@ export async function requestNotificationPermission(): Promise<boolean> {
 }
 
 // RNFirebase가 `RemoteMessage` 타입을 export하지 않아 쓰는 필드만 적는다.
-type OpenedMessage = { data?: Record<string, unknown> } | null;
+type OpenedMessage = {
+  data?: Record<string, unknown>;
+  notification?: { title?: string; body?: string };
+} | null;
 
 function toPushType(message: OpenedMessage): PushType | undefined {
   const type = message?.data?.type;
@@ -73,4 +77,20 @@ export function subscribeNotificationOpen(listener: (type: PushType) => void): (
       .catch(() => {});
   }
   return onNotificationOpenedApp(messaging, handle);
+}
+
+/**
+ * Android는 앱이 앞에 있을 때 받은 FCM 알림을 시스템에 띄우지 않고 `onMessage`로만 넘긴다
+ * (iOS는 firebase.json `messaging_ios_foreground_presentation_options`로 배너가 뜬다).
+ * 알림 표시 라이브러리(expo-notifications 등)는 FCM 수신 서비스가 겹쳐 쓰지 않으므로, 제목·본문을 넘겨 앱 안에서 보여 준다.
+ */
+export function subscribeForegroundNotification(
+  listener: (notice: { type?: PushType; text: string }) => void,
+): () => void {
+  if (Platform.OS !== 'android') return () => {};
+  return onMessage(getMessaging(), (message) => {
+    const { title, body } = message.notification ?? {};
+    const text = [title, body].filter(Boolean).join('\n');
+    if (text) listener({ type: toPushType(message), text });
+  });
 }
