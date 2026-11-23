@@ -16,6 +16,7 @@ import type {
   TerritoryListData,
   UpdateDongPreferencesRequest,
   UpdateMissionRequest,
+  WageListData,
 } from '@/types/territory';
 import client from './client';
 import { appendImage, MULTIPART_HEADERS } from './uploadImage';
@@ -157,6 +158,14 @@ export async function retakeDefensePhoto(
 
 export async function getTeamRanking(cycleId?: number): Promise<TeamRankingData> {
   const { data } = await client.get<ApiResponse<TeamRankingData>>('/api/territory/ranking/team', {
+    params: { cycleId },
+  });
+  return data.data;
+}
+
+/** `cycleId`를 빼면 전체 사이클. */
+export async function getMyWages(cycleId?: number): Promise<WageListData> {
+  const { data } = await client.get<ApiResponse<WageListData>>('/api/territory/me/wages', {
     params: { cycleId },
   });
   return data.data;

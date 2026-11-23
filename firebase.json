@@ -5,6 +5,7 @@
     "google_analytics_registration_with_ad_network_enabled": false,
     "analytics_default_allow_ad_storage": false,
     "analytics_default_allow_ad_user_data": false,
-    "analytics_default_allow_ad_personalization_signals": false
+    "analytics_default_allow_ad_personalization_signals": false,
+    "messaging_ios_foreground_presentation_options": ["banner", "list", "sound"]
   }
 }

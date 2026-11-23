@@ -89,6 +89,7 @@ export const territoryKeys = {
   detail: (dongCode: number) => [...territoryKeys.all, 'detail', dongCode] as const,
   challenge: (challengeId: string) => [...territoryKeys.all, 'challenge', challengeId] as const,
   mine: () => [...territoryKeys.all, 'mine'] as const,
+  wages: (cycleId?: number) => [...territoryKeys.all, 'wages', cycleId] as const,
   teamRanking: () => [...territoryKeys.all, 'teamRanking'] as const,
 };
 
@@ -96,4 +97,10 @@ export const equipmentKeys = {
   all: ['equipment'] as const,
   current: () => [...equipmentKeys.all, 'current'] as const,
   user: (userId: string) => [...equipmentKeys.all, 'user', userId] as const,
+};
+
+export const appVersionKeys = {
+  all: ['appVersion'] as const,
+  check: (platform: string, currentVersion: string | undefined) =>
+    [...appVersionKeys.all, 'check', platform, currentVersion] as const,
 };

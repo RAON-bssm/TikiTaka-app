@@ -15,8 +15,13 @@
         "usesNonExemptEncryption": false
       },
       "infoPlist": {
-        "NSCameraUsageDescription": "동네 사진을 촬영하기 위해 카메라 접근 권한이 필요합니다."
+        "NSCameraUsageDescription": "동네 사진을 촬영하기 위해 카메라 접근 권한이 필요합니다.",
+        "UIBackgroundModes": ["remote-notification"]
       },
+      "entitlements": {
+        "aps-environment": "development"
+      },
+      "associatedDomains": ["applinks:web-view.raon-tikitaka.shop"],
       "googleServicesFile": "./GoogleService-Info.plist",
       "appleTeamId": "64FFS3NVX7"
     },
@@ -29,15 +34,32 @@
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.ACCESS_FINE_LOCATION"
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.POST_NOTIFICATIONS"
       ],
       "package": "com.tikitaka.raon",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "web-view.raon-tikitaka.shop",
+              "pathPrefix": "/p/"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ],
       "versionCode": 1,
       "googleServicesFile": "./google-services.json",
       "blockedPermissions": [
         "com.google.android.gms.permission.AD_ID",
         "android.permission.ACCESS_ADSERVICES_AD_ID",
-        "android.permission.ACCESS_ADSERVICES_ATTRIBUTION"
+        "android.permission.ACCESS_ADSERVICES_ATTRIBUTION",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_VISUAL_USER_SELECTED"
       ]
     },
     "web": {
@@ -90,6 +112,15 @@
           "ios": {
             "withoutAdIdSupport": true
           }
+        }
+      ],
+      "@react-native-firebase/messaging",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": false,
+          "savePhotosPermission": "게시글 사진을 앨범에 저장하기 위해 사진 추가 권한이 필요합니다.",
+          "granularPermissions": []
         }
       ],
       [

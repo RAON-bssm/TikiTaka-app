@@ -5,14 +5,22 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 interface Props {
   visible: boolean;
   onClose: () => void;
+  /** 닫힘 애니메이션이 끝난 뒤 호출된다(iOS 전용, RN Modal 제약). */
+  onDismiss?: () => void;
   children: ReactNode;
 }
 
-export default function BottomSheet({ visible, onClose, children }: Props) {
+export default function BottomSheet({ visible, onClose, onDismiss, children }: Props) {
   const insets = useSafeAreaInsets();
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}
+      onDismiss={onDismiss}
+    >
       <Pressable className="flex-1 bg-black/25" onPress={onClose} />
 
       <View

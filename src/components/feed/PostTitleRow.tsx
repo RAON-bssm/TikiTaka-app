@@ -1,15 +1,17 @@
 import { View } from 'react-native';
 import Typography from '../ui/Typography';
 import LikeButton from './LikeButton';
+import PostShareButton from './PostShareButton';
 
 interface Props {
   postId: string;
   title: string;
+  onSaveImage: () => void;
   likeCount?: number;
   liked?: boolean;
 }
 
-export default function PostTitleRow({ postId, title, likeCount, liked }: Props) {
+export default function PostTitleRow({ postId, title, onSaveImage, likeCount, liked }: Props) {
   return (
     <View className="flex flex-row items-start gap-md">
       <Typography variant="body2" className="flex-1 text-gray-800">
@@ -24,6 +26,7 @@ export default function PostTitleRow({ postId, title, likeCount, liked }: Props)
           textClassName="text-gray-700"
         />
       )}
+      <PostShareButton postId={postId} onSaveImage={onSaveImage} />
     </View>
   );
 }

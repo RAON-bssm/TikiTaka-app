@@ -62,11 +62,10 @@ export default function Upload() {
       {
         onSuccess: ({ postId, status }) => {
           showToast(UPLOAD_SUCCESS_MESSAGE[status] ?? UPLOAD_UNSCORED_MESSAGE, { type: 'success' });
+          // 카메라 스택을 비우고 피드 탭으로 옮긴 뒤 상세를 덮어, 뒤로 가기가 피드 목록으로 가게 한다.
           router.dismissAll();
-          router.replace({
-            pathname: '/feed/[post_id]',
-            params: { post_id: postId, from: 'upload' },
-          });
+          router.navigate('/feed');
+          router.push({ pathname: '/post/[post_id]', params: { post_id: postId } });
         },
         onError: (error) => {
           if (error instanceof UploadConfirmationFailedError) {

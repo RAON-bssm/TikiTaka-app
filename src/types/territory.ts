@@ -161,6 +161,7 @@ export interface DevelopResult {
   team_gain: number;
   land_price: number;
   next_cost: number;
+  /** 개인 하루 남은 횟수. -1이면 제한이 없다. 땅마다 하루 성공 횟수 제한은 따로 있다(넘으면 409). */
   remaining_today: number;
   my_point: number;
 }
@@ -205,10 +206,10 @@ export interface MyTerritory {
   owner_last_active_at?: DateTimeString;
 }
 
-/** `territories.length === max_owned`면 다른 땅에 도전할 수 없다(409). */
 export interface MyTerritoryListData {
   cycle_id?: number;
   round_type: RoundType;
+  /** 0이면 보유 제한이 없다. 양수면 `territories.length === max_owned`일 때 다른 땅에 도전할 수 없다(409). */
   max_owned: number;
   territories: MyTerritory[];
 }
@@ -247,4 +248,24 @@ export interface TeamRankingData {
   finalized: boolean;
   my_location_id?: number;
   teams: TeamRank[];
+}
+
+/** 땅이 없어 일급이 0인 날은 기록이 없다. */
+export interface Wage {
+  wage_id: number;
+  cycle_id: number;
+  /** `YYYY-MM-DD`(KST) */
+  paid_on: string;
+  /** 지급 시점 값 */
+  land_count: number;
+  total_land_price: number;
+  /** 0.5 = 50% */
+  rate: number;
+  amount: number;
+}
+
+/** 최신순 최대 100건. `total_amount`는 이 목록 금액의 합계다. */
+export interface WageListData {
+  total_amount: number;
+  wages: Wage[];
 }

@@ -5,6 +5,8 @@ import { RefreshControl, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { trackEvent } from '@/api/analytics';
+import { PhotoPermissionDeniedError } from '@/api/photoSave';
 import BlockUserDialog from '@/components/block/BlockUserDialog';
 import AiScoreCard from '@/components/feed/AiScoreCard';
 import AiScoreCheckCard from '@/components/feed/AiScoreCheckCard';
@@ -17,14 +19,17 @@ import PostReviewNotice from '@/components/feed/PostReviewNotice';
 import PostTitleRow from '@/components/feed/PostTitleRow';
 import ReportDialog, { type ReportTarget } from '@/components/report/ReportDialog';
 import BackButton from '@/components/ui/BackButton';
+import ConfirmDialog from '@/components/ui/feedback/ConfirmDialog';
 import ErrorRetry from '@/components/ui/feedback/ErrorRetry';
 import Header from '@/components/ui/Header';
+import { useToast } from '@/components/ui/Toast';
 import { palette } from '@/constants/colors';
 import { usePostDetail } from '@/hooks/post/usePostDetail';
+import { useSavePostImage } from '@/hooks/post/useSavePostImage';
 import { useMyInfo } from '@/hooks/user/useMyInfo';
 
 export default function PostDetailScreen() {
-  const { post_id, from } = useLocalSearchParams<{ post_id: string; from?: 'upload' }>();
+  const { post_id } = useLocalSearchParams<{ post_id: string }>();
   const navigation = useNavigation();
   const { data: post, isLoading, isError, refetch } = usePostDetail(post_id);
   const { data: myInfo } = useMyInfo();
@@ -33,15 +38,43 @@ export default function PostDetailScreen() {
   const [reportTarget, setReportTarget] = useState<ReportTarget>();
   const [blockTarget, setBlockTarget] = useState<{ userId: string; userName: string }>();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isSaveConfirmOpen, setIsSaveConfirmOpen] = useState(false);
+  const { mutate: saveImage, isPending: isSavingImage } = useSavePostImage();
+  const { showToast } = useToast();
 
+  const handleSaveImage = (imageKey: string, imageUrl?: string) => {
+    if (isSavingImage) return;
+    saveImage(
+      { imageKey, imageUrl },
+      {
+        onSuccess: () => {
+          trackEvent('post_image_save');
+          showToast('사진을 앨범에 저장했어요');
+        },
+        onError: (error) => {
+          showToast(
+            error instanceof PhotoPermissionDeniedError
+              ? '사진 저장 권한을 기기 설정에서 허용해 주세요'
+              : '사진을 저장하지 못했어요. 다시 시도해 주세요.',
+          );
+        },
+      },
+    );
+  };
+
+  // 게시글 상세는 탭 위에 덮는 루트 스택 화면이다. 공유 링크로 바로 열거나 로그인 직후 replace로 오면
+  // 밑에 탭이 없어 뒤로 갈 곳이 없으므로, 피드 탭을 밑에 깔아 뒤로 가기가 피드 목록으로 가게 한다.
   useEffect(() => {
-    if (from !== 'upload') return;
     const state = navigation.getState();
     if (!state || state.index !== 0) return;
     navigation.dispatch(
-      CommonActions.reset({ ...state, index: 1, routes: [{ name: 'index' }, state.routes[0]] }),
+      CommonActions.reset({
+        ...state,
+        index: 1,
+        routes: [{ name: '(tabs)', params: { screen: 'feed' } }, state.routes[0]],
+      }),
     );
-  }, [from, navigation]);
+  }, [navigation]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -58,7 +91,7 @@ export default function PostDetailScreen() {
   const scoreRevealed = revealedPostId === post_id;
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-gray-50" edges={['top', 'bottom']}>
       <ScrollView
         className="flex-1"
         contentContainerClassName="gap-2xl px-xl pt-lg"
@@ -131,12 +164,14 @@ export default function PostDetailScreen() {
                 postId={post_id}
                 imageKey={post.post_image}
                 imageUrl={post.post_image_url}
+                onLongPress={() => setIsSaveConfirmOpen(true)}
               />
             </View>
 
             <PostTitleRow
               postId={post_id}
               title={post.content}
+              onSaveImage={() => handleSaveImage(post.post_image, post.post_image_url)}
               likeCount={post.status === 'DONE' ? post.like_count : undefined}
               liked={post.liked_by_me}
             />
@@ -159,6 +194,17 @@ export default function PostDetailScreen() {
         postId={isDeleteOpen ? post_id : undefined}
         onClose={() => setIsDeleteOpen(false)}
         onDeleted={() => router.back()}
+      />
+      <ConfirmDialog
+        visible={isSaveConfirmOpen}
+        title="사진을 저장할까요?"
+        description="게시글 사진을 앨범에 저장해요."
+        confirmLabel="저장"
+        onConfirm={() => {
+          setIsSaveConfirmOpen(false);
+          if (post) handleSaveImage(post.post_image, post.post_image_url);
+        }}
+        onCancel={() => setIsSaveConfirmOpen(false)}
       />
       <ReportDialog target={reportTarget} onClose={() => setReportTarget(undefined)} />
       <BlockUserDialog
