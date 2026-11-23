@@ -14,26 +14,36 @@ interface Props {
 
 export default function AppUpdateDialog({ versionCheck, enabled }: Props) {
   const [isDismissed, setIsDismissed] = useState(false);
+  const [isOpenFailed, setIsOpenFailed] = useState(false);
 
   // 서버가 store_url 없이 업데이트를 요구하면 이동할 곳이 없어, 강제 업데이트라도 앱을 막지 않는다.
   const storeUrl = versionCheck?.store_url;
   if (!enabled || !storeUrl || !versionCheck || versionCheck.update_type === 'NONE') return null;
 
-  const openStore = () => {
-    Linking.openURL(storeUrl).catch(() => {});
+  const openStore = async (): Promise<boolean> => {
+    try {
+      await Linking.openURL(storeUrl);
+      setIsOpenFailed(false);
+      return true;
+    } catch {
+      setIsOpenFailed(true);
+      return false;
+    }
   };
+  const failedMessage = '스토어를 열지 못했어요. 다시 시도해 주세요.';
 
   if (versionCheck.update_type === 'OPTIONAL') {
     return (
       <ConfirmDialog
         visible={!isDismissed}
         title="새 버전이 나왔어요"
-        description="업데이트하고 더 나아진 티키타카를 만나보세요."
+        description={isOpenFailed ? failedMessage : '업데이트하고 더 나아진 티키타카를 만나보세요.'}
         confirmLabel="업데이트"
         cancelLabel="나중에"
         onConfirm={() => {
-          setIsDismissed(true);
-          openStore();
+          void openStore().then((opened) => {
+            if (opened) setIsDismissed(true);
+          });
         }}
         onCancel={() => setIsDismissed(true)}
       />
@@ -50,10 +60,12 @@ export default function AppUpdateDialog({ versionCheck, enabled }: Props) {
               업데이트가 필요해요
             </Typography>
             <Typography variant="body2" className="text-center text-gray-500">
-              지금 버전은 더 이상 지원하지 않아요.{'\n'}최신 버전으로 업데이트해 주세요.
+              {isOpenFailed
+                ? failedMessage
+                : '지금 버전은 더 이상 지원하지 않아요.\n최신 버전으로 업데이트해 주세요.'}
             </Typography>
           </View>
-          <Button content="업데이트" onclick={openStore} />
+          <Button content="업데이트" onclick={() => void openStore()} />
         </View>
       </View>
     </Modal>
