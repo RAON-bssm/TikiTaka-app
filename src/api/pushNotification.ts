@@ -84,18 +84,16 @@ export function subscribeNotificationOpen(listener: (type: PushType) => void): (
 }
 
 /**
- * Android는 앱이 앞에 있을 때 받은 FCM 알림을 시스템에 띄우지 않고 `onMessage`로만 넘긴다
- * (iOS는 firebase.json `messaging_ios_foreground_presentation_options`로 배너가 뜬다).
- * 알림 표시 라이브러리(expo-notifications 등)는 FCM 수신 서비스가 겹쳐 쓰지 않으므로, 제목·본문을 넘겨 앱 안에서 보여 준다.
+ * 앱이 앞에 있을 때 받은 FCM 메시지. 두 플랫폼 모두 `onMessage`로 들어온다.
+ * Android는 이때 시스템 알림을 띄우지 않아(iOS는 firebase.json `messaging_ios_foreground_presentation_options`로 배너가 뜬다)
+ * 앱 안에서 보여 줄 수 있게 제목·본문을 `text`로 넘긴다. 알림 표시 라이브러리(expo-notifications 등)는 FCM 수신 서비스가 겹쳐 쓰지 않는다.
  */
 export function subscribeForegroundNotification(
   listener: (notice: { type?: PushType; text: string }) => void,
 ): () => void {
-  if (Platform.OS !== 'android') return () => {};
   return onMessage(getMessaging(), (message) => {
     const { title, body } = message.notification ?? {};
-    const text = [title, body].filter(Boolean).join('\n');
-    if (text) listener({ type: toPushType(message), text });
+    listener({ type: toPushType(message), text: [title, body].filter(Boolean).join('\n') });
   });
 }
 
@@ -107,12 +105,21 @@ async function registerPushToken(token: string): Promise<void> {
   await client.put<EmptyResponse>('/api/push-tokens', { token, platform: Platform.OS });
 }
 
-export async function registerCurrentPushToken(): Promise<void> {
-  await registerPushToken(await getToken(getMessaging()));
+// 해제(DELETE)가 진행 중인 등록(PUT)보다 먼저 서버에 닿으면, 로그아웃한 기기 토큰이 이전 계정에 다시 등록된다.
+let pendingRegistration: Promise<void> = Promise.resolve();
+
+function trackRegistration(registration: Promise<void>): Promise<void> {
+  pendingRegistration = registration.catch(() => {});
+  return registration;
+}
+
+export function registerCurrentPushToken(): Promise<void> {
+  return trackRegistration(getToken(getMessaging()).then(registerPushToken));
 }
 
 /** 로그아웃·탈퇴 API보다 먼저 부른다(access token이 살아 있어야 한다). 내 계정의 이 기기 토큰만 지운다. */
 export async function unregisterPushToken(): Promise<void> {
+  await pendingRegistration;
   const token = await getToken(getMessaging());
   await client.delete<EmptyResponse>('/api/push-tokens', { data: { token } });
 }
@@ -121,6 +128,6 @@ export async function unregisterPushToken(): Promise<void> {
 export function subscribePushTokenRegistration(): () => void {
   registerCurrentPushToken().catch(() => {});
   return onTokenRefresh(getMessaging(), (token) => {
-    registerPushToken(token).catch(() => {});
+    trackRegistration(registerPushToken(token)).catch(() => {});
   });
 }
