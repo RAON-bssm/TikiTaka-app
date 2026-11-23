@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 
 import { toAnalyticsMethod, trackEvent } from '@/api/analytics';
 import { signup } from '@/api/auth';
+import { consumePendingPostId } from '@/api/deepLink';
 import { clearSignupToken, getLoginProvider, getSignupToken, setTokens } from '@/api/token';
 import { startTutorialForNewUser } from '@/api/tutorial';
 
@@ -32,6 +33,12 @@ export function useSignup() {
       trackEvent('sign_up', { method: provider ? toAnalyticsMethod(provider) : 'unknown' });
       // 탭 화면이 열리면서 저장된 단계를 읽으므로 이동보다 먼저 기록한다.
       await startTutorialForNewUser().catch(() => {});
+      // 공유 링크로 들어와 가입까지 한 경우에도 그 게시글로 보낸다. 튜토리얼은 상세를 닫고 탭으로 돌아오면 이어진다.
+      const pendingPostId = consumePendingPostId();
+      if (pendingPostId) {
+        router.replace({ pathname: '/post/[post_id]', params: { post_id: pendingPostId } });
+        return;
+      }
       router.replace('/(tabs)');
     },
   });
