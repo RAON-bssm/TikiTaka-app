@@ -8,7 +8,7 @@ import { useEffect } from 'react';
  */
 export default function useScreenTracking() {
   const segments = useSegments();
-  // 실제 경로(/feed/123) 대신 라우트 패턴(/feed/[post_id])을 보내야 게시글마다 화면이 따로 집계되지 않는다.
+  // 실제 경로(/post/123) 대신 라우트 패턴(/post/[post_id])을 보내야 게시글마다 화면이 따로 집계되지 않는다.
   const screenName = `/${segments.filter((segment) => !segment.startsWith('(')).join('/')}`;
 
   useEffect(() => {

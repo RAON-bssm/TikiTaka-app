@@ -1,7 +1,7 @@
 import { setPendingPostId } from '@/api/deepLink';
 
 // 공유 링크(`https://<SHARE_ORIGIN>/p/<id>`, 카톡 인앱 브라우저의 "앱에서 보기"는 `tikitaka://p/<id>`)를
-// 게시글 상세로 바꾼다. 웹 주소를 짧게 두려고 앱 라우트(`/feed/<id>`)와 경로를 다르게 했다.
+// 게시글 상세로 바꾼다. 웹 주소를 짧게 두려고 앱 라우트(`/post/<id>`)와 경로를 다르게 했다.
 const POST_LINK_PATTERN = /(?:^|\/)p\/([^/?#]+)/;
 
 export function redirectSystemPath({ path }: { path: string; initial: boolean }) {
@@ -11,7 +11,7 @@ export function redirectSystemPath({ path }: { path: string; initial: boolean })
     if (!match) return path;
     const postId = decodeURIComponent(match[1]);
     setPendingPostId(postId);
-    return `/feed/${encodeURIComponent(postId)}?from=link`;
+    return `/post/${encodeURIComponent(postId)}`;
   } catch {
     return path;
   }

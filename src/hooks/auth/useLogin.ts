@@ -38,10 +38,7 @@ export function useLogin() {
       trackEvent('login', { method: toAnalyticsMethod(provider) });
       const pendingPostId = consumePendingPostId();
       if (pendingPostId) {
-        router.replace({
-          pathname: '/feed/[post_id]',
-          params: { post_id: pendingPostId, from: 'link' },
-        });
+        router.replace({ pathname: '/post/[post_id]', params: { post_id: pendingPostId } });
         return;
       }
       router.replace('/(tabs)');

@@ -111,7 +111,7 @@ function FeedCard({
 
   return (
     <Pressable
-      onPress={() => router.push(`/feed/${postId}`)}
+      onPress={() => router.push({ pathname: '/post/[post_id]', params: { post_id: postId } })}
       className="w-full gap-lg rounded-md border border-gray-100 bg-white p-lg active:opacity-90"
     >
       <View className="w-full flex-row items-center justify-between">

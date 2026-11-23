@@ -29,10 +29,7 @@ import { useSavePostImage } from '@/hooks/post/useSavePostImage';
 import { useMyInfo } from '@/hooks/user/useMyInfo';
 
 export default function PostDetailScreen() {
-  const { post_id, from } = useLocalSearchParams<{
-    post_id: string;
-    from?: 'upload' | 'link';
-  }>();
+  const { post_id } = useLocalSearchParams<{ post_id: string }>();
   const navigation = useNavigation();
   const { data: post, isLoading, isError, refetch } = usePostDetail(post_id);
   const { data: myInfo } = useMyInfo();
@@ -65,15 +62,19 @@ export default function PostDetailScreen() {
     );
   };
 
-  // 업로드 직후·공유 링크로 들어오면 피드 스택에 이 화면만 있어, 뒤로 가기가 피드 목록으로 가도록 목록을 밑에 깐다.
+  // 게시글 상세는 탭 위에 덮는 루트 스택 화면이다. 공유 링크로 바로 열거나 로그인 직후 replace로 오면
+  // 밑에 탭이 없어 뒤로 갈 곳이 없으므로, 피드 탭을 밑에 깔아 뒤로 가기가 피드 목록으로 가게 한다.
   useEffect(() => {
-    if (from !== 'upload' && from !== 'link') return;
     const state = navigation.getState();
     if (!state || state.index !== 0) return;
     navigation.dispatch(
-      CommonActions.reset({ ...state, index: 1, routes: [{ name: 'index' }, state.routes[0]] }),
+      CommonActions.reset({
+        ...state,
+        index: 1,
+        routes: [{ name: '(tabs)', params: { screen: 'feed' } }, state.routes[0]],
+      }),
     );
-  }, [from, navigation]);
+  }, [navigation]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -90,7 +91,7 @@ export default function PostDetailScreen() {
   const scoreRevealed = revealedPostId === post_id;
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-gray-50" edges={['top', 'bottom']}>
       <ScrollView
         className="flex-1"
         contentContainerClassName="gap-2xl px-xl pt-lg"
