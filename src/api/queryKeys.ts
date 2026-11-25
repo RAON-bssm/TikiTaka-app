@@ -60,6 +60,7 @@ export const productKeys = {
   all: ['product'] as const,
   /** 미보유 상품만 내려온다. */
   list: () => [...productKeys.all, 'list'] as const,
+  gashapon: () => [...productKeys.all, 'gashapon'] as const,
 };
 
 export const inventoryKeys = {
