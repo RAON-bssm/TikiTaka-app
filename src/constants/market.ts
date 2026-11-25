@@ -82,17 +82,6 @@ export function toMarketItem(product: PartProduct): MarketItem {
 
 // ──────────────────────────── 뽑기 (가챠) ────────────────────────────
 
-/**
- * 서버 `GashaponService`가 이 id로 뽑는 횟수를 정한다. id는 **하이픈**이다(`gashapon-1set`).
- * 서버 상품 목록은 뽑기권을 빼고 내려줘서 가격을 못 읽는다 — 그때는 `fallbackCost`를 보여 준다.
- * 실제 차감액은 DB의 뽑기권 price이므로, DB 값이 바뀌면 여기도 맞춰야 한다.
- */
-export const GASHAPON_OPTIONS = [
-  { productId: 'gashapon-1set', label: '1회 뽑기', fallbackCost: 3750, needsConfirm: false },
-  // 한 번에 크게 빠지므로 잘못 눌러도 바로 차감되지 않게 묻는다.
-  { productId: 'gashapon-5set', label: '5회 뽑기', fallbackCost: 18750, needsConfirm: true },
-] as const;
-
 export interface GotchaPull {
   name: string;
   duplicate: boolean;

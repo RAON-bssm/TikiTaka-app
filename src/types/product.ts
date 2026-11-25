@@ -47,7 +47,22 @@ export interface PurchaseProductRequest {
   product_id: string;
 }
 
-/** 뽑기권 상품 id. 서버가 이 id별 뽑는 횟수를 하드코딩해 두고, 가격은 상품 목록의 값을 쓴다. */
+/** 상품 목록(`GET /api/product`)에는 뽑기권이 빠져 있어 `GET /api/product/gashapon`으로 따로 받는다. */
+export interface Gashapon {
+  product_id: string;
+  product_name: string;
+  price: number;
+  draw_count: number;
+  product_image?: string;
+  description?: string;
+}
+
+/** `draw_count` 오름차순. 판매 중지된 뽑기권은 빠지므로 빈 배열일 수 있다. */
+export interface GashaponListData {
+  gashapon: Gashapon[];
+}
+
+/** `product_id`는 `GashaponListData`에서 받은 값을 그대로 보낸다. */
 export interface DrawGashaponRequest {
   product_id: string;
 }
